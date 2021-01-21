@@ -18,11 +18,11 @@ use super::voronoi_predicate as VP;
 use super::voronoi_siteevent as VSE;
 use super::voronoi_structures as VS;
 
-use std::cell::Cell;
-use num::{NumCast, PrimInt};
-use std::collections::BinaryHeap;
 use geo::{Line, Point};
+use num::{NumCast, PrimInt};
+use std::cell::Cell;
 use std::cmp::Ordering;
+use std::collections::BinaryHeap;
 use std::fmt;
 use std::hash::Hash;
 use std::ops::Neg;
@@ -57,10 +57,10 @@ mod tests;
 
 pub struct VoronoiBuilder<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output =I1>,
-    F1: BoostOutputType + Neg<Output =F1>,
-    I2: BigIntType + Neg<Output =I2>,
-    F2: BigFloatType + Neg<Output =F2>,
+    I1: BoostInputType + Neg<Output = I1>,
+    F1: BoostOutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
     pub site_events_: Vec<VSE::SiteEvent<I1, F1, I2, F2>>,
     circle_events_: VC::CircleEventQueue<F2>,
@@ -75,10 +75,10 @@ where
 
 impl<I1, F1, I2, F2> VoronoiBuilder<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output =I1>,
-    F1: BoostOutputType + Neg<Output =F1>,
-    I2: BigIntType + Neg<Output =I2>,
-    F2: BigFloatType + Neg<Output =F2>,
+    I1: BoostInputType + Neg<Output = I1>,
+    F1: BoostOutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
     #[allow(clippy::new_without_default)]
     pub fn new() -> VoronoiBuilder<I1, F1, I2, F2> {
@@ -630,7 +630,7 @@ where
         //dbg!(e);
         //dbg!(&it_first.0);
         //if self.debug_circle_counter >= 36 {
-            //self.beach_line_.debug_print_all();
+        //self.beach_line_.debug_print_all();
         //}
         //println!("->process_circle_event() {}", self.debug_circle_counter);
 
@@ -652,7 +652,7 @@ where
 
         // Get the A site.
         let site1 = *it_first.0.left_site();
-
+        #[allow(clippy::suspicious_operation_groupings)]
         let site3 = if !site1.is_segment() && site3.is_segment() && site3.point1() == site1.point0()
         {
             *site3.clone().inverse()
@@ -759,7 +759,8 @@ where
 
         // Create two new bisectors with opposite directions.
         let new_left_node = VB::BeachLineNodeKey::<I1, F1, I2, F2>::new_2(site_arc1, site_event);
-        let mut new_right_node = VB::BeachLineNodeKey::<I1, F1, I2, F2>::new_2(site_event, site_arc2);
+        let mut new_right_node =
+            VB::BeachLineNodeKey::<I1, F1, I2, F2>::new_2(site_event, site_arc2);
 
         // Set correct orientation for the first site of the second node.
         if site_event.is_segment() {
@@ -777,7 +778,8 @@ where
             // Update the beach line with temporary bisector, that will
             // disappear after processing site event corresponding to the
             // second endpoint of the segment site.
-            let mut new_node = VB::BeachLineNodeKey::<I1, F1, I2, F2>::new_2(site_event, site_event);
+            let mut new_node =
+                VB::BeachLineNodeKey::<I1, F1, I2, F2>::new_2(site_event, site_event);
             new_node.right_site_m().inverse();
             //dbg!(new_node);
             //self.beach_line_.debug_print_all();

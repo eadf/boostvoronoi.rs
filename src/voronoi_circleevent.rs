@@ -43,7 +43,7 @@ pub type CircleEventIndexType = usize;
 ///
 
 #[derive(Copy, Clone)]
-pub struct CircleEvent<F2: BoostOutputType + Neg<Output =F2>> {
+pub struct CircleEvent<F2: BoostOutputType + Neg<Output = F2>> {
     index_: Option<CircleEventIndexType>, // the list index inside CircleEventQueue
     center_x_: OrderedFloat<F2>,
     center_y_: OrderedFloat<F2>,
@@ -53,7 +53,7 @@ pub struct CircleEvent<F2: BoostOutputType + Neg<Output =F2>> {
 
 impl<F2> fmt::Debug for CircleEvent<F2>
 where
-    F2: BoostOutputType + Neg<Output =F2>,
+    F2: BoostOutputType + Neg<Output = F2>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
@@ -73,7 +73,7 @@ where
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output =F2>> Default for CircleEvent<F2> {
+impl<F2: BoostOutputType + Neg<Output = F2>> Default for CircleEvent<F2> {
     fn default() -> Self {
         Self {
             index_: None, // do i really have to put this in an option?
@@ -86,7 +86,7 @@ impl<F2: BoostOutputType + Neg<Output =F2>> Default for CircleEvent<F2> {
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output =F2>> PartialEq for CircleEvent<F2> {
+impl<F2: BoostOutputType + Neg<Output = F2>> PartialEq for CircleEvent<F2> {
     fn eq(&self, other: &Self) -> bool {
         self.center_x_ == other.center_x_
             && self.center_y_ == other.center_y_
@@ -97,15 +97,15 @@ impl<F2: BoostOutputType + Neg<Output =F2>> PartialEq for CircleEvent<F2> {
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output =F2>> Eq for CircleEvent<F2> {}
+impl<F2: BoostOutputType + Neg<Output = F2>> Eq for CircleEvent<F2> {}
 
-impl<F2: BoostOutputType + Neg<Output =F2>> PartialOrd for CircleEvent<F2> {
+impl<F2: BoostOutputType + Neg<Output = F2>> PartialOrd for CircleEvent<F2> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output =F2>> Ord for CircleEvent<F2> {
+impl<F2: BoostOutputType + Neg<Output = F2>> Ord for CircleEvent<F2> {
     fn cmp(&self, other: &Self) -> Ordering {
         if self.lower_x() != other.lower_x() {
             return if self.lower_x() < other.lower_x() {
@@ -113,10 +113,7 @@ impl<F2: BoostOutputType + Neg<Output =F2>> Ord for CircleEvent<F2> {
             } else {
                 Ordering::Greater
             };
-        } else if self.y() < other.y() {
-            return Ordering::Less;
-        } else if self.beach_line_index_.unwrap().0 < other.beach_line_index_.unwrap().0 {
-            // Todo! this is just a hack, identical circle events were put on the queue.
+        } else if self.y() < other.y() || self.beach_line_index_.unwrap().0 < other.beach_line_index_.unwrap().0 {
             return Ordering::Less;
         }
         Ordering::Greater
@@ -125,14 +122,14 @@ impl<F2: BoostOutputType + Neg<Output =F2>> Ord for CircleEvent<F2> {
 
 /// Wrapper object that lets me implement Ord on a Cell<CircleEvent<O>>
 #[derive(Clone)]
-pub struct CircleEventC<F2: BoostOutputType + Neg<Output =F2>>(
+pub struct CircleEventC<F2: BoostOutputType + Neg<Output = F2>>(
     pub Cell<CircleEvent<F2>>,
     pub(crate) Option<VB::BeachLineIndex>,
 );
 
 impl<F2> fmt::Debug for CircleEventC<F2>
 where
-    F2: BoostOutputType + Neg<Output =F2>,
+    F2: BoostOutputType + Neg<Output = F2>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
@@ -142,7 +139,7 @@ where
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output =F2>> CircleEventC<F2> {
+impl<F2: BoostOutputType + Neg<Output = F2>> CircleEventC<F2> {
     pub(crate) fn new_1(c: CircleEvent<F2>) -> Rc<Self> {
         let cc = Self(Cell::new(c), Some(c.beach_line_index_.unwrap())); // todo
         Rc::<Self>::new(cc)
@@ -177,13 +174,13 @@ impl<F2: BoostOutputType + Neg<Output =F2>> CircleEventC<F2> {
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output =F2>> PartialOrd for CircleEventC<F2> {
+impl<F2: BoostOutputType + Neg<Output = F2>> PartialOrd for CircleEventC<F2> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output =F2>> Ord for CircleEventC<F2> {
+impl<F2: BoostOutputType + Neg<Output = F2>> Ord for CircleEventC<F2> {
     fn cmp(&self, other: &Self) -> Ordering {
         let cself = self.0.get();
         let cother = other.0.get();
@@ -191,7 +188,7 @@ impl<F2: BoostOutputType + Neg<Output =F2>> Ord for CircleEventC<F2> {
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output =F2>> PartialEq for CircleEventC<F2> {
+impl<F2: BoostOutputType + Neg<Output = F2>> PartialEq for CircleEventC<F2> {
     fn eq(&self, other: &Self) -> bool {
         let cself = self.0.get();
         let cother = other.0.get();
@@ -202,11 +199,11 @@ impl<F2: BoostOutputType + Neg<Output =F2>> PartialEq for CircleEventC<F2> {
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output =F2>> Eq for CircleEventC<F2> {}
+impl<F2: BoostOutputType + Neg<Output = F2>> Eq for CircleEventC<F2> {}
 
 impl<F2> CircleEvent<F2>
 where
-    F2: BoostOutputType + Neg<Output =F2>,
+    F2: BoostOutputType + Neg<Output = F2>,
 {
     pub(crate) fn new_1(bech_line_index: VB::BeachLineIndex) -> CircleEvent<F2> {
         Self {
@@ -314,7 +311,7 @@ pub type CircleEventType<F2> = Rc<CircleEventC<F2>>;
 /// events ordering.
 pub(crate) struct CircleEventQueue<F2>
 where
-    F2: BoostOutputType + Neg<Output =F2>,
+    F2: BoostOutputType + Neg<Output = F2>,
 {
     c_: RBTree<CircleEventType<F2>>,
     c_list_: VecMap<CircleEventType<F2>>,
@@ -322,7 +319,7 @@ where
     inactive_circle_ids_: FnvHashSet<usize>, // Circle events turned inactive
 }
 
-impl<F2: BoostOutputType + Neg<Output =F2>> Default for CircleEventQueue<F2> {
+impl<F2: BoostOutputType + Neg<Output = F2>> Default for CircleEventQueue<F2> {
     fn default() -> CircleEventQueue<F2> {
         Self {
             c_: RBTree::new(),
@@ -335,7 +332,7 @@ impl<F2: BoostOutputType + Neg<Output =F2>> Default for CircleEventQueue<F2> {
 
 impl<F2> CircleEventQueue<F2>
 where
-    F2: BoostOutputType + Neg<Output =F2>,
+    F2: BoostOutputType + Neg<Output = F2>,
 {
     pub(crate) fn is_empty(&self) -> bool {
         self.c_.is_empty()

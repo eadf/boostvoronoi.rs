@@ -342,7 +342,7 @@ where
         (self.point0_.x() != self.point1_.x()) || (self.point0_.y() != self.point1_.y())
     }
 
-    #[allow(clippy::unknown_clippy_lints)]
+    #[allow(unknown_lints)]
     #[allow(clippy::suspicious_operation_groupings)]
     pub fn is_primary_edge(
         site1: &SiteEvent<I, O, BI, BF>,

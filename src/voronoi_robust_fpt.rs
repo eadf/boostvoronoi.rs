@@ -88,29 +88,29 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> RobustFpt<F> {
 
     pub fn copy_from(other: &RobustFpt<F>) -> Self {
         Self {
-            fpv_: other.fpv_.clone(),
+            fpv_: other.fpv_,
             re_: OrderedFloat(F::zero()),
         }
     }
 
     #[inline]
     pub fn fpv(&self) -> F {
-        self.fpv_.clone()
+        self.fpv_
     }
 
     #[inline]
     pub fn re(&self) -> F {
-        self.re_.as_ref().clone()
+        self.re_.into_inner()
     }
 
     #[inline]
     pub fn ulp(&self) -> F {
-        self.re_.as_ref().clone()
+        self.re_.into_inner()
     }
 
     pub fn assign_from(&mut self, that: &Self) -> &mut Self {
-        self.fpv_ = that.fpv_.clone();
-        self.re_ = that.re_.clone();
+        self.fpv_ = that.fpv_;
+        self.re_ = that.re_;
         self
     }
 

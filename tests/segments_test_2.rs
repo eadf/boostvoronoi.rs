@@ -48,7 +48,7 @@ where
 
 //#[ignore]
 #[test]
-/// four segments in a loop
+/// four segments in a loop + one more
 fn two_segments_9() {
     let output = {
         let points: [[I1; 2]; 0] = [];

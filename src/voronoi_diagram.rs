@@ -14,15 +14,15 @@ use super::voronoi_siteevent as VSE;
 use super::voronoi_structures as VS;
 use super::TypeConverter as TCC;
 
-use std::rc::Rc;
+use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
 use num::{NumCast, PrimInt};
 use std::cell::Cell;
-use std::marker::PhantomData;
-use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
 use std::fmt;
 use std::fmt::Display;
 use std::hash::Hash;
+use std::marker::PhantomData;
 use std::ops::Neg;
+use std::rc::Rc;
 use vec_map::VecMap;
 
 type SourceIndexType = usize;
@@ -1069,7 +1069,10 @@ where
         );
 
         // Add a new Voronoi vertex.
-        let new_vertex_id = self._vertex_new_2(TCC::<I1,F1,I2,F2>::f2_to_f1(circle.raw_x()), TCC::<I1,F1,I2,F2>::f2_to_f1(circle.raw_y()));
+        let new_vertex_id = self._vertex_new_2(
+            TCC::<I1, F1, I2, F2>::f2_to_f1(circle.raw_x()),
+            TCC::<I1, F1, I2, F2>::f2_to_f1(circle.raw_y()),
+        );
 
         // Update vertex pointers of the old edges.
         self._edge_set_vertex0(Some(edge12_id), Some(new_vertex_id));

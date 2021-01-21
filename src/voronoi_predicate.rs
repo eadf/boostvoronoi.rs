@@ -13,13 +13,13 @@ mod tests;
 
 use super::voronoi_beachline as VB;
 use super::voronoi_circleevent as VC;
+use super::voronoi_ctypes::UlpComparison;
 use super::voronoi_robust_fpt as VR;
 use super::voronoi_siteevent as VSE;
 use super::voronoi_structures as VS;
-use super::voronoi_ctypes::UlpComparison;
-use super::TypeConverter as TCC;
 use super::TypeCheckF as TCF;
 use super::TypeCheckI as TCI;
+use super::TypeConverter as TCC;
 use super::TypeConverter as TC;
 use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
 use geo::Point;
@@ -372,9 +372,9 @@ where
 
         let lhs = TC::<I1, F1, I2, F2>::i1_to_f64(lhs.x0());
         let rhs = TC::<I1, F1, I2, F2>::f2_to_f64(rhs.lower_x().into_inner());
-        let ulps = VoronoiPredicates::<I1,F1,I2,F2>::ulps();
+        let ulps = VoronoiPredicates::<I1, F1, I2, F2>::ulps();
 
-        UlpComparison::ulp_comparison(lhs, rhs,  ulps) == Ordering::Less
+        UlpComparison::ulp_comparison(lhs, rhs, ulps) == Ordering::Less
     }
 
     pub(crate) fn event_comparison_predicate_if(
@@ -601,6 +601,7 @@ where
                 - TC::<I1, F1, I2, F2>::i1_to_f2(segment0.y());
             let mut k: F2 = (a1 * a1 + b1 * b1).sqrt();
             // Avoid subtraction while computing k.
+            #[allow(clippy::suspicious_operation_groupings)]
             if !TCF::<F2>::is_neg(b1) {
                 k = TCF::<F2>::one() / (b1 + k);
             } else {
@@ -687,7 +688,7 @@ where
         //dbg!(fast_right_expr);
         //dbg!(expr_cmp);
         // rust expr_cmp === c++ (expr_cmp != ulp_cmp_type::EQUAL)
-        return if expr_cmp {
+        if expr_cmp {
             if (fast_left_expr > fast_right_expr) ^ reverse_order {
                 if reverse_order {
                     KPredicateResult::LESS
@@ -699,7 +700,7 @@ where
             }
         } else {
             KPredicateResult::UNDEFINED
-        };
+        }
 
         /* TODO! fix some ulps
         let expr_cmp = fast_left_expr.ulps(&fast_right_expr).cmp(4); //ulp_cmp(fast_left_expr, fast_right_expr, 4);
@@ -774,6 +775,7 @@ where
         let point2: &Point<I1> =
             NodeComparisonPredicate::<I1, F1, I2, F2>::get_comparison_point(site2);
 
+        #[allow(clippy::comparison_chain)]
         if point1.x() < point2.x() {
             // The second node contains a new site.
             return DistancePredicate::<I1, F1, I2, F2>::distance_predicate(
@@ -793,8 +795,7 @@ where
             match site1.sorted_index().cmp(&site2.sorted_index()) {
                 Ordering::Equal => {
                     // Both nodes are new (inserted during same site event processing).
-                    return Self::get_comparison_y(&node1, true)
-                        < Self::get_comparison_y(&node2, true);
+                    Self::get_comparison_y(&node1, true) < Self::get_comparison_y(&node2, true)
                 }
                 Ordering::Less => {
                     let y1 = Self::get_comparison_y(&node1, false);
@@ -802,7 +803,11 @@ where
                     if y1.0 != y2.0 {
                         return y1.0 < y2.0;
                     }
-                    return if !site1.is_segment() { y1.1 < 0 } else { false };
+                    if !site1.is_segment() {
+                        y1.1 < 0
+                    } else {
+                        false
+                    }
                 }
                 _ => {
                     let y1 = Self::get_comparison_y(node1, true);
@@ -810,7 +815,11 @@ where
                     if y1.0 != y2.0 {
                         return y1.0 < y2.0;
                     }
-                    return if !site2.is_segment() { y2.1 > 0 } else { true };
+                    if !site2.is_segment() {
+                        y2.1 > 0
+                    } else {
+                        true
+                    }
                 }
             }
         }
@@ -922,6 +931,7 @@ where
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
         segment_index: u64,
     ) -> bool {
+        #[allow(clippy::suspicious_operation_groupings)]
         if segment_index != 2 {
             let orient1 = OrientationTest::<I1, F1, I2, F2>::eval_3(
                 site1.point0(),
@@ -1039,7 +1049,7 @@ where
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
-        c_event: &VC::CircleEventType<F2>
+        c_event: &VC::CircleEventType<F2>,
     ) {
         Self::ppp(site1, site2, site3, c_event);
         println!(
@@ -1104,7 +1114,7 @@ where
             c_y.dif().fpv() * inv_orientation.fpv(),
             lower_x.dif().fpv() * inv_orientation.fpv(),
         );
-        let ulps = TCC::<I1, F1,I2,F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
+        let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
         let recompute_c_x = c_x.dif().ulp() > ulps;
         let recompute_c_y = c_y.dif().ulp() > ulps;
         let recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1126,9 +1136,9 @@ where
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
         segment_index: usize,
-        c_event: &VC::CircleEventType<F2>
+        c_event: &VC::CircleEventType<F2>,
     ) {
-        Self::pps(site1, site2, site3, segment_index,c_event);
+        Self::pps(site1, site2, site3, segment_index, c_event);
         println!(
             "LazyCircleFormationFunctor::pps(site1={:?}, site2={:?}, site3={:?}, segment_index={:?}, c_event={:?})",
             site1, site2, site3, segment_index, c_event
@@ -1236,14 +1246,10 @@ where
             // Todo check if this is correct
             //  = VC::CircleEvent::<F1>::new_3(c_x.dif(), c_y.dif(), lower_x.dif());
             let mut c_eventc: VC::CircleEvent<F2> = c_event.0.get();
-            c_eventc.set_3_raw(
-                c_x.dif().fpv(),
-                c_y.dif().fpv(),
-                lower_x.dif().fpv(),
-            );
+            c_eventc.set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
             c_event.0.set(c_eventc);
         }
-        let ulps = TCC::<I1, F1,I2,F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
+        let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
         let recompute_c_x = c_x.dif().ulp() > ulps;
         let recompute_c_y = c_y.dif().ulp() > ulps;
         let recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1273,9 +1279,9 @@ where
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
         point_index: i32,
-        c_event: &VC::CircleEventType<F2>
+        c_event: &VC::CircleEventType<F2>,
     ) {
-        Self::pss(site1, site2, site3, point_index,c_event);
+        Self::pss(site1, site2, site3, point_index, c_event);
         println!(
             "LazyCircleFormationFunctor::pss(site1={:?}, site2={:?}, site3={:?}, point_index={:?}, c_event={:?})",
             site1, site2, site3, point_index, c_event
@@ -1377,15 +1383,12 @@ where
             } else {
                 lower_x += VR::RobustFpt::<F2>::new_1(half) * c / a.sqrt();
             }
-            let ulps =TCC::<I1, F1,I2,F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
+            let ulps =
+                TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
             let recompute_c_x = c_x.dif().ulp() > ulps;
             let recompute_c_y = c_y.dif().ulp() > ulps;
             let recompute_lower_x = lower_x.dif().ulp() > ulps;
-            c_event.set_3_raw(
-                c_x.dif().fpv(),
-                c_y.dif().fpv(),
-                lower_x.dif().fpv(),
-            );
+            c_event.set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
         } else {
             let sqr_sum1 = VR::RobustFpt::<F2>::new_2((a1 * a1 + b1 * b1).sqrt(), two);
             let sqr_sum2 = VR::RobustFpt::<F2>::new_2((a2 * a2 + b2 * b2).sqrt(), two);
@@ -1500,16 +1503,13 @@ where
             } else {
                 lower_x += t * orientation;
             }
-            let ulps = TCC::<I1, F1,I2,F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
+            let ulps =
+                TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
             recompute_c_x = c_x.dif().ulp() > ulps;
             recompute_c_y = c_y.dif().ulp() > ulps;
             recompute_lower_x = lower_x.dif().ulp() > ulps;
             // Todo! Is this correct? it was let c_event = ...
-            c_event.set_3_raw(
-                c_x.dif().fpv(),
-                c_y.dif().fpv(),
-                lower_x.dif().fpv(),
-            );
+            c_event.set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
         }
         if recompute_c_x || recompute_c_y || recompute_lower_x {
             ExactCircleFormationFunctor::pss(
@@ -1529,12 +1529,12 @@ where
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
-        c_event: &VC::CircleEventType<F2>
+        c_event: &VC::CircleEventType<F2>,
     ) {
-        Self::sss(site1, site2, site3,c_event);
+        Self::sss(site1, site2, site3, c_event);
         println!(
             "LazyCircleFormationFunctor::sss(site1={:?}, site2={:?}, site3={:?}, c_event={:?})",
-            site1, site2, site3,  c_event
+            site1, site2, site3, c_event
         );
     }
 
@@ -1652,15 +1652,11 @@ where
         let c_y_dif = VR::RobustFpt::<F2>::copy_from(&c_y.dif()) / denom_dif;
         let lower_x_dif = VR::RobustFpt::<F2>::copy_from(&lower_x.dif()) / denom_dif;
 
-        let ulps = TCC::<I1, F1,I2,F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
+        let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
         let recompute_c_x = c_x_dif.ulp() > ulps;
         let recompute_c_y = c_y_dif.ulp() > ulps;
         let recompute_lower_x = lower_x_dif.ulp() > ulps;
-        c_event.set_3_raw(
-            c_x_dif.fpv(),
-            c_y_dif.fpv(),
-            lower_x_dif.fpv(),
-        );
+        c_event.set_3_raw(c_x_dif.fpv(), c_y_dif.fpv(), lower_x_dif.fpv());
         if recompute_c_x || recompute_c_y || recompute_lower_x {
             ExactCircleFormationFunctor::sss(
                 site1,
@@ -1720,9 +1716,9 @@ where
         }
         let y0 = i1_to_f64(if s.is_inverse() { s.y1() } else { s.y0() });
         let y1 = i1_to_f64(if s.is_inverse() { s.y0() } else { s.y1() });
-        let cc_y= f2_to_f64(c.0.get().y().into_inner());
+        let cc_y = f2_to_f64(c.0.get().y().into_inner());
 
-        UlpComparison::ulp_comparison(cc_y, y0,  128) == Ordering::Less
+        UlpComparison::ulp_comparison(cc_y, y0, 128) == Ordering::Less
             || UlpComparison::ulp_comparison(cc_y, y1, 128) == Ordering::Greater
     }
 
@@ -1747,7 +1743,6 @@ where
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
         circle: &VC::CircleEventType<F2>,
     ) -> bool {
-
         if !site1.is_segment() {
             if !site2.is_segment() {
                 if !site3.is_segment() {
@@ -2008,23 +2003,21 @@ where
         inv_denom_sqr = inv_denom_sqr * inv_denom_sqr;
 
         if recompute_c_x || recompute_lower_x {
-            ca[0] = sum_x.clone() * &denom * &denom + &teta * &sum_ab * &vec_x;
+            ca[0] = sum_x * &denom * &denom + &teta * &sum_ab * &vec_x;
             cb[0] = BigInt::from(1);
             ca[1] = if segment_index == 2 {
-                vec_x.clone() * -1
+                vec_x * -1
             } else {
-                vec_x.clone()
+                vec_x
             };
             cb[1] = det.clone();
             if recompute_c_x {
-                c_event.set_x_raw(
-                    (sqrt_expr_.eval2(&ca, &cb) * half * inv_denom_sqr).fpv(),
-                );
+                c_event.set_x_raw((sqrt_expr_.eval2(&ca, &cb) * half * inv_denom_sqr).fpv());
             }
         }
 
         if recompute_c_y || recompute_lower_x {
-            ca[2] = sum_y.clone() * &denom * &denom + &teta * &sum_ab * &vec_y;
+            ca[2] = sum_y * &denom * &denom + &teta * &sum_ab * &vec_y;
             cb[2] = BigInt::from(1);
             ca[3] = if segment_index == 2 {
                 vec_y * neg_one
@@ -2033,16 +2026,15 @@ where
             };
             cb[3] = det.clone();
             if recompute_c_y {
-                c_event.set_y_raw(
-                    (sqrt_expr_.eval2(&ca[2..], &cb[2..]) * half * inv_denom_sqr).fpv(),
-                );
+                c_event
+                    .set_y_raw((sqrt_expr_.eval2(&ca[2..], &cb[2..]) * half * inv_denom_sqr).fpv());
             }
         }
 
         if recompute_lower_x {
             cb[0] = cb[0].clone() * &segm_len;
             cb[1] = cb[1].clone() * &segm_len;
-            ca[2] = sum_ab.clone() * (&denom * &denom + &teta * &teta);
+            ca[2] = sum_ab * (&denom * &denom + &teta * &teta);
             cb[2] = BigInt::from(1);
             ca[3] = if segment_index == 2 { -teta } else { teta };
             cb[3] = det;
@@ -2138,7 +2130,7 @@ where
                 - &a[0]
                     * (TC::<I1, F1, I2, F2>::i1_to_bi(site1.y())
                         - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.y()));
-            cB[0] = dx.clone() * &dy;
+            cB[0] = dx * &dy;
             cB[1] = BigInt::from(1);
 
             if recompute_c_y {
@@ -2221,7 +2213,7 @@ where
         if recompute_c_y {
             cA[0] = b[1].clone() * (&dx * &dx + &dy * &dy) - &iy * (&dx * &a[1] + &dy * &b[1]);
             cA[1] = b[0].clone() * (&dx * &dx + &dy * &dy) - &iy * (&dx * &a[0] + &dy * &b[0]);
-            cA[2] = iy.clone() * &sign;
+            cA[2] = iy * &sign;
             let cy = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
             c_event.set_y_raw((cy / denom).fpv());
         }
@@ -2229,7 +2221,7 @@ where
         if recompute_c_x || recompute_lower_x {
             cA[0] = a[1].clone() * (&dx * &dx + &dy * &dy) - &ix * (&dx * &a[1] + &dy * &b[1]);
             cA[1] = a[0].clone() * (&dx * &dx + &dy * &dy) - &ix * (&dx * &a[0] + &dy * &b[0]);
-            cA[2] = ix.clone() * &sign;
+            cA[2] = ix * &sign;
 
             if recompute_c_x {
                 let cx = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA, &cB);
@@ -2237,7 +2229,7 @@ where
             }
 
             if recompute_lower_x {
-                cA[3] = orientation.clone()
+                cA[3] = orientation
                     * (&dx * &dx + &dy * &dy)
                     * (if temp.is_sign_negative() { -1 } else { 1 });
                 let lower_x = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA, &cB);
@@ -2282,25 +2274,27 @@ where
 
         // cA - corresponds to the cross product.
         // cB - corresponds to the squared length.
-        a[0] = i1_to_bi(site1.x1()) - i1_to_i128(site1.x0());
-        a[1] = i1_to_bi(site2.x1()) - i1_to_i128(site2.x0());
-        a[2] = i1_to_bi(site3.x1()) - i1_to_i128(site3.x0());
+        #[allow(clippy::suspicious_operation_groupings)]
+        {
+            a[0] = i1_to_bi(site1.x1()) - i1_to_i128(site1.x0());
+            a[1] = i1_to_bi(site2.x1()) - i1_to_i128(site2.x0());
+            a[2] = i1_to_bi(site3.x1()) - i1_to_i128(site3.x0());
 
-        b[0] = i1_to_bi(site1.y1()) - i1_to_i128(site1.y0());
-        b[1] = i1_to_bi(site2.y1()) - i1_to_i128(site2.y0());
-        b[2] = i1_to_bi(site3.y1()) - i1_to_i128(site3.y0());
+            b[0] = i1_to_bi(site1.y1()) - i1_to_i128(site1.y0());
+            b[1] = i1_to_bi(site2.y1()) - i1_to_i128(site2.y0());
+            b[2] = i1_to_bi(site3.y1()) - i1_to_i128(site3.y0());
 
-        c[0] = i1_to_bi(site1.x0()) * i1_to_i128(site1.y1())
-            - i1_to_i128(site1.y0()) * i1_to_i128(site1.x1());
-        c[1] = i1_to_bi(site2.x0()) * i1_to_i128(site2.y1())
-            - i1_to_i128(site2.y0()) * i1_to_i128(site2.x1());
-        c[2] = i1_to_bi(site3.x0()) * i1_to_i128(site3.y1())
-            - i1_to_i128(site3.y0()) * i1_to_i128(site3.x1());
-
+            c[0] = i1_to_bi(site1.x0()) * i1_to_i128(site1.y1())
+                - i1_to_i128(site1.y0()) * i1_to_i128(site1.x1());
+            c[1] = i1_to_bi(site2.x0()) * i1_to_i128(site2.y1())
+                - i1_to_i128(site2.y0()) * i1_to_i128(site2.x1());
+            c[2] = i1_to_bi(site3.x0()) * i1_to_i128(site3.y1())
+                - i1_to_i128(site3.y0()) * i1_to_i128(site3.x1());
+        }
         for (i, aa) in a.iter().enumerate().take(3) {
             cB[i] = aa.clone() * aa + &b[i] * &b[i];
         }
-
+        #[allow(clippy::needless_range_loop)]
         for i in 0..3 {
             let j = (i + 1) % 3;
             let k = (i + 2) % 3;
@@ -2309,6 +2303,7 @@ where
         let denom = sqrt_expr_.eval3(&cA, &cB);
 
         if recompute_c_y {
+            #[allow(clippy::needless_range_loop)]
             for i in 0..3 {
                 let j = (i + 1) % 3;
                 let k = (i + 2) % 3;

@@ -107,8 +107,11 @@ where
             // Compute maximum distance between the given parabolic arc
             // and line segment that discretize it.
             let mut dist = (new_y - cur_y) * (mid_x - cur_x) - (new_x - cur_x) * (mid_y - cur_y);
-            dist = dist * dist
-                / ((new_y - cur_y) * (new_y - cur_y) + (new_x - cur_x) * (new_x - cur_x));
+            #[allow(clippy::suspicious_operation_groupings)]
+            {
+                dist = dist * dist
+                    / ((new_y - cur_y) * (new_y - cur_y) + (new_x - cur_x) * (new_x - cur_x));
+            }
             if dist <= max_dist_transformed {
                 // Distance between parabola and line segment is less than max_dist.
                 point_stack.pop();
@@ -133,7 +136,10 @@ where
     /// Compute y(x) = ((x - a) * (x - a) + b * b) / (2 * b).
     #[inline(always)]
     fn parabola_y(x: O, a: O, b: O) -> O {
-        ((x - a) * (x - a) + b * b) / (b + b)
+        #[allow(clippy::suspicious_operation_groupings)]
+        {
+            ((x - a) * (x - a) + b * b) / (b + b)
+        }
     }
 
     // Get normalized length of the distance between:

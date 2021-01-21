@@ -106,11 +106,13 @@ fn event_loop() -> Result<String, BVError> {
                         is_drawing_lines = false;
                         is_drawing_line_strings = true;
                     }
-                    if key == piston::input::keyboard::Key::D1 || key == piston::input::keyboard::Key::D2 {
+                    if key == piston::input::keyboard::Key::D1
+                        || key == piston::input::keyboard::Key::D2
+                    {
                         let mut vis = visualizer.borrow_mut();
                         // Clear all containers.
                         vis.clear();
-                        vis.read_data(key == piston::input::keyboard::Key::D1 );
+                        vis.read_data(key == piston::input::keyboard::Key::D1);
                         data_is_dirty = true;
                     }
                 }
@@ -202,18 +204,18 @@ fn event_loop() -> Result<String, BVError> {
             vis.build()?;
             data_is_dirty = false;
         }
-            if let Some(args) = e.render_args() {
-                gl.draw(args.viewport(), |c, g| {
-                    graphics::clear([1.0; 4], g);
-                    {
-                        let vis = visualizer.borrow();
-                        vis.draw_edges(&c, g);
-                        vis.draw_points(&c, g);
-                        vis.draw_vertices(&c, g);
-                        vis.draw_segments(&c, g);
-                    }
-                });
-            }
+        if let Some(args) = e.render_args() {
+            gl.draw(args.viewport(), |c, g| {
+                graphics::clear([1.0; 4], g);
+                {
+                    let vis = visualizer.borrow();
+                    vis.draw_edges(&c, g);
+                    vis.draw_points(&c, g);
+                    vis.draw_vertices(&c, g);
+                    vis.draw_segments(&c, g);
+                }
+            });
+        }
     }
     Result::Ok("".to_string())
 }
@@ -349,7 +351,7 @@ where
         false
     }
 
-    fn read_data(&mut self, simple_example:bool) {
+    fn read_data(&mut self, simple_example: bool) {
         let i32_to_i1 = |x| I1::from(x).unwrap();
 
         let to_points = |points: &[[i32; 2]]| {
@@ -743,7 +745,7 @@ where
         ];
         // Preparing Input Geometries.
         self.point_data_.append(&mut to_points(&points));
-        let mut new_segments = if simple_example{
+        let mut new_segments = if simple_example {
             to_segments(&_simple_segments)
         } else {
             to_segments(&_segments_rust)
