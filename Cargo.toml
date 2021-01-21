@@ -13,7 +13,7 @@ keywords = ["voronoi", "sweepline", "geometry"]
 [dependencies]
 num = "0.3"
 ordered-float = "2.0"
-log = "0.3"
+#log = "0.3"
 fnv = "1.0"
 rb_tree = "0.3"
 vec_map = "0.8"
