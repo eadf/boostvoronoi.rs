@@ -3,7 +3,12 @@ name = "boostvoronoi"
 version = "0.1.0"
 authors = ["eadf"]
 edition = "2018"
-
+description = "Boost voronoi ported to 100% rust"
+readme = "README.md"
+repository = "https://github.com/eadf/boostvoronoi.rs"
+license = "Boost Software License - Version 1.0"
+license-file = "LICENSE"
+keywords = ["voronoi", "sweepline", "geometry"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -15,7 +20,7 @@ rb_tree = "0.3"
 vec_map = "0.8"
 num-bigint = "0.3"
 num-traits = "0.2"
-geo = "0.17" 
+geo = "0.17"
 #approx = "0.4"
 #float-cmp = "0.8"
 
