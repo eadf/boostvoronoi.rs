@@ -9,3 +9,5 @@ Quick example:
 set -x LIBRARY_PATH /opt/local/lib/ #or whatever you store your SDL
 cargo run --example piston_gui
 ```
+
+All credit goes to the original authors (Andrii Sydorchuk), except the porting mistakes. They are all mine.
