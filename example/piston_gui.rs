@@ -222,12 +222,8 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
-    //shift_: Point<O>,
-    brect_: Rect<F1>,
-    //screen_brect_: VS::BoundRect<O>,
-    //vb_: VoronoiBuilder,
+    bounding_rect: Rect<F1>,
     vd_: VD::VoronoiDiagram<I1, F1, I2, F2>,
-    brect_initialized_: bool,
     primary_edges_only_: bool,
     internal_edges_only_: bool,
     point_data_: Vec<Coordinate<I1>>,
@@ -245,7 +241,7 @@ where
 {
     pub fn new() -> Self {
         Self {
-            brect_: Rect::<F1>::new(
+            bounding_rect: Rect::<F1>::new(
                 Coordinate {
                     x: F1::from(DEFAULT_WINDOW_HEIGHT).unwrap(),
                     y: F1::from(DEFAULT_WINDOW_WIDTH).unwrap(),
@@ -253,7 +249,6 @@ where
                 Coordinate{x:F1::from(0).unwrap(), y:F1::from(0).unwrap()},
             ),
             vd_: VD::VoronoiDiagram::<I1, F1, I2, F2>::new(0),
-            brect_initialized_: false,
             primary_edges_only_: false,
             internal_edges_only_: false,
             point_data_: Vec::<Coordinate<I1>>::new(),
@@ -305,7 +300,6 @@ where
     }
 
     fn clear(&mut self) {
-        self.brect_initialized_ = false;
         self.point_data_.clear();
         self.segment_data_.clear();
         self.vd_.clear();
@@ -336,7 +330,7 @@ where
             {
                 continue;
             }
-            // todo: co-linear overlapping lines should not report as 'false'
+            // todo: co-linear overlapping lines are intersecting
 
             let s_ = Self::cast_line_f64(s);
             if l_.intersects(&s_) {
@@ -769,20 +763,18 @@ where
             return;
         }
         self.vd_.edge_set_color(edge_id, EXTERNAL_COLOR);
-        self.vd_
-            .edge_set_color(self.vd_.edge_get_twin(edge_id), EXTERNAL_COLOR);
-
-        let v1 = self.vd_.edge_get_vertex1(edge_id);
-        if v1.is_some() || !self.vd_.get_edge(edge_id.unwrap()).get().is_primary() {
+        self.vd_.edge_set_color(self.vd_.edge_get_twin(edge_id), EXTERNAL_COLOR);
+        let v = self.vd_.edge_get_vertex1(edge_id);
+        if v.is_none() || !self.vd_.get_edge(edge_id.unwrap()).get().is_primary() {
             return;
         }
-        self.vd_.vertex_set_color(v1, EXTERNAL_COLOR);
-        let mut e = self.vd_.vertex_get_incident_edge(v1);
-        let v1_incident_edge = e;
+        self.vd_.vertex_set_color(v, EXTERNAL_COLOR);
+        let mut e = self.vd_.vertex_get_incident_edge(v);
+        let v_incident_edge = e;
         while e.is_some() {
             self.color_exterior(e);
             e = self.vd_.edge_rot_next(e);
-            if e == v1_incident_edge {
+            if e == v_incident_edge {
                 break;
             }
         }
@@ -993,7 +985,7 @@ where
                 direction.y = dx;
             }
         }
-        let side = self.brect_.max().x - self.brect_.min().x;
+        let side = self.bounding_rect.max().x - self.bounding_rect.min().x;
         let koef = side / Self::max(direction.x.abs(), direction.y.abs());
 
         let vertex0 = edge.get().vertex0();
@@ -1029,7 +1021,7 @@ where
         edge_id: VD::VoronoiEdgeIndex,
         sampled_edge: &mut Vec<Coordinate<F1>>,
     ) {
-        let max_dist = Self::castf32_o(1E-3) * (self.brect_.max().x - self.brect_.min().x);
+        let max_dist = Self::castf32_o(1E-3) * (self.bounding_rect.max().x - self.bounding_rect.min().x);
 
         let cell_id = self.vd_.edge_get_cell(Some(edge_id)).unwrap();
         let cell = self.vd_.get_cell(cell_id).get();
