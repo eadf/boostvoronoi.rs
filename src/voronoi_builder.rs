@@ -28,7 +28,7 @@ use std::hash::Hash;
 use std::ops::Neg;
 use std::rc::Rc;
 
-use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
+use super::{BigFloatType, BigIntType, InputType, OutputType};
 use crate::voronoi_beachline::BeachLineNodeData;
 
 mod tests;
@@ -57,8 +57,8 @@ mod tests;
 
 pub struct VoronoiBuilder<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -75,8 +75,8 @@ where
 
 impl<I1, F1, I2, F2> VoronoiBuilder<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -322,7 +322,7 @@ where
         let second = *site_event_iterator_;
         let second = self.site_events_[second];
 
-        self.insert_new_arc(first, first, second, output);
+        let _ = self.insert_new_arc(first, first, second, output);
 
         // The second site was already processed. Move the iterator.
         *site_event_iterator_ += 1;
@@ -350,7 +350,8 @@ where
             let edge = output._insert_new_edge_2(*first, *second).0;
 
             // Insert a new bisector into the beach line.
-            self.beach_line_
+            let _ = self
+                .beach_line_
                 .insert(new_node_key, Some(VB::BeachLineNodeData::new_1(edge)));
 
             //self.beach_line_.debug_print_all();
@@ -417,17 +418,17 @@ where
             // remove temporary nodes from the beach line data structure.
             if !site_event.is_segment() {
                 ////dbg!(self.end_points_.len());
-                if !self.end_points_.is_empty() {
-                    let peek = self.end_points_.peek().unwrap();
-                    /*dbg!(
-                        self.end_points_.len(),
-                        site_event.point0(),
-                        peek.first,
-                        peek.second.0,
-                        self.beach_line_.get_node(&peek.second).0,
-                    );*/
-                    let a = 0;
-                }
+                //if !self.end_points_.is_empty() {
+                //let peek = self.end_points_.peek().unwrap();
+                /*dbg!(
+                    self.end_points_.len(),
+                    site_event.point0(),
+                    peek.first,
+                    peek.second.0,
+                    self.beach_line_.get_node(&peek.second).0,
+                );*/
+                //let a = 0;
+                //}
                 while !self.end_points_.is_empty()
                     && &self.end_points_.peek().unwrap().first == site_event.point0()
                 {
@@ -435,7 +436,7 @@ where
                     let b_it = self.end_points_.peek().unwrap();
                     //dbg!(b_it.first, b_it.second);
                     let b_it = b_it.second;
-                    self.end_points_.pop();
+                    let _ = self.end_points_.pop();
                     /*println!(
                         "Erasing:{:?} == {:?}",
                         b_it,
@@ -500,7 +501,7 @@ where
                 // The above arc corresponds to the second arc of the last node.
                 // Move the iterator to the last node.
 
-                let old_left_it = left_it;
+                //let old_left_it = left_it;
                 ////dbg!(self.beach_line_.peek_last());
                 ////dbg!(self.beach_line_.len());
                 left_it = Some(self.beach_line_.peek_last().unwrap().0);
@@ -542,9 +543,7 @@ where
 
                 // If the site event is a segment, update its direction.
                 if site_event.is_segment() {
-                    site_event.inverse();
-                    // Todo! should the original be updated?
-                    //self.site_events_[*site_event_iterator_]= site_event;
+                    let _ = site_event.inverse();
                 }
 
                 // Add a candidate circle to the circle event queue.
@@ -591,7 +590,7 @@ where
 
                 // If the site event is a segment, update its direction.
                 if site_event.is_segment() {
-                    site_event.inverse();
+                    let _ = site_event.inverse();
                 }
 
                 self.activate_circle_event(
@@ -692,7 +691,7 @@ where
                 ._insert_new_edge_5(site1, site3, circle_event, bisector1, bisector2)
                 .0;
             let data = if let Some(mut node) = it_first.1.get() {
-                node.set_edge_id(edge);
+                let _ = node.set_edge_id(edge);
                 Some(node)
             } else {
                 Some(BeachLineNodeData::new_1(edge))
@@ -769,13 +768,14 @@ where
 
         // Set correct orientation for the first site of the second node.
         if site_event.is_segment() {
-            new_right_node.left_site_m().inverse();
+            let _ = new_right_node.left_site_m().inverse();
         }
 
         // Update the output.
         let edges = output._insert_new_edge_2(site_arc2, site_event);
 
-        self.beach_line_
+        let _ = self
+            .beach_line_
             .insert(new_right_node, Some(VB::BeachLineNodeData::new_1(edges.1)));
         //self.beach_line_.debug_print_all();
 
@@ -785,7 +785,7 @@ where
             // second endpoint of the segment site.
             let mut new_node =
                 VB::BeachLineNodeKey::<I1, F1, I2, F2>::new_2(site_event, site_event);
-            new_node.right_site_m().inverse();
+            let _ = new_node.right_site_m().inverse();
             //dbg!(new_node);
             //self.beach_line_.debug_print_all();
             let new_node = self.beach_line_.insert(new_node, None);
@@ -857,7 +857,7 @@ where
             {
                 let b = self.beach_line_.get_node(&bisector_node);
                 if let Some(mut bd) = b.1.get() {
-                    bd.set_circle_event_id(Some(e.0.get().get_index().unwrap())); // make sure it is_some()
+                    let _ = bd.set_circle_event_id(Some(e.0.get().get_index().unwrap())); // make sure it is_some()
                     b.1.set(Some(bd));
                 } else {
                     panic!();

@@ -16,7 +16,7 @@ fn inverse_test_1() {
         1,
     );
     assert_eq!(a_site.is_inverse(), false);
-    a_site.inverse();
+    let _ = a_site.inverse();
     assert_eq!(a_site.is_inverse(), true);
 }
 
@@ -38,14 +38,14 @@ fn inverse_test_2() {
     assert_eq!(a_site.x1(), 12);
     assert_eq!(a_site.y1(), 13);
 
-    a_site.inverse();
+    let _ = a_site.inverse();
     assert_eq!(a_site.is_inverse(), true);
     assert_eq!(a_site.x0(), 12);
     assert_eq!(a_site.y0(), 13);
     assert_eq!(a_site.x1(), 10);
     assert_eq!(a_site.y1(), 11);
 
-    a_site.inverse();
+    let _ = a_site.inverse();
     assert_eq!(a_site.is_inverse(), false);
     assert_eq!(a_site.x0(), 10);
     assert_eq!(a_site.y0(), 11);

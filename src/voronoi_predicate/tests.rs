@@ -6,13 +6,14 @@ use super::super::voronoi_error::BVError;
 use super::super::voronoi_predicate as VP;
 use super::super::voronoi_siteevent as VSE;
 use super::super::voronoi_structures as VS;
-use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
+use super::{BigFloatType, BigIntType, InputType, OutputType};
 use geo::{Coordinate, Line};
 use std::ops::Neg;
 
 use std::collections::BTreeMap;
 use std::ops::Bound::{Excluded, Included, Unbounded};
 
+#[allow(dead_code)]
 fn new_key<I1, F1, I2, F2>(
     x1: I1,
     y1: I1,
@@ -22,10 +23,10 @@ fn new_key<I1, F1, I2, F2>(
     si2: usize,
 ) -> VB::BeachLineNodeKey<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
-    I2: BoostInputType + Neg<Output = I2>,
-    F2: BoostOutputType + Neg<Output = F2>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: InputType + Neg<Output = I2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     let mut site1 = VSE::SiteEvent::<I1, F1, I2, F2>::new_2(Coordinate { x: x1, y: y1 }, si1);
     site1.sorted_index_ = si1;
@@ -35,6 +36,7 @@ where
 }
 
 #[allow(clippy::too_many_arguments)]
+#[allow(dead_code)] // this function is used 44 times in this file, still rustc don't think so
 fn node_test<I1, F1, I2, F2>(
     a_key: &VB::BeachLineNodeKey<I1, F1, I2, F2>,
     x1: I1,
@@ -46,10 +48,10 @@ fn node_test<I1, F1, I2, F2>(
     expect: bool,
 ) -> bool
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
-    I2: BoostInputType + Neg<Output = I2>,
-    F2: BoostOutputType + Neg<Output = F2>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: InputType + Neg<Output = I2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     let test_node = new_key::<I1, F1, I2, F2>(x1, y1, si1, x2, y2, si2);
 
@@ -235,14 +237,14 @@ fn node_4() {
 
     // test data copy & pasted from c++ debug session
     let mykey = new_key::<I1, F1, I2, F2>(10, 18, 2, 10, 18, 2);
-    node_test::<I1, F1, I2, F2>(&mykey, 4, 21, 0, 8, 62, 1, true);
-    node_test::<I1, F1, I2, F2>(&mykey, 8, 62, 1, 4, 21, 0, true);
+    let _ = node_test::<I1, F1, I2, F2>(&mykey, 4, 21, 0, 8, 62, 1, true);
+    let _ = node_test::<I1, F1, I2, F2>(&mykey, 8, 62, 1, 4, 21, 0, true);
 
     let mykey = new_key::<I1, F1, I2, F2>(12, 3, 3, 12, 3, 3);
-    node_test::<I1, F1, I2, F2>(&mykey, 4, 21, 0, 10, 18, 2, true);
-    node_test::<I1, F1, I2, F2>(&mykey, 10, 18, 2, 4, 21, 0, true);
-    node_test::<I1, F1, I2, F2>(&mykey, 4, 21, 0, 8, 62, 1, true);
-    node_test::<I1, F1, I2, F2>(&mykey, 8, 62, 1, 4, 21, 0, true);
+    let _ = node_test::<I1, F1, I2, F2>(&mykey, 4, 21, 0, 10, 18, 2, true);
+    let _ = node_test::<I1, F1, I2, F2>(&mykey, 10, 18, 2, 4, 21, 0, true);
+    let _ = node_test::<I1, F1, I2, F2>(&mykey, 4, 21, 0, 8, 62, 1, true);
+    let _ = node_test::<I1, F1, I2, F2>(&mykey, 8, 62, 1, 4, 21, 0, true);
 }
 
 #[test]

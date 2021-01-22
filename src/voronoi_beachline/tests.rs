@@ -1,7 +1,6 @@
 use super::super::voronoi_beachline as VB;
 use super::super::voronoi_builder::VoronoiBuilder;
 use super::super::voronoi_diagram as VD;
-use super::super::voronoi_diagram::VoronoiDiagram;
 use super::super::voronoi_error::BVError;
 use super::super::voronoi_predicate as VP;
 use super::super::voronoi_siteevent as VSE;
@@ -16,7 +15,7 @@ use std::ops::Bound::{Excluded, Included, Unbounded};
 fn beachline_0() {
     let mut map = BTreeMap::<i32, i32>::new();
     for i in 0..5 {
-        map.insert(i, i);
+        let _ = map.insert(i, i);
     }
 
     // search next
@@ -54,7 +53,7 @@ fn beachline_1() {
 
     let mut vb = VoronoiBuilder::<I1, F1, I2, F2>::new();
     vb.with_vertices(_v.iter()).unwrap();
-    let output = vb.construct();
+    let _output = vb.construct();
     //assert!(false);
 }
 
@@ -107,9 +106,10 @@ fn beachline_3() {
     type F2 = f64;
 
     {
-        let _s = vec![
-            Line::new(Coordinate{x:10, y:10}, Coordinate{x:50, y:50}),
-        ];
+        let _s = vec![Line::new(
+            Coordinate { x: 10, y: 10 },
+            Coordinate { x: 50, y: 50 },
+        )];
         let mut output: VD::VoronoiDiagram<I1, F1, I2, F2> =
             VD::VoronoiDiagram::<I1, F1, I2, F2>::default();
 
@@ -146,14 +146,12 @@ fn beachline_4() {
     type F1 = f32;
     type I2 = i64;
     type F2 = f64;
-    type Point2D = Coordinate<I1>;
-    type Segment2DI = Line<I1>;
 
     let coord = |x, y| Coordinate { x, y };
 
     let mut a_site = VSE::SiteEvent::<I1, F1, I2, F2>::new_3(coord(10, 10), coord(50, 50), 1);
     assert!(!a_site.is_inverse());
-    a_site.inverse();
+    let _ = a_site.inverse();
     assert!(a_site.is_inverse());
 
     //new_key_(50,50)#2, ((50,50)#2
@@ -175,7 +173,7 @@ fn beachline_4() {
     //(50,50)¿(10,10)#1, ((10,10)#0
     let node2 = {
         let mut site1 = VSE::SiteEvent::<I1, F1, I2, F2>::new_3(coord(10, 10), coord(50, 50), 1);
-        site1.inverse();
+        let _ = site1.inverse();
         site1.set_sorted_index(1);
         dbg!(site1);
         let mut site2 = VSE::SiteEvent::<I1, F1, I2, F2>::new_2(coord(10, 10), 0);
@@ -216,7 +214,7 @@ fn beachline_5() {
 
         let mut site2 =
             VSE::SiteEvent::<I1, F1, I2, F2>::new_3(coord(367, 107), coord(529, 242), 4);
-        site2.inverse();
+        let _ = site2.inverse();
         site2.set_sorted_index(6);
         site2.set_flags(41);
         VB::BeachLineNodeKey::<I1, F1, I2, F2>::new_2(site1, site2)
@@ -228,7 +226,7 @@ fn beachline_5() {
     let node2 = {
         let mut site1 =
             VSE::SiteEvent::<I1, F1, I2, F2>::new_3(coord(367, 107), coord(529, 242), 4);
-        site1.inverse();
+        let _ = site1.inverse();
         site1.set_sorted_index(6);
         site1.set_flags(41);
         let mut site2 =

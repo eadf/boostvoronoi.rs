@@ -10,7 +10,7 @@ use boostvoronoi::voronoi_diagram::VoronoiEdgeIndex;
 use boostvoronoi::voronoi_error::BVError;
 use boostvoronoi::voronoi_visual_utils as VV;
 use boostvoronoi::TypeConverter;
-use boostvoronoi::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
+use boostvoronoi::{BigFloatType, BigIntType, InputType, OutputType};
 use sdl2_window::Sdl2Window;
 //use num::FromPrimitive;
 //use num::NumCast;
@@ -146,7 +146,7 @@ fn event_loop() -> Result<String, BVError> {
                     }
                 }
                 Button::Mouse(_) => {
-                    let point = Coordinate{x:mx, y:my};
+                    let point = Coordinate { x: mx, y: my };
                     let mut vis = visualizer.borrow_mut();
 
                     // Two points at the same place is a problem
@@ -217,8 +217,8 @@ fn event_loop() -> Result<String, BVError> {
 
 pub struct VorVisualizer<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -234,8 +234,8 @@ where
 
 impl<I1, F1, I2, F2> VorVisualizer<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -246,7 +246,10 @@ where
                     x: F1::from(DEFAULT_WINDOW_HEIGHT).unwrap(),
                     y: F1::from(DEFAULT_WINDOW_WIDTH).unwrap(),
                 },
-                Coordinate{x:F1::from(0).unwrap(), y:F1::from(0).unwrap()},
+                Coordinate {
+                    x: F1::from(0).unwrap(),
+                    y: F1::from(0).unwrap(),
+                },
             ),
             vd_: VD::VoronoiDiagram::<I1, F1, I2, F2>::new(0),
             primary_edges_only_: false,
@@ -763,7 +766,8 @@ where
             return;
         }
         self.vd_.edge_set_color(edge_id, EXTERNAL_COLOR);
-        self.vd_.edge_set_color(self.vd_.edge_get_twin(edge_id), EXTERNAL_COLOR);
+        self.vd_
+            .edge_set_color(self.vd_.edge_get_twin(edge_id), EXTERNAL_COLOR);
         let v = self.vd_.edge_get_vertex1(edge_id);
         if v.is_none() || !self.vd_.get_edge(edge_id.unwrap()).get().is_primary() {
             return;
@@ -838,7 +842,10 @@ where
             if self.internal_edges_only_ && it.get_color() == EXTERNAL_COLOR {
                 continue;
             }
-            let point = Coordinate{x:it.x(), y:it.y()};
+            let point = Coordinate {
+                x: it.x(),
+                y: it.y(),
+            };
             graphics::ellipse(
                 color,
                 graphics::ellipse::circle(
@@ -1021,7 +1028,8 @@ where
         edge_id: VD::VoronoiEdgeIndex,
         sampled_edge: &mut Vec<Coordinate<F1>>,
     ) {
-        let max_dist = Self::castf32_o(1E-3) * (self.bounding_rect.max().x - self.bounding_rect.min().x);
+        let max_dist =
+            Self::castf32_o(1E-3) * (self.bounding_rect.max().x - self.bounding_rect.min().x);
 
         let cell_id = self.vd_.edge_get_cell(Some(edge_id)).unwrap();
         let cell = self.vd_.get_cell(cell_id).get();
@@ -1076,12 +1084,12 @@ where
 
     fn cast_line_f64(value: &Line<I1>) -> Line<f64> {
         let ps = Coordinate {
-            x:Self::cast_i_f64(value.start.x),
-            y:Self::cast_i_f64(value.start.y),
+            x: Self::cast_i_f64(value.start.x),
+            y: Self::cast_i_f64(value.start.y),
         };
-        let pe = Coordinate{
-            x:Self::cast_i_f64(value.end.x),
-            y:Self::cast_i_f64(value.end.y)
+        let pe = Coordinate {
+            x: Self::cast_i_f64(value.end.x),
+            y: Self::cast_i_f64(value.end.y),
         };
         Line::<f64>::new(ps, pe)
     }

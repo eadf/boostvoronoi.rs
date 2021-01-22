@@ -3,7 +3,7 @@
 use boostvoronoi::voronoi_builder::VoronoiBuilder;
 use boostvoronoi::voronoi_diagram::VoronoiDiagram;
 use boostvoronoi::voronoi_error::BVError;
-use boostvoronoi::{BoostInputType, BoostOutputType};
+use boostvoronoi::{InputType, OutputType};
 use geo::{Coordinate, Line};
 use std::ops::Neg;
 
@@ -23,7 +23,7 @@ fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
 
 fn to_points<T>(points: &[[T; 2]]) -> Vec<Coordinate<T>>
 where
-    T: BoostInputType + Neg<Output = T>,
+    T: InputType + Neg<Output = T>,
 {
     let mut rv = Vec::with_capacity(points.len());
     for p in points.iter() {
@@ -34,13 +34,13 @@ where
 
 fn to_segments<T>(points: &[[T; 4]]) -> Vec<Line<T>>
 where
-    T: BoostInputType + Neg<Output = T>,
+    T: InputType + Neg<Output = T>,
 {
     let mut rv = Vec::with_capacity(points.len());
     for p in points.iter() {
         rv.push(Line::<T>::new(
-            Coordinate{x:p[0], y:p[1]},
-            Coordinate{x:p[2], y:p[3]},
+            Coordinate { x: p[0], y: p[1] },
+            Coordinate { x: p[2], y: p[3] },
         ));
     }
     rv

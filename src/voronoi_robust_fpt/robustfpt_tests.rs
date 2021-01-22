@@ -29,26 +29,26 @@ fn sum_1() {
 fn sum_2() {
     for a_ in -10..10 {
         for b_ in (-10..10).rev() {
-            for c_ in (-10..10).rev() {
-                let a_: f64 = NumCast::from(a_).unwrap();
-                let b_: f64 = NumCast::from(b_).unwrap();
-                let c_: f64 = NumCast::from(b_).unwrap();
+            //for c_ in (-10..10).rev() {
+            let a_: f64 = NumCast::from(a_).unwrap();
+            let b_: f64 = NumCast::from(b_).unwrap();
+            //let c_: f64 = NumCast::from(b_).unwrap();
 
-                let mut a = RobustFpt::new_1(a_);
-                let b = RobustFpt::new_1(b_);
-                a += b;
-                assert_eq!(a.fpv(), a_ + b_);
-                a -= b;
-                assert_eq!(a.fpv(), a_);
-                a -= b;
-                assert_eq!(a.fpv(), a_ - b_);
-                /* not implemented?
-                a += c;
-                assert_eq!(a.fpv(), a_ - b_ + c_);
-                a -= c_;
-                a -= c_;
-                assert_eq!(a.fpv(), a_ - b_ - c_);*/
-            }
+            let mut a = RobustFpt::new_1(a_);
+            let b = RobustFpt::new_1(b_);
+            a += b;
+            assert_eq!(a.fpv(), a_ + b_);
+            a -= b;
+            assert_eq!(a.fpv(), a_);
+            a -= b;
+            assert_eq!(a.fpv(), a_ - b_);
+            /* not implemented?
+            a += c;
+            assert_eq!(a.fpv(), a_ - b_ + c_);
+            a -= c_;
+            a -= c_;
+            assert_eq!(a.fpv(), a_ - b_ - c_);*/
+            //}
         }
     }
 }
@@ -143,12 +143,8 @@ fn sqrt_1() {
 
 #[test]
 fn sqrt_2() {
-    type I1 = i32;
-    type O = f32;
-    type I2 = i64;
-    type F2 = f64;
-    type TC = TCC<I1, O, I2, F2>;
-    let sqrte = VR::robust_sqrt_expr::<O>::new();
+    type F1 = f32;
+    let sqrte = VR::robust_sqrt_expr::<F1>::new();
 
     let mut ca: [BigInt; 5] = [
         BigInt::zero(),
@@ -178,12 +174,8 @@ fn sqrt_2() {
 
 #[test]
 fn sqrt_3() {
-    type I1 = i32;
-    type O = f32;
-    type I2 = i64;
-    type F2 = f64;
-    type TC = TCC<I1, O, I2, F2>;
-    let sqrte = VR::robust_sqrt_expr::<O>::new();
+    type F1 = f32;
+    let sqrte = VR::robust_sqrt_expr::<F1>::new();
 
     let mut ca: [BigInt; 5] = [
         BigInt::zero(),
@@ -215,12 +207,9 @@ fn sqrt_3() {
 
 #[test]
 fn sqrt_4() {
-    type I1 = i32;
-    type O = f32;
-    type I2 = i64;
-    type F2 = f64;
-    type TC = TCC<I1, O, I2, F2>;
-    let sqrte = VR::robust_sqrt_expr::<O>::new();
+    type F1 = f32;
+
+    let sqrte = VR::robust_sqrt_expr::<F1>::new();
 
     let mut ca: [BigInt; 5] = [
         BigInt::zero(),
@@ -254,7 +243,6 @@ fn sqrt_4() {
 
 #[test]
 fn sqrt_5() {
-    type I2 = i64;
     type F2 = f64;
     let sqrte = VR::robust_sqrt_expr::<F2>::new();
 
@@ -286,7 +274,6 @@ fn sqrt_5() {
 
 #[test]
 fn sqrt_6() {
-    type I2 = i64;
     type F2 = f64;
     let sqrte = VR::robust_sqrt_expr::<F2>::new();
 
@@ -311,7 +298,6 @@ fn sqrt_6() {
 
 #[test]
 fn sqrt_7() {
-    type I2 = i64;
     type F2 = f64;
     let sqrte = VR::robust_sqrt_expr::<F2>::new();
 

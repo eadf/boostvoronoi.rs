@@ -16,7 +16,7 @@ use super::voronoi_error::BVError;
 use super::voronoi_predicate as VP;
 use super::voronoi_siteevent as VSE;
 use super::voronoi_structures as VS;
-use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
+use super::{BigFloatType, BigIntType, InputType, OutputType};
 use geo::Coordinate;
 use std::cmp::Ordering;
 use std::ops::Neg;
@@ -27,7 +27,7 @@ use std::ops::Neg;
 #[derive(Debug)]
 pub(crate) struct EndPointPair<I>
 where
-    I: BoostInputType + Neg<Output = I>,
+    I: InputType + Neg<Output = I>,
 {
     pub(crate) first: Coordinate<I>,       // TODO: better name
     pub(crate) second: VB::BeachLineIndex, // TODO: better name
@@ -35,7 +35,7 @@ where
 
 impl<I> EndPointPair<I>
 where
-    I: BoostInputType + Neg<Output = I>,
+    I: InputType + Neg<Output = I>,
 {
     pub(crate) fn new_2(first: Coordinate<I>, second: VB::BeachLineIndex) -> Self {
         Self { first, second }
@@ -44,7 +44,7 @@ where
 
 impl<I> PartialOrd for EndPointPair<I>
 where
-    I: BoostInputType + Neg<Output = I>,
+    I: InputType + Neg<Output = I>,
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
@@ -53,7 +53,7 @@ where
 
 impl<I> Ord for EndPointPair<I>
 where
-    I: BoostInputType + Neg<Output = I>,
+    I: InputType + Neg<Output = I>,
 {
     fn cmp(&self, other: &Self) -> Ordering {
         if VP::PointComparisonPredicate::<I>::point_comparison_predicate(&self.first, &other.first)
@@ -69,11 +69,11 @@ where
 
 impl<I> PartialEq for EndPointPair<I>
 where
-    I: BoostInputType + Neg<Output = I>,
+    I: InputType + Neg<Output = I>,
 {
     fn eq(&self, other: &Self) -> bool {
         self.first.eq(&other.first)
     }
 }
 
-impl<I> Eq for EndPointPair<I> where I: BoostInputType + Neg<Output = I> {}
+impl<I> Eq for EndPointPair<I> where I: InputType + Neg<Output = I> {}

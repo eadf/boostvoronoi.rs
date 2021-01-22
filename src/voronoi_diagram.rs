@@ -14,11 +14,10 @@ use super::voronoi_siteevent as VSE;
 use super::voronoi_structures as VS;
 use super::TypeConverter as TCC;
 
-use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
+use super::{BigFloatType, BigIntType, InputType, OutputType};
 use num::{NumCast, PrimInt};
 use std::cell::Cell;
 use std::fmt;
-use std::fmt::Display;
 use std::hash::Hash;
 use std::marker::PhantomData;
 use std::ops::Neg;
@@ -117,8 +116,8 @@ impl SourceCategory {
 #[derive(Copy, Clone)]
 pub struct VoronoiCell<I1, F1>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
 {
     // sorted_index of the site event
     id_: VoronoiCellIndex,
@@ -132,8 +131,8 @@ where
 
 impl<I1, F1> fmt::Debug for VoronoiCell<I1, F1>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
@@ -154,8 +153,8 @@ where
 
 impl<I1, F1> VoronoiCell<I1, F1>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
 {
     pub fn new(
         id: VoronoiCellIndex,
@@ -225,8 +224,8 @@ where
 #[derive(Copy, Clone)]
 pub struct VoronoiVertex<I1, F1>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
 {
     pub(crate) id_: VoronoiVertexIndex,
     pub(crate) x_: F1,
@@ -238,8 +237,8 @@ where
 
 impl<I1, F1> fmt::Debug for VoronoiVertex<I1, F1>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
@@ -261,8 +260,8 @@ where
 
 impl<I1, F1> VoronoiVertex<I1, F1>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
 {
     pub fn new_3(id: VoronoiVertexIndex, x: F1, y: F1) -> Rc<Cell<VoronoiVertex<I1, F1>>> {
         Rc::new(Cell::new(Self {
@@ -329,8 +328,8 @@ where
 #[derive(Copy, Clone)]
 pub struct VoronoiEdge<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -349,8 +348,8 @@ where
 
 impl<I1, F1, I2, F2> fmt::Debug for VoronoiEdge<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -376,15 +375,15 @@ where
 
 impl<I1, F1, I2, F2> VoronoiEdge<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
     const BIT_IS_LINEAR: ColorType = 0x1; // linear is opposite to curved
     const BIT_IS_PRIMARY: ColorType = 0x2; // primary is opposite to secondary
 
-    fn new_1(id: VoronoiEdgeIndex) -> Self {
+    /*fn new_1(id: VoronoiEdgeIndex) -> Self {
         Self {
             id,
             cell_: None,
@@ -398,7 +397,7 @@ where
             _pdbi: PhantomData,
             _pdbf: PhantomData,
         }
-    }
+    }*/
 
     fn new_4(
         id: VoronoiEdgeIndex,
@@ -502,8 +501,8 @@ pub type VertexType<I1, F1> = Rc<Cell<VoronoiVertex<I1, F1>>>;
 #[derive(Default, Debug)]
 pub struct VoronoiDiagram<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -517,8 +516,8 @@ where
 
 impl<I1, F1, I2, F2> VoronoiDiagram<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -626,7 +625,7 @@ where
     }
 
     pub(crate) fn _process_single_site(&mut self, site: &VSE::SiteEvent<I1, F1, I2, F2>) {
-        self._make_new_cell_with_catagory(
+        let _ = self._make_new_cell_with_catagory(
             VoronoiCellIndex(site.sorted_index()),
             site.initial_index(),
             site.source_category(),
@@ -635,7 +634,7 @@ where
 
     #[inline]
     fn _cell_get(&self, cell_id: Option<VoronoiCellIndex>) -> Option<&CellType<I1, F1>> {
-        cell_id?;
+        let _ = cell_id?;
         self.cells_.get(cell_id.unwrap().0)
     }
 
@@ -658,7 +657,7 @@ where
         &self,
         cell_id: Option<VoronoiCellIndex>,
     ) -> Option<VoronoiEdgeIndex> {
-        cell_id?;
+        let _ = cell_id?;
         if let Some(cell) = self._cell_get(cell_id) {
             return cell.get().incident_edge_;
         }
@@ -677,7 +676,7 @@ where
 
     #[inline]
     pub fn vertex_get(&self, vertex_id: Option<VoronoiVertexIndex>) -> Option<&VertexType<I1, F1>> {
-        vertex_id?;
+        let _ = vertex_id?;
         self.vertices_.get(vertex_id.unwrap().0)
     }
 
@@ -713,7 +712,7 @@ where
         &self,
         vertex_id: Option<VoronoiVertexIndex>,
     ) -> Option<VoronoiEdgeIndex> {
-        vertex_id?;
+        let _ = vertex_id?;
         self.vertex_get(vertex_id)
             .and_then(|x| x.get().incident_edge_)
     }
@@ -724,7 +723,7 @@ where
         }
         if let Some(cell) = self.vertex_get(vertex_id) {
             let mut vertex = cell.get();
-            vertex.set_color(color);
+            let _ = vertex.set_color(color);
             cell.set(vertex);
         }
     }
@@ -739,12 +738,12 @@ where
         //dbg!(self.next_edge_id_);
         self.next_edge_id_ += 1;
         let new_edge = VoronoiEdge::new_4(new_edge_id, cell_id, is_linear, is_primary);
-        self.edges_.insert(new_edge_id.0, new_edge);
+        let _ = self.edges_.insert(new_edge_id.0, new_edge);
         new_edge_id
     }
 
     fn _edge_get(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<&EdgeType<I1, F1, I2, F2>> {
-        edge_id?;
+        let _ = edge_id?;
         let rv = self.edges_.get(edge_id.unwrap().0);
         if rv.is_none() {
             dbg!(edge_id.unwrap().0);
@@ -767,7 +766,7 @@ where
     }
 
     pub fn edge_get_color(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<ColorType> {
-        edge_id?;
+        let _ = edge_id?;
         if let Some(edgecell) = self._edge_get(edge_id) {
             let edge = edgecell.get();
             return Some(edge.get_color());
@@ -781,7 +780,7 @@ where
         }
         if let Some(edgecell) = self._edge_get(edge_id) {
             let mut edge = edgecell.get();
-            edge.set_color(color);
+            let _ = edge.set_color(color);
             edgecell.set(edge);
         }
     }
@@ -798,7 +797,7 @@ where
     }
 
     pub fn edge_get_twin(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<VoronoiEdgeIndex> {
-        edge_id?;
+        let _ = edge_id?;
         if let Some(edgecell) = self._edge_get(edge_id) {
             return edgecell.get().twin();
         }
@@ -817,7 +816,7 @@ where
     }
 
     pub fn edge_get_cell(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<VoronoiCellIndex> {
-        edge_id?;
+        let _ = edge_id?;
         if let Some(edgecell) = self._edge_get(edge_id) {
             return edgecell.get().cell();
         }
@@ -828,7 +827,7 @@ where
     /// Returns false if the edge is infinite (ray, line).
     #[inline]
     pub fn edge_is_finite(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<bool> {
-        edge_id?;
+        let _ = edge_id?;
         Some(self.edge_get_vertex0(edge_id).is_some() && self.edge_get_vertex1(edge_id).is_some())
     }
 
@@ -836,7 +835,7 @@ where
     /// Returns false if the edge is finite (segment, parabolic arc).
     #[inline]
     pub fn edge_is_infinite(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<bool> {
-        edge_id?;
+        let _ = edge_id?;
         Some(self.edge_get_vertex0(edge_id).is_none() || self.edge_get_vertex1(edge_id).is_none())
     }
 
@@ -886,7 +885,7 @@ where
         let new_vertex_id = VoronoiVertexIndex(self.next_vertex_id_);
         self.next_vertex_id_ += 1;
         let new_edge = VoronoiVertex::new_3(new_vertex_id, x, y);
-        self.vertices_.insert(new_vertex_id.0, new_edge);
+        let _ = self.vertices_.insert(new_vertex_id.0, new_edge);
         new_vertex_id
     }
 
@@ -909,7 +908,7 @@ where
         &self,
         edge_id: Option<VoronoiEdgeIndex>,
     ) -> Option<VoronoiVertexIndex> {
-        edge_id?;
+        let _ = edge_id?;
         self._edge_get(edge_id).and_then(|x| x.get().vertex0())
     }
 
@@ -917,7 +916,7 @@ where
         &self,
         edge_id: Option<VoronoiEdgeIndex>,
     ) -> Option<VoronoiVertexIndex> {
-        edge_id?;
+        let _ = edge_id?;
         let twin = self._edge_get(edge_id).and_then(|x| x.get().twin());
         self.edge_get_vertex0(twin)
     }
@@ -945,21 +944,21 @@ where
     }
 
     fn _edge_get_next(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<VoronoiEdgeIndex> {
-        edge_id?;
+        let _ = edge_id?;
         self.edges_
             .get(edge_id.unwrap().0)
             .and_then(|x| x.get().next())
     }
 
     fn _edge_get_prev(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<VoronoiEdgeIndex> {
-        edge_id?;
+        let _ = edge_id?;
         self.edges_
             .get(edge_id.unwrap().0)
             .and_then(|x| x.get().prev())
     }
 
     fn _edge_get_cell(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<VoronoiCellIndex> {
-        edge_id?;
+        let _ = edge_id?;
         self.edges_
             .get(edge_id.unwrap().0)
             .and_then(|x| x.get().cell())
@@ -968,7 +967,7 @@ where
     /// Returns a pointer to the rotation next edge
     /// over the starting point of the half-edge.
     pub fn edge_rot_next(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<VoronoiEdgeIndex> {
-        edge_id?;
+        let _ = edge_id?;
         let prev = self._edge_get_prev(edge_id);
         self.edge_get_twin(prev)
     }
@@ -976,7 +975,7 @@ where
     /// Returns a pointer to the rotation previous edge
     /// over the starting point of the half-edge.
     pub fn edge_rot_prev(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<VoronoiEdgeIndex> {
-        edge_id?;
+        let _ = edge_id?;
         let twin = self.edge_get_twin(edge_id);
         self._edge_get_next(twin)
     }
@@ -1007,7 +1006,7 @@ where
 
         // Add the initial cell during the first edge insertion.
         if self.cells_.is_empty() {
-            self._make_new_cell_with_catagory(
+            let _ = self._make_new_cell_with_catagory(
                 VoronoiCellIndex(site1_index),
                 site1.initial_index(),
                 site1.source_category(),
@@ -1016,7 +1015,7 @@ where
 
         // The second site represents a new site during site event
         // processing. Add a new cell to the cell records.
-        self._make_new_cell_with_catagory(
+        let _ = self._make_new_cell_with_catagory(
             VoronoiCellIndex(site2_index),
             site2.initial_index(),
             site2.source_category(),
@@ -1185,7 +1184,7 @@ where
             for e in (last_edge..edges_end).rev() {
                 //edges_to_erase.push(last_edge);
                 //println!("really removing edge:{} size:{}", e, self.edges_.len());
-                self.edges_.remove(e);
+                let _ = self.edges_.remove(e);
                 //println!("size after:{}", self.edges_.len());
                 self.next_edge_id_ = e;
             }
@@ -1234,7 +1233,7 @@ where
                     //edges_to_erase.push(last_edge);
                     //println!("really removing vertex:{} size:{}", v, self.vertices_.len());
                     //vertices_.erase(last_vertex, vertices_.end());
-                    self.vertices_.remove(v);
+                    let _ = self.vertices_.remove(v);
                     //println!("size after:{}", self.edges_.len());
                     self.next_vertex_id_ = v;
                 }
@@ -1246,7 +1245,7 @@ where
             if !self.edges_.is_empty() {
                 // Update prev/next pointers for the line edges.
                 let mut edge_it = self.edges_.keys();
-                let edge_it_last = self.edges_.keys().next_back().unwrap();
+                //let edge_it_last = self.edges_.keys().next_back().unwrap();
 
                 let mut edge1 = edge_it.next().map(VoronoiEdgeIndex);
                 //dbg!(edge1.unwrap());

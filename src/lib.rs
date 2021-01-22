@@ -1,13 +1,9 @@
 #![deny(non_camel_case_types)]
 #![deny(unused_parens)]
 #![deny(non_upper_case_globals)]
-//#![deny(unused_qualifications)]
-//#![deny(unused_results)]
-#![allow(unused_qualifications)]
-#![allow(unused_results)]
-#![allow(dead_code)]
+#![deny(unused_qualifications)]
+#![deny(unused_results)]
 #![allow(unused_imports)]
-#![allow(unused_variables)]
 
 use core::fmt::Debug;
 use num::bigint::BigInt;
@@ -33,7 +29,7 @@ pub mod voronoi_siteevent;
 pub mod voronoi_structures;
 pub mod voronoi_visual_utils;
 
-pub trait BoostInputType:
+pub trait InputType:
     Display
     + Ord
     + PartialOrd
@@ -66,7 +62,7 @@ pub trait BigIntType:
 {
 }
 
-impl<I1> BoostInputType for I1 where
+impl<I1> InputType for I1 where
     I1: Display
         + Ord
         + PartialOrd
@@ -83,8 +79,8 @@ impl<I1> BoostInputType for I1 where
 {
 }
 
-impl<B> BigIntType for B where
-    B: Display
+impl<I2> BigIntType for I2 where
+    I2: Display
         + Ord
         + PartialOrd
         + Eq
@@ -100,12 +96,12 @@ impl<B> BigIntType for B where
 {
 }
 
-pub trait BoostOutputType:
+pub trait OutputType:
     Float + PartialOrd + PartialEq + NumCast + Copy + Clone + Display + Default + Debug + Zero
 {
 }
 
-impl<F1> BoostOutputType for F1 where
+impl<F1> OutputType for F1 where
     F1: Float
         + PartialOrd
         + PartialEq
@@ -153,26 +149,29 @@ where
     F: Default + Copy + Clone + Float + Zero + Neg<Output = F>,
 {
     #[inline]
+    // todo: remove!
     pub fn is_zero(v: F) -> bool {
         v == F::zero()
     }
 
     #[inline]
+    // todo: remove!
     pub fn is_neg(v: F) -> bool {
         v < F::zero()
     }
 
     #[inline]
+    // todo: remove!
     pub fn is_pos(v: F) -> bool {
         v > F::zero()
     }
 
+    // TODO: this is stupid: why can't I1 just use a float literal?
     #[inline]
     pub fn half() -> F {
         num::cast::<f32, F>(1.0f32 / 2.0f32).unwrap()
     }
 
-    // TODO: this is stupid: why can't I1 just use a float literal?
     #[inline]
     pub fn one() -> F {
         num::cast::<f32, F>(1.0f32).unwrap()
@@ -181,12 +180,6 @@ where
     #[inline]
     pub fn two() -> F {
         num::cast::<f32, F>(2.0f32).unwrap()
-    }
-
-    // todo this is just a stopgap
-    #[inline]
-    pub fn epsilon() -> F {
-        num::cast::<f32, F>(0.0000001f32).unwrap()
     }
 }
 
@@ -203,16 +196,19 @@ where
     I1: Default + Copy + Clone + PrimInt + Zero + Neg<Output = I1>,
 {
     #[inline]
+    // todo: remove!
     pub fn is_zero(v: I1) -> bool {
         v == I1::zero()
     }
 
     #[inline]
+    // todo: remove!
     pub fn is_neg(v: I1) -> bool {
         v < I1::zero()
     }
 
     #[inline]
+    // todo: remove!
     pub fn is_pos(v: I1) -> bool {
         v > I1::zero()
     }
@@ -232,10 +228,10 @@ where
 #[derive(Default)]
 pub struct TypeConverter<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
-    I2: BoostInputType + Neg<Output = I2>,
-    F2: BoostOutputType + Neg<Output = F2>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: InputType + Neg<Output = I2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     _pdo: PhantomData<F1>,
     _pdi: PhantomData<I1>,
@@ -245,10 +241,10 @@ where
 
 impl<I1, F1, I2, F2> TypeConverter<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
-    I2: BoostInputType + Neg<Output = I2>,
-    F2: BoostOutputType + Neg<Output = F2>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: InputType + Neg<Output = I2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     #[inline(always)]
     pub fn i1_to_f1(input: I1) -> F1 {
@@ -333,11 +329,6 @@ where
     pub fn f32_to_f2(input: f32) -> F2 {
         num::cast::<f32, F2>(input).unwrap()
     }
-
-    //#[inline(always)]
-    //pub fn f1_to_f32(input: F1) -> f32 {
-    //    num::cast::<F1, f32>(input).unwrap()
-    //}
 
     #[inline(always)]
     pub fn i32_to_i1(input: i32) -> I1 {

@@ -14,7 +14,7 @@ use super::voronoi_diagram as VD;
 use super::voronoi_predicate as VP;
 use super::voronoi_structures as VS;
 
-use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
+use super::{BigFloatType, BigIntType, InputType, OutputType};
 use fnv::FnvHashSet;
 use ordered_float::OrderedFloat;
 use rb_tree::RBTree;
@@ -43,7 +43,7 @@ pub type CircleEventIndexType = usize;
 ///
 
 #[derive(Copy, Clone)]
-pub struct CircleEvent<F2: BoostOutputType + Neg<Output = F2>> {
+pub struct CircleEvent<F2: OutputType + Neg<Output = F2>> {
     index_: Option<CircleEventIndexType>, // the list index inside CircleEventQueue
     center_x_: OrderedFloat<F2>,
     center_y_: OrderedFloat<F2>,
@@ -53,7 +53,7 @@ pub struct CircleEvent<F2: BoostOutputType + Neg<Output = F2>> {
 
 impl<F2> fmt::Debug for CircleEvent<F2>
 where
-    F2: BoostOutputType + Neg<Output = F2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
@@ -73,7 +73,7 @@ where
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output = F2>> Default for CircleEvent<F2> {
+impl<F2: OutputType + Neg<Output = F2>> Default for CircleEvent<F2> {
     fn default() -> Self {
         Self {
             index_: None, // do i really have to put this in an option?
@@ -86,7 +86,7 @@ impl<F2: BoostOutputType + Neg<Output = F2>> Default for CircleEvent<F2> {
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output = F2>> PartialEq for CircleEvent<F2> {
+impl<F2: OutputType + Neg<Output = F2>> PartialEq for CircleEvent<F2> {
     fn eq(&self, other: &Self) -> bool {
         self.center_x_ == other.center_x_
             && self.center_y_ == other.center_y_
@@ -97,15 +97,15 @@ impl<F2: BoostOutputType + Neg<Output = F2>> PartialEq for CircleEvent<F2> {
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output = F2>> Eq for CircleEvent<F2> {}
+impl<F2: OutputType + Neg<Output = F2>> Eq for CircleEvent<F2> {}
 
-impl<F2: BoostOutputType + Neg<Output = F2>> PartialOrd for CircleEvent<F2> {
+impl<F2: OutputType + Neg<Output = F2>> PartialOrd for CircleEvent<F2> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output = F2>> Ord for CircleEvent<F2> {
+impl<F2: OutputType + Neg<Output = F2>> Ord for CircleEvent<F2> {
     fn cmp(&self, other: &Self) -> Ordering {
         if self.lower_x() != other.lower_x() {
             return if self.lower_x() < other.lower_x() {
@@ -124,14 +124,14 @@ impl<F2: BoostOutputType + Neg<Output = F2>> Ord for CircleEvent<F2> {
 
 /// Wrapper object that lets me implement Ord on a Cell<CircleEvent<O>>
 #[derive(Clone)]
-pub struct CircleEventC<F2: BoostOutputType + Neg<Output = F2>>(
+pub struct CircleEventC<F2: OutputType + Neg<Output = F2>>(
     pub Cell<CircleEvent<F2>>,
     pub(crate) Option<VB::BeachLineIndex>,
 );
 
 impl<F2> fmt::Debug for CircleEventC<F2>
 where
-    F2: BoostOutputType + Neg<Output = F2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
@@ -141,7 +141,7 @@ where
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output = F2>> CircleEventC<F2> {
+impl<F2: OutputType + Neg<Output = F2>> CircleEventC<F2> {
     pub(crate) fn new_1(c: CircleEvent<F2>) -> Rc<Self> {
         let cc = Self(Cell::new(c), Some(c.beach_line_index_.unwrap())); // todo
         Rc::<Self>::new(cc)
@@ -157,32 +157,32 @@ impl<F2: BoostOutputType + Neg<Output = F2>> CircleEventC<F2> {
     /// sets the x coordinates inside the Cell.
     pub(crate) fn set_x_raw(&self, x: F2) {
         let mut selfc = self.0.get();
-        selfc.set_x_raw(x);
+        let _ = selfc.set_x_raw(x);
         self.0.set(selfc);
     }
 
     /// sets the y coordinate inside the Cell.
     pub(crate) fn set_y_raw(&self, x: F2) {
         let mut selfc = self.0.get();
-        selfc.set_raw_y(x);
+        let _ = selfc.set_raw_y(x);
         self.0.set(selfc);
     }
 
     /// sets the y coordinate inside the Cell.
     pub(crate) fn set_lower_x_raw(&self, x: F2) {
         let mut selfc: CircleEvent<F2> = self.0.get();
-        selfc.set_raw_lower_x(x);
+        let _ = selfc.set_raw_lower_x(x);
         self.0.set(selfc);
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output = F2>> PartialOrd for CircleEventC<F2> {
+impl<F2: OutputType + Neg<Output = F2>> PartialOrd for CircleEventC<F2> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output = F2>> Ord for CircleEventC<F2> {
+impl<F2: OutputType + Neg<Output = F2>> Ord for CircleEventC<F2> {
     fn cmp(&self, other: &Self) -> Ordering {
         let cself = self.0.get();
         let cother = other.0.get();
@@ -190,7 +190,7 @@ impl<F2: BoostOutputType + Neg<Output = F2>> Ord for CircleEventC<F2> {
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output = F2>> PartialEq for CircleEventC<F2> {
+impl<F2: OutputType + Neg<Output = F2>> PartialEq for CircleEventC<F2> {
     fn eq(&self, other: &Self) -> bool {
         let cself = self.0.get();
         let cother = other.0.get();
@@ -201,11 +201,11 @@ impl<F2: BoostOutputType + Neg<Output = F2>> PartialEq for CircleEventC<F2> {
     }
 }
 
-impl<F2: BoostOutputType + Neg<Output = F2>> Eq for CircleEventC<F2> {}
+impl<F2: OutputType + Neg<Output = F2>> Eq for CircleEventC<F2> {}
 
 impl<F2> CircleEvent<F2>
 where
-    F2: BoostOutputType + Neg<Output = F2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     pub(crate) fn new_1(bech_line_index: VB::BeachLineIndex) -> CircleEvent<F2> {
         Self {
@@ -217,6 +217,7 @@ where
         }
     }
 
+    /*
     pub(crate) fn new_3(
         center_x: F2,
         center_y: F2,
@@ -230,7 +231,7 @@ where
             beach_line_index_: Some(bech_line_index),
             index_: None,
         }
-    }
+    }*/
 
     pub(crate) fn get_index(&self) -> Option<CircleEventIndexType> {
         self.index_
@@ -249,6 +250,7 @@ where
         self.center_x_.into_inner()
     }
 
+    #[allow(dead_code)]
     pub(crate) fn set_x(&mut self, x: OrderedFloat<F2>) -> &mut Self {
         self.center_x_ = x;
         self
@@ -267,6 +269,7 @@ where
         self.center_y_.into_inner()
     }
 
+    #[allow(dead_code)]
     pub(crate) fn set_y(&mut self, y: OrderedFloat<F2>) -> &mut Self {
         self.center_y_ = y;
         self
@@ -277,10 +280,12 @@ where
         self
     }
 
+    #[inline(always)]
     pub(crate) fn lower_x(&self) -> OrderedFloat<F2> {
         self.lower_x_
     }
 
+    #[allow(dead_code)]
     pub(crate) fn set_lower_x(&mut self, x: OrderedFloat<F2>) -> &mut Self {
         self.lower_x_ = x;
         self
@@ -291,14 +296,16 @@ where
         self
     }
 
+    #[allow(dead_code)]
+    #[inline(always)]
     pub(crate) fn lower_y(&self) -> OrderedFloat<F2> {
         self.center_y_
     }
 
     pub(crate) fn set_3_raw(&mut self, x: F2, y: F2, lower_x: F2) {
-        self.set_x_raw(x);
-        self.set_raw_y(y);
-        self.set_raw_lower_x(lower_x);
+        let _ = self.set_x_raw(x);
+        let _ = self.set_raw_y(y);
+        let _ = self.set_raw_lower_x(lower_x);
     }
 }
 
@@ -313,7 +320,7 @@ pub type CircleEventType<F2> = Rc<CircleEventC<F2>>;
 /// events ordering.
 pub(crate) struct CircleEventQueue<F2>
 where
-    F2: BoostOutputType + Neg<Output = F2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     c_: RBTree<CircleEventType<F2>>,
     c_list_: VecMap<CircleEventType<F2>>,
@@ -321,7 +328,7 @@ where
     inactive_circle_ids_: FnvHashSet<usize>, // Circle events turned inactive
 }
 
-impl<F2: BoostOutputType + Neg<Output = F2>> Default for CircleEventQueue<F2> {
+impl<F2: OutputType + Neg<Output = F2>> Default for CircleEventQueue<F2> {
     fn default() -> CircleEventQueue<F2> {
         Self {
             c_: RBTree::new(),
@@ -334,12 +341,13 @@ impl<F2: BoostOutputType + Neg<Output = F2>> Default for CircleEventQueue<F2> {
 
 impl<F2> CircleEventQueue<F2>
 where
-    F2: BoostOutputType + Neg<Output = F2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     pub(crate) fn is_empty(&self) -> bool {
         self.c_.is_empty()
     }
 
+    #[allow(dead_code)]
     pub(crate) fn len(&self) -> usize {
         //todo! assert_eq!(self.c_.len(), self.c_list_.len());
         assert!(self.c_list_.len() <= self.c_list_next_free_index_);
@@ -394,8 +402,8 @@ where
         );*/
         if let Some(circle) = self.c_.pop() {
             if let Some(circle_id) = circle.0.get().index_ {
-                self.c_list_.remove(circle_id);
-                self.inactive_circle_ids_.insert(circle_id);
+                let _ = self.c_list_.remove(circle_id);
+                let _ = self.inactive_circle_ids_.insert(circle_id);
             } else {
                 panic!("This should not happend")
             }
@@ -410,6 +418,7 @@ where
         }
     }
 
+    #[allow(dead_code)]
     pub(crate) fn clear(&mut self) {
         self.c_.clear();
         self.c_list_.clear();
@@ -424,17 +433,18 @@ where
     pub(crate) fn associate_and_push(&mut self, cc: CircleEventType<F2>) -> Rc<CircleEventC<F2>> {
         //assert!(!self.c_.contains(&cc)); // todo: is this supposed to happen?
         //dbg!(&cc);
-        let duplicates = self.c_.contains(&cc);
+        //let duplicates = self.c_.contains(&cc);
         {
             let mut c = cc.0.get();
-            c.set_index(self.c_list_next_free_index_);
+            let _ = c.set_index(self.c_list_next_free_index_);
             cc.0.set(c);
         }
 
-        self.c_list_
+        let _ = self
+            .c_list_
             .insert(self.c_list_next_free_index_, cc.clone());
         self.c_list_next_free_index_ += 1;
-        self.c_.insert(cc.clone());
+        let _ = self.c_.insert(cc.clone());
         cc
     }
 
@@ -447,7 +457,7 @@ where
         dbg!(circle_event_id);
         */
         if let Some(circle_event_id) = circle_event_id {
-            self.inactive_circle_ids_.insert(circle_event_id);
+            let _ = self.inactive_circle_ids_.insert(circle_event_id);
         }
     }
 
@@ -462,6 +472,7 @@ where
         c
     }
 
+    #[allow(dead_code)]
     pub(crate) fn dbg(&self) {
         for c in self.c_.iter() {
             println!("{:?}", c);

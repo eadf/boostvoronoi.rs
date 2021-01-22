@@ -15,7 +15,7 @@ use super::voronoi_predicate as VP;
 use ordered_float::OrderedFloat;
 use std::cmp::Ordering;
 
-use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
+use super::{BigFloatType, BigIntType, InputType, OutputType};
 use num::{NumCast, PrimInt};
 use std::fmt;
 use std::fmt::Display;

@@ -52,13 +52,13 @@ mod robustfpt_tests;
 
 use super::TypeCheckF as TCF;
 use super::TypeCheckI as TCI;
-use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
+use super::{BigFloatType, BigIntType, InputType, OutputType};
 use core::fmt::Debug;
 use num::{BigInt, Float, FromPrimitive, Num, NumCast, ToPrimitive, Zero};
 //use num_traits;
 use ordered_float::OrderedFloat;
 use std::convert::TryInto;
-use std::fmt::Display;
+use std::fmt;
 use std::marker::PhantomData;
 use std::ops;
 
@@ -66,12 +66,12 @@ use std::ops;
 pub const ROUNDING_ERROR: u8 = 1;
 
 #[derive(Copy, Clone, Debug, Default)]
-pub struct RobustFpt<F: BoostOutputType + ops::Neg<Output = F>> {
+pub struct RobustFpt<F: OutputType + ops::Neg<Output = F>> {
     fpv_: F,
     re_: OrderedFloat<F>,
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> RobustFpt<F> {
+impl<F: OutputType + ops::Neg<Output = F>> RobustFpt<F> {
     pub fn new_1(fpv: F) -> Self {
         Self {
             fpv_: fpv,
@@ -93,21 +93,23 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> RobustFpt<F> {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn fpv(&self) -> F {
         self.fpv_
     }
 
-    #[inline]
+    #[inline(always)]
+    #[allow(dead_code)]
     pub fn re(&self) -> F {
         self.re_.into_inner()
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn ulp(&self) -> F {
         self.re_.into_inner()
     }
 
+    #[allow(dead_code)]
     pub fn assign_from(&mut self, that: &Self) -> &mut Self {
         self.fpv_ = that.fpv_;
         self.re_ = that.re_;
@@ -125,6 +127,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> RobustFpt<F> {
     }
 
     #[inline(always)]
+    #[allow(dead_code)]
     pub fn is_zero(&self) -> bool {
         self.fpv_.is_zero()
     }
@@ -140,7 +143,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> RobustFpt<F> {
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Add<RobustFpt<F>> for RobustFpt<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::Add<RobustFpt<F>> for RobustFpt<F> {
     type Output = RobustFpt<F>;
 
     fn add(self, _rhs: RobustFpt<F>) -> Self {
@@ -163,7 +166,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Add<RobustFpt<F>> for Robus
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::AddAssign<RobustFpt<F>> for RobustFpt<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::AddAssign<RobustFpt<F>> for RobustFpt<F> {
     fn add_assign(&mut self, _rhs: RobustFpt<F>) {
         let fpv: F = self.fpv_ + _rhs.fpv_;
         let re = if (!TCF::<F>::is_neg(self.fpv_) && !TCF::<F>::is_neg(_rhs.fpv_))
@@ -185,7 +188,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::AddAssign<RobustFpt<F>> for
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Mul<F> for RobustFpt<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::Mul<F> for RobustFpt<F> {
     type Output = RobustFpt<F>;
     // Todo make this more efficient
     fn mul(self, _rhs: F) -> Self {
@@ -194,7 +197,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Mul<F> for RobustFpt<F> {
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Mul<RobustFpt<F>> for RobustFpt<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::Mul<RobustFpt<F>> for RobustFpt<F> {
     type Output = RobustFpt<F>;
 
     fn mul(self, _rhs: RobustFpt<F>) -> Self {
@@ -206,14 +209,14 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Mul<RobustFpt<F>> for Robus
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::MulAssign<RobustFpt<F>> for RobustFpt<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::MulAssign<RobustFpt<F>> for RobustFpt<F> {
     fn mul_assign(&mut self, _rhs: RobustFpt<F>) {
         self.re_ = self.re_ + _rhs.re_ + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap());
         self.fpv_ = self.fpv_ * _rhs.fpv_;
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Sub<RobustFpt<F>> for RobustFpt<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::Sub<RobustFpt<F>> for RobustFpt<F> {
     type Output = RobustFpt<F>;
 
     fn sub(self, _rhs: RobustFpt<F>) -> Self {
@@ -234,7 +237,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Sub<RobustFpt<F>> for Robus
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::SubAssign<RobustFpt<F>> for RobustFpt<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::SubAssign<RobustFpt<F>> for RobustFpt<F> {
     fn sub_assign(&mut self, _rhs: RobustFpt<F>) {
         let fpv = self.fpv_ - _rhs.fpv_;
         if (!TCF::<F>::is_neg(self.fpv_) && !TCF::<F>::is_pos(_rhs.fpv_))
@@ -255,7 +258,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::SubAssign<RobustFpt<F>> for
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Div<F> for RobustFpt<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::Div<F> for RobustFpt<F> {
     type Output = RobustFpt<F>;
 
     // todo make efficient
@@ -265,7 +268,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Div<F> for RobustFpt<F> {
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Div<RobustFpt<F>> for RobustFpt<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::Div<RobustFpt<F>> for RobustFpt<F> {
     type Output = RobustFpt<F>;
 
     fn div(self, _rhs: RobustFpt<F>) -> Self {
@@ -275,14 +278,14 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Div<RobustFpt<F>> for Robus
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::DivAssign<RobustFpt<F>> for RobustFpt<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::DivAssign<RobustFpt<F>> for RobustFpt<F> {
     fn div_assign(&mut self, _rhs: RobustFpt<F>) {
         self.re_ = self.re_ + _rhs.re_ + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap());
         self.fpv_ = self.fpv_ / _rhs.fpv_;
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Neg for RobustFpt<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::Neg for RobustFpt<F> {
     type Output = RobustFpt<F>;
 
     fn neg(self) -> Self {
@@ -292,9 +295,9 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Neg for RobustFpt<F> {
         }
     }
 }
-
+/*
 // todo!() figure out how to do this for real
-impl<F: BoostOutputType + ops::Neg<Output = F>> num::ToPrimitive for RobustFpt<F> {
+impl<F: OutputType + ops::Neg<Output = F>> num::ToPrimitive for RobustFpt<F> {
     fn to_i64(&self) -> Option<i64> {
         None
     }
@@ -302,13 +305,13 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> num::ToPrimitive for RobustFpt<F
     fn to_u64(&self) -> Option<u64> {
         None
     }
-}
-
-impl<F: BoostOutputType + ops::Neg<Output = F>> NumCast for RobustFpt<F> {
+}*/
+/*
+impl<F: OutputType + ops::Neg<Output = F>> NumCast for RobustFpt<F> {
     fn from<T: num::ToPrimitive>(n: T) -> Option<Self> {
         None
     }
-}
+}*/
 
 /// robust_dif consists of two not negative values: value1 and value2.
 /// The resulting expression is equal to the value1 - value2.
@@ -317,12 +320,12 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> NumCast for RobustFpt<F> {
 /// value1. The structure implicitly avoids difference computation.
 
 #[derive(Copy, Clone, Debug, Default)]
-pub struct RobustDif<F: BoostOutputType + ops::Neg<Output = F>> {
+pub struct RobustDif<F: OutputType + ops::Neg<Output = F>> {
     positive_sum_: RobustFpt<F>,
     negative_sum_: RobustFpt<F>,
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> RobustDif<F> {
     pub fn new() -> Self {
         Self {
             positive_sum_: RobustFpt::<F>::default(),
@@ -338,6 +341,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> RobustDif<F> {
         }
     }
 
+    #[allow(dead_code)]
     pub fn new_from_2(a: &RobustFpt<F>, b: &RobustFpt<F>) -> Self {
         Self {
             positive_sum_: *a,
@@ -345,6 +349,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> RobustDif<F> {
         }
     }
 
+    #[allow(dead_code)]
     pub fn new_1(value: F) -> Self {
         if TCF::<F>::is_pos(value) {
             Self {
@@ -359,6 +364,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> RobustDif<F> {
         }
     }
 
+    #[allow(dead_code)]
     pub fn new_2(pos: F, neg: F) -> Self {
         assert!(TCF::<F>::is_pos(pos));
         assert!(TCF::<F>::is_pos(neg));
@@ -389,7 +395,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> RobustDif<F> {
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Neg for RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::Neg for RobustDif<F> {
     type Output = RobustDif<F>;
 
     fn neg(self) -> Self {
@@ -414,7 +420,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Neg for RobustDif<F> {
     return *this;
   }
 */
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Add<RobustDif<F>> for RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::Add<RobustDif<F>> for RobustDif<F> {
     type Output = RobustDif<F>;
 
     fn add(self, _rhs: RobustDif<F>) -> Self {
@@ -425,14 +431,14 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Add<RobustDif<F>> for Robus
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::AddAssign<RobustDif<F>> for RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::AddAssign<RobustDif<F>> for RobustDif<F> {
     fn add_assign(&mut self, _rhs: RobustDif<F>) {
         self.positive_sum_ += _rhs.positive_sum_;
         self.negative_sum_ += _rhs.negative_sum_;
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::AddAssign<RobustFpt<F>> for RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::AddAssign<RobustFpt<F>> for RobustDif<F> {
     fn add_assign(&mut self, _rhs: RobustFpt<F>) {
         if _rhs.is_sign_positive() {
             self.positive_sum_ += _rhs;
@@ -469,7 +475,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::AddAssign<RobustFpt<F>> for
     return *this;
   }
 */
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Sub<RobustDif<F>> for RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::Sub<RobustDif<F>> for RobustDif<F> {
     type Output = RobustDif<F>;
 
     fn sub(self, _rhs: RobustDif<F>) -> Self {
@@ -480,14 +486,14 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Sub<RobustDif<F>> for Robus
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::SubAssign<RobustDif<F>> for RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::SubAssign<RobustDif<F>> for RobustDif<F> {
     fn sub_assign(&mut self, _rhs: RobustDif<F>) {
         self.positive_sum_ += _rhs.negative_sum_;
         self.negative_sum_ += _rhs.positive_sum_;
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::SubAssign<RobustFpt<F>> for RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::SubAssign<RobustFpt<F>> for RobustDif<F> {
     fn sub_assign(&mut self, _rhs: RobustFpt<F>) {
         //dbg!(&self, &_rhs);
         if _rhs.is_sign_positive() {
@@ -522,7 +528,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::SubAssign<RobustFpt<F>> for
   }
 */
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Mul<RobustDif<F>> for RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::Mul<RobustDif<F>> for RobustDif<F> {
     type Output = RobustDif<F>;
 
     fn mul(self, _rhs: RobustDif<F>) -> Self {
@@ -533,7 +539,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Mul<RobustDif<F>> for Robus
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Mul<F> for RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::Mul<F> for RobustDif<F> {
     type Output = RobustDif<F>;
 
     fn mul(self, _rhs: F) -> Self {
@@ -553,7 +559,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Mul<F> for RobustDif<F> {
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Mul<RobustFpt<F>> for RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::Mul<RobustFpt<F>> for RobustDif<F> {
     type Output = RobustDif<F>;
 
     fn mul(self, mut _rhs: RobustFpt<F>) -> Self {
@@ -572,7 +578,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::Mul<RobustFpt<F>> for Robus
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::MulAssign<F> for RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::MulAssign<F> for RobustDif<F> {
     fn mul_assign(&mut self, mut _rhs: F) {
         if _rhs.is_sign_negative() {
             _rhs = -_rhs;
@@ -583,7 +589,7 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::MulAssign<F> for RobustDif<
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::MulAssign<RobustFpt<F>> for RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::MulAssign<RobustFpt<F>> for RobustDif<F> {
     fn mul_assign(&mut self, mut _rhs: RobustFpt<F>) {
         if _rhs.is_sign_negative() {
             _rhs = -_rhs;
@@ -594,14 +600,14 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::MulAssign<RobustFpt<F>> for
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::MulAssign<RobustDif<F>> for RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::MulAssign<RobustDif<F>> for RobustDif<F> {
     fn mul_assign(&mut self, _rhs: RobustDif<F>) {
         self.positive_sum_ = self.positive_sum_ * _rhs.positive_sum_;
         self.negative_sum_ = self.negative_sum_ * _rhs.negative_sum_;
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::DivAssign<F> for RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::DivAssign<F> for RobustDif<F> {
     fn div_assign(&mut self, _rhs: F) {
         let rhs = if _rhs.is_sign_negative() {
             self.swap();
@@ -614,110 +620,19 @@ impl<F: BoostOutputType + ops::Neg<Output = F>> ops::DivAssign<F> for RobustDif<
     }
 }
 
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::DivAssign<RobustFpt<F>> for RobustDif<F> {
+impl<F: OutputType + ops::Neg<Output = F>> ops::DivAssign<RobustFpt<F>> for RobustDif<F> {
     fn div_assign(&mut self, _rhs: RobustFpt<F>) {
         self.positive_sum_ /= _rhs;
         self.negative_sum_ /= _rhs;
     }
 }
 
-/*
-template<typename T>
-robust_dif<T> operator+(const robust_dif<T>& lhs,
-                        const robust_dif<T>& rhs) {
-  return robust_dif<T>(lhs.pos() + rhs.pos(), lhs.neg() + rhs.neg());
-}
-
-template<typename T>
-robust_dif<T> operator+(const robust_dif<T>& lhs, const T& rhs) {
-  if (!is_neg(rhs)) {
-    return robust_dif<T>(lhs.pos() + rhs, lhs.neg());
-  } else {
-    return robust_dif<T>(lhs.pos(), lhs.neg() - rhs);
-  }
-}
-
-template<typename T>
-robust_dif<T> operator+(const T& lhs, const robust_dif<T>& rhs) {
-  if (!is_neg(lhs)) {
-    return robust_dif<T>(lhs + rhs.pos(), rhs.neg());
-  } else {
-    return robust_dif<T>(rhs.pos(), rhs.neg() - lhs);
-  }
-}
-
-template<typename T>
-robust_dif<T> operator-(const robust_dif<T>& lhs,
-                        const robust_dif<T>& rhs) {
-  return robust_dif<T>(lhs.pos() + rhs.neg(), lhs.neg() + rhs.pos());
-}
-
-template<typename T>
-robust_dif<T> operator-(const robust_dif<T>& lhs, const T& rhs) {
-  if (!is_neg(rhs)) {
-    return robust_dif<T>(lhs.pos(), lhs.neg() + rhs);
-  } else {
-    return robust_dif<T>(lhs.pos() - rhs, lhs.neg());
-  }
-}
-
-template<typename T>
-robust_dif<T> operator-(const T& lhs, const robust_dif<T>& rhs) {
-  if (!is_neg(lhs)) {
-    return robust_dif<T>(lhs + rhs.neg(), rhs.pos());
-  } else {
-    return robust_dif<T>(rhs.neg(), rhs.pos() - lhs);
-  }
-}
-
-template<typename T>
-robust_dif<T> operator*(const robust_dif<T>& lhs,
-                        const robust_dif<T>& rhs) {
-  T res_pos = lhs.pos() * rhs.pos() + lhs.neg() * rhs.neg();
-  T res_neg = lhs.pos() * rhs.neg() + lhs.neg() * rhs.pos();
-  return robust_dif<T>(res_pos, res_neg);
-}
-
-template<typename T>
-robust_dif<T> operator*(const robust_dif<T>& lhs, const T& val) {
-  if (!is_neg(val)) {
-    return robust_dif<T>(lhs.pos() * val, lhs.neg() * val);
-  } else {
-    return robust_dif<T>(-lhs.neg() * val, -lhs.pos() * val);
-  }
-}
-
-template<typename T>
-robust_dif<T> operator*(const T& val, const robust_dif<T>& rhs) {
-  if (!is_neg(val)) {
-    return robust_dif<T>(val * rhs.pos(), val * rhs.neg());
-  } else {
-    return robust_dif<T>(-val * rhs.neg(), -val * rhs.pos());
-  }
-}
-
-template<typename T>
-robust_dif<T> operator/(const robust_dif<T>& lhs, const T& val) {
-  if (!is_neg(val)) {
-    return robust_dif<T>(lhs.pos() / val, lhs.neg() / val);
-  } else {
-    return robust_dif<T>(-lhs.neg() / val, -lhs.pos() / val);
-  }
-}
-*/
-/*
-const MAX_RELATIVE_ERROR_EVAL1:i32 = 4;
-const MAX_RELATIVE_ERROR_EVAL2:i32 = 7;
-const MAX_RELATIVE_ERROR_EVAL3:i32 = 16;
-const MAX_RELATIVE_ERROR_EVAL4:i32 = 25;
-*/
-
 /// Used to compute expressions that operate with sqrts with predefined
 /// relative error. Evaluates expressions of the next type:
 /// sum(i = 1 .. n)(A[i] * sqrt(B[i])), 1 <= n <= 4.
 #[allow(non_camel_case_types)]
 pub struct robust_sqrt_expr<
-    _fpt: NumCast + Float + std::fmt::Display + Default + Debug + ops::Neg<Output = _fpt>,
+    _fpt: NumCast + Float + fmt::Display + Default + Debug + ops::Neg<Output = _fpt>,
 > {
     _pdf: PhantomData<_fpt>,
     //one: i32,
@@ -726,9 +641,8 @@ pub struct robust_sqrt_expr<
 }
 
 #[allow(non_camel_case_types)]
-impl<
-        _fpt: Clone + NumCast + Float + std::fmt::Display + Default + Debug + ops::Neg<Output = _fpt>,
-    > robust_sqrt_expr<_fpt>
+impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<Output = _fpt>>
+    robust_sqrt_expr<_fpt>
 {
     pub fn new() -> Self {
         Self {
@@ -744,14 +658,14 @@ impl<
         RobustFpt::<_fpt>::new_1(num::cast::<f64, _fpt>(that).unwrap())
     }
 
-    pub fn eval1_fake(&self, a: &[BigInt], b: &[BigInt]) -> RobustFpt<_fpt> {
+    /*pub fn eval1_fake(&self, a: &[BigInt], b: &[BigInt]) -> RobustFpt<_fpt> {
         let rv = self.eval1(a, b);
         println!("eval1");
         println!("A=[{}]", a[0].to_i128().unwrap());
         println!("B=[{}]", b[0].to_i128().unwrap());
         println!("rv={:?}", rv.fpv());
         rv
-    }
+    }*/
 
     /// Evaluates expression (re = 4 EPS):
     /// A[0] * sqrt(B[0]).
@@ -761,7 +675,7 @@ impl<
         a * b.sqrt()
     }
 
-    pub fn eval2_fake(&self, a: &[BigInt], b: &[BigInt]) -> RobustFpt<_fpt> {
+    /*pub fn eval2_fake(&self, a: &[BigInt], b: &[BigInt]) -> RobustFpt<_fpt> {
         let rv = self.eval2(a, b);
         println!("eval2");
         println!(
@@ -776,7 +690,7 @@ impl<
         );
         println!("rv={:?}", rv.fpv());
         rv
-    }
+    }*/
 
     // Evaluates expression (re = 7 EPS):
     // A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]).
@@ -794,6 +708,7 @@ impl<
             / (ra - rb)
     }
 
+    /*
     pub fn eval3_fake(&self, a: &[BigInt], b: &[BigInt]) -> RobustFpt<_fpt> {
         let rv = self.eval3(a, b);
         println!("eval3");
@@ -811,7 +726,7 @@ impl<
         );
         println!("rv={:?}", rv.fpv());
         rv
-    }
+    }*/
 
     /// Evaluates expression (re = 16 EPS):
     /// A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) + A[2] * sqrt(B[2]).
@@ -835,6 +750,7 @@ impl<
         nom / (ra - rb)
     }
 
+    /*
     pub fn eval4_fake(&self, a: &[BigInt], b: &[BigInt]) -> RobustFpt<_fpt> {
         let rv = self.eval4(a, b);
         println!("eval4");
@@ -854,7 +770,7 @@ impl<
         );
         println!("rv={:?}", rv.fpv());
         rv
-    }
+    }*/
 
     /// Evaluates expression (re = 25 EPS):
     /// A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) +

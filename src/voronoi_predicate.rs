@@ -21,14 +21,14 @@ use super::TypeCheckF as TCF;
 use super::TypeCheckI as TCI;
 use super::TypeConverter as TCC;
 use super::TypeConverter as TC;
-use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
+use super::{BigFloatType, BigIntType, InputType, OutputType};
 use geo::Coordinate;
 use num::FromPrimitive;
 use num::ToPrimitive;
 use num::{BigInt, Float, NumCast, PrimInt, Zero};
 //use num_traits;
 use ordered_float::OrderedFloat;
-use std::cmp::Ordering;
+use std::cmp;
 use std::convert::TryInto;
 use std::fmt::{Debug, Display};
 use std::hash::Hash;
@@ -39,21 +39,9 @@ use std::ops::Neg;
 const ULPS: u64 = 64;
 const ULPSX2: u64 = 128;
 
-#[derive(Debug, PartialEq, Eq)]
-enum UlpCmp {
-    LESS,
-    EQUAL,
-    MORE,
-}
-
 #[inline(always)]
 fn is_neg(number: &BigInt) -> bool {
     number < &BigInt::zero()
-}
-
-#[inline(always)]
-fn is_pos(number: &BigInt) -> bool {
-    number > &BigInt::zero()
 }
 
 #[inline(always)]
@@ -67,10 +55,10 @@ fn is_zero(number: &BigInt) -> bool {
 #[derive(Default)]
 pub struct VoronoiPredicates<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
-    I2: BoostInputType + Neg<Output = I2>,
-    F2: BoostOutputType + Neg<Output = F2>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: InputType + Neg<Output = I2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     _pdo: PhantomData<F1>,
     _pdi: PhantomData<I1>,
@@ -80,10 +68,10 @@ where
 
 impl<I1, F1, I2, F2> VoronoiPredicates<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
-    I2: BoostInputType + Neg<Output = I2>,
-    F2: BoostOutputType + Neg<Output = F2>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: InputType + Neg<Output = I2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     #[inline(always)]
     pub(crate) fn is_vertical_1(site: &VSE::SiteEvent<I1, F1, I2, F2>) -> bool {
@@ -194,10 +182,10 @@ enum Orientation {
 #[derive(Default)]
 pub struct OrientationTest<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
-    I2: BoostInputType + Neg<Output = I2>,
-    F2: BoostOutputType + Neg<Output = F2>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: InputType + Neg<Output = I2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     _pdo: PhantomData<F1>,
     _pdi: PhantomData<I1>,
@@ -207,13 +195,14 @@ where
 
 impl<I1, F1, I2, F2> OrientationTest<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
-    I2: BoostInputType + Neg<Output = I2>,
-    F2: BoostOutputType + Neg<Output = F2>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: InputType + Neg<Output = I2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     /// Value is a determinant of two vectors (e.g. x1 * y2 - x2 * y1).
     /// Return orientation based on the sign of the determinant.
+    #[allow(dead_code)]
     fn eval_i(value: I1) -> Orientation {
         if TCI::<I1>::is_zero(value) {
             return Orientation::COLLINEAR;
@@ -274,14 +263,14 @@ where
 #[derive(Default)]
 pub struct PointComparisonPredicate<I1>
 where
-    I1: BoostInputType + Neg<Output = I1>,
+    I1: InputType + Neg<Output = I1>,
 {
     _pdi: PhantomData<I1>,
 }
 
 impl<I1> PointComparisonPredicate<I1>
 where
-    I1: BoostInputType + Neg<Output = I1>,
+    I1: InputType + Neg<Output = I1>,
 {
     pub(crate) fn point_comparison_predicate(lhs: &Coordinate<I1>, rhs: &Coordinate<I1>) -> bool {
         if lhs.x == rhs.x {
@@ -295,10 +284,10 @@ where
 #[derive(Default)]
 pub struct EventComparisonPredicate<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
-    I2: BoostInputType + Neg<Output = I2>,
-    F2: BoostOutputType + Neg<Output = F2>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: InputType + Neg<Output = I2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     _pdo: PhantomData<F1>,
     _pdi: PhantomData<I1>,
@@ -308,10 +297,10 @@ where
 
 impl<I1, F1, I2, F2> EventComparisonPredicate<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
-    I2: BoostInputType + Neg<Output = I2>,
-    F2: BoostOutputType + Neg<Output = F2>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: InputType + Neg<Output = I2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     /// boolean predicate between two sites (bool int int)
     pub(crate) fn event_comparison_predicate_bii(
@@ -350,15 +339,15 @@ where
         }
     }
 
-    /// Ordering predicate between two sites (int int)
+    /// cmp::Ordering predicate between two sites (int int)
     pub(crate) fn event_comparison_predicate_ii(
         lhs: &VSE::SiteEvent<I1, F1, I2, F2>,
         rhs: &VSE::SiteEvent<I1, F1, I2, F2>,
-    ) -> std::cmp::Ordering {
+    ) -> cmp::Ordering {
         if Self::event_comparison_predicate_bii(lhs, rhs) {
-            std::cmp::Ordering::Less
+            cmp::Ordering::Less
         } else {
-            std::cmp::Ordering::Greater
+            cmp::Ordering::Greater
         }
     }
 
@@ -378,17 +367,18 @@ where
         let rhs = TC::<I1, F1, I2, F2>::f2_to_f64(rhs.lower_x().into_inner());
         let ulps = VoronoiPredicates::<I1, F1, I2, F2>::ulps();
 
-        UlpComparison::ulp_comparison(lhs, rhs, ulps) == Ordering::Less
+        UlpComparison::ulp_comparison(lhs, rhs, ulps) == cmp::Ordering::Less
     }
 
+    #[allow(dead_code)]
     pub(crate) fn event_comparison_predicate_if(
         lhs: &VSE::SiteEvent<I1, F1, I2, F2>,
         rhs: &VC::CircleEvent<F2>,
-    ) -> std::cmp::Ordering {
+    ) -> cmp::Ordering {
         if Self::event_comparison_predicate_bif(lhs, rhs) {
-            std::cmp::Ordering::Less
+            cmp::Ordering::Less
         } else {
-            std::cmp::Ordering::Greater
+            cmp::Ordering::Greater
         }
     }
 }
@@ -404,8 +394,8 @@ enum KPredicateResult {
 
 pub struct DistancePredicate<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -417,11 +407,12 @@ where
 
 impl<I1, F1, I2, F2> DistancePredicate<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
+    /*
     pub(crate) fn distance_predicate_debug(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -433,7 +424,8 @@ where
             left_site, right_site, new_point, rv
         );
         rv
-    }
+    }*/
+
     /// Returns true if a horizontal line going through a new site intersects
     /// right arc at first, else returns false. If horizontal line goes
     /// through intersection point of the given two arcs returns false also.
@@ -630,6 +622,7 @@ where
     ) -> KPredicateResult {
         let i1_to_f2 = TC::<I1, F1, I2, F2>::i1_to_f2;
         let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
+        let f2_to_f64 = TC::<I1, F1, I2, F2>::f2_to_f64;
 
         let site_point: &Coordinate<I1> = left_site.point0();
         let segment_start: &Coordinate<I1> = right_site.point0();
@@ -679,22 +672,13 @@ where
             }
         }
 
-        let fast_left_expr = a * (dif_y + dif_x) * (dif_y - dif_x);
-        let fast_right_expr = (TCF::<F2>::two() * b) * dif_x * dif_y;
+        let fast_left_expr = f2_to_f64(a * (dif_y + dif_x) * (dif_y - dif_x));
+        let fast_right_expr = f2_to_f64((TCF::<F2>::two() * b) * dif_x * dif_y);
 
-        //let epsilon = F1::default_epsilon();
-        let expr_cmp = if fast_left_expr > fast_right_expr {
-            fast_left_expr - fast_right_expr
-        } else {
-            fast_right_expr - fast_left_expr
-        } > TCF::<F2>::epsilon();
+        let expr_cmp = UlpComparison::ulp_comparison(fast_left_expr, fast_right_expr, 4);
 
-        //dbg!(fast_left_expr);
-        //dbg!(fast_right_expr);
-        //dbg!(expr_cmp);
-        // rust expr_cmp === c++ (expr_cmp != ulp_cmp_type::EQUAL)
-        if expr_cmp {
-            if (fast_left_expr > fast_right_expr) ^ reverse_order {
+        if expr_cmp != cmp::Ordering::Equal {
+            if (expr_cmp == cmp::Ordering::Greater) ^ reverse_order {
                 if reverse_order {
                     KPredicateResult::LESS
                 } else {
@@ -706,34 +690,15 @@ where
         } else {
             KPredicateResult::UNDEFINED
         }
-
-        /* TODO! fix some ulps
-        let expr_cmp = fast_left_expr.ulps(&fast_right_expr).cmp(4); //ulp_cmp(fast_left_expr, fast_right_expr, 4);
-
-        if expr_cmp != UlpCmp::EQUAL {
-            if (expr_cmp == UlpCmp::MORE) ^ reverse_order {
-                return if reverse_order {
-                    KPredicateResult::LESS
-                } else {
-                    KPredicateResult::MORE
-                };
-            }
-            return KPredicateResult::UNDEFINED;
-        }*/
-        //        return KPredicateResult::UNDEFINED;
     }
-
-    //    private:
-    //    ulp_cmp_type ulp_cmp;
-    //    to_fpt_converter to_fpt;
 }
 
 pub struct NodeComparisonPredicate<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
-    I2: BoostInputType + Neg<Output = I2>,
-    F2: BoostOutputType + Neg<Output = F2>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: InputType + Neg<Output = I2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     _pdo: PhantomData<F1>,
     _pdi: PhantomData<I1>,
@@ -743,10 +708,10 @@ where
 
 impl<I1, F1, I2, F2> NodeComparisonPredicate<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
-    I2: BoostInputType + Neg<Output = I2>,
-    F2: BoostOutputType + Neg<Output = F2>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: InputType + Neg<Output = I2>,
+    F2: OutputType + Neg<Output = F2>,
 {
     pub fn node_comparison_predicate_debug(
         node1: &VB::BeachLineNodeKey<I1, F1, I2, F2>,
@@ -798,11 +763,11 @@ where
         } else {
             // These checks were evaluated experimentally.
             match site1.sorted_index().cmp(&site2.sorted_index()) {
-                Ordering::Equal => {
+                cmp::Ordering::Equal => {
                     // Both nodes are new (inserted during same site event processing).
                     Self::get_comparison_y(&node1, true) < Self::get_comparison_y(&node2, true)
                 }
-                Ordering::Less => {
+                cmp::Ordering::Less => {
                     let y1 = Self::get_comparison_y(&node1, false);
                     let y2 = Self::get_comparison_y(&node2, true);
                     if y1.0 != y2.0 {
@@ -876,8 +841,8 @@ where
 
 pub struct CircleExistencePredicate<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -889,11 +854,12 @@ where
 
 impl<I1, F1, I2, F2> CircleExistencePredicate<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
+    /*
     pub(crate) fn ppp_debug(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -905,7 +871,7 @@ where
             site1, site2, site3, rv
         );
         rv
-    }
+    }*/
 
     pub(crate) fn ppp(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -916,6 +882,7 @@ where
             == Orientation::RIGHT
     }
 
+    /*
     pub(crate) fn pps_debug(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -928,7 +895,7 @@ where
             site1, site2, site3, segment_index, rv
         );
         rv
-    }
+    }*/
 
     pub(crate) fn pps(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -965,6 +932,7 @@ where
         true
     }
 
+    /*
     pub(crate) fn pss_debug(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -977,7 +945,7 @@ where
             site1, site2, site3, point_index, rv
         );
         rv
-    }
+    }*/
 
     pub(crate) fn pss(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1005,6 +973,7 @@ where
         true
     }
 
+    /*
     pub(crate) fn sss_debug(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1016,7 +985,7 @@ where
             site1, site2, site3, rv
         );
         rv
-    }
+    }*/
 
     pub(crate) fn sss(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1031,8 +1000,8 @@ where
 #[derive(Default)]
 pub struct LazyCircleFormationFunctor<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -1045,11 +1014,12 @@ where
 #[allow(non_snake_case)]
 impl<I1, F1, I2, F2> LazyCircleFormationFunctor<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
+    /*
     pub(crate) fn ppp_debug(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1061,7 +1031,7 @@ where
             "LazyCircleFormationFunctor::ppp(site1={:?}, site2={:?}, site3={:?}, c_event={:?})",
             site1, site2, site3, c_event
         );
-    }
+    }*/
 
     fn ppp(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1071,7 +1041,6 @@ where
     ) {
         let i1_to_f2 = TC::<I1, F1, I2, F2>::i1_to_f2;
         let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
-        let f2_to_f1 = TC::<I1, F1, I2, F2>::f2_to_f1;
 
         let dif_x1 = i1_to_f2(site1.x()) - i1_to_f2(site2.x());
         let dif_x2 = i1_to_f2(site2.x()) - i1_to_f2(site3.x());
@@ -1136,6 +1105,7 @@ where
         }
     }
 
+    /*
     pub(crate) fn pps_debug(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1148,7 +1118,7 @@ where
             "LazyCircleFormationFunctor::pps(site1={:?}, site2={:?}, site3={:?}, segment_index={:?}, c_event={:?})",
             site1, site2, site3, segment_index, c_event
         );
-    }
+    }*/
 
     fn pps(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1159,7 +1129,6 @@ where
     ) {
         let i1_to_f2 = TC::<I1, F1, I2, F2>::i1_to_f2;
         let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
-        let f2_to_f1 = TC::<I1, F1, I2, F2>::f2_to_f1;
 
         let half = num::cast::<f32, F2>(0.5f32).unwrap();
         let one = num::cast::<f32, F2>(1.0f32).unwrap();
@@ -1279,6 +1248,7 @@ where
         }
     }
 
+    /*
     pub(crate) fn pss_debug(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1291,9 +1261,10 @@ where
             "LazyCircleFormationFunctor::pss(site1={:?}, site2={:?}, site3={:?}, point_index={:?}, c_event={:?})",
             site1, site2, site3, point_index, c_event
         );
-    }
+    }*/
 
     #[allow(unused_parens)]
+    #[allow(unused_assignments)]
     fn pss(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1303,7 +1274,6 @@ where
     ) {
         let i1_to_f2 = TC::<I1, F1, I2, F2>::i1_to_f2;
         let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
-        let f2_to_f1 = TC::<I1, F1, I2, F2>::f2_to_f1;
 
         let half = num::cast::<f32, F2>(0.5f32).unwrap();
         let one = num::cast::<f32, F2>(1.0f32).unwrap();
@@ -1390,9 +1360,9 @@ where
             }
             let ulps =
                 TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
-            let recompute_c_x = c_x.dif().ulp() > ulps;
-            let recompute_c_y = c_y.dif().ulp() > ulps;
-            let recompute_lower_x = lower_x.dif().ulp() > ulps;
+            recompute_c_x = c_x.dif().ulp() > ulps;
+            recompute_c_y = c_y.dif().ulp() > ulps;
+            recompute_lower_x = lower_x.dif().ulp() > ulps;
             c_event.set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
         } else {
             let sqr_sum1 = VR::RobustFpt::<F2>::new_2((a1 * a1 + b1 * b1).sqrt(), two);
@@ -1530,6 +1500,7 @@ where
         }
     }
 
+    /*
     pub(crate) fn sss_debug(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1541,7 +1512,7 @@ where
             "LazyCircleFormationFunctor::sss(site1={:?}, site2={:?}, site3={:?}, c_event={:?})",
             site1, site2, site3, c_event
         );
-    }
+    }*/
 
     fn sss(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1550,7 +1521,6 @@ where
         c_event: &VC::CircleEventType<F2>,
     ) {
         let i1_to_f2 = TC::<I1, F1, I2, F2>::i1_to_f2;
-        let f2_to_f1 = TC::<I1, F1, I2, F2>::f2_to_f1;
         let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
 
         let one = num::cast::<f32, F2>(1.0f32).unwrap();
@@ -1679,8 +1649,8 @@ where
 #[derive(Default)]
 pub struct CircleFormationFunctor<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -1692,11 +1662,12 @@ where
 
 impl<I1, F1, I2, F2> CircleFormationFunctor<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
+    /*
     pub(crate) fn lies_outside_vertical_segment_debug(
         circle: &VC::CircleEventType<F2>,
         site: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1707,7 +1678,7 @@ where
             circle, site, rv
         );
         rv
-    }
+    }*/
 
     pub(crate) fn lies_outside_vertical_segment(
         c: &VC::CircleEventType<F2>,
@@ -1723,10 +1694,11 @@ where
         let y1 = i1_to_f64(if s.is_inverse() { s.y0() } else { s.y1() });
         let cc_y = f2_to_f64(c.0.get().y().into_inner());
 
-        UlpComparison::ulp_comparison(cc_y, y0, 128) == Ordering::Less
-            || UlpComparison::ulp_comparison(cc_y, y1, 128) == Ordering::Greater
+        UlpComparison::ulp_comparison(cc_y, y0, 128) == cmp::Ordering::Less
+            || UlpComparison::ulp_comparison(cc_y, y1, 128) == cmp::Ordering::Greater
     }
 
+    /*
     pub(crate) fn circle_formation_predicate_debug(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1737,7 +1709,7 @@ where
         println!("->circle_formation_predicate");
         dbg!(&site1, &site2, &site3, &circle, rv);
         rv
-    }
+    }*/
 
     // Create a circle event from the given three sites.
     // Returns true if the circle event exists, else false.
@@ -1819,8 +1791,8 @@ where
 #[derive(Default)]
 pub struct ExactCircleFormationFunctor<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -1835,8 +1807,8 @@ where
 
 impl<I1, F1, I2, F2> ExactCircleFormationFunctor<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -1851,14 +1823,8 @@ where
     ) {
         let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
         let i2_to_f2 = TC::<I1, F1, I2, F2>::i2_to_f2;
-        let f1_to_f2 = TC::<I1, F1, I2, F2>::f1_to_f2;
-        let f2_to_f1 = TC::<I1, F1, I2, F2>::f2_to_f1;
 
         let half: F2 = num::cast::<f32, F2>(0.5f32).unwrap();
-        let one = 1; //: F2 = num::cast::<f32, F2>(1.0f32).unwrap();
-        let two = 2; //: F2 = num::cast::<f32, F2>(2.0f32).unwrap();
-        let three = 3; //: F2 = num::cast::<f32, F2>(3.0f32).unwrap();
-        let eight = 8; //;F2 = num::cast::<f32, F2>(8.0f32).unwrap();
 
         let mut dif_x: [I2; 3] = [I2::zero(); 3];
         let mut dif_y: [I2; 3] = [I2::zero(); 3];
@@ -1933,7 +1899,6 @@ where
         let bi_to_f2 = TC::<I1, F1, I2, F2>::bi_to_f2;
         let i1_to_bi = TC::<I1, F1, I2, F2>::i1_to_bi;
         let i1_to_i128 = TC::<I1, F1, I2, F2>::i1_to_i128;
-        let f2_to_f1 = TC::<I1, F1, I2, F2>::f2_to_f1;
 
         let sqrt_expr_ = VR::robust_sqrt_expr::<F2>::new();
         let quarter: F2 = num::cast::<f64, F2>(1f64 / 4.0f64).unwrap();
@@ -2066,7 +2031,6 @@ where
         recompute_lower_x: bool,
     ) {
         let i1_to_i128 = TC::<I1, F1, I2, F2>::i1_to_i128;
-        let f2_to_f1 = TC::<I1, F1, I2, F2>::f2_to_f1;
         let bi_to_f2 = TC::<I1, F1, I2, F2>::bi_to_f2;
 
         /*if site1.sorted_index() == 5 && site2.sorted_index() == 6 && site3.sorted_index() == 4 {
@@ -2075,11 +2039,7 @@ where
             println!("site3:{}", site3);
         }*/
         let mut sqrt_expr_ = VR::robust_sqrt_expr::<F2>::new();
-        let quarter: F2 = num::cast::<f64, F2>(1f64 / 4.0f64).unwrap();
-        let half: F2 = num::cast::<f64, F2>(1f64 / 2.0f64).unwrap();
         let one: BigInt = BigInt::from(1); //num::cast::<i8, I2>(1i8).unwrap();
-        let two = 2; //: BigInt = BigInt::from(2); //num::cast::<i8, I2>(2i8).unwrap();
-        let four = 4; //: BigInt = BigInt::from(4); // I2 = num::cast::<i8, I2>(4i8).unwrap();
 
         let mut a: [BigInt; 2] = [BigInt::zero(), BigInt::zero()];
         let mut b: [BigInt; 2] = [BigInt::zero(), BigInt::zero()];
@@ -2254,10 +2214,8 @@ where
         recompute_c_y: bool,
         recompute_lower_x: bool,
     ) {
-        let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
         let i1_to_bi = TC::<I1, F1, I2, F2>::i1_to_bi;
         let i1_to_i128 = TC::<I1, F1, I2, F2>::i1_to_i128;
-        let f2_to_f1 = TC::<I1, F1, I2, F2>::f2_to_f1;
         let sqrt_expr_ = VR::robust_sqrt_expr::<F2>::new();
 
         let mut a: [BigInt; 3] = [BigInt::zero(), BigInt::zero(), BigInt::zero()];

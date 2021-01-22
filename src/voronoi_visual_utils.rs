@@ -11,7 +11,7 @@
 
 use super::voronoi_diagram as VD;
 use super::voronoi_structures as VS;
-use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
+use super::{BigFloatType, BigIntType, InputType, OutputType};
 
 use geo::{Coordinate, Line};
 use std::marker::PhantomData;
@@ -20,8 +20,8 @@ use std::ops::Neg;
 /// Utilities class, that contains set of routines handful for visualization.
 pub struct VoronoiVisualUtils<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -33,8 +33,8 @@ where
 
 impl<I1, F1, I2, F2> VoronoiVisualUtils<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -85,7 +85,7 @@ where
 
         // Save the last point.
         let last_point = (*discretization)[1];
-        discretization.pop();
+        let _ = discretization.pop();
 
         // Use stack to avoid recursion.
         let mut point_stack = Vec::<F1>::new();
@@ -114,7 +114,7 @@ where
             }
             if dist <= max_dist_transformed {
                 // Distance between parabola and line segment is less than max_dist.
-                point_stack.pop();
+                let _ = point_stack.pop();
                 let inter_x = (segm_vec_x * new_x - segm_vec_y * new_y) / sqr_segment_length
                     + Self::cast_io(segment.start.x);
                 let inter_y = (segm_vec_x * new_y + segm_vec_y * new_x) / sqr_segment_length

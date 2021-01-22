@@ -5,7 +5,7 @@ use boostvoronoi::voronoi_error::BVError;
 //use boostvoronoi::voronoi_structures as VS;
 use boostvoronoi::voronoi_visual_utils as VV;
 use boostvoronoi::TypeConverter;
-use boostvoronoi::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
+use boostvoronoi::{BigFloatType, BigIntType, InputType, OutputType};
 //use num::NumCast;
 //use num::Zero;
 use geo::algorithm::simplify::Simplify;
@@ -28,8 +28,8 @@ type F2 = f64;
 //#[derive(Clone)]
 struct VorVisualizer<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1> + GeoFloat,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1> + GeoFloat,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -44,8 +44,8 @@ where
 
 impl<I1, F1, I2, F2> VorVisualizer<I1, F1, I2, F2>
 where
-    I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1> + GeoFloat,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1> + GeoFloat,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {

@@ -17,7 +17,7 @@ use super::voronoi_predicate as VP;
 use super::voronoi_siteevent as VSE;
 use super::voronoi_structures as VS;
 
-use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
+use super::{BigFloatType, BigIntType, InputType, OutputType};
 use std::cell::Cell;
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
@@ -63,8 +63,8 @@ pub type BeachLineNodeDataType = Rc<Cell<Option<BeachLineNodeData>>>;
 /// Has a priority queue and indexed list for BeachLineNodeKey.
 pub struct Beachline<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -75,8 +75,8 @@ where
 
 impl<I, O, BI, BF> Beachline<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -107,9 +107,9 @@ where
         //dbg!(key, data);
 
         let node = Rc::new(Cell::new(data));
-        self.beach_line_vec.insert(self.next_free_.0, (key, node));
-        self.beach_line_.insert(key, key.node_index_);
-        self.next_free_.increment();
+        let _ = self.beach_line_vec.insert(self.next_free_.0, (key, node));
+        let _ = self.beach_line_.insert(key, key.node_index_);
+        let _ = self.next_free_.increment();
         //dbg!("added bl {}", self.next_free_ - 1);
         //self.debug_print_all();
         key
@@ -128,7 +128,7 @@ where
             if self.beach_line_.contains_key(&node) {
                 panic!("There are more identical keys");
             }
-            self.beach_line_vec.remove(beachline_index.0);
+            let _ = self.beach_line_vec.remove(beachline_index.0);
         } else {
             // tried to remove non-existing beachline
             panic!();
@@ -193,13 +193,12 @@ where
         after: BeachLineNodeKey<I, O, BI, BF>,
     ) -> (BeachLineNodeKey<I, O, BI, BF>, BeachLineNodeDataType) {
         let idx = *self.beach_line_.get(&before).unwrap();
-        self.beach_line_.remove(&before);
-        self.beach_line_.insert(after, idx);
+        let _ = self.beach_line_.remove(&before);
+        let _ = self.beach_line_.insert(after, idx);
 
         let item = self.beach_line_vec.remove(idx.0).unwrap().1;
-        self.beach_line_vec.insert(idx.0, (after, item));
-        // todo this can be optimized a bit
-        //self.debug_print_all();
+        let _rv = self.beach_line_vec.insert(idx.0, (after, item));
+        // todo! why doesn't _rv contain the return value we need?
         self.get_node(&idx)
     }
 
@@ -222,6 +221,7 @@ where
 
     /// Returns the left neighbour beach line element
     /// Returns None if no association data is found
+    #[allow(dead_code)]
     pub(crate) fn get_left_neighbour_by_id(
         &self,
         position: BeachLineIndex,
@@ -306,10 +306,11 @@ where
             .map(|x| (*x.0, *x.1))
     }
 
+    #[allow(unused_variables)]
     pub fn debug_cmp_all(&self, key: BeachLineNodeKey<I, O, BI, BF>) {
         for (i, v) in self.beach_line_.iter().enumerate() {
             print!("#{}:", i);
-            let rv =
+            let _rv =
                 VP::NodeComparisonPredicate::<I, O, BI, BF>::node_comparison_predicate(v.0, &key);
         }
     }
@@ -343,8 +344,8 @@ where
 
 impl<I, O, BI, BF> fmt::Debug for Beachline<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -376,8 +377,8 @@ where
 #[derive(Copy, Clone)]
 pub struct BeachLineNodeKey<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -387,8 +388,8 @@ where
 }
 impl<I, O, BI, BF> fmt::Debug for BeachLineNodeKey<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -409,8 +410,8 @@ where
 
 impl<I, O, BI, BF> BeachLineNodeKey<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -445,8 +446,9 @@ where
         &self.left_site_
     }
 
+    #[allow(dead_code)]
     pub(crate) fn set_left_site(&mut self, site: &VSE::SiteEvent<I, O, BI, BF>) {
-        self.left_site_ = *site; // Copy
+        self.left_site_ = *site;
     }
 
     pub(crate) fn right_site_m(&mut self) -> &mut VSE::SiteEvent<I, O, BI, BF> {
@@ -468,8 +470,8 @@ where
 
 impl<I, O, BI, BF> PartialOrd for BeachLineNodeKey<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -480,8 +482,8 @@ where
 
 impl<I, O, BI, BF> Ord for BeachLineNodeKey<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -504,8 +506,8 @@ where
 
 impl<I, O, BI, BF> PartialEq for BeachLineNodeKey<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -516,8 +518,8 @@ where
 
 impl<I, O, BI, BF> Eq for BeachLineNodeKey<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -525,8 +527,8 @@ where
 
 impl<I, O, BI, BF> Hash for BeachLineNodeKey<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -554,13 +556,13 @@ impl BeachLineNodeData {
             edge_: new_edge,
         }
     }
-
+    /*
     fn new_2(circle: Option<VC::CircleEventIndexType>, new_edge: VD::VoronoiEdgeIndex) -> Self {
         Self {
             circle_event_: circle,
             edge_: new_edge,
         }
-    }
+    }*/
 
     pub fn get_circle_event_id(&self) -> Option<VC::CircleEventIndexType> {
         self.circle_event_

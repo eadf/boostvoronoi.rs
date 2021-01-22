@@ -16,12 +16,11 @@ use super::voronoi_structures as VS;
 use ordered_float::OrderedFloat;
 use std::cmp::Ordering;
 
-use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
+use super::{BigFloatType, BigIntType, InputType, OutputType};
 use geo::{Coordinate, Line};
 use num::{NumCast, PrimInt};
 use std::cell::Cell;
 use std::fmt;
-use std::fmt::Display;
 use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
 use std::mem;
@@ -56,8 +55,8 @@ pub type SiteEventIndexType = usize;
 #[derive(Copy, Clone)]
 pub struct SiteEvent<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -73,8 +72,8 @@ where
 
 impl<I, O, BI, BF> fmt::Debug for SiteEvent<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -115,8 +114,8 @@ where
 
 impl<I, O, BI, BF> PartialOrd for SiteEvent<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -131,8 +130,8 @@ where
 
 impl<I, O, BI, BF> Ord for SiteEvent<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -143,8 +142,8 @@ where
 
 impl<I, O, BI, BF> PartialEq for SiteEvent<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -155,8 +154,8 @@ where
 
 impl<I, O, BI, BF> Eq for SiteEvent<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -164,8 +163,8 @@ where
 
 impl<I, O, BI, BF> Hash for SiteEvent<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -180,8 +179,8 @@ where
 
 impl<I, O, BI, BF> SiteEvent<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
@@ -236,21 +235,21 @@ where
             _pdbf: PhantomData,
         }
     }
-
+    /*
     pub(crate) fn is_single_point(&self) -> bool {
         self.flags_ & VD::SourceCategory::SOURCE_CATEGORY_BITMASK.0
             == VD::SourceCategory::SOURCE_CATEGORY_SINGLE_POINT.0
-    }
-
+    }*/
+    /*
     pub(crate) fn is_segment_start_point(&self) -> bool {
         self.flags_ & VD::SourceCategory::SOURCE_CATEGORY_BITMASK.0
             == VD::SourceCategory::SOURCE_CATEGORY_SEGMENT_START_POINT.0
-    }
-
+    }*/
+    /*
     pub(crate) fn is_segment_end_point(&self) -> bool {
         self.flags_ & VD::SourceCategory::SOURCE_CATEGORY_BITMASK.0
             == VD::SourceCategory::SOURCE_CATEGORY_SEGMENT_END_POINT.0
-    }
+    }*/
 
     #[inline(always)]
     pub fn x(&self) -> I {
@@ -306,10 +305,11 @@ where
         self.initial_index_
     }
 
+    /*
     pub(crate) fn set_initial_index(&mut self, index: usize) -> &mut Self {
         self.initial_index_ = index;
         self
-    }
+    }*/
 
     pub fn is_inverse(&self) -> bool {
         (self.flags_ & VS::Bits::IS_INVERSE) != 0
@@ -331,6 +331,7 @@ where
 
     /// only for basic test purposes
     #[inline(always)]
+    #[allow(dead_code)]
     pub(crate) fn set_flags(&mut self, flags: u32) {
         self.flags_ = flags;
     }
@@ -375,8 +376,8 @@ where
 
 impl<I, O, BI, BF> fmt::Display for SiteEvent<I, O, BI, BF>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
+    I: InputType + Neg<Output = I>,
+    O: OutputType + Neg<Output = O>,
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
