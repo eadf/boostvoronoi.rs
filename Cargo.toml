@@ -1,6 +1,6 @@
 [package]
 name = "boostvoronoi"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["eadf"]
 edition = "2018"
 description = "Boost voronoi ported to 100% rust"
@@ -8,20 +8,16 @@ readme = "README.md"
 repository = "https://github.com/eadf/boostvoronoi.rs"
 license-file = "LICENSE"
 keywords = ["voronoi", "sweepline", "geometry"]
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 num = "0.3"
 ordered-float = "2.0"
-#log = "0.3"
 fnv = "1.0"
 rb_tree = "0.3"
 vec_map = "0.8"
 num-bigint = "0.3"
 num-traits = "0.2"
 geo = "0.17"
-#approx = "0.4"
-#float-cmp = "0.8"
 
 [[example]]
 name="piston_gui"
@@ -36,26 +32,15 @@ name="main"
 path="src/main.rs"
 
 #[[bin]]
-#name="experiment2"
-#path="src/experiment2.rs"
-
-#[[bin]]
 #name="experiment"
 #path="src/experiment.rs"
 
 [dev-dependencies]
-piston = "0.35.0"
-piston2d-opengl_graphics = "0.50.0"
-piston2d-graphics = "0.24.0"
-piston2d-touch_visualizer = "0.8.0"
-rand = "0.3"
+piston = "0.52.1"
+piston2d-opengl_graphics = "0.77.0"
+piston2d-graphics = "0.39.0"
+piston2d-touch_visualizer = "0.29.0"
+pistoncore-sdl2_window="0.67.0"
 getopts = "0.2.15"
 geo = "0.17"
 
-[dependencies.pistoncore-sdl2_window]
-version = "0.47.0"
-optional = true
-
-[features]
-default = ["include_sdl2"]
-include_sdl2 = ["pistoncore-sdl2_window"]

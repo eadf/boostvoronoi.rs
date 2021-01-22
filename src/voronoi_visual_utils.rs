@@ -13,30 +13,30 @@ use super::voronoi_diagram as VD;
 use super::voronoi_structures as VS;
 use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
 
-use geo::{Line, Point};
+use geo::{Coordinate, Line, LineString, Point};
 use std::marker::PhantomData;
 use std::ops::Neg;
 
 /// Utilities class, that contains set of routines handful for visualization.
-pub struct VoronoiVisualUtils<I, O, BI, BF>
+pub struct VoronoiVisualUtils<I1, F1, I2, F2>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: BoostInputType + Neg<Output = I1>,
+    F1: BoostOutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
-    _pdi: PhantomData<I>,
-    _pdo: PhantomData<O>,
-    _pdbi: PhantomData<BI>,
-    _pdbf: PhantomData<BF>,
+    _pdi: PhantomData<I1>,
+    _pdo: PhantomData<F1>,
+    _pdbi: PhantomData<I2>,
+    _pdbf: PhantomData<F2>,
 }
 
-impl<I, O, BI, BF> VoronoiVisualUtils<I, O, BI, BF>
+impl<I1, F1, I2, F2> VoronoiVisualUtils<I1, F1, I2, F2>
 where
-    I: BoostInputType + Neg<Output = I>,
-    O: BoostOutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: BoostInputType + Neg<Output = I1>,
+    F1: BoostOutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
     /// Discretize parabolic Voronoi edge.
     /// Parabolic Voronoi edges are always formed by one point and one segment
@@ -56,10 +56,10 @@ where
     /// Important:
     ///   discretization should contain both edge endpoints initially.
     pub fn discretize(
-        point: &Point<I>,
-        segment: &Line<I>,
-        max_dist: O,
-        discretization: &mut Vec<Point<O>>,
+        point: &Coordinate<I1>,
+        segment: &Line<I1>,
+        max_dist: F1,
+        discretization: &mut Vec<Coordinate<F1>>,
     ) {
         // Apply the linear transformation to move start point of the segment to
         // the point with coordinates (0, 0) and the direction of the segment to
@@ -78,8 +78,8 @@ where
         // Compute parabola parameters in the transformed space.
         // Parabola has next representation:
         // f(x) = ((x-rot_x)^2 + rot_y^2) / (2.0*rot_y).
-        let point_vec_x = Self::cast_io(point.x()) - Self::cast_io(segment.start.x);
-        let point_vec_y = Self::cast_io(point.y()) - Self::cast_io(segment.start.y);
+        let point_vec_x = Self::cast_io(point.x) - Self::cast_io(segment.start.x);
+        let point_vec_y = Self::cast_io(point.y) - Self::cast_io(segment.start.y);
         let rot_x = segm_vec_x * point_vec_x + segm_vec_y * point_vec_y;
         let rot_y = segm_vec_x * point_vec_y - segm_vec_y * point_vec_x;
 
@@ -88,7 +88,7 @@ where
         discretization.pop();
 
         // Use stack to avoid recursion.
-        let mut point_stack = Vec::<O>::new();
+        let mut point_stack = Vec::<F1>::new();
         point_stack.push(projection_end);
         let mut cur_x = projection_start;
         let mut cur_y = Self::parabola_y(cur_x, rot_x, rot_y);
@@ -119,7 +119,10 @@ where
                     + Self::cast_io(segment.start.x);
                 let inter_y = (segm_vec_x * new_y + segm_vec_y * new_x) / sqr_segment_length
                     + Self::cast_io(segment.start.y);
-                discretization.push(Point::<O>::new(inter_x, inter_y));
+                discretization.push(Coordinate {
+                    x: inter_x,
+                    y: inter_y,
+                });
                 cur_x = new_x;
                 cur_y = new_y;
             } else {
@@ -135,7 +138,7 @@ where
 
     /// Compute y(x) = ((x - a) * (x - a) + b * b) / (2 * b).
     #[inline(always)]
-    fn parabola_y(x: O, a: O, b: O) -> O {
+    fn parabola_y(x: F1, a: F1, b: F1) -> F1 {
         #[allow(clippy::suspicious_operation_groupings)]
         {
             ((x - a) * (x - a) + b * b) / (b + b)
@@ -149,18 +152,18 @@ where
     // sqrt computation during transformation from the initial space to the
     // transformed one and vice versa. The assumption is made that projection of
     // the point lies between the start-point and endpoint of the segment.
-    pub fn get_point_projection(point: &Point<O>, segment: &Line<I>) -> O {
+    pub fn get_point_projection(point: &Coordinate<F1>, segment: &Line<I1>) -> F1 {
         let segment_vec_x = Self::cast_io(segment.end.x) - Self::cast_io(segment.start.x);
         let segment_vec_y = Self::cast_io(segment.end.y) - Self::cast_io(segment.start.y);
-        let point_vec_x = point.x() - Self::cast_io(segment.start.x);
-        let point_vec_y = point.y() - Self::cast_io(segment.start.y);
+        let point_vec_x = point.x - Self::cast_io(segment.start.x);
+        let point_vec_y = point.y - Self::cast_io(segment.start.y);
         let sqr_segment_length = segment_vec_x * segment_vec_x + segment_vec_y * segment_vec_y;
         let vec_dot = segment_vec_x * point_vec_x + segment_vec_y * point_vec_y;
         vec_dot / sqr_segment_length
     }
 
     #[inline(always)]
-    pub fn cast_io(value: I) -> O {
-        super::TypeConverter::<I, O, BI, BF>::i1_to_f1(value)
+    pub fn cast_io(value: I1) -> F1 {
+        super::TypeConverter::<I1, F1, I2, F2>::i1_to_f1(value)
     }
 }

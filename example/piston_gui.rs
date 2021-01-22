@@ -1,11 +1,10 @@
+extern crate piston;
 extern crate graphics;
 extern crate opengl_graphics;
-extern crate piston;
+extern crate sdl2_window;
 extern crate touch_visualizer;
 
-#[cfg(feature = "include_sdl2")]
-extern crate sdl2_window;
-
+use sdl2_window::Sdl2Window;
 use boostvoronoi::voronoi_builder as VB;
 use boostvoronoi::voronoi_diagram as VD;
 use boostvoronoi::voronoi_diagram::VoronoiEdgeIndex;
@@ -49,10 +48,11 @@ fn main() {
     println!(" 'l' : press and hold + mouse click -> line segments");
     println!(" mouse click -> point");
     println!(" 'c' : clear everything");
-    println!(" 'i' : toggle draw internal edges only");
+    println!(" 'i' : toggle draw internal edges only ");
     println!(" 'p' : toggle draw primary edges only");
     println!(" '1' : load simple example data");
     println!(" '2' : load complex example data (can be slow)");
+    println!(" move mouse to trigger refresh for 'i' and 'p'");
     println!();
     let _ = event_loop();
 }
@@ -70,12 +70,12 @@ fn event_loop() -> Result<String, BVError> {
     }
 
     let opengl = OpenGL::V3_2;
-    let mut window: AppWindow = WindowSettings::new(
+    let mut window:Sdl2Window = WindowSettings::new(
         "Rusted Boost Voronoi",
         [DEFAULT_WINDOW_HEIGHT, DEFAULT_WINDOW_WIDTH],
     )
     .exit_on_esc(true)
-    .opengl(opengl)
+    .graphics_api(opengl)
     .build()
     .unwrap();
 
@@ -91,9 +91,9 @@ fn event_loop() -> Result<String, BVError> {
 
     while let Some(e) = events.next(&mut window) {
         touch_visualizer.event(window.size(), &e);
-        e.mouse_cursor(|x, y| {
-            mx = num::cast::<f64, i32>(x).unwrap();
-            my = num::cast::<f64, i32>(y).unwrap();
+        e.mouse_cursor(|mouse_coord| {
+            mx = num::cast::<f64, i32>(mouse_coord[0]).unwrap();
+            my = num::cast::<f64, i32>(mouse_coord[1]).unwrap();
         });
         if let Some(button) = e.press_args() {
             match button {
@@ -189,8 +189,7 @@ fn event_loop() -> Result<String, BVError> {
                                 previous_dot = Some(point);
                             }
                         } else {
-                            let point = Point::new(mx, my);
-                            vis.point_data_.push(point);
+                            vis.point_data_.push(Coordinate{x:mx, y:my});
                             data_is_dirty = true;
                         }
                     }
@@ -235,7 +234,7 @@ where
     brect_initialized_: bool,
     primary_edges_only_: bool,
     internal_edges_only_: bool,
-    point_data_: Vec<Point<I1>>,
+    point_data_: Vec<Coordinate<I1>>,
     segment_data_: Vec<Line<I1>>,
     pub previous_points: HashSet<Point<i32>>,
     _pdo: PhantomData<F1>,
@@ -261,7 +260,7 @@ where
             brect_initialized_: false,
             primary_edges_only_: false,
             internal_edges_only_: false,
-            point_data_: Vec::<Point<I1>>::new(),
+            point_data_: Vec::<Coordinate<I1>>::new(),
             segment_data_: Vec::<Line<I1>>::new(),
             previous_points: HashSet::new(),
             _pdo: PhantomData,
@@ -274,7 +273,7 @@ where
         );
         print!("  let points:[[I1;2];{}]=[", self.point_data_.len());
         for p in self.point_data_.iter() {
-            print!("[{},{}],", p.x(), p.y())
+            print!("[{},{}],", p.x, p.y)
         }
         println!("];");
         print!("  let segments:[[I1;4];{}]=[", self.segment_data_.len());
@@ -357,7 +356,7 @@ where
         let to_points = |points: &[[i32; 2]]| {
             let mut rv = Vec::new();
             for p in points.iter() {
-                rv.push(Point::<I1>::new(i32_to_i1(p[0]), i32_to_i1(p[1])));
+                rv.push(Coordinate{x:i32_to_i1(p[0]), y:i32_to_i1(p[1])});
             }
             rv
         };
@@ -366,8 +365,8 @@ where
             let mut rv = Vec::new();
             for p in segments_.iter() {
                 let line = Line::<I1>::new(
-                    Point::<I1>::new(i32_to_i1(p[0]), i32_to_i1(p[1])),
-                    Point::<I1>::new(i32_to_i1(p[2]), i32_to_i1(p[3])),
+                    Coordinate{x:i32_to_i1(p[0]), y:i32_to_i1(p[1])},
+                        Coordinate{x:i32_to_i1(p[2]), y:i32_to_i1(p[3])},
                 );
                 rv.push(line);
             }
@@ -787,12 +786,12 @@ where
     /// Draw input points and endpoints of the input segments.
     fn draw_points<G: Graphics>(&self, c: &Context, g: &mut G) {
         let color = [0.8, 0.1, 0.1, 1.0];
-        let mut draw = |point: &Point<F1>| {
+        let mut draw = |point: &Coordinate<F1>| {
             graphics::ellipse(
                 color,
                 graphics::ellipse::circle(
-                    Self::insane_float_to_float_cast(point.x()).into_inner(),
-                    Self::insane_float_to_float_cast(point.y()).into_inner(),
+                    Self::insane_float_to_float_cast(point.x).into_inner(),
+                    Self::insane_float_to_float_cast(point.y).into_inner(),
                     3.0,
                 ),
                 c.transform,
@@ -822,10 +821,10 @@ where
                 color,
                 2.0,
                 [
-                    Self::insane_float_to_float_cast(lp.x()).into(),
-                    Self::insane_float_to_float_cast(lp.y()).into(),
-                    Self::insane_float_to_float_cast(hp.x()).into(),
-                    Self::insane_float_to_float_cast(hp.y()).into(),
+                    Self::insane_float_to_float_cast(lp.x).into(),
+                    Self::insane_float_to_float_cast(lp.y).into(),
+                    Self::insane_float_to_float_cast(hp.x).into(),
+                    Self::insane_float_to_float_cast(hp.y).into(),
                 ],
                 c.transform,
                 g,
@@ -893,16 +892,22 @@ where
                 // internal edgecolor
                 color = [0.2, 0.7, 0.0, 1.0];
             }
-            let mut samples = Vec::<Point<F1>>::new();
+            let mut samples = Vec::<Coordinate<F1>>::new();
             if !self.vd_.edge_is_finite(Some(edge_id)).unwrap() {
                 self.clip_infinite_edge(edge_id, &mut samples);
             } else {
                 let vertex0 = self.vd_.vertex_get(edge.vertex0()).unwrap().get();
-                let vertex0 = Point::<F1>::new(vertex0.x(), vertex0.y());
+                let vertex0 = Coordinate {
+                    x: vertex0.x(),
+                    y: vertex0.y(),
+                };
                 samples.push(vertex0);
                 let vertex1 = self.vd_.edge_get_vertex1(Some(edge_id));
                 let vertex1 = self.vd_.vertex_get(vertex1).unwrap().get();
-                let vertex1 = Point::<F1>::new(vertex1.x(), vertex1.y());
+                let vertex1 = Coordinate {
+                    x: vertex1.x(),
+                    y: vertex1.y(),
+                };
                 samples.push(vertex1);
                 if edge.is_curved() {
                     self.sample_curved_edge(VoronoiEdgeIndex(it.0), &mut samples);
@@ -918,10 +923,10 @@ where
                     color,
                     1.0,
                     [
-                        Self::insane_float_to_float_cast(vertex1.x()).into(),
-                        Self::insane_float_to_float_cast(vertex1.y()).into(),
-                        Self::insane_float_to_float_cast(vertex2.x()).into(),
-                        Self::insane_float_to_float_cast(vertex2.y()).into(),
+                        Self::insane_float_to_float_cast(vertex1.x).into(),
+                        Self::insane_float_to_float_cast(vertex1.y).into(),
+                        Self::insane_float_to_float_cast(vertex2.x).into(),
+                        Self::insane_float_to_float_cast(vertex2.y).into(),
                     ],
                     c.transform,
                     g,
@@ -930,7 +935,11 @@ where
         }
     }
 
-    fn clip_infinite_edge(&self, edge_id: VD::VoronoiEdgeIndex, clipped_edge: &mut Vec<Point<F1>>) {
+    fn clip_infinite_edge(
+        &self,
+        edge_id: VD::VoronoiEdgeIndex,
+        clipped_edge: &mut Vec<Coordinate<F1>>,
+    ) {
         let edge = self.vd_.get_edge(edge_id);
         //const cell_type& cell1 = *edge.cell();
         let cell1_id = self.vd_.edge_get_cell(Some(edge_id)).unwrap();
@@ -943,16 +952,16 @@ where
             .unwrap();
         let cell2 = self.vd_.get_cell(cell2_id).get();
 
-        let mut origin: Point<F1> = Point::new(F1::default(), F1::default());
-        let mut direction: Point<F1> = Point::new(F1::default(), F1::default());
+        let mut origin: Coordinate<F1> = Coordinate{x:F1::default(), y:F1::default()};
+        let mut direction: Coordinate<F1> = Coordinate{x:F1::default(), y:F1::default()};
         // Infinite edges could not be created by two segment sites.
         if cell1.contains_point() && cell2.contains_point() {
             let p1 = Self::cast_point_io(&self.retrieve_point(cell1_id));
             let p2 = Self::cast_point_io(&self.retrieve_point(cell2_id));
-            origin.set_x((p1.x() + p2.x()) * Self::castf32_o(0.5));
-            origin.set_y((p1.y() + p2.y()) * Self::castf32_o(0.5));
-            direction.set_x(p1.y() - p2.y());
-            direction.set_y(p2.x() - p1.x());
+            origin.x = (p1.x + p2.x) * Self::castf32_o(0.5);
+            origin.y = (p1.y + p2.y) * Self::castf32_o(0.5);
+            direction.x = p1.y - p2.y;
+            direction.y = p2.x - p1.x;
         } else {
             origin = if cell1.contains_segment() {
                 Self::cast_point_io(&self.retrieve_point(cell2_id))
@@ -967,39 +976,49 @@ where
             let dx = Self::cast_io(segment.end.x - segment.start.x);
             let dy = Self::cast_io(segment.end.y - segment.start.y);
             if (Self::cast_coord_io(&segment.start) == origin) ^ cell1.contains_point() {
-                direction.set_x(dy);
-                direction.set_y(-dx);
+                direction.x = dy;
+                direction.y = -dx;
             } else {
-                direction.set_x(-dy);
-                direction.set_y(dx);
+                direction.x = -dy;
+                direction.y = dx;
             }
         }
         let side = self.brect_.max().x - self.brect_.min().x;
-        let koef = side / Self::max(direction.x().abs(), direction.y().abs());
+        let koef = side / Self::max(direction.x.abs(), direction.y.abs());
 
         let vertex0 = edge.get().vertex0();
         if vertex0.is_none() {
-            clipped_edge.push(Point::<F1>::new(
-                origin.x() - direction.x() * koef,
-                origin.y() - direction.y() * koef,
-            ));
+            clipped_edge.push(Coordinate {
+                x: origin.x - direction.x * koef,
+                y: origin.y - direction.y * koef,
+            });
         } else {
             let vertex0 = self.vd_.vertex_get(vertex0).unwrap().get();
-            clipped_edge.push(Point::<F1>::new(vertex0.x(), vertex0.y()));
+            clipped_edge.push(Coordinate {
+                x: vertex0.x(),
+                y: vertex0.y(),
+            });
         }
         let vertex1 = self.vd_.edge_get_vertex1(Some(edge_id));
         if vertex1.is_none() {
-            clipped_edge.push(Point::<F1>::new(
-                origin.x() + direction.x() * koef,
-                origin.y() + direction.y() * koef,
-            ));
+            clipped_edge.push(Coordinate {
+                x: origin.x + direction.x * koef,
+                y: origin.y + direction.y * koef,
+            });
         } else {
             let vertex1 = self.vd_.vertex_get(vertex1).unwrap().get();
-            clipped_edge.push(Point::<F1>::new(vertex1.x(), vertex1.y()));
+            clipped_edge.push(Coordinate {
+                x: vertex1.x(),
+                y: vertex1.y(),
+            });
         }
     }
 
-    fn sample_curved_edge(&self, edge_id: VD::VoronoiEdgeIndex, sampled_edge: &mut Vec<Point<F1>>) {
+    fn sample_curved_edge(
+        &self,
+        edge_id: VD::VoronoiEdgeIndex,
+        sampled_edge: &mut Vec<Coordinate<F1>>,
+    ) {
         let max_dist = Self::castf32_o(1E-3) * (self.brect_.max().x - self.brect_.min().x);
 
         let cell_id = self.vd_.edge_get_cell(Some(edge_id)).unwrap();
@@ -1025,7 +1044,7 @@ where
         );
     }
 
-    fn retrieve_point(&self, cell_id: VD::VoronoiCellIndex) -> Point<I1> {
+    fn retrieve_point(&self, cell_id: VD::VoronoiCellIndex) -> Coordinate<I1> {
         let cell = self.vd_.get_cell(cell_id).get();
         let mut index = cell.source_index();
         let category = cell.source_category();
@@ -1033,12 +1052,11 @@ where
             return self.point_data_[index];
         }
         index -= self.point_data_.len();
-        let rv = if category.0 == VD::SourceCategory::SOURCE_CATEGORY_SEGMENT_START_POINT.0 {
+        if category.0 == VD::SourceCategory::SOURCE_CATEGORY_SEGMENT_START_POINT.0 {
             self.segment_data_[index].start
         } else {
             self.segment_data_[index].end
-        };
-        Point::<I1>::from(rv)
+        }
     }
 
     fn retrieve_segment(&self, cell_id: VD::VoronoiCellIndex) -> &Line<I1> {
@@ -1047,8 +1065,8 @@ where
         &self.segment_data_[index]
     }
 
-    fn cast_point_io(value: &Point<I1>) -> Point<F1> {
-        Point::<F1>::new(Self::cast_io(value.x()), Self::cast_io(value.y()))
+    fn cast_point_io(value: &Coordinate<I1>) -> Coordinate<F1> {
+        Coordinate{x:Self::cast_io(value.x), y:Self::cast_io(value.y)}
     }
 
     fn cast_line_f64(value: &Line<I1>) -> Line<f64> {
@@ -1060,8 +1078,8 @@ where
         Line::<f64>::new(ps, pe)
     }
 
-    fn cast_coord_io(value: &Coordinate<I1>) -> Point<F1> {
-        Point::<F1>::new(Self::cast_io(value.x), Self::cast_io(value.y))
+    fn cast_coord_io(value: &Coordinate<I1>) -> Coordinate<F1> {
+        Coordinate{x:Self::cast_io(value.x), y:Self::cast_io(value.y)}
     }
 
     #[inline(always)]

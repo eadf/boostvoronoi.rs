@@ -5,9 +5,36 @@ This implementaton of Forune's algorithm works on line segments as well as point
 ![Rusty voronoi](img.png)
 
 Quick example:
-```
-set -x LIBRARY_PATH /opt/local/lib/ #or whatever you store your SDL
+```fish
+set -x LIBRARY_PATH /opt/local/lib/ #or wherever you store your SDL
 cargo run --example piston_gui
 ```
 
+API example:
+```rust
+type I1 = i32; // this is the integer input type
+type F1 = f64; // this is the float output type (circle event coordinates)
+type I2 = i64; // All integer calculations are made in this type (or num::BigInt when needed)
+type F2 = f64; // All float calculations are made in this type
+// it is ok to set I1=I2=i64 and F1=F2=f64
+let output = {
+  // points should be unique
+  let _p = vec![Coordinate{x:9, y:10}];
+  // lines should never intersect with other lines, identical end or start points is ok.
+  let _s = vec![Line::new(Coordinate{x:10, y:11}, Coordinate{x:12, y:13})];
+  let mut vb = VoronoiBuilder::<I1, F1, I2, F2>::new();
+  
+  // you will have to keep track of the input geometry. it will be referenced as 
+  // input geometry index in the output. 
+  vb.with_vertices(_p.iter()).expect("test");
+  vb.with_segments(_s.iter()).expect("test");
+
+  // this will generate a the list of cells, edges and circle events (aka vertices)
+  vb.construct().expect("test")
+};
+
+```
+Edges may become curves when line segments are used as input, see the example code for discretization and interpolation. 
+
 All credit goes to the original authors (Andrii Sydorchuk), except the porting mistakes. They are all mine.
+

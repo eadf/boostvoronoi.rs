@@ -113,7 +113,9 @@ impl<F2: BoostOutputType + Neg<Output = F2>> Ord for CircleEvent<F2> {
             } else {
                 Ordering::Greater
             };
-        } else if self.y() < other.y() || self.beach_line_index_.unwrap().0 < other.beach_line_index_.unwrap().0 {
+        } else if self.y() < other.y()
+            || self.beach_line_index_.unwrap().0 < other.beach_line_index_.unwrap().0
+        {
             return Ordering::Less;
         }
         Ordering::Greater

@@ -17,7 +17,7 @@ use ordered_float::OrderedFloat;
 use std::cmp::Ordering;
 
 use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
-use geo::{Line, Point};
+use geo::{Line, Point, Coordinate};
 use num::{NumCast, PrimInt};
 use std::cell::Cell;
 use std::fmt;
@@ -61,8 +61,8 @@ where
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
-    pub(crate) point0_: Point<I>,
-    pub(crate) point1_: Point<I>,
+    pub(crate) point0_: Coordinate<I>,
+    pub(crate) point1_: Coordinate<I>,
     pub sorted_index_: SiteEventIndexType,
     initial_index_: SiteEventIndexType,
     flags_: VD::SourceCategoryType,
@@ -86,8 +86,8 @@ where
                 format!(
                     "#{:?}({},{}),ii:{:?},f:{:?}",
                     self.sorted_index_,
-                    self.point0_.x(),
-                    self.point0_.y(),
+                    self.point0_.x,
+                    self.point0_.y,
                     self.initial_index_,
                     self.flags_
                 )
@@ -98,11 +98,11 @@ where
                 format!(
                     "#{:?}({},{}){}({},{}),ii:{:?},f:{:?}",
                     self.sorted_index_,
-                    self.point0_.x(),
-                    self.point0_.y(),
+                    self.point0_.x,
+                    self.point0_.y,
                     if self.is_inverse() { "¿" } else { "-" },
-                    self.point1_.x(),
-                    self.point1_.y(),
+                    self.point1_.x,
+                    self.point1_.y,
                     self.initial_index_,
                     self.flags_
                 )
@@ -185,7 +185,7 @@ where
     BI: BigIntType + Neg<Output = BI>,
     BF: BigFloatType + Neg<Output = BF>,
 {
-    pub fn new_2(a: Point<I>, initial_index_: SiteEventIndexType) -> SiteEvent<I, O, BI, BF> {
+    pub fn new_2(a: Coordinate<I>, initial_index_: SiteEventIndexType) -> SiteEvent<I, O, BI, BF> {
         Self {
             point0_: a,
             point1_: a,
@@ -199,8 +199,8 @@ where
     }
 
     pub fn new_3(
-        a: Point<I>,
-        b: Point<I>,
+        a: Coordinate<I>,
+        b: Coordinate<I>,
         initial_index_: SiteEventIndexType,
     ) -> SiteEvent<I, O, BI, BF> {
         Self {
@@ -226,8 +226,8 @@ where
         flags: u32,
     ) -> SiteEvent<I, O, BI, BF> {
         Self {
-            point0_: Point::<I>::new(x1, y1),
-            point1_: Point::<I>::new(x2, y2),
+            point0_: Coordinate{x:x1, y:y1},
+            point1_: Coordinate{x:x2, y:y2},
             sorted_index_: sorted_index,
             initial_index_: initial_index,
             flags_: flags,
@@ -254,40 +254,40 @@ where
 
     #[inline(always)]
     pub fn x(&self) -> I {
-        self.point0_.x()
+        self.point0_.x
     }
 
     #[inline(always)]
     pub fn y(&self) -> I {
-        self.point0_.y()
+        self.point0_.y
     }
 
     #[inline(always)]
     pub fn x0(&self) -> I {
-        self.point0_.x()
+        self.point0_.x
     }
 
     #[inline(always)]
     pub fn y0(&self) -> I {
-        self.point0_.y()
+        self.point0_.y
     }
 
     #[inline(always)]
     pub fn x1(&self) -> I {
-        self.point1_.x()
+        self.point1_.x
     }
 
     #[inline(always)]
     pub fn y1(&self) -> I {
-        self.point1_.y()
+        self.point1_.y
     }
 
     #[inline(always)]
-    pub fn point0(&self) -> &Point<I> {
+    pub fn point0(&self) -> &Coordinate<I> {
         &self.point0_
     }
     #[inline(always)]
-    pub fn point1(&self) -> &Point<I> {
+    pub fn point1(&self) -> &Coordinate<I> {
         &self.point1_
     }
 
@@ -330,16 +330,19 @@ where
     }
 
     /// only for basic test purposes
+    #[inline(always)]
     pub(crate) fn set_flags(&mut self, flags: u32) {
         self.flags_ = flags;
     }
 
+    #[inline(always)]
     pub fn is_point(&self) -> bool {
-        (self.point0_.x() == self.point1_.x()) && (self.point0_.y() == self.point1_.y())
+        (self.point0_.x == self.point1_.x) && (self.point0_.y == self.point1_.y)
     }
 
+    #[inline(always)]
     pub fn is_segment(&self) -> bool {
-        (self.point0_.x() != self.point1_.x()) || (self.point0_.y() != self.point1_.y())
+        (self.point0_.x != self.point1_.x) || (self.point0_.y != self.point1_.y)
     }
 
     #[allow(unknown_lints)]

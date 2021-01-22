@@ -3,14 +3,12 @@
 use boostvoronoi::voronoi_builder::VoronoiBuilder;
 use boostvoronoi::voronoi_diagram::VoronoiDiagram;
 use boostvoronoi::voronoi_error::BVError;
-use geo::{Line, Point};
+use geo::{Line, Point, Coordinate};
 
 type I = i32;
 type O = f32;
 type DI = i64;
 type DF = f64;
-
-type Point2D = Point<I>;
 
 fn almost_equal(x1: O, x2: O, y1: O, y2: O) -> bool {
     let delta = 0.001;
@@ -23,7 +21,7 @@ fn almost_equal(x1: O, x2: O, y1: O, y2: O) -> bool {
 #[test]
 fn single_point_1() {
     let output = {
-        let _v = vec![Point2D::new(10, 11)];
+        let _v = vec![Coordinate{x:10, y:11}];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("single_point_1");
         vb.construct().expect("single_point_1")
@@ -40,7 +38,7 @@ fn single_point_1() {
 #[test]
 fn two_points_1() {
     let output = {
-        let _v = vec![Point2D::new(10, 11), Point2D::new(1, 3)];
+        let _v = vec![Coordinate{x:10, y:11}, Coordinate{x:1, y:3}];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("two_points_1");
         vb.construct().expect("two_points_1")
@@ -93,7 +91,7 @@ fn two_points_1() {
 /// same as test two_points_2 but reversed order
 fn two_points_2() {
     let output = {
-        let _v = vec![Point2D::new(1, 3), Point2D::new(10, 11)];
+        let _v = vec![Coordinate{x:1, y:3}, Coordinate{x:10, y:11}];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("two_points_1");
         vb.construct().expect("two_points_1")
@@ -122,7 +120,7 @@ fn two_points_2() {
 #[test]
 fn two_points_3() {
     let output = {
-        let _v = vec![Point2D::new(45, 1), Point2D::new(8, 23)];
+        let _v = vec![Coordinate{x:45, y:1}, Coordinate{x:8, y:23}];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("two_points_2");
         vb.construct().expect("two_points_2")
@@ -151,7 +149,7 @@ fn two_points_3() {
 #[test]
 fn three_points_1() {
     let output = {
-        let _v = vec![Point2D::new(10, 11), Point2D::new(1, 3), Point2D::new(5, 4)];
+        let _v = vec![Coordinate{x:10, y:11}, Coordinate{x:1, y:3}, Coordinate{x:5, y:4}];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("three_points_1");
         vb.construct().expect("three_points_1")
@@ -206,7 +204,7 @@ fn three_points_1() {
 /// 3 co-linear sites (on x)
 fn three_points_2() {
     let output = {
-        let _v = vec![Point2D::new(1, 8), Point2D::new(1, 3), Point2D::new(1, 2)];
+        let _v = vec![Coordinate{x:1, y:8}, Coordinate{x:1, y:3}, Coordinate{x:1, y:2}];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("three_points_2");
         vb.construct().expect("three_points_2")
@@ -250,9 +248,9 @@ fn three_points_2() {
 fn three_points_3() {
     let output = {
         let _v = vec![
-            Point2D::new(19, 8),
-            Point2D::new(19, 1),
-            Point2D::new(19, 20),
+            Coordinate{x:19,y:8},
+            Coordinate{x:19, y:1},
+            Coordinate{x:19, y:20},
         ];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("three_points_3");
@@ -296,7 +294,7 @@ fn three_points_3() {
 #[test]
 fn three_points_4() {
     let output = {
-        let _v = vec![Point2D::new(10, 10), Point2D::new(1, 1), Point2D::new(1, 6)];
+        let _v = vec![Coordinate{x:10, y:10}, Coordinate{x:1, y:1}, Coordinate{x:1, y:6}];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("three_points_4");
         vb.construct().expect("three_points_4")
@@ -351,10 +349,10 @@ fn three_points_4() {
 fn four_points_1() {
     let output = {
         let _v = vec![
-            Point2D::new(10, 8),
-            Point2D::new(1, 3),
-            Point2D::new(4, 2),
-            Point2D::new(5, 6),
+            Coordinate{x:10, y:8},
+            Coordinate{x:1, y:3},
+            Coordinate{x:4, y:2},
+            Coordinate{x:5, y:6},
         ];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("four_points_1");
@@ -436,10 +434,10 @@ fn four_points_1() {
 fn four_points_2() {
     let output = {
         let _v = vec![
-            Point2D::new(10, 18),
-            Point2D::new(12, 3),
-            Point2D::new(4, 21),
-            Point2D::new(8, 62),
+            Coordinate{x:10, y:18},
+            Coordinate{x:12, y:3},
+            Coordinate{x:4, y:21},
+            Coordinate{x:8, y:62},
         ];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("four_points_2");
@@ -536,10 +534,10 @@ fn four_points_2() {
 fn four_points_3() {
     let output = {
         let _v = vec![
-            Point2D::new(10, 18),
-            Point2D::new(12, 3),
-            Point2D::new(4, 21),
-            Point2D::new(8, 3),
+            Coordinate{x:10, y:18},
+            Coordinate{x:12, y:3},
+            Coordinate{x:4, y:21},
+            Coordinate{x:8, y:3},
         ];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("four_points_3");
@@ -621,11 +619,11 @@ fn four_points_3() {
 fn five_points_1() {
     let output = {
         let _v = vec![
-            Point2D::new(8, 9),
-            Point2D::new(2, 14),
-            Point2D::new(1, 15),
-            Point2D::new(4, 16),
-            Point2D::new(9, 8),
+           Coordinate{x:8, y:9},
+            Coordinate{x:2, y:14},
+            Coordinate{x:1, y:15},
+            Coordinate{x:4, y:16},
+            Coordinate{x:9, y:8},
         ];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("five_points_1");
@@ -756,14 +754,14 @@ fn five_points_1() {
 fn eighth_points_1() {
     let output = {
         let _v = vec![
-            Point2D::new(10, 16),
-            Point2D::new(12, 3),
-            Point2D::new(4, 12),
-            Point2D::new(8, 10),
-            Point2D::new(7, 18),
-            Point2D::new(8, 9),
-            Point2D::new(9, 8),
-            Point2D::new(11, 11),
+            Coordinate{x:10, y:16},
+            Coordinate{x:12, y:3},
+            Coordinate{x:4, y:12},
+            Coordinate{x:8, y:10},
+            Coordinate{x:7, y:18},
+            Coordinate{x:8, y:9},
+            Coordinate{x:9, y:8},
+            Coordinate{x:11, y:11},
         ];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("eighth_points_1");

@@ -1,6 +1,6 @@
 use boostvoronoi::voronoi_builder as VB;
 use boostvoronoi::BoostInputType;
-use geo::{Line, Point};
+use geo::{Line, Point, Coordinate};
 use std::ops::Neg;
 
 type I1 = i32;
@@ -17,13 +17,13 @@ fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
 }
 
 #[allow(dead_code)]
-fn to_points<T>(points: &[[T; 2]]) -> Vec<Point<T>>
+fn to_points<T>(points: &[[T; 2]]) -> Vec<Coordinate<T>>
 where
     T: BoostInputType + Neg<Output = T>,
 {
     let mut rv = Vec::with_capacity(points.len());
     for p in points.iter() {
-        rv.push(Point::<T>::new(p[0], p[1]));
+        rv.push(Coordinate::<T>{x:p[0], y:p[1]});
     }
     rv
 }

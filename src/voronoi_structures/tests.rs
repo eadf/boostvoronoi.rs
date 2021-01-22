@@ -1,7 +1,7 @@
 use super::super::voronoi_diagram::VoronoiDiagram;
 use super::super::voronoi_error::BVError;
 use super::super::voronoi_siteevent as VSE;
-use geo::{Line, Point};
+use geo::{Line, Coordinate};
 
 #[test]
 fn inverse_test_1() {
@@ -9,10 +9,9 @@ fn inverse_test_1() {
     type F1 = f32;
     type I2 = i64;
     type F2 = f64;
-    type Point2D = Point<I1>;
 
     let mut a_site =
-        VSE::SiteEvent::<I1, F1, I2, F2>::new_3(Point::new(10, 10), Point::new(50, 50), 1);
+        VSE::SiteEvent::<I1, F1, I2, F2>::new_3(Coordinate{x:10, y:10}, Coordinate{x:50, y:50}, 1);
     assert_eq!(a_site.is_inverse(), false);
     a_site.inverse();
     assert_eq!(a_site.is_inverse(), true);
@@ -24,10 +23,9 @@ fn inverse_test_2() {
     type F1 = f32;
     type I2 = i64;
     type F2 = f64;
-    type Point2D = Point<I1>;
 
     let mut a_site =
-        VSE::SiteEvent::<I1, F1, I2, F2>::new_3(Point::new(10, 11), Point::new(12, 13), 1);
+        VSE::SiteEvent::<I1, F1, I2, F2>::new_3(Coordinate{x:10, y:11}, Coordinate{x:12, y:13}, 1);
     assert_eq!(a_site.is_inverse(), false);
     assert_eq!(a_site.x0(), 10);
     assert_eq!(a_site.y0(), 11);

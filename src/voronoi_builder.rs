@@ -18,7 +18,7 @@ use super::voronoi_predicate as VP;
 use super::voronoi_siteevent as VSE;
 use super::voronoi_structures as VS;
 
-use geo::{Line, Point};
+use geo::{Line, Point, Coordinate};
 use num::{NumCast, PrimInt};
 use std::cell::Cell;
 use std::cmp::Ordering;
@@ -102,7 +102,7 @@ where
     pub fn with_vertices<'a, T>(&mut self, vertices: T) -> Result<(), BVError>
     where
         I1: 'a,
-        T: Iterator<Item = &'a Point<I1>>,
+        T: Iterator<Item = &'a Coordinate<I1>>,
     {
         if self.segments_added {
             return Err(BVError::VerticesGoesFirst {
@@ -110,8 +110,7 @@ where
             });
         }
         for v in vertices {
-            let p = Point::<I1>::new(v.x(), v.y());
-            let mut s = VSE::SiteEvent::<I1, F1, I2, F2>::new_3(p, p, self.index_);
+            let mut s = VSE::SiteEvent::<I1, F1, I2, F2>::new_3(*v, *v, self.index_);
             s.or_source_category(&VD::SourceCategory::SOURCE_CATEGORY_SINGLE_POINT);
             self.site_events_.push(s);
             self.index_ += 1;
@@ -126,8 +125,8 @@ where
     {
         type SC = VD::SourceCategory;
         for s in segments {
-            let p1 = Point::<I1>::new(s.start.x, s.start.y);
-            let p2 = Point::<I1>::new(s.end.x, s.end.y);
+            let p1 = Coordinate{x:s.start.x, y:s.start.y};
+            let p2 = Coordinate{x:s.end.x, y:s.end.y};
             let mut s1 = VSE::SiteEvent::<I1, F1, I2, F2>::new_3(p1, p1, self.index_);
             s1.or_source_category(&SC::SOURCE_CATEGORY_SEGMENT_START_POINT);
             let mut s2 = VSE::SiteEvent::new_3(p2, p2, self.index_);

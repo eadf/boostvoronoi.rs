@@ -8,7 +8,8 @@ use boostvoronoi::TypeConverter;
 use boostvoronoi::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
 //use num::NumCast;
 //use num::Zero;
-use geo::{Coordinate, Line, Point, Rect};
+use geo::algorithm::simplify::Simplify;
+use geo::{Coordinate, GeoFloat, Line, LineString, Point, Rect};
 //use num::FromPrimitive;
 //use num::ToPrimitive;
 use ordered_float::OrderedFloat;
@@ -28,7 +29,7 @@ type F2 = f64;
 struct VorVisualizer<I1, F1, I2, F2>
 where
     I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    F1: BoostOutputType + Neg<Output = F1> + GeoFloat,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -36,7 +37,7 @@ where
     vd_: VD::VoronoiDiagram<I1, F1, I2, F2>,
     primary_edges_only_: bool,
     internal_edges_only_: bool,
-    point_data_: Vec<Point<I1>>,
+    point_data_: Vec<Coordinate<I1>>,
     segment_data_: Vec<Line<I1>>,
     _pdo: PhantomData<F1>,
 }
@@ -44,7 +45,7 @@ where
 impl<I1, F1, I2, F2> VorVisualizer<I1, F1, I2, F2>
 where
     I1: BoostInputType + Neg<Output = I1>,
-    F1: BoostOutputType + Neg<Output = F1>,
+    F1: BoostOutputType + Neg<Output = F1> + GeoFloat,
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
@@ -60,7 +61,7 @@ where
             vd_: VD::VoronoiDiagram::<I1, F1, I2, F2>::new(0),
             primary_edges_only_: false,
             internal_edges_only_: false,
-            point_data_: Vec::<Point<I1>>::new(),
+            point_data_: Vec::<Coordinate<I1>>::new(),
             segment_data_: Vec::<Line<I1>>::new(),
             _pdo: PhantomData,
         }
@@ -72,7 +73,7 @@ where
 
         self.read_data();
 
-        let mut point_data = Vec::<Point<I1>>::new();
+        let mut point_data = Vec::<Coordinate<I1>>::new();
         let mut segment_data = Vec::<Line<I1>>::new();
         std::mem::swap(&mut self.point_data_, &mut point_data);
         std::mem::swap(&mut self.segment_data_, &mut segment_data);
@@ -129,7 +130,7 @@ where
         let to_points = |points: &[[i32; 2]]| {
             let mut rv = Vec::new();
             for p in points.iter() {
-                rv.push(Point::<I1>::new(i32_i1(p[0]), i32_i1(p[1])));
+                rv.push(Coordinate::<I1>{x:i32_i1(p[0]), y:i32_i1(p[1])});
             }
             rv
         };
@@ -137,8 +138,8 @@ where
             let mut rv = Vec::new();
             for p in points.iter() {
                 rv.push(Line::<I1>::new(
-                    Point::<I1>::new(i32_i1(p[0]), i32_i1(p[1])),
-                    Point::<I1>::new(i32_i1(p[2]), i32_i1(p[3])),
+                    Coordinate::<I1>{x:i32_i1(p[0]), y:i32_i1(p[1])},
+                        Coordinate::<I1>{x:i32_i1(p[2]), y:i32_i1(p[3])},
                 ));
             }
             rv
@@ -192,15 +193,15 @@ where
         let mut j: usize = 0;
         for i in self.point_data_.iter() {
             let point = Self::cast_point_io(i);
-            Self::gl_vertex2f(j, point.x(), point.y());
+            Self::gl_vertex2f(j, &point);
             j += 1;
         }
         println!("->draw_points segments");
         for i in self.segment_data_.iter() {
             let lp = Self::cast_coord_io(&i.start);
-            Self::gl_vertex2f(j, lp.x(), lp.y());
+            Self::gl_vertex2f(j, &lp);
             let hp = Self::cast_coord_io(&i.end);
-            Self::gl_vertex2f(j, hp.x(), hp.y());
+            Self::gl_vertex2f(j, &hp);
             j += 1;
         }
         println!("<-draw_points");
@@ -212,9 +213,9 @@ where
         println!("->draw_segments");
         for (j, i) in self.segment_data_.iter().enumerate() {
             let lp = Self::cast_coord_io(&i.start);
-            Self::gl_vertex2f(j, lp.x(), lp.y());
+            Self::gl_vertex2f(j, &lp);
             let hp = Self::cast_coord_io(&i.end);
-            Self::gl_vertex2f(j, hp.x(), hp.y());
+            Self::gl_vertex2f(j, &hp);
         }
         println!("<-draw_segments");
         println!();
@@ -228,8 +229,8 @@ where
             if self.internal_edges_only_ && it.get_color() == EXTERNAL_COLOR {
                 continue;
             }
-            //let point = Point::<F1>::new(it.x(), it.y());
-            Self::gl_vertex2f(i, it.x(), it.y());
+            let point = Coordinate{x:it.x(), y:it.y()};
+            Self::gl_vertex2f(i, &point);
         }
         println!("<-draw_vertices");
         println!();
@@ -250,29 +251,42 @@ where
                 continue;
             }
 
-            let mut samples = Vec::<Point<F1>>::new();
+            let mut samples = Vec::<Coordinate<F1>>::new();
             if !self.vd_.edge_is_finite(Some(edge_id)).unwrap() {
                 self.clip_infinite_edge(edge_id, &mut samples);
             } else {
                 let vertex0 = self.vd_.vertex_get(edge.vertex0()).unwrap().get();
-                let vertex0 = Point::<F1>::new(vertex0.x(), vertex0.y());
+                let vertex0 = Coordinate {
+                    x: vertex0.x(),
+                    y: vertex0.y(),
+                };
                 samples.push(vertex0);
                 let vertex1 = self.vd_.edge_get_vertex1(Some(edge_id));
                 let vertex1 = self.vd_.vertex_get(vertex1).unwrap().get();
-                let vertex1 = Point::<F1>::new(vertex1.x(), vertex1.y());
+                let vertex1 = Coordinate {
+                    x: vertex1.x(),
+                    y: vertex1.y(),
+                };
                 samples.push(vertex1);
                 if edge.is_curved() {
                     self.sample_curved_edge(VoronoiEdgeIndex(it.0), &mut samples);
+                    // Optional simplification of the sampled curve
+                    let linestring = LineString::from(samples).simplify(&F1::from(1.0).unwrap());
+                    samples = linestring.0;
                 }
             }
             for i in samples.iter() {
-                Self::gl_vertex2f(edge_id.0, i.x(), i.y());
+                Self::gl_vertex2f(edge_id.0, i);
             }
         }
         println!("<-draw_edges");
     }
 
-    fn clip_infinite_edge(&self, edge_id: VD::VoronoiEdgeIndex, clipped_edge: &mut Vec<Point<F1>>) {
+    fn clip_infinite_edge(
+        &self,
+        edge_id: VD::VoronoiEdgeIndex,
+        clipped_edge: &mut Vec<Coordinate<F1>>,
+    ) {
         let edge = self.vd_.get_edge(edge_id);
         //const cell_type& cell1 = *edge.cell();
         let cell1_id = self.vd_.edge_get_cell(Some(edge_id)).unwrap();
@@ -285,16 +299,16 @@ where
             .unwrap();
         let cell2 = self.vd_.get_cell(cell2_id).get();
 
-        let mut origin: Point<F1> = Point::new(F1::default(), F1::default());
-        let mut direction: Point<F1> = Point::new(F1::default(), F1::default());
+        let mut origin: Coordinate<F1> = Coordinate{x:F1::default(), y:F1::default()};
+        let mut direction: Coordinate<F1> = Coordinate{x:F1::default(), y:F1::default()};
         // Infinite edges could not be created by two segment sites.
         if cell1.contains_point() && cell2.contains_point() {
             let p1 = Self::cast_point_io(&self.retrieve_point(cell1_id));
             let p2 = Self::cast_point_io(&self.retrieve_point(cell2_id));
-            origin.set_x((p1.x() + p2.x()) * Self::castf32_o(0.5));
-            origin.set_y((p1.y() + p2.y()) * Self::castf32_o(0.5));
-            direction.set_x(p1.y() - p2.y());
-            direction.set_y(p2.x() - p1.x());
+            origin.x = (p1.x + p2.x) * Self::castf32_o(0.5);
+            origin.y = (p1.y + p2.y) * Self::castf32_o(0.5);
+            direction.x = p1.y - p2.y;
+            direction.y = p2.x - p1.x;
         } else {
             origin = if cell1.contains_segment() {
                 Self::cast_point_io(&self.retrieve_point(cell2_id))
@@ -309,39 +323,49 @@ where
             let dx = Self::cast_io(segment.end.x - segment.start.x);
             let dy = Self::cast_io(segment.end.y - segment.start.y);
             if (Self::cast_coord_io(&segment.start) == origin) ^ cell1.contains_point() {
-                direction.set_x(dy);
-                direction.set_y(-dx);
+                direction.x = dy;
+                direction.y = -dx;
             } else {
-                direction.set_x(-dy);
-                direction.set_y(dx);
+                direction.x = -dy;
+                direction.y = dx;
             }
         }
         let side = self.brect_.max().x - self.brect_.min().x;
-        let koef = side / Self::max(direction.x().abs(), direction.y().abs());
+        let koef = side / Self::max(direction.x.abs(), direction.y.abs());
 
         let vertex0 = edge.get().vertex0();
         if vertex0.is_none() {
-            clipped_edge.push(Point::<F1>::new(
-                origin.x() - direction.x() * koef,
-                origin.y() - direction.y() * koef,
-            ));
+            clipped_edge.push(Coordinate {
+                x: origin.x - direction.x * koef,
+                y: origin.y - direction.y * koef,
+            });
         } else {
             let vertex0 = self.vd_.vertex_get(vertex0).unwrap().get();
-            clipped_edge.push(Point::<F1>::new(vertex0.x(), vertex0.y()));
+            clipped_edge.push(Coordinate {
+                x: vertex0.x(),
+                y: vertex0.y(),
+            });
         }
         let vertex1 = self.vd_.edge_get_vertex1(Some(edge_id));
         if vertex1.is_none() {
-            clipped_edge.push(Point::<F1>::new(
-                origin.x() + direction.x() * koef,
-                origin.y() + direction.y() * koef,
-            ));
+            clipped_edge.push(Coordinate {
+                x: origin.x + direction.x * koef,
+                y: origin.y + direction.y * koef,
+            });
         } else {
             let vertex1 = self.vd_.vertex_get(vertex1).unwrap().get();
-            clipped_edge.push(Point::<F1>::new(vertex1.x(), vertex1.y()));
+            clipped_edge.push(Coordinate {
+                x: vertex1.x(),
+                y: vertex1.y(),
+            });
         }
     }
 
-    fn sample_curved_edge(&self, edge_id: VD::VoronoiEdgeIndex, sampled_edge: &mut Vec<Point<F1>>) {
+    fn sample_curved_edge(
+        &self,
+        edge_id: VD::VoronoiEdgeIndex,
+        sampled_edge: &mut Vec<Coordinate<F1>>,
+    ) {
         let max_dist = Self::castf32_o(1E-3) * (self.brect_.min().x - self.brect_.max().x);
 
         let cell_id = self.vd_.edge_get_cell(Some(edge_id)).unwrap();
@@ -367,7 +391,7 @@ where
         );
     }
 
-    fn retrieve_point(&self, cell_id: VD::VoronoiCellIndex) -> Point<I1> {
+    fn retrieve_point(&self, cell_id: VD::VoronoiCellIndex) -> Coordinate<I1> {
         let cell = self.vd_.get_cell(cell_id).get();
         let mut index = cell.source_index();
         let category = cell.source_category();
@@ -375,12 +399,11 @@ where
             return self.point_data_[index];
         }
         index -= self.point_data_.len();
-        let rv = if category.0 == VD::SourceCategory::SOURCE_CATEGORY_SEGMENT_START_POINT.0 {
+        if category.0 == VD::SourceCategory::SOURCE_CATEGORY_SEGMENT_START_POINT.0 {
             self.segment_data_[index].start
         } else {
             self.segment_data_[index].end
-        };
-        Point::from(rv)
+        }
     }
 
     fn retrieve_segment(&self, cell_id: VD::VoronoiCellIndex) -> &Line<I1> {
@@ -389,12 +412,12 @@ where
         &self.segment_data_[index]
     }
 
-    fn cast_point_io(value: &Point<I1>) -> Point<F1> {
-        Point::<F1>::new(Self::cast_io(value.x()), Self::cast_io(value.y()))
+    fn cast_point_io(value: &Coordinate<I1>) -> Coordinate<F1> {
+        Coordinate::<F1>{x:Self::cast_io(value.x), y:Self::cast_io(value.y)}
     }
 
-    fn cast_coord_io(value: &Coordinate<I1>) -> Point<F1> {
-        Point::<F1>::new(Self::cast_io(value.x), Self::cast_io(value.y))
+    fn cast_coord_io(value: &Coordinate<I1>) -> Coordinate<F1> {
+        Coordinate::<F1>{x:Self::cast_io(value.x), y:Self::cast_io(value.y)}
     }
 
     #[inline(always)]
@@ -418,8 +441,8 @@ where
         TypeConverter::<I1, F1, I2, F2>::f1_to_i1(value)
     }
 
-    fn gl_vertex2f(i: usize, x: F1, y: F1) {
-        println!("#{}: x:{:.4}, y:{:.4}", i, x, y);
+    fn gl_vertex2f(i: usize, c:&Coordinate<F1>) {
+        println!("#{}: x:{:.4}, y:{:.4}", i, c.x, c.y);
     }
 }
 
