@@ -36,5 +36,14 @@ let output = {
 ```
 Edges may become curves when line segments are used as input, see the example code for discretization and interpolation. 
 
+## Todo
+- [ ] Evaluate the generic API. Is <I1, F1, I2, F2> really needed?
+- [ ] Maybe replace the builtin ulp implementation
+- [ ] Maybe replace num::BigInt with something stack friendly
+- [ ] Add many more test cases for voronoi_robust_ftp.rs, specially for ulp
+- [ ] Benchmark and optimize
+
+#
+
 All credit goes to the original authors (Andrii Sydorchuk), except the porting mistakes. They are all mine.
 
