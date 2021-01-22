@@ -130,7 +130,10 @@ where
         let to_points = |points: &[[i32; 2]]| {
             let mut rv = Vec::new();
             for p in points.iter() {
-                rv.push(Coordinate::<I1>{x:i32_i1(p[0]), y:i32_i1(p[1])});
+                rv.push(Coordinate::<I1> {
+                    x: i32_i1(p[0]),
+                    y: i32_i1(p[1]),
+                });
             }
             rv
         };
@@ -138,8 +141,14 @@ where
             let mut rv = Vec::new();
             for p in points.iter() {
                 rv.push(Line::<I1>::new(
-                    Coordinate::<I1>{x:i32_i1(p[0]), y:i32_i1(p[1])},
-                        Coordinate::<I1>{x:i32_i1(p[2]), y:i32_i1(p[3])},
+                    Coordinate::<I1> {
+                        x: i32_i1(p[0]),
+                        y: i32_i1(p[1]),
+                    },
+                    Coordinate::<I1> {
+                        x: i32_i1(p[2]),
+                        y: i32_i1(p[3]),
+                    },
                 ));
             }
             rv
@@ -229,7 +238,10 @@ where
             if self.internal_edges_only_ && it.get_color() == EXTERNAL_COLOR {
                 continue;
             }
-            let point = Coordinate{x:it.x(), y:it.y()};
+            let point = Coordinate {
+                x: it.x(),
+                y: it.y(),
+            };
             Self::gl_vertex2f(i, &point);
         }
         println!("<-draw_vertices");
@@ -299,8 +311,14 @@ where
             .unwrap();
         let cell2 = self.vd_.get_cell(cell2_id).get();
 
-        let mut origin: Coordinate<F1> = Coordinate{x:F1::default(), y:F1::default()};
-        let mut direction: Coordinate<F1> = Coordinate{x:F1::default(), y:F1::default()};
+        let mut origin: Coordinate<F1> = Coordinate {
+            x: F1::default(),
+            y: F1::default(),
+        };
+        let mut direction: Coordinate<F1> = Coordinate {
+            x: F1::default(),
+            y: F1::default(),
+        };
         // Infinite edges could not be created by two segment sites.
         if cell1.contains_point() && cell2.contains_point() {
             let p1 = Self::cast_point_io(&self.retrieve_point(cell1_id));
@@ -366,7 +384,7 @@ where
         edge_id: VD::VoronoiEdgeIndex,
         sampled_edge: &mut Vec<Coordinate<F1>>,
     ) {
-        let max_dist = Self::castf32_o(1E-3) * (self.brect_.min().x - self.brect_.max().x);
+        let max_dist = Self::castf32_o(1E-3) * (self.brect_.max().x - self.brect_.min().x);
 
         let cell_id = self.vd_.edge_get_cell(Some(edge_id)).unwrap();
         let cell = self.vd_.get_cell(cell_id).get();
@@ -413,11 +431,17 @@ where
     }
 
     fn cast_point_io(value: &Coordinate<I1>) -> Coordinate<F1> {
-        Coordinate::<F1>{x:Self::cast_io(value.x), y:Self::cast_io(value.y)}
+        Coordinate::<F1> {
+            x: Self::cast_io(value.x),
+            y: Self::cast_io(value.y),
+        }
     }
 
     fn cast_coord_io(value: &Coordinate<I1>) -> Coordinate<F1> {
-        Coordinate::<F1>{x:Self::cast_io(value.x), y:Self::cast_io(value.y)}
+        Coordinate::<F1> {
+            x: Self::cast_io(value.x),
+            y: Self::cast_io(value.y),
+        }
     }
 
     #[inline(always)]
@@ -441,7 +465,7 @@ where
         TypeConverter::<I1, F1, I2, F2>::f1_to_i1(value)
     }
 
-    fn gl_vertex2f(i: usize, c:&Coordinate<F1>) {
+    fn gl_vertex2f(i: usize, c: &Coordinate<F1>) {
         println!("#{}: x:{:.4}, y:{:.4}", i, c.x, c.y);
     }
 }

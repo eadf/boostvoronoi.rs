@@ -17,7 +17,7 @@ use ordered_float::OrderedFloat;
 use std::cmp::Ordering;
 
 use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
-use geo::{Line, Point, Coordinate};
+use geo::{Coordinate, Line};
 use num::{NumCast, PrimInt};
 use std::cell::Cell;
 use std::fmt;
@@ -226,8 +226,8 @@ where
         flags: u32,
     ) -> SiteEvent<I, O, BI, BF> {
         Self {
-            point0_: Coordinate{x:x1, y:y1},
-            point1_: Coordinate{x:x2, y:y2},
+            point0_: Coordinate { x: x1, y: y1 },
+            point1_: Coordinate { x: x2, y: y2 },
             sorted_index_: sorted_index,
             initial_index_: initial_index,
             flags_: flags,

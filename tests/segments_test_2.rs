@@ -4,7 +4,7 @@ use boostvoronoi::voronoi_builder::VoronoiBuilder;
 use boostvoronoi::voronoi_diagram::VoronoiDiagram;
 use boostvoronoi::voronoi_error::BVError;
 use boostvoronoi::{BoostInputType, BoostOutputType};
-use geo::{Line, Point, Coordinate};
+use geo::{Coordinate, Line};
 use std::ops::Neg;
 
 type I1 = i32;
@@ -27,7 +27,7 @@ where
 {
     let mut rv = Vec::with_capacity(points.len());
     for p in points.iter() {
-        rv.push(Coordinate::<T>{x:p[0], y:p[1]});
+        rv.push(Coordinate::<T> { x: p[0], y: p[1] });
     }
     rv
 }
@@ -39,8 +39,8 @@ where
     let mut rv = Vec::with_capacity(points.len());
     for p in points.iter() {
         rv.push(Line::<T>::new(
-            Point::<T>::new(p[0], p[1]),
-            Point::<T>::new(p[2], p[3]),
+            Coordinate{x:p[0], y:p[1]},
+            Coordinate{x:p[2], y:p[3]},
         ));
     }
     rv

@@ -22,7 +22,7 @@ use super::TypeCheckI as TCI;
 use super::TypeConverter as TCC;
 use super::TypeConverter as TC;
 use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
-use geo::{Point, Coordinate};
+use geo::Coordinate;
 use num::FromPrimitive;
 use num::ToPrimitive;
 use num::{BigInt, Float, NumCast, PrimInt, Zero};
@@ -248,7 +248,11 @@ where
         }
     }
 
-    fn eval_3(point1: &Coordinate<I1>, point2: &Coordinate<I1>, point3: &Coordinate<I1>) -> Orientation {
+    fn eval_3(
+        point1: &Coordinate<I1>,
+        point2: &Coordinate<I1>,
+        point3: &Coordinate<I1>,
+    ) -> Orientation {
         let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
         let dx1: I2 = i1_to_i2(point1.x) - i1_to_i2(point2.x);
         let dx2: I2 = i1_to_i2(point2.x) - i1_to_i2(point3.x);
@@ -575,11 +579,12 @@ where
         dist1 < dist2
     }
 
-    fn find_distance_to_point_arc(site: &VSE::SiteEvent<I1, F1, I2, F2>, point: &Coordinate<I1>) -> F2 {
-        let dx =
-            TC::<I1, F1, I2, F2>::i1_to_f2(site.x()) - TC::<I1, F1, I2, F2>::i1_to_f2(point.x);
-        let dy =
-            TC::<I1, F1, I2, F2>::i1_to_f2(site.y()) - TC::<I1, F1, I2, F2>::i1_to_f2(point.y);
+    fn find_distance_to_point_arc(
+        site: &VSE::SiteEvent<I1, F1, I2, F2>,
+        point: &Coordinate<I1>,
+    ) -> F2 {
+        let dx = TC::<I1, F1, I2, F2>::i1_to_f2(site.x()) - TC::<I1, F1, I2, F2>::i1_to_f2(point.x);
+        let dy = TC::<I1, F1, I2, F2>::i1_to_f2(site.y()) - TC::<I1, F1, I2, F2>::i1_to_f2(point.y);
         // The relative error is at most 3EPS.
         (dx * dx + dy * dy) / (dx * TC::<I1, F1, I2, F2>::f32_to_f2(2.0))
     }
@@ -2152,15 +2157,14 @@ where
 
             if recompute_c_x || recompute_lower_x {
                 cA[0] = a[0].clone() * BigInt::from(if point_index == 2i32 { 2i32 } else { -2i32 });
-                cA[1] = b[0].clone()
-                    * &b[0]
-                    * (i1_to_i128(segm_start1.x) + i1_to_i128(segm_start2.x))
-                    - &a[0]
-                        * &b[0]
-                        * (i1_to_i128(segm_start1.y) + i1_to_i128(segm_start2.y)
-                            - i1_to_i128(site1.y()))
-                        * 2
-                    + &a[0] * &a[0] * (i1_to_i128(site1.x())) * 2;
+                cA[1] =
+                    b[0].clone() * &b[0] * (i1_to_i128(segm_start1.x) + i1_to_i128(segm_start2.x))
+                        - &a[0]
+                            * &b[0]
+                            * (i1_to_i128(segm_start1.y) + i1_to_i128(segm_start2.y)
+                                - i1_to_i128(site1.y()))
+                            * 2
+                        + &a[0] * &a[0] * (i1_to_i128(site1.x())) * 2;
 
                 if recompute_c_x {
                     let c_x = sqrt_expr_.eval2(&cA, &cB);

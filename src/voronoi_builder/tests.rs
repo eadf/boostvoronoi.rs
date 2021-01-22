@@ -1,7 +1,7 @@
 use super::super::voronoi_diagram::VoronoiDiagram;
 use super::super::voronoi_error::BVError;
 use super::VoronoiBuilder;
-use geo::{Line, Point, Coordinate};
+use geo::{Coordinate, Line};
 
 #[test]
 fn sort_1() {
@@ -11,14 +11,9 @@ fn sort_1() {
     type F2 = f64;
 
     {
-        let coord = |x,y|Coordinate{x,y};
+        let coord = |x, y| Coordinate { x, y };
 
-        let _v = vec![
-            coord(10, 11),
-            coord(0, 100),
-            coord(10, 11),
-            coord(0, 100),
-        ];
+        let _v = vec![coord(10, 11), coord(0, 100), coord(10, 11), coord(0, 100)];
 
         let mut vb = VoronoiBuilder::<I1, F1, I2, F2>::new();
         assert!(vb.site_events_.is_empty());

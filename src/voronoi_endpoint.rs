@@ -17,7 +17,7 @@ use super::voronoi_predicate as VP;
 use super::voronoi_siteevent as VSE;
 use super::voronoi_structures as VS;
 use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
-use geo::{Point, Coordinate};
+use geo::Coordinate;
 use std::cmp::Ordering;
 use std::ops::Neg;
 
@@ -29,7 +29,7 @@ pub(crate) struct EndPointPair<I>
 where
     I: BoostInputType + Neg<Output = I>,
 {
-    pub(crate) first: Coordinate<I>,            // TODO: better name
+    pub(crate) first: Coordinate<I>,       // TODO: better name
     pub(crate) second: VB::BeachLineIndex, // TODO: better name
 }
 

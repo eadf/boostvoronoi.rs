@@ -1,10 +1,9 @@
-extern crate piston;
 extern crate graphics;
 extern crate opengl_graphics;
+extern crate piston;
 extern crate sdl2_window;
 extern crate touch_visualizer;
 
-use sdl2_window::Sdl2Window;
 use boostvoronoi::voronoi_builder as VB;
 use boostvoronoi::voronoi_diagram as VD;
 use boostvoronoi::voronoi_diagram::VoronoiEdgeIndex;
@@ -12,6 +11,7 @@ use boostvoronoi::voronoi_error::BVError;
 use boostvoronoi::voronoi_visual_utils as VV;
 use boostvoronoi::TypeConverter;
 use boostvoronoi::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
+use sdl2_window::Sdl2Window;
 //use num::FromPrimitive;
 //use num::NumCast;
 //use num::ToPrimitive;
@@ -23,7 +23,7 @@ use std::ops::Neg;
 use std::rc::Rc;
 
 use geo::algorithm::intersects::Intersects;
-use geo::{Coordinate, Line, Point, Rect};
+use geo::{Coordinate, Line, Rect};
 
 //use graphics::math::Scalar;
 use graphics::{Context, Graphics};
@@ -70,7 +70,7 @@ fn event_loop() -> Result<String, BVError> {
     }
 
     let opengl = OpenGL::V3_2;
-    let mut window:Sdl2Window = WindowSettings::new(
+    let mut window: Sdl2Window = WindowSettings::new(
         "Rusted Boost Voronoi",
         [DEFAULT_WINDOW_HEIGHT, DEFAULT_WINDOW_WIDTH],
     )
@@ -85,7 +85,7 @@ fn event_loop() -> Result<String, BVError> {
     //let mut colors = Vec::new();
     let mut is_drawing_lines = false;
     let mut is_drawing_line_strings = false;
-    let mut previous_dot: Option<Point<i32>> = None;
+    let mut previous_dot: Option<Coordinate<i32>> = None;
     let mut mx: i32 = 0;
     let mut my: i32 = 0;
 
@@ -146,7 +146,7 @@ fn event_loop() -> Result<String, BVError> {
                     }
                 }
                 Button::Mouse(_) => {
-                    let point = Point::<i32>::new(mx, my);
+                    let point = Coordinate{x:mx, y:my};
                     let mut vis = visualizer.borrow_mut();
 
                     // Two points at the same place is a problem
@@ -154,9 +154,7 @@ fn event_loop() -> Result<String, BVError> {
                         vis.previous_points.insert(point);
                         if is_drawing_lines {
                             if let Some(tpp) = previous_dot {
-                                let point1 = Point::new(tpp.x(), tpp.y());
-                                let point2 = Point::new(point.x(), point.y());
-                                let line = Line::new(point1, point2);
+                                let line = Line::new(tpp, point);
                                 if !vis.self_intersecting_check(&line) {
                                     vis.segment_data_.push(line);
                                     data_is_dirty = true;
@@ -172,9 +170,7 @@ fn event_loop() -> Result<String, BVError> {
                             }
                         } else if is_drawing_line_strings {
                             if let Some(tpp) = previous_dot {
-                                let point1 = Point::new(tpp.x(), tpp.y());
-                                let point2 = Point::new(point.x(), point.y());
-                                let line = Line::new(point1, point2);
+                                let line = Line::new(tpp, point);
                                 if !vis.self_intersecting_check(&line) {
                                     vis.segment_data_.push(line);
                                     data_is_dirty = true;
@@ -189,7 +185,7 @@ fn event_loop() -> Result<String, BVError> {
                                 previous_dot = Some(point);
                             }
                         } else {
-                            vis.point_data_.push(Coordinate{x:mx, y:my});
+                            vis.point_data_.push(Coordinate { x: mx, y: my });
                             data_is_dirty = true;
                         }
                     }
@@ -236,7 +232,7 @@ where
     internal_edges_only_: bool,
     point_data_: Vec<Coordinate<I1>>,
     segment_data_: Vec<Line<I1>>,
-    pub previous_points: HashSet<Point<i32>>,
+    pub previous_points: HashSet<Coordinate<i32>>,
     _pdo: PhantomData<F1>,
 }
 
@@ -250,11 +246,11 @@ where
     pub fn new() -> Self {
         Self {
             brect_: Rect::<F1>::new(
-                Point::<F1>::new(
-                    F1::from(DEFAULT_WINDOW_HEIGHT).unwrap(),
-                    F1::from(DEFAULT_WINDOW_WIDTH).unwrap(),
-                ),
-                Point::<F1>::new(F1::from(0).unwrap(), F1::from(0).unwrap()),
+                Coordinate {
+                    x: F1::from(DEFAULT_WINDOW_HEIGHT).unwrap(),
+                    y: F1::from(DEFAULT_WINDOW_WIDTH).unwrap(),
+                },
+                Coordinate{x:F1::from(0).unwrap(), y:F1::from(0).unwrap()},
             ),
             vd_: VD::VoronoiDiagram::<I1, F1, I2, F2>::new(0),
             brect_initialized_: false,
@@ -356,7 +352,10 @@ where
         let to_points = |points: &[[i32; 2]]| {
             let mut rv = Vec::new();
             for p in points.iter() {
-                rv.push(Coordinate{x:i32_to_i1(p[0]), y:i32_to_i1(p[1])});
+                rv.push(Coordinate {
+                    x: i32_to_i1(p[0]),
+                    y: i32_to_i1(p[1]),
+                });
             }
             rv
         };
@@ -365,8 +364,14 @@ where
             let mut rv = Vec::new();
             for p in segments_.iter() {
                 let line = Line::<I1>::new(
-                    Coordinate{x:i32_to_i1(p[0]), y:i32_to_i1(p[1])},
-                        Coordinate{x:i32_to_i1(p[2]), y:i32_to_i1(p[3])},
+                    Coordinate {
+                        x: i32_to_i1(p[0]),
+                        y: i32_to_i1(p[1]),
+                    },
+                    Coordinate {
+                        x: i32_to_i1(p[2]),
+                        y: i32_to_i1(p[3]),
+                    },
                 );
                 rv.push(line);
             }
@@ -841,13 +846,12 @@ where
             if self.internal_edges_only_ && it.get_color() == EXTERNAL_COLOR {
                 continue;
             }
-            let point = Point::<F1>::new(it.x(), it.y());
-            //point.deconvolve(&self.shift_);
+            let point = Coordinate{x:it.x(), y:it.y()};
             graphics::ellipse(
                 color,
                 graphics::ellipse::circle(
-                    Self::insane_float_to_float_cast(point.x()).into(),
-                    Self::insane_float_to_float_cast(point.y()).into(),
+                    Self::insane_float_to_float_cast(point.x).into(),
+                    Self::insane_float_to_float_cast(point.y).into(),
                     2.0,
                 ),
                 c.transform,
@@ -952,8 +956,14 @@ where
             .unwrap();
         let cell2 = self.vd_.get_cell(cell2_id).get();
 
-        let mut origin: Coordinate<F1> = Coordinate{x:F1::default(), y:F1::default()};
-        let mut direction: Coordinate<F1> = Coordinate{x:F1::default(), y:F1::default()};
+        let mut origin: Coordinate<F1> = Coordinate {
+            x: F1::default(),
+            y: F1::default(),
+        };
+        let mut direction: Coordinate<F1> = Coordinate {
+            x: F1::default(),
+            y: F1::default(),
+        };
         // Infinite edges could not be created by two segment sites.
         if cell1.contains_point() && cell2.contains_point() {
             let p1 = Self::cast_point_io(&self.retrieve_point(cell1_id));
@@ -1066,20 +1076,29 @@ where
     }
 
     fn cast_point_io(value: &Coordinate<I1>) -> Coordinate<F1> {
-        Coordinate{x:Self::cast_io(value.x), y:Self::cast_io(value.y)}
+        Coordinate {
+            x: Self::cast_io(value.x),
+            y: Self::cast_io(value.y),
+        }
     }
 
     fn cast_line_f64(value: &Line<I1>) -> Line<f64> {
-        let ps = Point::<f64>::new(
-            Self::cast_i_f64(value.start.x),
-            Self::cast_i_f64(value.start.y),
-        );
-        let pe = Point::<f64>::new(Self::cast_i_f64(value.end.x), Self::cast_i_f64(value.end.y));
+        let ps = Coordinate {
+            x:Self::cast_i_f64(value.start.x),
+            y:Self::cast_i_f64(value.start.y),
+        };
+        let pe = Coordinate{
+            x:Self::cast_i_f64(value.end.x),
+            y:Self::cast_i_f64(value.end.y)
+        };
         Line::<f64>::new(ps, pe)
     }
 
     fn cast_coord_io(value: &Coordinate<I1>) -> Coordinate<F1> {
-        Coordinate{x:Self::cast_io(value.x), y:Self::cast_io(value.y)}
+        Coordinate {
+            x: Self::cast_io(value.x),
+            y: Self::cast_io(value.y),
+        }
     }
 
     #[inline(always)]

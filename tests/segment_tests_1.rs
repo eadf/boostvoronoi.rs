@@ -4,7 +4,7 @@ use boostvoronoi::voronoi_builder::VoronoiBuilder;
 use boostvoronoi::voronoi_diagram::VoronoiDiagram;
 use boostvoronoi::voronoi_error::BVError;
 use boostvoronoi::{BoostInputType, BoostOutputType};
-use geo::{Line, Coordinate};
+use geo::{Coordinate, Line};
 use std::ops::Neg;
 
 type I = i32;
@@ -26,7 +26,7 @@ where
 {
     let mut rv = Vec::with_capacity(points.len());
     for p in points.iter() {
-        rv.push(Coordinate{x:p[0], y:p[1]});
+        rv.push(Coordinate { x: p[0], y: p[1] });
     }
     rv
 }
@@ -38,8 +38,8 @@ where
     let mut rv = Vec::with_capacity(points.len());
     for p in points.iter() {
         rv.push(Line::<T>::new(
-            Coordinate::<T>{x:p[0], y:p[1]},
-            Coordinate::<T>{x:p[2], y:p[3]},
+            Coordinate::<T> { x: p[0], y: p[1] },
+            Coordinate::<T> { x: p[2], y: p[3] },
         ));
     }
     rv
@@ -49,7 +49,10 @@ where
 #[test]
 fn single_segment_1() {
     let output = {
-        let _s = vec![Line::new(Coordinate{x:10, y:10}, Coordinate{x:50, y:50})];
+        let _s = vec![Line::new(
+            Coordinate { x: 10, y: 10 },
+            Coordinate { x: 50, y: 50 },
+        )];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_segments(_s.iter()).expect("single_segment_1");
         vb.construct().expect("single_segment_1")
@@ -95,7 +98,10 @@ fn single_segment_1() {
 #[test]
 fn single_segment_2() {
     let output = {
-        let _s = vec![Line::new(Coordinate{x:10, y:10}, Coordinate{x:50, y:50})];
+        let _s = vec![Line::new(
+            Coordinate { x: 10, y: 10 },
+            Coordinate { x: 50, y: 50 },
+        )];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_segments(_s.iter()).expect("single_segment_2");
         vb.construct().expect("single_segment_2")
@@ -137,7 +143,10 @@ fn single_segment_2() {
 #[test]
 fn single_segment_3() {
     let output = {
-        let _s = vec![Line::new(Coordinate{x:10, y:10}, Coordinate{x:50, y:10})];
+        let _s = vec![Line::new(
+            Coordinate { x: 10, y: 10 },
+            Coordinate { x: 50, y: 10 },
+        )];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_segments(_s.iter()).expect("single_segment_3");
         vb.construct().expect("single_segment_3")
@@ -179,7 +188,10 @@ fn single_segment_3() {
 #[test]
 fn single_segment_4() {
     let output = {
-        let _s = vec![Line::new(Coordinate{x:50, y:10}, Coordinate{x:10, y:10})];
+        let _s = vec![Line::new(
+            Coordinate { x: 50, y: 10 },
+            Coordinate { x: 10, y: 10 },
+        )];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_segments(_s.iter()).expect("single_segment_4");
         vb.construct().expect("single_segment_4")
@@ -224,8 +236,8 @@ fn single_segment_4() {
 fn two_segments_1() {
     let output = {
         let _s = vec![
-            Line::new(Coordinate{x:1, y:2}, Coordinate{x:3, y:4}),
-            Line::new(Coordinate{x:2, y:2}, Coordinate{x:5, y:4}),
+            Line::new(Coordinate { x: 1, y: 2 }, Coordinate { x: 3, y: 4 }),
+            Line::new(Coordinate { x: 2, y: 2 }, Coordinate { x: 5, y: 4 }),
         ];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_segments(_s.iter()).expect("two_segments_1");
@@ -390,10 +402,10 @@ fn two_segments_1() {
 /// two segments and one point
 fn two_segments_2() {
     let output = {
-        let _v = vec![Coordinate{x:10, y:11}];
+        let _v = vec![Coordinate { x: 10, y: 11 }];
         let _s = vec![
-            Line::new(Coordinate{x:1, y:2}, Coordinate{x:3, y:4}),
-            Line::new(Coordinate{x:2, y:2}, Coordinate{x:5, y:4}),
+            Line::new(Coordinate { x: 1, y: 2 }, Coordinate { x: 3, y: 4 }),
+            Line::new(Coordinate { x: 2, y: 2 }, Coordinate { x: 5, y: 4 }),
         ];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("two_segments_2");
@@ -799,10 +811,10 @@ fn two_segments_2() {
 /// two segments and two points
 fn two_segments_3() {
     let output = {
-        let _v = vec![Coordinate{x:4, y:3}, Coordinate{x:1, y:1}];
+        let _v = vec![Coordinate { x: 4, y: 3 }, Coordinate { x: 1, y: 1 }];
         let _s = vec![
-            Line::new(Coordinate{x:1, y:2}, Coordinate{x:3, y:4}),
-            Line::new(Coordinate{x:2, y:2}, Coordinate{x:5, y:4}),
+            Line::new(Coordinate { x: 1, y: 2 }, Coordinate { x: 3, y: 4 }),
+            Line::new(Coordinate { x: 2, y: 2 }, Coordinate { x: 5, y: 4 }),
         ];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("two_segments_3");
@@ -1350,11 +1362,11 @@ fn two_segments_3() {
 /// three segments and one point
 fn two_segments_4() {
     let output = {
-        let _v = vec![Coordinate{x:4, y:3}];
+        let _v = vec![Coordinate { x: 4, y: 3 }];
         let _s = vec![
-            Line::new(Coordinate{x:1, y:2}, Coordinate{x:3, y:4}),
-            Line::new(Coordinate{x:2, y:2}, Coordinate{x:5, y:4}),
-            Line::new(Coordinate{x:5, y:6}, Coordinate{x:3, y:1}),
+            Line::new(Coordinate { x: 1, y: 2 }, Coordinate { x: 3, y: 4 }),
+            Line::new(Coordinate { x: 2, y: 2 }, Coordinate { x: 5, y: 4 }),
+            Line::new(Coordinate { x: 5, y: 6 }, Coordinate { x: 3, y: 1 }),
         ];
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("two_segments_4");

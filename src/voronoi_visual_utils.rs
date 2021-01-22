@@ -13,7 +13,7 @@ use super::voronoi_diagram as VD;
 use super::voronoi_structures as VS;
 use super::{BigFloatType, BigIntType, BoostInputType, BoostOutputType};
 
-use geo::{Coordinate, Line, LineString, Point};
+use geo::{Coordinate, Line};
 use std::marker::PhantomData;
 use std::ops::Neg;
 
