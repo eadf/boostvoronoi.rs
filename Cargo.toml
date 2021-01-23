@@ -41,6 +41,4 @@ piston2d-opengl_graphics = "0.77.0"
 piston2d-graphics = "0.39.0"
 piston2d-touch_visualizer = "0.29.0"
 pistoncore-sdl2_window="0.67.0"
-getopts = "0.2.15"
-geo = "0.17"
 
