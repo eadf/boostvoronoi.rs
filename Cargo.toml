@@ -1,6 +1,6 @@
 [package]
 name = "boostvoronoi"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["eadf"]
 edition = "2018"
 description = "Boost voronoi ported to 100% rust"
@@ -27,13 +27,10 @@ path= "example/piston_gui.rs"
 name="simple"
 path= "example/simple.rs"
 
+# this bin is for development test purposes
 [[bin]]
 name="main"
 path="src/main.rs"
-
-#[[bin]]
-#name="experiment"
-#path="src/experiment.rs"
 
 [dev-dependencies]
 piston = "0.52.1"
