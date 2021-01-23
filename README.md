@@ -1,5 +1,5 @@
 # boostvoronoi.rs
-Boost 1.75.0 polygon::voronoi ported to 100% rust.
+[Boost 1.75.0 polygon::voronoi](https://www.boost.org/doc/libs/1_75_0/libs/polygon/) ported to 100% rust.
 This implementaton of Forune's algorithm works on line segments as well as points, making it useful for finding centerlines or whatnot.
 
 ![Rusty voronoi](img.png)
