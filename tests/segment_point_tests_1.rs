@@ -1,8 +1,4 @@
-#![allow(unused_imports)]
-
 use boostvoronoi::voronoi_builder::VoronoiBuilder;
-use boostvoronoi::voronoi_diagram::VoronoiDiagram;
-use boostvoronoi::voronoi_error::BVError;
 use geo::{Coordinate, Line};
 
 type I1 = i32;
