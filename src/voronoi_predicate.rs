@@ -412,7 +412,7 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
-    /*
+    #[allow(dead_code)]
     pub(crate) fn distance_predicate_debug(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -424,12 +424,24 @@ where
             left_site, right_site, new_point, rv
         );
         rv
-    }*/
+    }
+    pub fn distance_predicate(
+        left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
+        right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
+        new_point: &Coordinate<I1>,
+    ) -> bool {
+        let rv = Self::distance_predicate_real(left_site, right_site, new_point);
+        println!(
+            "DistancePredicate(L:{} R:{} K:({},{}))=={}",
+            left_site, right_site, new_point.x, new_point.y, rv
+        );
+        rv
+    }
 
     /// Returns true if a horizontal line going through a new site intersects
     /// right arc at first, else returns false. If horizontal line goes
     /// through intersection point of the given two arcs returns false also.
-    pub(crate) fn distance_predicate(
+    pub(crate) fn distance_predicate_real(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         new_point: &Coordinate<I1>,
@@ -451,15 +463,15 @@ where
 
     //private:
 
-    pub fn pp_debug(
+    pub fn pp(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         new_point: &Coordinate<I1>,
     ) -> bool {
-        let rv = Self::pp(left_site, right_site, new_point);
+        let rv = Self::pp_real(left_site, right_site, new_point);
         println!(
-            " pp(L:{} R:{} K:{:?})=={}",
-            left_site, right_site, new_point, rv
+            "DistancePredicate::pp(L:{} R:{} K:({},{}))=={}",
+            left_site, right_site, new_point.x, new_point.y, rv
         );
         rv
     }
@@ -468,7 +480,7 @@ where
     /// Returns true if a horizontal line going through the new point site
     /// intersects right arc at first, else returns false. If horizontal line
     /// goes through intersection point of the given two arcs returns false.
-    fn pp(
+    fn pp_real(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         new_point: &Coordinate<I1>,
@@ -501,25 +513,21 @@ where
         dist1 < dist2
     }
 
-    pub fn ps_debug(
+    pub fn ps(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         new_point: &Coordinate<I1>,
         reverse_order: bool,
     ) -> bool {
+        let rv = Self::ps_real(left_site, right_site, new_point, reverse_order);
         println!(
-            " ps(L:{}, R:{}, K:{:?}, {})==?",
-            left_site, right_site, new_point, reverse_order
-        );
-        let rv = Self::ps(left_site, right_site, new_point, reverse_order);
-        println!(
-            " ps(L:{}, R:{}, K:{:?}, {})=={}",
-            left_site, right_site, new_point, reverse_order, rv
+            "DistancePredicate::ps(L:{}, R:{}, K:({},{}), {})=={}",
+            left_site, right_site, new_point.x, new_point.y, reverse_order, rv
         );
         rv
     }
 
-    fn ps(
+    fn ps_real(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         new_point: &Coordinate<I1>,
@@ -537,20 +545,20 @@ where
         reverse_order ^ (dist1 < dist2)
     }
 
-    pub fn ss_debug(
+    pub fn ss(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         new_point: &Coordinate<I1>,
     ) -> bool {
-        let rv = Self::ss(left_site, right_site, new_point);
+        let rv = Self::ss_real(left_site, right_site, new_point);
         println!(
-            " ss(L:{} R:{} K:{:?})=={}",
-            left_site, right_site, new_point, rv
+            "DistancePredicate::ss(L:{} R:{} K:({},{}))=={}",
+            left_site, right_site, new_point.x,new_point.y, rv
         );
         rv
     }
 
-    fn ss(
+    fn ss_real(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         new_point: &Coordinate<I1>,
@@ -859,21 +867,20 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
-    /*
-    pub(crate) fn ppp_debug(
+    pub(crate) fn ppp(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
     ) -> bool {
-        let rv = Self::ppp(site1, site2, site3);
+        let rv = Self::ppp_real(site1, site2, site3);
         println!(
             "CircleExistencePredicate::ppp(site1={:?}, site2={:?}, site2={:?}), rv={}",
             site1, site2, site3, rv
         );
         rv
-    }*/
+    }
 
-    pub(crate) fn ppp(
+    pub(crate) fn ppp_real(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -882,22 +889,21 @@ where
             == Orientation::RIGHT
     }
 
-    /*
-    pub(crate) fn pps_debug(
+    pub(crate) fn pps(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
         segment_index: u64,
     ) -> bool {
-        let rv = Self::pps(site1, site2, site3, segment_index);
+        let rv = Self::pps_real(site1, site2, site3, segment_index);
         println!(
             "CircleExistencePredicate::pps(site1={:?}, site2={:?}, site2={:?},segment_index={}),  rv={}",
             site1, site2, site3, segment_index, rv
         );
         rv
-    }*/
+    }
 
-    pub(crate) fn pps(
+    pub(crate) fn pps_real(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -932,22 +938,21 @@ where
         true
     }
 
-    /*
-    pub(crate) fn pss_debug(
+    pub(crate) fn pss(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
         point_index: i32,
     ) -> bool {
-        let rv = Self::pss(site1, site2, site3, point_index);
+        let rv = Self::pss_real(site1, site2, site3, point_index);
         println!(
             "CircleExistencePredicate::pss(site1={:?}, site2={:?}, site2={:?},segment_index={})={}",
             site1, site2, site3, point_index, rv
         );
         rv
-    }*/
+    }
 
-    pub(crate) fn pss(
+    pub(crate) fn pss_real(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -973,21 +978,20 @@ where
         true
     }
 
-    /*
-    pub(crate) fn sss_debug(
+    pub(crate) fn sss(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
     ) -> bool {
-        let rv = Self::sss(site1, site2, site3);
+        let rv = Self::sss_real(site1, site2, site3);
         println!(
             "CircleExistencePredicate::sss(site1={:?}, site2={:?}, site2={:?})={}",
             site1, site2, site3, rv
         );
         rv
-    }*/
+    }
 
-    pub(crate) fn sss(
+    pub(crate) fn sss_real(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1019,21 +1023,20 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
-    /*
-    pub(crate) fn ppp_debug(
+    pub(crate) fn ppp(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
         c_event: &VC::CircleEventType<F2>,
     ) {
-        Self::ppp(site1, site2, site3, c_event);
+        Self::ppp_real(site1, site2, site3, c_event);
         println!(
             "LazyCircleFormationFunctor::ppp(site1={:?}, site2={:?}, site3={:?}, c_event={:?})",
             site1, site2, site3, c_event
         );
-    }*/
+    }
 
-    fn ppp(
+    fn ppp_real(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1105,22 +1108,21 @@ where
         }
     }
 
-    /*
-    pub(crate) fn pps_debug(
+    pub(crate) fn pps(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
         segment_index: usize,
         c_event: &VC::CircleEventType<F2>,
     ) {
-        Self::pps(site1, site2, site3, segment_index, c_event);
+        Self::pps_real(site1, site2, site3, segment_index, c_event);
         println!(
             "LazyCircleFormationFunctor::pps(site1={:?}, site2={:?}, site3={:?}, segment_index={:?}, c_event={:?})",
             site1, site2, site3, segment_index, c_event
         );
-    }*/
+    }
 
-    fn pps(
+    fn pps_real(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1248,24 +1250,23 @@ where
         }
     }
 
-    /*
-    pub(crate) fn pss_debug(
+    pub(crate) fn pss(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
         point_index: i32,
         c_event: &VC::CircleEventType<F2>,
     ) {
-        Self::pss(site1, site2, site3, point_index, c_event);
+        Self::pss_real(site1, site2, site3, point_index, c_event);
         println!(
             "LazyCircleFormationFunctor::pss(site1={:?}, site2={:?}, site3={:?}, point_index={:?}, c_event={:?})",
             site1, site2, site3, point_index, c_event
         );
-    }*/
+    }
 
     #[allow(unused_parens)]
     #[allow(unused_assignments)]
-    fn pss(
+    fn pss_real(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1500,21 +1501,20 @@ where
         }
     }
 
-    /*
-    pub(crate) fn sss_debug(
+    pub(crate) fn sss(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
         c_event: &VC::CircleEventType<F2>,
     ) {
-        Self::sss(site1, site2, site3, c_event);
+        Self::sss_real(site1, site2, site3, c_event);
         println!(
             "LazyCircleFormationFunctor::sss(site1={:?}, site2={:?}, site3={:?}, c_event={:?})",
             site1, site2, site3, c_event
         );
-    }*/
+    }
 
-    fn sss(
+    fn sss_real(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1667,20 +1667,19 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
-    /*
-    pub(crate) fn lies_outside_vertical_segment_debug(
+    pub(crate) fn lies_outside_vertical_segment(
         circle: &VC::CircleEventType<F2>,
         site: &VSE::SiteEvent<I1, F1, I2, F2>,
     ) -> bool {
-        let rv = Self::lies_outside_vertical_segment(circle, site);
+        let rv = Self::lies_outside_vertical_segment_real(circle, site);
         println!(
             "CircleFormationFunctor::lies_outside_vertical_segment(circle={:?}, site={:?})={:?}",
             circle, site, rv
         );
         rv
-    }*/
+    }
 
-    pub(crate) fn lies_outside_vertical_segment(
+    pub(crate) fn lies_outside_vertical_segment_real(
         c: &VC::CircleEventType<F2>,
         s: &VSE::SiteEvent<I1, F1, I2, F2>,
     ) -> bool {
@@ -1698,23 +1697,24 @@ where
             || UlpComparison::ulp_comparison(cc_y, y1, 128) == cmp::Ordering::Greater
     }
 
-    /*
-    pub(crate) fn circle_formation_predicate_debug(
+    pub(crate) fn circle_formation_predicate(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
         circle: &VC::CircleEventType<F2>,
     ) -> bool {
-        let rv = Self::circle_formation_predicate(site1, site2, site3, circle);
-        println!("->circle_formation_predicate");
-        dbg!(&site1, &site2, &site3, &circle, rv);
+        let rv = Self::circle_formation_predicate_real(site1, site2, site3, circle);
+        println!(
+            "circle_formation_predicate(site1={:?}, site2={:?}, site3={:?}, circle={:?})={}",
+            site1, site2, site3, circle, rv
+        );
         rv
-    }*/
+    }
 
     // Create a circle event from the given three sites.
     // Returns true if the circle event exists, else false.
     // If exists circle event is saved into the c_event variable.
-    pub(crate) fn circle_formation_predicate(
+    pub(crate) fn circle_formation_predicate_real(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,

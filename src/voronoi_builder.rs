@@ -169,23 +169,23 @@ where
         //let mut output = ::new(self.site_events_.len());
 
         let mut site_event_iterator_: VSE::SiteEventIndexType = self.init_sites_queue();
-        /*        println!(
-                    "********************************************************************************"
-                );
-                println!("->construct()");
-                println!(
-                    "********************************************************************************"
-                );
-                for s in self.site_events_.iter() {
-                    println!("{}", s);
-                }
-                println!("#site_events={}", self.site_events_.len());
-        dbg!(
-            self.site_events_.len(),
-            &self.site_events_,
-            site_event_iterator_
+        println!(
+            "********************************************************************************"
         );
-        */
+        println!("->construct()");
+        println!(
+            "********************************************************************************"
+        );
+        for s in self.site_events_.iter() {
+            println!("{}", s);
+        }
+        println!("#site_events={}", self.site_events_.len());
+        //dbg!(
+        //    self.site_events_.len(),
+        //    &self.site_events_,
+        //    site_event_iterator_
+        //);
+        //* /
 
         self.init_beach_line(&mut site_event_iterator_, &mut output);
 
@@ -193,9 +193,10 @@ where
         //event_comparison_predicate event_comparison; wtf is this?
         while !self.circle_events_.is_empty() || (site_event_iterator_ != self.site_events_.len()) {
             /*self.beach_line_.debug_print_all();
+            */
             println!("################################################");
             println!(
-                "loop circle_events_:{}, num_vertices:{}, site_events:{}, beachline:{} index:{} debug_site_counter:{} debug_circle_counter:{}",
+                "loop circle_events_:{} num_vertices:{} site_events:{} beachline:{} index:{} debug_site_counter:{} debug_circle_counter:{}",
                 self.circle_events_.len(),
                 output.num_vertices(),
                 self.site_events_.len(),
@@ -204,6 +205,8 @@ where
                 self.debug_site_counter,
                 self.debug_circle_counter,
             );
+            println!("################################################");
+            /*
             if self.debug_circle_counter >= 27 {
                 // 30
                 print!("");
