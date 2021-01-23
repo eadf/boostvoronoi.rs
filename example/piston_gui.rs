@@ -11,11 +11,8 @@ use boostvoronoi::voronoi_error::BVError;
 use boostvoronoi::voronoi_visual_utils as VV;
 use boostvoronoi::TypeConverter;
 use boostvoronoi::{BigFloatType, BigIntType, InputType, OutputType};
-use sdl2_window::Sdl2Window;
-//use num::FromPrimitive;
-//use num::NumCast;
-//use num::ToPrimitive;
 use ordered_float::OrderedFloat;
+use sdl2_window::Sdl2Window;
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::marker::PhantomData;
@@ -25,16 +22,13 @@ use std::rc::Rc;
 use geo::algorithm::intersects::Intersects;
 use geo::{Coordinate, Line, Rect};
 
-//use graphics::math::Scalar;
+use graphics::math::Scalar;
 use graphics::{Context, Graphics};
 use opengl_graphics::{GlGraphics, OpenGL};
 use piston::event_loop::*;
 use piston::input::*;
 use piston::window::{Window, WindowSettings};
-//use rand::Rng;
-#[cfg(feature = "include_sdl2")]
-use sdl2_window::Sdl2Window as AppWindow;
-//use std::collections::HashMap;
+
 use touch_visualizer::TouchVisualizer;
 
 const EXTERNAL_COLOR: u32 = 1;
@@ -60,7 +54,9 @@ fn main() {
 fn event_loop() -> Result<String, BVError> {
     let mut data_is_dirty = false;
 
-    let visualizer = Rc::new(RefCell::new(VorVisualizer::<i32, f32, i64, f64>::new()));
+    let visualizer = Rc::new(RefCell::new(
+        VorVisualizer::<i32, Scalar, i64, Scalar>::new(),
+    ));
     {
         let mut vis = visualizer.borrow_mut();
         // Clear all containers.
@@ -310,7 +306,7 @@ where
 
     // returns true if l intersects with any of the lines in self.segment_data_
     fn self_intersecting_check(&self, l: &Line<I1>) -> bool {
-        let l_ = Self::cast_line_f64(l);
+        let l_ = Self::line_i1_to_f64(l);
         for s in self.segment_data_.iter() {
             // allow end point intersection
             if (s.start.x == l.start.x && s.start.y == l.start.y)
@@ -335,7 +331,7 @@ where
             }
             // todo: co-linear overlapping lines are intersecting
 
-            let s_ = Self::cast_line_f64(s);
+            let s_ = Self::line_i1_to_f64(s);
             if l_.intersects(&s_) {
                 return true;
             }
@@ -791,8 +787,8 @@ where
             graphics::ellipse(
                 color,
                 graphics::ellipse::circle(
-                    Self::insane_float_to_float_cast(point.x).into_inner(),
-                    Self::insane_float_to_float_cast(point.y).into_inner(),
+                    Self::f1_to_f64(point.x).into_inner(),
+                    Self::f1_to_f64(point.y).into_inner(),
                     3.0,
                 ),
                 c.transform,
@@ -801,12 +797,12 @@ where
         };
 
         for i in self.point_data_.iter() {
-            draw(&Self::cast_point_io(&i));
+            draw(&Self::coord_i1_to_f1(&i));
         }
         for i in self.segment_data_.iter() {
-            let lp = Self::cast_coord_io(&i.start);
+            let lp = Self::coord_i1_to_f1(&i.start);
             draw(&lp);
-            let hp = Self::cast_coord_io(&i.end);
+            let hp = Self::coord_i1_to_f1(&i.end);
             draw(&hp);
         }
     }
@@ -816,16 +812,16 @@ where
         let color = [1.0, 0.0, 0.0, 1.0];
 
         for i in self.segment_data_.iter() {
-            let lp = Self::cast_coord_io(&i.start);
-            let hp = Self::cast_coord_io(&i.end);
+            let lp = Self::coord_i1_to_f1(&i.start);
+            let hp = Self::coord_i1_to_f1(&i.end);
             graphics::line(
                 color,
                 2.0,
                 [
-                    Self::insane_float_to_float_cast(lp.x).into(),
-                    Self::insane_float_to_float_cast(lp.y).into(),
-                    Self::insane_float_to_float_cast(hp.x).into(),
-                    Self::insane_float_to_float_cast(hp.y).into(),
+                    Self::f1_to_f64(lp.x).into(),
+                    Self::f1_to_f64(lp.y).into(),
+                    Self::f1_to_f64(hp.x).into(),
+                    Self::f1_to_f64(hp.y).into(),
                 ],
                 c.transform,
                 g,
@@ -849,23 +845,14 @@ where
             graphics::ellipse(
                 color,
                 graphics::ellipse::circle(
-                    Self::insane_float_to_float_cast(point.x).into(),
-                    Self::insane_float_to_float_cast(point.y).into(),
+                    Self::f1_to_f64(point.x).into(),
+                    Self::f1_to_f64(point.y).into(),
                     2.0,
                 ),
                 c.transform,
                 g,
             );
         }
-    }
-
-    // Todo: all this casting/typeconvertion is insane, I must be doing something wrong here
-    // O is already set to be the same type as Scalar, so why is the cast required?
-    // also: Point2d::get_ox() already returns a OrderedFloat of correct type, why
-    // won't the compiler let me use it?
-    #[inline(always)]
-    pub fn insane_float_to_float_cast(v: F1) -> OrderedFloat<f64> {
-        OrderedFloat(num::cast::<F1, f64>(v).unwrap())
     }
 
     /// Draw voronoi edges.
@@ -926,10 +913,10 @@ where
                     color,
                     1.0,
                     [
-                        Self::insane_float_to_float_cast(vertex1.x).into(),
-                        Self::insane_float_to_float_cast(vertex1.y).into(),
-                        Self::insane_float_to_float_cast(vertex2.x).into(),
-                        Self::insane_float_to_float_cast(vertex2.y).into(),
+                        Self::f1_to_f64(vertex1.x).into(),
+                        Self::f1_to_f64(vertex1.y).into(),
+                        Self::f1_to_f64(vertex2.x).into(),
+                        Self::f1_to_f64(vertex2.y).into(),
                     ],
                     c.transform,
                     g,
@@ -965,26 +952,26 @@ where
         };
         // Infinite edges could not be created by two segment sites.
         if cell1.contains_point() && cell2.contains_point() {
-            let p1 = Self::cast_point_io(&self.retrieve_point(cell1_id));
-            let p2 = Self::cast_point_io(&self.retrieve_point(cell2_id));
-            origin.x = (p1.x + p2.x) * Self::castf32_o(0.5);
-            origin.y = (p1.y + p2.y) * Self::castf32_o(0.5);
+            let p1 = Self::coord_i1_to_f1(&self.retrieve_point(cell1_id));
+            let p2 = Self::coord_i1_to_f1(&self.retrieve_point(cell2_id));
+            origin.x = (p1.x + p2.x) * Self::f32_to_f1(0.5);
+            origin.y = (p1.y + p2.y) * Self::f32_to_f1(0.5);
             direction.x = p1.y - p2.y;
             direction.y = p2.x - p1.x;
         } else {
             origin = if cell1.contains_segment() {
-                Self::cast_point_io(&self.retrieve_point(cell2_id))
+                Self::coord_i1_to_f1(&self.retrieve_point(cell2_id))
             } else {
-                Self::cast_point_io(&self.retrieve_point(cell1_id))
+                Self::coord_i1_to_f1(&self.retrieve_point(cell1_id))
             };
             let segment = if cell1.contains_segment() {
                 self.retrieve_segment(cell1_id)
             } else {
                 self.retrieve_segment(cell2_id)
             };
-            let dx = Self::cast_io(segment.end.x - segment.start.x);
-            let dy = Self::cast_io(segment.end.y - segment.start.y);
-            if (Self::cast_coord_io(&segment.start) == origin) ^ cell1.contains_point() {
+            let dx = Self::i1_to_f1(segment.end.x - segment.start.x);
+            let dy = Self::i1_to_f1(segment.end.y - segment.start.y);
+            if (Self::coord_i1_to_f1(&segment.start) == origin) ^ cell1.contains_point() {
                 direction.x = dy;
                 direction.y = -dx;
             } else {
@@ -993,7 +980,7 @@ where
             }
         }
         let side = self.bounding_rect.max().x - self.bounding_rect.min().x;
-        let koef = side / Self::max(direction.x.abs(), direction.y.abs());
+        let koef = side / Self::max_f1(direction.x.abs(), direction.y.abs());
 
         let vertex0 = edge.get().vertex0();
         if vertex0.is_none() {
@@ -1029,7 +1016,7 @@ where
         sampled_edge: &mut Vec<Coordinate<F1>>,
     ) {
         let max_dist =
-            Self::castf32_o(1E-3) * (self.bounding_rect.max().x - self.bounding_rect.min().x);
+            Self::f32_to_f1(1E-3) * (self.bounding_rect.max().x - self.bounding_rect.min().x);
 
         let cell_id = self.vd_.edge_get_cell(Some(edge_id)).unwrap();
         let cell = self.vd_.get_cell(cell_id).get();
@@ -1075,54 +1062,52 @@ where
         &self.segment_data_[index]
     }
 
-    fn cast_point_io(value: &Coordinate<I1>) -> Coordinate<F1> {
-        Coordinate {
-            x: Self::cast_io(value.x),
-            y: Self::cast_io(value.y),
-        }
-    }
-
-    fn cast_line_f64(value: &Line<I1>) -> Line<f64> {
+    fn line_i1_to_f64(value: &Line<I1>) -> Line<f64> {
         let ps = Coordinate {
-            x: Self::cast_i_f64(value.start.x),
-            y: Self::cast_i_f64(value.start.y),
+            x: Self::i1_to_f64(value.start.x),
+            y: Self::i1_to_f64(value.start.y),
         };
         let pe = Coordinate {
-            x: Self::cast_i_f64(value.end.x),
-            y: Self::cast_i_f64(value.end.y),
+            x: Self::i1_to_f64(value.end.x),
+            y: Self::i1_to_f64(value.end.y),
         };
         Line::<f64>::new(ps, pe)
     }
 
-    fn cast_coord_io(value: &Coordinate<I1>) -> Coordinate<F1> {
+    fn coord_i1_to_f1(value: &Coordinate<I1>) -> Coordinate<F1> {
         Coordinate {
-            x: Self::cast_io(value.x),
-            y: Self::cast_io(value.y),
+            x: Self::i1_to_f1(value.x),
+            y: Self::i1_to_f1(value.y),
         }
     }
 
     #[inline(always)]
-    fn max(a: F1, b: F1) -> F1 {
+    fn max_f1(a: F1, b: F1) -> F1 {
         OrderedFloat(a).max(OrderedFloat(b)).into_inner()
     }
 
     #[inline(always)]
-    pub fn cast_io(value: I1) -> F1 {
+    pub fn i1_to_f1(value: I1) -> F1 {
         TypeConverter::<I1, F1, I2, F2>::i1_to_f1(value)
     }
 
     #[inline(always)]
-    pub fn castf32_o(value: f32) -> F1 {
+    pub fn f32_to_f1(value: f32) -> F1 {
         TypeConverter::<I1, F1, I2, F2>::f32_to_f1(value)
     }
 
     #[inline(always)]
-    pub fn cast_oi(value: F1) -> I1 {
+    pub fn f1_to_i1(value: F1) -> I1 {
         TypeConverter::<I1, F1, I2, F2>::f1_to_i1(value)
     }
 
     #[inline(always)]
-    pub fn cast_i_f64(value: I1) -> f64 {
+    pub fn i1_to_f64(value: I1) -> f64 {
         TypeConverter::<I1, F1, I2, F2>::i1_to_f64(value)
+    }
+
+    #[inline(always)]
+    pub fn f1_to_f64(v: F1) -> OrderedFloat<f64> {
+        OrderedFloat(num::cast::<F1, f64>(v).unwrap())
     }
 }
