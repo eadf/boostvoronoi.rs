@@ -1,6 +1,6 @@
 # boostvoronoi.rs
 [Boost 1.75.0 polygon::voronoi](https://www.boost.org/doc/libs/1_75_0/libs/polygon/) ported to 100% rust.
-This implementaton of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) works on line segments as well as points, making it useful for finding centerlines or whatnot.
+This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) works on line segments as well as points, making it useful for finding centerlines or whatnot.
 
 ![Rusty voronoi](img.png)
 
