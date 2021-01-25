@@ -12,6 +12,7 @@
 use super::voronoi_circleevent as VC;
 use super::voronoi_siteevent as VSE;
 use super::voronoi_structures as VS;
+use super::voronoi_ctypes as CT;
 use super::TypeConverter as TCC;
 
 use super::{BigFloatType, BigIntType, InputType, OutputType};
@@ -23,6 +24,7 @@ use std::marker::PhantomData;
 use std::ops::Neg;
 use std::rc::Rc;
 use vec_map::VecMap;
+use std::cmp::Ordering;
 
 type SourceIndexType = usize;
 #[derive(Copy, Clone, PartialEq, Eq, Default)]
@@ -273,15 +275,16 @@ where
             _pdi: PhantomData,
         }))
     }
-    /*
-       TODO: add ULPS!
-       return (ulp_cmp(v1.x(), v2.x(), ULPS) ==
-                   detail::ulp_comparison<T>::EQUAL) &&
-                  (ulp_cmp(v1.y(), v2.y(), ULPS) ==
-                   detail::ulp_comparison<T>::EQUAL);
-    */
+
     fn vertex_equality_predicate_eq(&self, other: &Self) -> bool {
-        self.x_ == other.x_ && self.y_ == other.y_
+        let ulp = 128;
+        let x1:f64 = NumCast::from(self.x()).unwrap();
+        let y1:f64 = NumCast::from(self.y()).unwrap();
+        let x2:f64 = NumCast::from(other.x()).unwrap();
+        let y2:f64 = NumCast::from(other.y()).unwrap();
+
+        CT::UlpComparison::ulp_comparison(x1,x2,ulp)==Ordering::Equal &&
+        CT::UlpComparison::ulp_comparison(y1,y2,ulp)==Ordering::Equal
     }
 
     pub fn get_id(&self) -> VoronoiVertexIndex {
@@ -1047,7 +1050,7 @@ where
         edge12_id: VoronoiEdgeIndex,
         edge23_id: VoronoiEdgeIndex,
     ) -> (VoronoiEdgeIndex, VoronoiEdgeIndex) {
-        //println!("-> insert_new_edge_5()");
+        println!("new vertex@CE{:?}", circle);
         //dbg!(&site1, &site3, &circle, edge12_id, edge23_id);
 
         let is_linear = VSE::SiteEvent::<I1, F1, I2, F2>::is_linear_edge(&site1, &site3);
@@ -1116,7 +1119,8 @@ where
 
     pub fn _build(&mut self) {
         //self.debug_print_all();
-
+        println!("edges b4 degenerate {}", self.edges_.len());
+        
         // Remove degenerate edges.
         if !self.edges_.is_empty() {
             let mut last_edge: usize = self.edges_.iter().next().unwrap().0;
@@ -1142,7 +1146,7 @@ where
                             .vertex_equality_predicate_eq(&v2.unwrap().get())
                 };
                 if is_equal {
-                    //println!("removing edge:{}", it);
+                    println!("removing edge:{}", it);
                     self._remove_edge(Some(VoronoiEdgeIndex(it)));
                 } else {
                     if it != last_edge {
@@ -1189,6 +1193,8 @@ where
                 self.next_edge_id_ = e;
             }
         }
+        println!("edges after degenerate {}", self.edges_.len());
+        
         //self.debug_print_edges();
 
         // Set up incident edge pointers for cells and vertices.

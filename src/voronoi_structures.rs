@@ -50,6 +50,7 @@ pub(crate) fn format_id(value: Option<usize>) -> String {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) fn debug_print_bli_id(value: Option<VB::BeachLineIndex>) -> String {
     if let Some(value) = value {
         value.to_string()

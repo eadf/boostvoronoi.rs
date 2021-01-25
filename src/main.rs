@@ -48,12 +48,19 @@ fn main() {
     let output = {
 
         let points: [[I1; 2]; 1] = [[10,11]];
-        let segments: [[I1; 4]; 2] = [
-            [1, 2, 3, 4],
-            [2, 2, 5, 4],
-        ];
+        /*let segments: [[I1; 4]; 9] = [
+            [403, 0, 395, 1],
+            [409, 4, 403, 0],
+            [481, 8, 473, 7],
+            [325, 7, 318, 9],
+            [332, 10, 325, 7],
+            [486, 14, 481, 8],
+            [318, 9, 314, 14],
+            [257, 31, 250, 29],
+            [556, 32, 548, 29],
+        ];*/
 
-        let segments2: [[i32; 4]; 355] = [
+        let segments: [[i32; 4]; 355] = [
             [403, 0, 395, 1],
             [409, 4, 403, 0],
             [481, 8, 473, 7],
@@ -413,11 +420,23 @@ fn main() {
 
         let _v = to_points::<I1>(&points);
         let _s = to_segments::<I1>(&segments);
-
+        let mut i = 0;
+        println!("points.size()=={}", _v.len());
+        for v in _v.iter() {
+            println!("#{}:({},{})",i,v.x, v.y);
+            i+=1;
+        }
+        println!("segments.size()=={}", _s.len());
+        for s in _s.iter() {
+            println!("#{}:({},{})-({},{})", i,s.start.x, s.start.y, s.end.x, s.end.y);
+            i+=1;
+        }
         let mut vb = VB::VoronoiBuilder::<I1, F1, I2, F2>::new();
         vb.with_vertices(_v.iter()).expect("test_template");
         vb.with_segments(_s.iter()).expect("test_template");
         vb.construct().expect("test_template")
     };
-    println!("done");
+    println!("cells:{}", output.cells().len());
+    println!("vertices:{}", output.vertices().len());
+    println!("edges:{}", output.edges().len());
 }

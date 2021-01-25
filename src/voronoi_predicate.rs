@@ -37,7 +37,7 @@ use std::ops::Neg;
 
 // TODO: how to make these generic?
 const ULPS: u64 = 64;
-const ULPSX2: u64 = 128;
+const ULPSX2: u64 = 64;//128;
 
 #[inline(always)]
 fn is_neg(number: &BigInt) -> bool {
@@ -302,11 +302,26 @@ where
     I2: InputType + Neg<Output = I2>,
     F2: OutputType + Neg<Output = F2>,
 {
-    /// boolean predicate between two sites (bool int int)
+    #[allow(clippy::let_and_return)]
     pub(crate) fn event_comparison_predicate_bii(
         lhs: &VSE::SiteEvent<I1, F1, I2, F2>,
         rhs: &VSE::SiteEvent<I1, F1, I2, F2>,
     ) -> bool {
+       let rv = Self::event_comparison_predicate_bii_real(lhs, rhs);
+       /*println!(
+            "event_comparison_predicate(lhs:{}, rhs:{})={}",
+            lhs, rhs, rv);
+        */
+        rv
+    }
+    /// boolean predicate between two sites (bool int int)
+    pub(crate) fn event_comparison_predicate_bii_real(
+        lhs: &VSE::SiteEvent<I1, F1, I2, F2>,
+        rhs: &VSE::SiteEvent<I1, F1, I2, F2>,
+    ) -> bool {
+        if lhs.x0()==I1::from(318).unwrap() && rhs.x0()==I1::from(318).unwrap(){
+            //println!("lhs:{} rhs:{}", lhs, rhs);
+        }
         if lhs.x0() != rhs.x0() {
             return lhs.x0() < rhs.x0();
         }
@@ -344,6 +359,15 @@ where
         lhs: &VSE::SiteEvent<I1, F1, I2, F2>,
         rhs: &VSE::SiteEvent<I1, F1, I2, F2>,
     ) -> cmp::Ordering {
+        // this is techically not needed as ordering of identical point sites is random in C++ boost
+        if lhs.is_point() && rhs.is_point() 
+           && lhs.point0() == rhs.point0() {
+           if lhs.initial_index() < rhs.initial_index() {
+              return cmp::Ordering::Greater; 
+           } else {
+              return cmp::Ordering::Less;
+           }
+        }
         if Self::event_comparison_predicate_bii(lhs, rhs) {
             cmp::Ordering::Less
         } else {
@@ -413,28 +437,31 @@ where
     F2: BigFloatType + Neg<Output = F2>,
 {
     #[allow(dead_code)]
+    #[allow(clippy::let_and_return)]
     pub(crate) fn distance_predicate_debug(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         new_point: &Coordinate<I1>,
     ) -> bool {
         let rv = Self::distance_predicate(left_site, right_site, new_point);
-        println!(
-            "distance_predicate: L:{} R:{} K:{:?}=={}",
-            left_site, right_site, new_point, rv
-        );
+        //println!(
+        //    "distance_predicate: L:{} R:{} K:{:?}=={}",
+        //    left_site, right_site, new_point, rv
+        //);
         rv
     }
+    
+    #[allow(clippy::let_and_return)]
     pub fn distance_predicate(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         new_point: &Coordinate<I1>,
     ) -> bool {
         let rv = Self::distance_predicate_real(left_site, right_site, new_point);
-        println!(
+        /*println!(
             "DistancePredicate(L:{} R:{} K:({},{}))=={}",
             left_site, right_site, new_point.x, new_point.y, rv
-        );
+        );*/
         rv
     }
 
@@ -462,17 +489,18 @@ where
     }
 
     //private:
-
+    
+    #[allow(clippy::let_and_return)]
     pub fn pp(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         new_point: &Coordinate<I1>,
     ) -> bool {
         let rv = Self::pp_real(left_site, right_site, new_point);
-        println!(
+        /*println!(
             "DistancePredicate::pp(L:{} R:{} K:({},{}))=={}",
             left_site, right_site, new_point.x, new_point.y, rv
-        );
+        );*/
         rv
     }
 
@@ -513,6 +541,7 @@ where
         dist1 < dist2
     }
 
+    #[allow(clippy::let_and_return)]
     pub fn ps(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -520,10 +549,10 @@ where
         reverse_order: bool,
     ) -> bool {
         let rv = Self::ps_real(left_site, right_site, new_point, reverse_order);
-        println!(
+        /*println!(
             "DistancePredicate::ps(L:{}, R:{}, K:({},{}), {})=={}",
             left_site, right_site, new_point.x, new_point.y, reverse_order, rv
-        );
+        );*/
         rv
     }
 
@@ -545,16 +574,17 @@ where
         reverse_order ^ (dist1 < dist2)
     }
 
+    #[allow(clippy::let_and_return)]
     pub fn ss(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         new_point: &Coordinate<I1>,
     ) -> bool {
         let rv = Self::ss_real(left_site, right_site, new_point);
-        println!(
+        /*println!(
             "DistancePredicate::ss(L:{} R:{} K:({},{}))=={}",
             left_site, right_site, new_point.x,new_point.y, rv
-        );
+        );*/
         rv
     }
 
@@ -721,15 +751,15 @@ where
     I2: InputType + Neg<Output = I2>,
     F2: OutputType + Neg<Output = F2>,
 {
-    pub fn node_comparison_predicate_debug(
+    pub fn node_comparison_predicate(
         node1: &VB::BeachLineNodeKey<I1, F1, I2, F2>,
         node2: &VB::BeachLineNodeKey<I1, F1, I2, F2>,
     ) -> bool {
-        let rv = Self::node_comparison_predicate(node1, node2);
-        println!(
+        let rv = Self::node_comparison_predicate_real(node1, node2);
+        /*println!(
             "node_comparison_predicate(node1={:?}, node2={:?}), rv={}",
             node1, node2, rv
-        );
+        );*/
         rv
     }
 
@@ -739,7 +769,7 @@ where
     /// Comparison is only called during the new site events processing.
     /// That's why one of the nodes will always lie on the sweepline and may
     /// be represented as a straight horizontal line.
-    pub fn node_comparison_predicate(
+    pub fn node_comparison_predicate_real(
         node1: &VB::BeachLineNodeKey<I1, F1, I2, F2>,
         node2: &VB::BeachLineNodeKey<I1, F1, I2, F2>,
     ) -> bool {
@@ -867,16 +897,17 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
+    #[allow(clippy::let_and_return)]
     pub(crate) fn ppp(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
     ) -> bool {
         let rv = Self::ppp_real(site1, site2, site3);
-        println!(
-            "CircleExistencePredicate::ppp(site1={:?}, site2={:?}, site2={:?}), rv={}",
-            site1, site2, site3, rv
-        );
+        //println!(
+        //    "CircleExistencePredicate::ppp(site1:{:?}, site2:{:?}, site3:{:?})={}",
+        //    site1, site2, site3, rv
+        //);
         rv
     }
 
@@ -888,7 +919,8 @@ where
         OrientationTest::<I1, F1, I2, F2>::eval_3(site1.point0(), site2.point0(), site3.point0())
             == Orientation::RIGHT
     }
-
+    
+    #[allow(clippy::let_and_return)]
     pub(crate) fn pps(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -896,10 +928,10 @@ where
         segment_index: u64,
     ) -> bool {
         let rv = Self::pps_real(site1, site2, site3, segment_index);
-        println!(
-            "CircleExistencePredicate::pps(site1={:?}, site2={:?}, site2={:?},segment_index={}),  rv={}",
-            site1, site2, site3, segment_index, rv
-        );
+        //println!(
+        //    "CircleExistencePredicate::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{})={}",
+        //    site1, site2, site3, segment_index, rv
+        //);
         rv
     }
 
@@ -945,10 +977,10 @@ where
         point_index: i32,
     ) -> bool {
         let rv = Self::pss_real(site1, site2, site3, point_index);
-        println!(
-            "CircleExistencePredicate::pss(site1={:?}, site2={:?}, site2={:?},segment_index={})={}",
-            site1, site2, site3, point_index, rv
-        );
+        //println!(
+        //    "CircleExistencePredicate::pss(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{})={}",
+        //    site1, site2, site3, point_index, rv
+        //);
         rv
     }
 
@@ -984,10 +1016,10 @@ where
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
     ) -> bool {
         let rv = Self::sss_real(site1, site2, site3);
-        println!(
-            "CircleExistencePredicate::sss(site1={:?}, site2={:?}, site2={:?})={}",
-            site1, site2, site3, rv
-        );
+        //println!(
+        //    "CircleExistencePredicate::sss(site1:{:?}, site2:{:?}, site3:{:?})={}",
+        //    site1, site2, site3, rv
+        //);
         rv
     }
 
@@ -1030,10 +1062,10 @@ where
         c_event: &VC::CircleEventType<F2>,
     ) {
         Self::ppp_real(site1, site2, site3, c_event);
-        println!(
-            "LazyCircleFormationFunctor::ppp(site1={:?}, site2={:?}, site3={:?}, c_event={:?})",
-            site1, site2, site3, c_event
-        );
+        //println!(
+        //    "LazyCircleFormationFunctor::ppp(site1:{:?}, site2:{:?}, site3:{:?}, c_event:{:?})",
+        //    site1, site2, site3, c_event
+        //);
     }
 
     fn ppp_real(
@@ -1116,10 +1148,10 @@ where
         c_event: &VC::CircleEventType<F2>,
     ) {
         Self::pps_real(site1, site2, site3, segment_index, c_event);
-        println!(
-            "LazyCircleFormationFunctor::pps(site1={:?}, site2={:?}, site3={:?}, segment_index={:?}, c_event={:?})",
-            site1, site2, site3, segment_index, c_event
-        );
+        //println!(
+        //    "LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?}, c_event:{:?})",
+        //    site1, site2, site3, segment_index, c_event
+        //);
     }
 
     fn pps_real(
@@ -1258,10 +1290,10 @@ where
         c_event: &VC::CircleEventType<F2>,
     ) {
         Self::pss_real(site1, site2, site3, point_index, c_event);
-        println!(
-            "LazyCircleFormationFunctor::pss(site1={:?}, site2={:?}, site3={:?}, point_index={:?}, c_event={:?})",
-            site1, site2, site3, point_index, c_event
-        );
+        //println!(
+        //    "LazyCircleFormationFunctor::pss(site1:{:?}, site2:{:?}, site3:{:?}, point_index:{:?}, c_event:{:?})",
+        //    site1, site2, site3, point_index, c_event
+        //);
     }
 
     #[allow(unused_parens)]
@@ -1479,8 +1511,10 @@ where
             } else {
                 lower_x += t * orientation;
             }
-            let ulps =
-                TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
+            //let ulps =
+            //    TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
+            let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(ULPS);
+            
             recompute_c_x = c_x.dif().ulp() > ulps;
             recompute_c_y = c_y.dif().ulp() > ulps;
             recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1508,10 +1542,10 @@ where
         c_event: &VC::CircleEventType<F2>,
     ) {
         Self::sss_real(site1, site2, site3, c_event);
-        println!(
-            "LazyCircleFormationFunctor::sss(site1={:?}, site2={:?}, site3={:?}, c_event={:?})",
-            site1, site2, site3, c_event
-        );
+        //println!(
+        //    "LazyCircleFormationFunctor::sss(site1:{:?}, site2:{:?}, site3:{:?}, c_event:{:?})",
+        //    site1, site2, site3, c_event
+        //);
     }
 
     fn sss_real(
@@ -1672,10 +1706,10 @@ where
         site: &VSE::SiteEvent<I1, F1, I2, F2>,
     ) -> bool {
         let rv = Self::lies_outside_vertical_segment_real(circle, site);
-        println!(
-            "CircleFormationFunctor::lies_outside_vertical_segment(circle={:?}, site={:?})={:?}",
-            circle, site, rv
-        );
+        //println!(
+        //    "lies_outside_vertical_segment(c={:?},s={:?})={:?}",
+        //    circle, site, rv
+        //);
         rv
     }
 
@@ -1692,11 +1726,12 @@ where
         let y0 = i1_to_f64(if s.is_inverse() { s.y1() } else { s.y0() });
         let y1 = i1_to_f64(if s.is_inverse() { s.y0() } else { s.y1() });
         let cc_y = f2_to_f64(c.0.get().y().into_inner());
-
-        UlpComparison::ulp_comparison(cc_y, y0, 128) == cmp::Ordering::Less
-            || UlpComparison::ulp_comparison(cc_y, y1, 128) == cmp::Ordering::Greater
+// TODO 64 or 128 ????????????????
+        UlpComparison::ulp_comparison(cc_y, y0, 64) == cmp::Ordering::Less
+            || UlpComparison::ulp_comparison(cc_y, y1, 64) == cmp::Ordering::Greater
     }
 
+    #[allow(clippy::let_and_return)]
     pub(crate) fn circle_formation_predicate(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1704,10 +1739,10 @@ where
         circle: &VC::CircleEventType<F2>,
     ) -> bool {
         let rv = Self::circle_formation_predicate_real(site1, site2, site3, circle);
-        println!(
-            "circle_formation_predicate(site1={:?}, site2={:?}, site3={:?}, circle={:?})={}",
-            site1, site2, site3, circle, rv
-        );
+        //println!(
+        //    "circle_formation_predicate(site1:{:?}, site2:{:?}, site3:{:?}, circle:{:?})={}",
+        //    site1, site2, site3, circle, rv
+        //);
         rv
     }
 

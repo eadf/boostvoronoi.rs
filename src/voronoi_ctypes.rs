@@ -49,12 +49,15 @@ impl UlpComparison {
         // Difference in 1 Ulp is equivalent to a relative error of between
         // 1/4,000,000,000,000,000 and 1/8,000,000,000,000,000.
         if ll_a > ll_b {
+            //println!("ulp_comparison:a-b={} max_ulps={}", ll_a-ll_b, max_ulps);        
             if ll_a - ll_b <= max_ulps {
-                Ordering::Equal
+                return Ordering::Equal
             } else {
-                Ordering::Less
+                return Ordering::Less
             }
-        } else if ll_b - ll_a <= max_ulps {
+        }
+        //println!("ulp_comparison:b-a={} max_ulps={}", ll_b-ll_a, max_ulps);
+        if ll_b - ll_a <= max_ulps {
             Ordering::Equal
         } else {
             Ordering::Greater
