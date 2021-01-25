@@ -13,3 +13,5 @@ boostvoronoi.iml
 Cargo.lock
 /.idea
 boost_voronoi_c++.dia~
+compare_cpp.txt
+compare_rust.txt

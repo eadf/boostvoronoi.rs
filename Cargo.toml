@@ -1,12 +1,12 @@
 [package]
 name = "boostvoronoi"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["eadf"]
 edition = "2018"
 description = "Boost voronoi ported to 100% rust"
 readme = "README.md"
 repository = "https://github.com/eadf/boostvoronoi.rs"
-license-file = "LICENSE"
+license = "BSL-1.0"
 keywords = ["voronoi", "sweepline", "geometry"]
 
 [dependencies]
