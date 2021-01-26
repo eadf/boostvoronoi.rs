@@ -495,8 +495,7 @@ where
 {
     cells_: Vec<CellType<I1, F1>>, // index key is VoronoiCell.id_:VoronoiCellIndexType
     vertices_: VecMap<VertexType<I1, F1>>, // indexed by: VoronoiVertexIndexType
-    edges_: VecMap<EdgeType<I1, F1, I2, F2>>, // indexed by: VoronoiEdgeIndexType
-    //next_cell_id: VoronoiCellIndexType,
+    edges_: Vec<EdgeType<I1, F1, I2, F2>>, // indexed by: VoronoiEdgeIndexType
     next_edge_id_: usize,
     next_vertex_id_: usize,
 }
@@ -512,7 +511,7 @@ where
         Self {
             cells_: Vec::<CellType<I1, F1>>::with_capacity(input_size),
             vertices_: VecMap::<VertexType<I1, F1>>::with_capacity(input_size),
-            edges_: VecMap::<EdgeType<I1, F1, I2, F2>>::with_capacity(input_size * 2),
+            edges_: Vec::<EdgeType<I1, F1, I2, F2>>::with_capacity(input_size * 2),
             next_edge_id_: 0,
             next_vertex_id_: 0,
         }
@@ -532,7 +531,7 @@ where
         &self.vertices_
     }
 
-    pub fn edges(&self) -> &VecMap<EdgeType<I1, F1, I2, F2>> {
+    pub fn edges(&self) -> &Vec<EdgeType<I1, F1, I2, F2>> {
         &self.edges_
     }
 
@@ -552,7 +551,7 @@ where
         self.vertices_.iter()
     }
 
-    pub fn edge_iter(&self) -> vec_map::Iter<EdgeType<I1, F1, I2, F2>> {
+    pub fn edge_iter(&self) -> std::slice::Iter<EdgeType<I1, F1, I2, F2>> {
         self.edges_.iter()
     }
 
@@ -608,7 +607,7 @@ where
     pub fn _reserve(&mut self, num_sites: usize) {
         self.cells_.reserve(num_sites);
         self.vertices_.reserve_len(num_sites << 1);
-        self.edges_.reserve_len((num_sites << 2) + (num_sites << 1));
+        self.edges_.reserve((num_sites << 2) + (num_sites << 1));
     }
 
     pub(crate) fn _process_single_site(&mut self, site: &VSE::SiteEvent<I1, F1, I2, F2>) {
@@ -1088,9 +1087,9 @@ where
     pub fn _build(&mut self) {
         // Remove degenerate edges.
         if !self.edges_.is_empty() {
-            let mut last_edge: usize = self.edges_.iter().next().unwrap().0;
+            let mut last_edge: usize = 0;
             let mut it: usize = last_edge;
-            let edges_end: usize = self.edges_.iter().last().unwrap().0 + 1;
+            let edges_end: usize = self.edges_.len();
 
             //let mut edges_to_erase: Vec<usize> = Vec::new();
             while it < edges_end {
@@ -1149,7 +1148,7 @@ where
         }
 
         // Set up incident edge pointers for cells and vertices.
-        for edge_it in self.edge_iter().map(|x| VoronoiEdgeIndex(x.0)) {
+        for edge_it in self.edge_iter().enumerate().map(|x| VoronoiEdgeIndex(x.0)) {
             let cell = self._edge_get_cell(Some(edge_it));
             self._cell_set_incident_edge(cell, Some(edge_it));
             let vertex = self.edge_get_vertex0(Some(edge_it));
@@ -1194,8 +1193,7 @@ where
         if self.vertices_.is_empty() {
             if !self.edges_.is_empty() {
                 // Update prev/next pointers for the line edges.
-                let mut edge_it = self.edges_.keys();
-                //let edge_it_last = self.edges_.keys().next_back().unwrap();
+                let mut edge_it = self.edges_.iter().enumerate().map(|x|x.0);
 
                 let mut edge1 = edge_it.next().map(VoronoiEdgeIndex);
                 self._edge_set_next(edge1, edge1);
@@ -1280,7 +1278,7 @@ where
     pub fn debug_print_edges(&self) {
         println!("edges:{}", self.edges_.len());
         for (i, e) in self.edges_.iter().enumerate() {
-            let e = e.1.get();
+            let e = e.get();
             println!("edge{} {:?}", e.id.0, &e);
             assert_eq!(i, e.id.0);
         }

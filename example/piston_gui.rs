@@ -281,10 +281,9 @@ where
 
         // Color exterior edges.
         for it in self.vd_.edges().iter() {
-            let edge_id = it.1.get().get_id();
-            //assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), true);
-            if !self.vd_.edge_is_finite(Some(edge_id)).unwrap() {
-                self.color_exterior(Some(it.1.get().get_id()));
+            let edge_id = Some(it.get().get_id());
+            if !self.vd_.edge_is_finite(edge_id).unwrap() {
+                self.color_exterior(edge_id);
             }
         }
         Result::Ok("".to_string())
@@ -860,7 +859,7 @@ where
         #[allow(unused_assignments)]
         let mut color = [0.0, 6.0, 0.0, 1.0];
 
-        for it in self.vd_.edges().iter() {
+        for it in self.vd_.edges().iter().enumerate() {
             let edge_id = VoronoiEdgeIndex(it.0);
             let edge = it.1.get();
             assert_eq!(edge.get_id(), edge_id);
