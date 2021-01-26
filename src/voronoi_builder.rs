@@ -68,9 +68,9 @@ where
     // todo! make pub(crate)
     pub beach_line_: VB::Beachline<I1, F1, I2, F2>,
     index_: usize,
-    segments_added: bool, // make sure eventual vertices is added before segments
     debug_circle_counter: isize, // Just for debugging purposes
     debug_site_counter: isize, // Just for debugging purposes
+    segments_added: bool, // make sure eventual vertices are added before segments
 }
 
 impl<I1, F1, I2, F2> VoronoiBuilder<I1, F1, I2, F2>
@@ -83,14 +83,10 @@ where
     #[allow(clippy::new_without_default)]
     pub fn new() -> VoronoiBuilder<I1, F1, I2, F2> {
         Self {
-            //vertexes_: Vec::new(),
-            //segments_: Vec::new(),
             /// key by SiteEventIndexType
             site_events_: Vec::new(),
             beach_line_: VB::Beachline::default(),
             index_: 0,
-            //site_event_iterator_: 0,
-            //_pdo: PhantomData,
             end_points_: BinaryHeap::new(),
             circle_events_: VC::CircleEventQueue::<F2>::default(),
             debug_circle_counter: 0,
