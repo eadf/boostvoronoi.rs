@@ -1,4 +1,4 @@
-# boostvoronoi.rs
+# Segmented Voronoi for Rust
 [Boost 1.75.0 polygon::voronoi](https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_main.htm) ported to 100% rust.
 This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) works on line segments as well as points, making it useful for finding centerlines or whatnot.
 
@@ -25,7 +25,7 @@ let s = vec![Line::new(Coordinate{x:10, y:11}, Coordinate{x:12, y:13})];
 let mut vb = VoronoiBuilder::<I1, F1, I2, F2>::new();
   
 // you will have to keep track of the input geometry. it will be referenced as 
-// input geometry index in the output. 
+// input geometry indices in the output. 
 vb.with_vertices(p.iter()).expect("test");
 vb.with_segments(s.iter()).expect("test");
 
@@ -45,5 +45,5 @@ Edges may become curves when line segments are used as input, see the example co
 
 #
 
-All credit goes to the original authors (Andrii Sydorchuk), except the porting mistakes. They are all mine.
+All credit goes to the original author (Andrii Sydorchuk), except the porting mistakes. They are all mine.
 
