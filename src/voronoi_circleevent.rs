@@ -61,9 +61,7 @@ where
         rv.push_str(
             format!(
                 "(x:{:.7},y:{:.7},lx:{:.7})",
-                self.center_x_,
-                self.center_y_,
-                self.lower_x_,
+                self.center_x_, self.center_y_, self.lower_x_,
             )
             .as_str(),
         );
@@ -113,7 +111,7 @@ impl<F2: OutputType + Neg<Output = F2>> Ord for CircleEvent<F2> {
                 Ordering::Greater
             };
         } else if self.y() < other.y()
-//TODO!!! what's this?            || self.beach_line_index_.unwrap().0 < other.beach_line_index_.unwrap().0
+        //TODO!!! what's this?            || self.beach_line_index_.unwrap().0 < other.beach_line_index_.unwrap().0
         {
             return Ordering::Less;
         }
@@ -357,9 +355,9 @@ where
         // Todo: maybe iterate until a non-removed event is found
         self.c_.peek()
     }
-    
+
     #[allow(dead_code)]
-    fn get(&self, id:CircleEventIndexType)-> &CircleEventType<F2> {
+    fn get(&self, id: CircleEventIndexType) -> &CircleEventType<F2> {
         &self.c_list_[id]
     }
 
@@ -461,12 +459,12 @@ where
         dbg!(circle_event_id);
         */
         if let Some(circle_event_id) = circle_event_id {
-            if !self.inactive_circle_ids_.contains(&circle_event_id){
-                if self.c_list_.contains_key(circle_event_id){
-                  println!("deactivate {:?}",self.c_list_[circle_event_id]);
+            if !self.inactive_circle_ids_.contains(&circle_event_id) {
+                if self.c_list_.contains_key(circle_event_id) {
+                    println!("deactivate {:?}", self.c_list_[circle_event_id]);
                 } else {
-                  println!("circle {} not present", circle_event_id);  
-                }           
+                    println!("circle {} not present", circle_event_id);
+                }
                 let _ = self.inactive_circle_ids_.insert(circle_event_id);
             }
         }

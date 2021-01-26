@@ -10,21 +10,21 @@
 // Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
 
 use super::voronoi_circleevent as VC;
+use super::voronoi_ctypes as CT;
 use super::voronoi_siteevent as VSE;
 use super::voronoi_structures as VS;
-use super::voronoi_ctypes as CT;
 use super::TypeConverter as TCC;
 
 pub use super::{BigFloatType, BigIntType, InputType, OutputType};
 use num::{NumCast, PrimInt};
 use std::cell::Cell;
+use std::cmp::Ordering;
 use std::fmt;
 use std::hash::Hash;
 use std::marker::PhantomData;
 use std::ops::Neg;
 use std::rc::Rc;
 use vec_map::VecMap;
-use std::cmp::Ordering;
 
 pub type SourceIndexType = usize;
 #[derive(Copy, Clone, PartialEq, Eq, Default)]
@@ -300,13 +300,13 @@ where
 
     fn vertex_equality_predicate_eq(&self, other: &Self) -> bool {
         let ulp = 128;
-        let x1:f64 = NumCast::from(self.x()).unwrap();
-        let y1:f64 = NumCast::from(self.y()).unwrap();
-        let x2:f64 = NumCast::from(other.x()).unwrap();
-        let y2:f64 = NumCast::from(other.y()).unwrap();
+        let x1: f64 = NumCast::from(self.x()).unwrap();
+        let y1: f64 = NumCast::from(self.y()).unwrap();
+        let x2: f64 = NumCast::from(other.x()).unwrap();
+        let y2: f64 = NumCast::from(other.y()).unwrap();
 
-        CT::UlpComparison::ulp_comparison(x1,x2,ulp)==Ordering::Equal &&
-        CT::UlpComparison::ulp_comparison(y1,y2,ulp)==Ordering::Equal
+        CT::UlpComparison::ulp_comparison(x1, x2, ulp) == Ordering::Equal
+            && CT::UlpComparison::ulp_comparison(y1, y2, ulp) == Ordering::Equal
     }
 
     pub fn get_id(&self) -> VoronoiVertexIndex {
@@ -1125,7 +1125,7 @@ where
     pub fn _build(&mut self) {
         //self.debug_print_all();
         println!("edges b4 degenerate {}", self.edges_.len());
-        
+
         // Remove degenerate edges.
         if !self.edges_.is_empty() {
             let mut last_edge: usize = 0;
@@ -1199,7 +1199,7 @@ where
             }
         }
         println!("edges after degenerate {}", self.edges_.len());
-        
+
         //self.debug_print_edges();
 
         // Set up incident edge pointers for cells and vertices.

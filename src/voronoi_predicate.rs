@@ -307,8 +307,8 @@ where
         lhs: &VSE::SiteEvent<I1, F1, I2, F2>,
         rhs: &VSE::SiteEvent<I1, F1, I2, F2>,
     ) -> bool {
-       let rv = Self::event_comparison_predicate_bii_real(lhs, rhs);
-       /*println!(
+        let rv = Self::event_comparison_predicate_bii_real(lhs, rhs);
+        /*println!(
             "event_comparison_predicate(lhs:{}, rhs:{})={}",
             lhs, rhs, rv);
         */
@@ -319,7 +319,7 @@ where
         lhs: &VSE::SiteEvent<I1, F1, I2, F2>,
         rhs: &VSE::SiteEvent<I1, F1, I2, F2>,
     ) -> bool {
-        if lhs.x0()==I1::from(318).unwrap() && rhs.x0()==I1::from(318).unwrap(){
+        if lhs.x0() == I1::from(318).unwrap() && rhs.x0() == I1::from(318).unwrap() {
             //println!("lhs:{} rhs:{}", lhs, rhs);
         }
         if lhs.x0() != rhs.x0() {
@@ -360,13 +360,12 @@ where
         rhs: &VSE::SiteEvent<I1, F1, I2, F2>,
     ) -> cmp::Ordering {
         // this is techically not needed as ordering of identical point sites is random in C++ boost
-        if lhs.is_point() && rhs.is_point() 
-           && lhs.point0() == rhs.point0() {
-           if lhs.initial_index() < rhs.initial_index() {
-              return cmp::Ordering::Greater; 
-           } else {
-              return cmp::Ordering::Less;
-           }
+        if lhs.is_point() && rhs.is_point() && lhs.point0() == rhs.point0() {
+            if lhs.initial_index() < rhs.initial_index() {
+                return cmp::Ordering::Greater;
+            } else {
+                return cmp::Ordering::Less;
+            }
         }
         if Self::event_comparison_predicate_bii(lhs, rhs) {
             cmp::Ordering::Less
@@ -1500,7 +1499,7 @@ where
             //let ulps =
             //    TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
             let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(ULPS);
-            
+
             recompute_c_x = c_x.dif().ulp() > ulps;
             recompute_c_y = c_y.dif().ulp() > ulps;
             recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1713,7 +1712,7 @@ where
         let y0 = i1_to_f64(if s.is_inverse() { s.y1() } else { s.y0() });
         let y1 = i1_to_f64(if s.is_inverse() { s.y0() } else { s.y1() });
         let cc_y = f2_to_f64(c.0.get().y().into_inner());
-// TODO 64 or 128 ????????????????
+        // TODO 64 or 128 ????????????????
         UlpComparison::ulp_comparison(cc_y, y0, 64) == cmp::Ordering::Less
             || UlpComparison::ulp_comparison(cc_y, y1, 64) == cmp::Ordering::Greater
     }

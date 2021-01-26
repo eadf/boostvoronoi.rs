@@ -69,8 +69,8 @@ where
     pub beach_line_: VB::Beachline<I1, F1, I2, F2>,
     index_: usize,
     debug_circle_counter: isize, // Just for debugging purposes
-    debug_site_counter: isize, // Just for debugging purposes
-    segments_added: bool, // make sure eventual vertices are added before segments
+    debug_site_counter: isize,   // Just for debugging purposes
+    segments_added: bool,        // make sure eventual vertices are added before segments
 }
 
 impl<I1, F1, I2, F2> VoronoiBuilder<I1, F1, I2, F2>
@@ -170,11 +170,11 @@ where
         );
 
         self.init_beach_line(&mut site_event_iterator_, &mut output);
-        let mut i=0;
+        let mut i = 0;
         // The algorithm stops when there are no events to process.
         while !self.circle_events_.is_empty() || (site_event_iterator_ != self.site_events_.len()) {
             /*self.beach_line_.debug_print_all();
-            */
+             */
             println!("################################################");
             println!(
                 "loop:{} circle_events_:{} num_vertices:{} beachline:{} debug_site_counter:{} debug_circle_counter:{}",
@@ -186,10 +186,10 @@ where
             );
             println!("################################################");
             if i == 185 {
-              print!("");
+                print!("");
             }
-            i+=1;
-            
+            i += 1;
+
             //if self.debug_site_counter >= 8 {
             //    print!("");
             //}
@@ -239,7 +239,7 @@ where
             }
             self.site_events_ = reversed;
         }*/
-        
+
         //println!("post sort:");
         //self.debug_site_events();
 
@@ -348,9 +348,11 @@ where
             let edge = output._insert_new_edge_2(*first, *second).0;
 
             // Insert a new bisector into the beach line.
-            let _ = self
-                .beach_line_
-                .insert(new_node_key, Some(VB::BeachLineNodeData::new_1(edge)),&self.circle_events_);
+            let _ = self.beach_line_.insert(
+                new_node_key,
+                Some(VB::BeachLineNodeData::new_1(edge)),
+                &self.circle_events_,
+            );
 
             //self.beach_line_.debug_print_all();
 
@@ -376,7 +378,7 @@ where
             if let Some(node_cell) = node_cell {
                 //dbg!(&node_cell);
                 let cevent: Option<VC::CircleEventIndexType> = node_cell.get_circle_event_id();
-                
+
                 //dbg!(&cevent);
                 self.circle_events_.deactivate(cevent);
 
@@ -395,7 +397,7 @@ where
     ) {
         //println!("->process_site_event");
         if self.debug_site_counter >= 109 {
-           print!("");
+            print!("");
         }
         //self.beach_line_.debug_print_all();
         //}
@@ -404,7 +406,7 @@ where
         let (mut right_it, last_index) = {
             // Get next site event to process.
             let site_event = self.site_events_.get(*site_event_iterator_).unwrap();
-            println!("processing site:{}",site_event);//dbg!(&site_event);
+            println!("processing site:{}", site_event); //dbg!(&site_event);
 
             // Move site iterator.
             let mut last_index = *site_event_iterator_ + 1;
@@ -472,8 +474,10 @@ where
         //self.beach_line_.debug_print_all();
         //}
         let debug_range = 999999;
-        if self.debug_circle_counter >= debug_range && self.debug_circle_counter <= debug_range +2 {
-            self.beach_line_.debug_print_all_compat(&self.circle_events_);
+        if self.debug_circle_counter >= debug_range && self.debug_circle_counter <= debug_range + 2
+        {
+            self.beach_line_
+                .debug_print_all_compat(&self.circle_events_);
             //print!("right_it:"); self.beach_line_.debug_print_all_compat_node(&right_it);
         }
 
@@ -618,7 +622,8 @@ where
     #[allow(clippy::unnecessary_unwrap)]
     pub(crate) fn process_circle_event(&mut self, output: &mut VD::VoronoiDiagram<I1, F1, I2, F2>) {
         let debug_range = 999999;
-        if self.debug_circle_counter >= debug_range && self.debug_circle_counter <= debug_range +2 {
+        if self.debug_circle_counter >= debug_range && self.debug_circle_counter <= debug_range + 2
+        {
             print!("");
         }
         self.debug_circle_counter += 1;
@@ -626,7 +631,7 @@ where
         let e = self.circle_events_.top().unwrap();
         let circle_event = e.0.get();
         println!("processing:CE{:?}", circle_event);
-        
+
         if !self
             .circle_events_
             .is_active(circle_event.get_index().unwrap())
@@ -638,9 +643,13 @@ where
         let it_last = it_first;
 
         let debug_range = 999999;
-        if self.debug_circle_counter >= debug_range && self.debug_circle_counter <= debug_range +2 {
-            self.beach_line_.debug_print_all_compat(&self.circle_events_);
-            print!("it_first:"); self.beach_line_.debug_print_all_compat_node(&it_first.0, &self.circle_events_);
+        if self.debug_circle_counter >= debug_range && self.debug_circle_counter <= debug_range + 2
+        {
+            self.beach_line_
+                .debug_print_all_compat(&self.circle_events_);
+            print!("it_first:");
+            self.beach_line_
+                .debug_print_all_compat_node(&it_first.0, &self.circle_events_);
         }
         //self.circle_events_.dbg();
         //dbg!(e);
@@ -715,7 +724,7 @@ where
         // Pop the topmost circle event from the event queue.
         self.circle_events_.pop_and_destroy();
         //dbg!(self.circle_events_.len());
-        
+
         // Check new triplets formed by the neighboring arcs
         // to the left for potential circle events.
         if self.beach_line_.len().0 > 0 && it_first.0 != self.beach_line_.peek_first().unwrap().0 {
@@ -782,9 +791,11 @@ where
         // Update the output.
         let edges = output._insert_new_edge_2(site_arc2, site_event);
 
-        let _ = self
-            .beach_line_
-            .insert(new_right_node, Some(VB::BeachLineNodeData::new_1(edges.1)), &self.circle_events_);
+        let _ = self.beach_line_.insert(
+            new_right_node,
+            Some(VB::BeachLineNodeData::new_1(edges.1)),
+            &self.circle_events_,
+        );
         //self.beach_line_.debug_print_all();
 
         if site_event.is_segment() {
@@ -796,7 +807,9 @@ where
             let _ = new_node.right_site_m().inverse();
             //dbg!(new_node);
             //self.beach_line_.debug_print_all();
-            let new_node = self.beach_line_.insert(new_node, None, &self.circle_events_);
+            let new_node = self
+                .beach_line_
+                .insert(new_node, None, &self.circle_events_);
             //dbg!(new_node);
             //self.beach_line_.debug_print_all();
 
@@ -829,7 +842,7 @@ where
         bisector_node: VB::BeachLineIndex,
     ) {
         //self.beach_line_.debug_print_all();
-        
+
         /*
         println!("Site1:{:?}", &site1);
         println!("Site2:{:?}", &site2);
@@ -874,7 +887,7 @@ where
         }
     }
 
-    fn debug_site_events(&self){
+    fn debug_site_events(&self) {
         println!("Site event list:");
         for s in self.site_events_.iter() {
             println!("{}", s);

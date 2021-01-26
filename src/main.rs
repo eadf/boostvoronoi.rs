@@ -46,8 +46,7 @@ where
 fn main() {
     #[allow(unused_variables)]
     let output = {
-
-        let points: [[I1; 2]; 1] = [[10,11]];
+        let points: [[I1; 2]; 1] = [[10, 11]];
         /*let segments: [[I1; 4]; 9] = [
             [403, 0, 395, 1],
             [409, 4, 403, 0],
@@ -423,13 +422,16 @@ fn main() {
         let mut i = 0;
         println!("points.size()=={}", _v.len());
         for v in _v.iter() {
-            println!("#{}:({},{})",i,v.x, v.y);
-            i+=1;
+            println!("#{}:({},{})", i, v.x, v.y);
+            i += 1;
         }
         println!("segments.size()=={}", _s.len());
         for s in _s.iter() {
-            println!("#{}:({},{})-({},{})", i,s.start.x, s.start.y, s.end.x, s.end.y);
-            i+=1;
+            println!(
+                "#{}:({},{})-({},{})",
+                i, s.start.x, s.start.y, s.end.x, s.end.y
+            );
+            i += 1;
         }
         let mut vb = VB::VoronoiBuilder::<I1, F1, I2, F2>::new();
         vb.with_vertices(_v.iter()).expect("test_template");

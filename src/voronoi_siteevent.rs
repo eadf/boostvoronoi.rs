@@ -151,9 +151,9 @@ where
         let equal = (self.point0_ == other.point0_) && (self.point1_ == other.point1_);
         //if equal {
         //   println!("PartialEq site1:{} {} site2:{} {} equal={}",self, self.is_inverse(), other, other.is_segment(), equal);
-           //if self.initial_index_ > other.initial_index_{
-           //   return false;
-           //}
+        //if self.initial_index_ > other.initial_index_{
+        //   return false;
+        //}
         //}
         equal
     }
