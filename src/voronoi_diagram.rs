@@ -24,7 +24,6 @@ use std::hash::Hash;
 use std::marker::PhantomData;
 use std::ops::Neg;
 use std::rc::Rc;
-use vec_map::VecMap;
 
 type SourceIndexType = usize;
 #[derive(Copy, Clone, PartialEq, Eq, Default)]
@@ -89,7 +88,6 @@ impl SourceCategory {
     pub const SOURCE_CATEGORY_SINGLE_POINT: Self = SourceCategory(0x0);
     pub const SOURCE_CATEGORY_SEGMENT_START_POINT: Self = SourceCategory(0x1);
     pub const SOURCE_CATEGORY_SEGMENT_END_POINT: Self = SourceCategory(0x2);
-    //pub const SOURCE_CATEGORY_POINT_BITMASK: Self = SourceCategory(0x2);
 
     // Segment subtypes.
     pub const SOURCE_CATEGORY_INITIAL_SEGMENT: Self = SourceCategory(0x8);
@@ -493,9 +491,9 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
-    cells_: Vec<CellType<I1, F1>>, // index key is VoronoiCell.id_:VoronoiCellIndexType
-    vertices_: VecMap<VertexType<I1, F1>>, // indexed by: VoronoiVertexIndexType
-    edges_: Vec<EdgeType<I1, F1, I2, F2>>, // indexed by: VoronoiEdgeIndexType
+    cells_: Vec<CellType<I1, F1>>,         // indexed by VoronoiCellIndex
+    vertices_: Vec<VertexType<I1, F1>>,    // indexed by VoronoiVertexIndex
+    edges_: Vec<EdgeType<I1, F1, I2, F2>>, // indexed by VoronoiEdgeIndex
     next_edge_id_: usize,
     next_vertex_id_: usize,
 }
@@ -510,7 +508,7 @@ where
     pub fn new(input_size: usize) -> Self {
         Self {
             cells_: Vec::<CellType<I1, F1>>::with_capacity(input_size),
-            vertices_: VecMap::<VertexType<I1, F1>>::with_capacity(input_size),
+            vertices_: Vec::<VertexType<I1, F1>>::with_capacity(input_size),
             edges_: Vec::<EdgeType<I1, F1, I2, F2>>::with_capacity(input_size * 2),
             next_edge_id_: 0,
             next_vertex_id_: 0,
@@ -527,7 +525,7 @@ where
         &self.cells_
     }
 
-    pub fn vertices(&self) -> &VecMap<VertexType<I1, F1>> {
+    pub fn vertices(&self) -> &Vec<VertexType<I1, F1>> {
         &self.vertices_
     }
 
@@ -547,7 +545,7 @@ where
         self.cells_.iter()
     }
 
-    pub fn vertex_iter(&self) -> vec_map::Iter<VertexType<I1, F1>> {
+    pub fn vertex_iter(&self) -> core::slice::Iter<VertexType<I1, F1>> {
         self.vertices_.iter()
     }
 
@@ -606,7 +604,7 @@ where
 
     pub fn _reserve(&mut self, num_sites: usize) {
         self.cells_.reserve(num_sites);
-        self.vertices_.reserve_len(num_sites << 1);
+        self.vertices_.reserve(num_sites << 1);
         self.edges_.reserve((num_sites << 2) + (num_sites << 1));
     }
 
@@ -1271,7 +1269,8 @@ where
             }
         }
         for (i, v) in self.vertices_.iter().enumerate() {
-            println!("vertex{} {:?}", i, &v.1.get());
+            assert_eq!(i,v.get().id_.0);
+            println!("vertex{} {:?}", i, &v.get());
         }
     }
 

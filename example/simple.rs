@@ -234,7 +234,7 @@ where
         // Draw voronoi vertices.
         println!("->draw_vertices");
         for (i, it) in self.vd_.vertex_iter().enumerate() {
-            let it = it.1.get();
+            let it = it.get();
             if self.internal_edges_only_ && it.get_color() == EXTERNAL_COLOR {
                 continue;
             }

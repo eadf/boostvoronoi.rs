@@ -37,10 +37,10 @@ Edges may become curves when line segments are used as input, see the example co
 
 ## Todo
 - [ ] Evaluate the generic API. Is <I1, F1, I2, F2> really needed?
-- [ ] Maybe replace the builtin ulp implementation
-- [ ] Maybe replace num::BigInt with something stack friendly
+- [ ] Replace the builtin ulp implementation
+- [ ] Replace num::BigInt with something lighter
 - [ ] Add many more test cases for voronoi_robust_ftp.rs, specially for ulp
-- [ ] Remove use of vec_map::VecMap, probably only needed for circle events
+- [x] Remove use of vec_map::VecMap where not absolutely needed.
 - [ ] Benchmark and optimize
 
 #

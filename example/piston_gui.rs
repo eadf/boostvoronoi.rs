@@ -832,7 +832,7 @@ where
     fn draw_vertices<G: Graphics>(&self, c: &Context, g: &mut G) {
         let color = [0.0, 0.0, 0.6, 1.0];
 
-        for it in self.vd_.vertex_iter() {
+        for it in self.vd_.vertex_iter().enumerate() {
             let it = it.1.get();
             if self.internal_edges_only_ && it.get_color() == EXTERNAL_COLOR {
                 continue;
