@@ -80,7 +80,7 @@ impl VoronoiCellBits {
 /// Represents category of the input source that forms Voronoi cell.
 pub type SourceCategoryType = u32;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub struct SourceCategory(pub SourceCategoryType);
 
 // Todo: rename these enums (make shorter)
