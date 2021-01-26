@@ -217,22 +217,6 @@ where
         }
     }
 
-    /*
-    pub(crate) fn new_3(
-        center_x: F2,
-        center_y: F2,
-        lower_x: F2,
-        bech_line_index: VB::BeachLineIndex,
-    ) -> CircleEvent<F2> {
-        Self {
-            center_x_: OrderedFloat(center_x),
-            center_y_: OrderedFloat(center_y),
-            lower_x_: OrderedFloat(lower_x),
-            beach_line_index_: Some(bech_line_index),
-            index_: None,
-        }
-    }*/
-
     pub(crate) fn get_index(&self) -> Option<CircleEventIndexType> {
         self.index_
     }
@@ -394,25 +378,14 @@ where
     /// was named pop in C++, but it was never used to actually get the item, only to destroy it
     ///
     pub(crate) fn pop_and_destroy(&mut self) {
-        /*println!("-> circle_event::pop_and_destroy");
-        dbg!(
-            self.c_list_.len(),
-            self.c_.len(),
-            self.inactive_circle_ids_.len()
-        );*/
         if let Some(circle) = self.c_.pop() {
             if let Some(circle_id) = circle.0.get().index_ {
                 let _ = self.c_list_.remove(circle_id);
                 let _ = self.inactive_circle_ids_.insert(circle_id);
             } else {
-                panic!("This should not happend")
+                panic!("This should not have happened")
             }
         }
-        /*dbg!(
-            self.c_list_.len(),
-            self.c_.len(),
-            self.inactive_circle_ids_.len()
-        );*/
         if self.c_list_.len() != self.c_.len() {
             assert_eq!(self.c_list_.len(), self.c_.len());
         }
@@ -432,8 +405,6 @@ where
     /// return a Rc ref of the inserted element
     pub(crate) fn associate_and_push(&mut self, cc: CircleEventType<F2>) -> Rc<CircleEventC<F2>> {
         //assert!(!self.c_.contains(&cc)); // todo: is this supposed to happen?
-        //dbg!(&cc);
-        //let duplicates = self.c_.contains(&cc);
         {
             let mut c = cc.0.get();
             let _ = c.set_index(self.c_list_next_free_index_);
@@ -453,9 +424,6 @@ where
     }
 
     pub(crate) fn deactivate(&mut self, circle_event_id: Option<CircleEventIndexType>) {
-        /*println!("->circle_event::deactivate");
-        dbg!(circle_event_id);
-        */
         if let Some(circle_event_id) = circle_event_id {
             let _ = self.inactive_circle_ids_.insert(circle_event_id);
         }

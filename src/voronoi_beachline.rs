@@ -99,26 +99,17 @@ where
         mut key: BeachLineNodeKey<I, O, BI, BF>,
         data: Option<BeachLineNodeData>,
     ) -> BeachLineNodeKey<I, O, BI, BF> {
-        //println!("b4 node_index_=={}", key.node_index_);
         key.node_index_ = self.next_free_;
-        //println!("after node_index_=={}", key.node_index_);
-
-        //println!("-> beachline.insert()");
-        //dbg!(key, data);
 
         let node = Rc::new(Cell::new(data));
         let _ = self.beach_line_vec.insert(self.next_free_.0, (key, node));
         let _ = self.beach_line_.insert(key, key.node_index_);
         let _ = self.next_free_.increment();
-        //dbg!("added bl {}", self.next_free_ - 1);
-        //self.debug_print_all();
+
         key
     }
 
     pub(crate) fn erase(&mut self, beachline_index: BeachLineIndex) {
-        //println!("-> beachline::erase()");
-        //dbg!(beachline_index);
-
         //todo is this correct?
         if let Some(node) = self.beach_line_vec.get(beachline_index.0) {
             let node = node.0;
@@ -133,7 +124,6 @@ where
             // tried to remove non-existing beachline
             panic!();
         }
-        //self.debug_print_all();
     }
 
     pub fn clear(&mut self) {
@@ -160,8 +150,6 @@ where
             return false;
         }
 
-        //self.debug_print_all();
-        //dbg!(&peek.unwrap().0, &right_it.unwrap());
         peek.unwrap().0 == right_it.unwrap()
     }
 
@@ -266,12 +254,8 @@ where
         &self,
         key: BeachLineNodeKey<I, O, BI, BF>,
     ) -> Option<BeachLineNodeKey<I, O, BI, BF>> {
-        //println!("--> lower bound");
-        //self.debug_print_all();
-        //dbg!(&key);
         let rv = self.beach_line_.range((Included(&key), Unbounded)).next();
         if let Some(rv) = rv {
-            //dbg!(&key, &rv.0);
             Some(*rv.0)
         } else {
             None
@@ -361,7 +345,6 @@ where
             rv.push('\n');
         }
         write!(f, "\n{}\n", rv)
-        //write!(f, "\nRoot: {}\n{}", "", /*self.root*/ rv)
     }
 }
 

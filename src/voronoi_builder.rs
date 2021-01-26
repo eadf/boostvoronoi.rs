@@ -68,9 +68,7 @@ where
     // todo! make pub(crate)
     pub beach_line_: VB::Beachline<I1, F1, I2, F2>,
     index_: usize,
-    segments_added: bool, // make sure eventual vertices is added before segments
-    debug_circle_counter: isize, // Just for debugging purposes
-    debug_site_counter: isize, // Just for debugging purposes
+    segments_added: bool, // make sure eventual vertices are added before segments
 }
 
 impl<I1, F1, I2, F2> VoronoiBuilder<I1, F1, I2, F2>
@@ -83,18 +81,12 @@ where
     #[allow(clippy::new_without_default)]
     pub fn new() -> VoronoiBuilder<I1, F1, I2, F2> {
         Self {
-            //vertexes_: Vec::new(),
-            //segments_: Vec::new(),
             /// key by SiteEventIndexType
             site_events_: Vec::new(),
             beach_line_: VB::Beachline::default(),
             index_: 0,
-            //site_event_iterator_: 0,
-            //_pdo: PhantomData,
             end_points_: BinaryHeap::new(),
             circle_events_: VC::CircleEventQueue::<F2>::default(),
-            debug_circle_counter: 0,
-            debug_site_counter: 0,
             segments_added: false,
         }
     }
@@ -164,55 +156,12 @@ where
         let mut output: VD::VoronoiDiagram<I1, F1, I2, F2> =
             VD::VoronoiDiagram::<I1, F1, I2, F2>::new(self.site_events_.len());
 
-        /*
-         */
-        //let mut output = ::new(self.site_events_.len());
-
         let mut site_event_iterator_: VSE::SiteEventIndexType = self.init_sites_queue();
-        /*        println!(
-                    "********************************************************************************"
-                );
-                println!("->construct()");
-                println!(
-                    "********************************************************************************"
-                );
-                for s in self.site_events_.iter() {
-                    println!("{}", s);
-                }
-                println!("#site_events={}", self.site_events_.len());
-        dbg!(
-            self.site_events_.len(),
-            &self.site_events_,
-            site_event_iterator_
-        );
-        */
 
         self.init_beach_line(&mut site_event_iterator_, &mut output);
 
         // The algorithm stops when there are no events to process.
-        //event_comparison_predicate event_comparison; wtf is this?
         while !self.circle_events_.is_empty() || (site_event_iterator_ != self.site_events_.len()) {
-            /*self.beach_line_.debug_print_all();
-            println!("################################################");
-            println!(
-                "loop circle_events_:{}, num_vertices:{}, site_events:{}, beachline:{} index:{} debug_site_counter:{} debug_circle_counter:{}",
-                self.circle_events_.len(),
-                output.num_vertices(),
-                self.site_events_.len(),
-                self.beach_line_.len().0,
-                self.index_,
-                self.debug_site_counter,
-                self.debug_circle_counter,
-            );
-            if self.debug_circle_counter >= 27 {
-                // 30
-                print!("");
-            }
-            */
-            //if self.debug_site_counter >= 8 {
-            //    print!("");
-            //}
-
             if self.circle_events_.is_empty() {
                 self.process_site_event(&mut site_event_iterator_, &mut output);
             } else if site_event_iterator_ == self.site_events_.len() {
@@ -227,15 +176,9 @@ where
                     self.process_circle_event(&mut output);
                 }
             }
-
-            //dbg!(self.circle_events_.len(), site_event_iterator_);
             self.circle_events_.pop_inactive_at_top();
-
-            //println!("end loop");
-            //dbg!(self.circle_events_.len(), site_event_iterator_);
         }
-        //println!("<-construct()");
-        ////dbg!(&self.beach_line_);
+
         self.beach_line_.clear();
 
         // Finish construction.
@@ -266,9 +209,6 @@ where
         site_event_iterator_: &mut VSE::SiteEventIndexType,
         output: &mut VD::VoronoiDiagram<I1, F1, I2, F2>,
     ) {
-        //println!("-> init_beach_line()");
-        ////dbg!(&site_event_iterator_);
-
         if self.site_events_.is_empty() {
             return;
         }
@@ -289,8 +229,6 @@ where
                     &self.site_events_[*site_event_iterator_],
                 )
             {
-                ////dbg!(&self.site_events_[*site_event_iterator_].point0());
-                ////dbg!(&self.site_events_[0].point0());
                 *site_event_iterator_ += 1;
                 skip += 1;
             }
@@ -303,8 +241,6 @@ where
                 self.init_beach_line_collinear_sites(site_event_iterator_, output);
             }
         }
-        //println!("<- init_beach_line()");
-        ////dbg!(&site_event_iterator_);
     }
 
     /// Init beach line with the two first sites.
@@ -314,8 +250,6 @@ where
         site_event_iterator_: &mut VSE::SiteEventIndexType,
         output: &mut VD::VoronoiDiagram<I1, F1, I2, F2>,
     ) {
-        //println!("->init_beach_line_default()");
-        ////dbg!(&site_event_iterator_);
         // Get the first and the second site event.
         let first = *site_event_iterator_ - 1;
         let first = self.site_events_[first];
@@ -334,9 +268,6 @@ where
         site_event_iterator_: &VSE::SiteEventIndexType,
         output: &mut VD::VoronoiDiagram<I1, F1, I2, F2>,
     ) {
-        //println!("->init_beach_line_collinear_sites()");
-        ////dbg!(&site_event_iterator_);
-
         let mut it_first: VSE::SiteEventIndexType = 0;
         let mut it_second: VSE::SiteEventIndexType = 1;
         while it_second != *site_event_iterator_ {
@@ -354,32 +285,18 @@ where
                 .beach_line_
                 .insert(new_node_key, Some(VB::BeachLineNodeData::new_1(edge)));
 
-            //self.beach_line_.debug_print_all();
-
             // Update iterators.
             it_first += 1;
             it_second += 1;
         }
-        ////dbg!(&self.beach_line_, &output.cells(), &output.edges());
     }
 
     fn deactivate_circle_event(&mut self, value: &Option<VB::BeachLineNodeKey<I1, F1, I2, F2>>) {
-        //if self.debug_site_counter >= 6 {
-        /*println!(
-            "debug_site_counter:{}, circle_events:{}",
-            self.debug_site_counter,
-            self.circle_events_.len()
-        );*/
-        //self.beach_line_.debug_print_all();
-        //}
         if let Some(value) = value {
-            //dbg!(&value);
             let node_data = self.beach_line_.get_node(&value.get_index()).1;
             let node_cell = node_data.get();
             if let Some(node_cell) = node_cell {
-                //dbg!(&node_cell);
                 let cevent: Option<VC::CircleEventIndexType> = node_cell.get_circle_event_id();
-                //dbg!(&cevent);
                 self.circle_events_.deactivate(cevent);
 
                 // TODO! should this be in here?
@@ -395,21 +312,9 @@ where
         site_event_iterator_: &mut VSE::SiteEventIndexType,
         output: &mut VD::VoronoiDiagram<I1, F1, I2, F2>,
     ) {
-        //println!("->process_site_event");
-        //if self.debug_site_counter >= 6 {
-        /*println!(
-            "debug_site_counter:{}, circle_events:{}",
-            self.debug_site_counter,
-            self.circle_events_.len()
-        );*/
-        //self.beach_line_.debug_print_all();
-        //}
-        self.debug_site_counter += 1;
-
         let (mut right_it, last_index) = {
             // Get next site event to process.
             let site_event = self.site_events_.get(*site_event_iterator_).unwrap();
-            //dbg!(&site_event);
 
             // Move site iterator.
             let mut last_index = *site_event_iterator_ + 1;
@@ -417,33 +322,14 @@ where
             // If a new site is an end point of some segment,
             // remove temporary nodes from the beach line data structure.
             if !site_event.is_segment() {
-                ////dbg!(self.end_points_.len());
-                //if !self.end_points_.is_empty() {
-                //let peek = self.end_points_.peek().unwrap();
-                /*dbg!(
-                    self.end_points_.len(),
-                    site_event.point0(),
-                    peek.first,
-                    peek.second.0,
-                    self.beach_line_.get_node(&peek.second).0,
-                );*/
-                //let a = 0;
-                //}
                 while !self.end_points_.is_empty()
                     && &self.end_points_.peek().unwrap().first == site_event.point0()
                 {
-                    //self.beach_line_.debug_print_all();
                     let b_it = self.end_points_.peek().unwrap();
-                    //dbg!(b_it.first, b_it.second);
                     let b_it = b_it.second;
                     let _ = self.end_points_.pop();
-                    /*println!(
-                        "Erasing:{:?} == {:?}",
-                        b_it,
-                        self.beach_line_.get_node(&b_it)
-                    );*/
+
                     self.beach_line_.erase(b_it);
-                    //self.beach_line_.debug_print_all();
                 }
             } else {
                 let mut last = self.site_events_.get(last_index);
@@ -460,37 +346,15 @@ where
             // Find the node in the binary search tree with left arc
             // lying above the new site point.
             let new_key = VB::BeachLineNodeKey::<I1, F1, I2, F2>::new_1(*site_event);
-            //if self.debug_site_counter >= 7 {
-            //dbg!(&new_key);
-            //    self.beach_line_.debug_cmp_all(new_key);
-            //}
+
             let right_it = self.beach_line_.lower_bound(new_key);
-            //if self.debug_site_counter >= 7 {
-            //dbg!(&right_it);
-            //    println!("debug_site_counter:{}", self.debug_site_counter);
-            //self.beach_line_.debug_print_all();
-            //}
+
             (right_it, last_index)
         };
-        //if self.debug_site_counter >= 6 {
-        //println!("debug_site_counter:{}", self.debug_site_counter);
-        //self.beach_line_.debug_print_all();
-        //}
 
         while *site_event_iterator_ != last_index {
             // site_event is a copy of the the event site_event_iterator_ is indexing
             let mut site_event = self.site_events_[*site_event_iterator_];
-
-            //dbg!(&right_it, &site_event_iterator_, &site_event, &last_index);
-            //if self.debug_site_counter >= 6 {
-            /*println!(
-                "debug_site_counter:{}, circle_events:{}",
-                self.debug_site_counter,
-                self.circle_events_.len()
-            );
-            self.beach_line_.debug_print_all();
-            */
-            //}
 
             let mut left_it = right_it;
 
@@ -501,9 +365,6 @@ where
                 // The above arc corresponds to the second arc of the last node.
                 // Move the iterator to the last node.
 
-                //let old_left_it = left_it;
-                ////dbg!(self.beach_line_.peek_last());
-                ////dbg!(self.beach_line_.len());
                 left_it = Some(self.beach_line_.peek_last().unwrap().0);
 
                 // Get the second site of the last node
@@ -539,7 +400,6 @@ where
                     );
                     Some(self.beach_line_.get_node(&new_key).0)
                 };
-                ////dbg!(&left_it);
 
                 // If the site event is a segment, update its direction.
                 if site_event.is_segment() {
@@ -557,7 +417,6 @@ where
                 );
                 right_it = left_it;
             } else {
-                //dbg!(&right_it);
                 let (site_arc2, site3) = {
                     // The above arc corresponds neither to the first,
                     // nor to the last site in the beach line.
@@ -572,16 +431,13 @@ where
                     .beach_line_
                     .get_left_neighbour(left_it.unwrap())
                     .map(|x| x.0); //--left_it;
-                                   //self.beach_line_.debug_print_all();
-                                   //dbg!(&left_it);
+
                 let site_arc1 = *(left_it.unwrap().right_site());
                 let site1 = *(left_it.unwrap().left_site());
-                //left_it.map(|x| x.left_site().sorted_index()).unwrap();
 
                 // Insert new nodes into the beach line. Update the output.
                 let new_node_it = self
                     .insert_new_arc(site_arc1, site_arc2, site_event /*, right_it*/, output);
-                //self.beach_line_.debug_print_all();
 
                 // Add candidate circles to the circle event queue.
                 // There could be up to two circle events formed by
@@ -630,14 +486,6 @@ where
         let it_first = &self.beach_line_.get_node(&e.1.unwrap());
         let it_last = it_first;
 
-        //self.circle_events_.dbg();
-        //dbg!(e);
-        //dbg!(&it_first.0);
-        //if self.debug_circle_counter >= 36 {
-        //self.beach_line_.debug_print_all();
-        //}
-        //println!("->process_circle_event() {}", self.debug_circle_counter);
-
         // Get the C site.
         let site3 = it_first.0.right_site();
 
@@ -646,13 +494,9 @@ where
 
         // Get the half-edge corresponding to the first bisector - (A, B).
         let it_first = self.beach_line_.get_left_neighbour(it_first.0).unwrap();
-        //dbg!(&it_first);
         let it_first = &self.beach_line_.get_node(&it_first.1);
-        //dbg!(&it_first.0);
 
         let bisector1 = it_first.1.get().unwrap().edge_id();
-        //dbg!(&bisector1);
-        //dbg!(&bisector2);
 
         // Get the A site.
         let site1 = *it_first.0.left_site();
@@ -664,10 +508,6 @@ where
             *site3
         };
 
-        /*if self.debug_circle_counter >= 27 {
-            print!("");
-            self.beach_line_.debug_print_all();
-        }*/
         // Change the (A, B) bisector node to the (A, C) bisector node.
         let mut it_first = {
             let it_first_key_before = it_first.0;
@@ -679,11 +519,6 @@ where
             self.beach_line_
                 .replace_key(it_first_key_before, it_first_key_after)
         };
-        /*
-        if self.debug_circle_counter >= 27 {
-            print!("");
-            self.beach_line_.debug_print_all();
-        }*/
 
         // Insert the new bisector into the beach line.
         {
@@ -698,15 +533,12 @@ where
             };
             it_first.1.set(data);
         }
-        //self.beach_line_.debug_print_all();
         // Remove the (B, C) bisector node from the beach line.
         self.beach_line_.erase(it_last.0.get_index());
-        //self.beach_line_.debug_print_all();
         let it_last = (it_first.0, it_first.0.get_index());
 
         // Pop the topmost circle event from the event queue.
         self.circle_events_.pop_and_destroy();
-        //dbg!(self.circle_events_.len());
 
         // Check new triplets formed by the neighboring arcs
         // to the left for potential circle events.
@@ -725,24 +557,17 @@ where
 
         // Check the new triplet formed by the neighboring arcs
         // to the right for potential circle events.
-        //self.beach_line_.debug_print_all();
-        //println!("pre++ ");
-        //dbg!(&it_last.0);
+
         let it_last = self
             .beach_line_
             .get_right_neighbour_by_id(it_last.0.get_index());
-        //println!("post++ ");
-        //dbg!(&it_last);
-        //if self.debug_circle_counter >= 7 {
-        //    print!("");
-        //}
+
         if it_last.is_some() {
             let it_last = it_last.unwrap();
             let it_last_node = self.beach_line_.get_node(&it_last.get_index()).1;
             self.circle_events_
                 .deactivate(it_last_node.get().and_then(|x| x.get_circle_event_id()));
 
-            ////dbg!(&it_last);
             let site_r1 = it_last.right_site();
             self.activate_circle_event(site1, site3, *site_r1, it_last.get_index());
         }
@@ -758,9 +583,6 @@ where
         //position: BeachLineIteratorType,
         output: &mut VD::VoronoiDiagram<I1, F1, I2, F2>,
     ) -> VB::BeachLineIndex {
-        //println!("->insert_new_arc()");
-        //dbg!(&site_arc1, &site_arc2, &site_event);
-
         // Create two new bisectors with opposite directions.
         let new_left_node = VB::BeachLineNodeKey::<I1, F1, I2, F2>::new_2(site_arc1, site_event);
         let mut new_right_node =
@@ -777,7 +599,6 @@ where
         let _ = self
             .beach_line_
             .insert(new_right_node, Some(VB::BeachLineNodeData::new_1(edges.1)));
-        //self.beach_line_.debug_print_all();
 
         if site_event.is_segment() {
             // Update the beach line with temporary bisector, that will
@@ -786,29 +607,19 @@ where
             let mut new_node =
                 VB::BeachLineNodeKey::<I1, F1, I2, F2>::new_2(site_event, site_event);
             let _ = new_node.right_site_m().inverse();
-            //dbg!(new_node);
-            //self.beach_line_.debug_print_all();
             let new_node = self.beach_line_.insert(new_node, None);
-            //dbg!(new_node);
-            //self.beach_line_.debug_print_all();
-
-            //dbg!(&site_event.point1(), new_node.get_index());
-            //dbg!(self.beach_line_.get_node(&new_node.get_index()).0);
 
             // Update the data structure that holds temporary bisectors.
             self.end_points_.push(VEP::EndPointPair::new_2(
                 *site_event.point1(),
                 new_node.get_index(),
             ));
-            //dbg!(&self.end_points_.peek().unwrap().first);
         }
         let new_node_data = VB::BeachLineNodeData::new_1(edges.0);
         //let rv =
         self.beach_line_
             .insert(new_left_node, Some(new_node_data))
             .get_index()
-        //self.beach_line_.debug_print_all();
-        //rv
     }
 
     /// Add a new circle event to the event queue.
@@ -820,32 +631,11 @@ where
         site3: VSE::SiteEvent<I1, F1, I2, F2>,
         bisector_node: VB::BeachLineIndex,
     ) {
-        //self.beach_line_.debug_print_all();
-        /*
-        println!("activate_circle_event: {}", self.debug_circle_counter);
-        println!("Site1:{:?}", &site1);
-        println!("Site2:{:?}", &site2);
-        println!("Site3:{:?}", &site3);
-        println!(
-            "bi-node L:{:?}",
-            &self.beach_line_.get_node(&bisector_node).0.left_site()
-        );
-        println!(
-            "bi-node R:{:?}",
-            &self.beach_line_.get_node(&bisector_node).0.right_site()
-        );
-        */
-        //if self.debug_circle_counter >= 6 {
-        //    self.beach_line_.debug_print_all();
-        //    self.debug_circle_counter += 0;
-        //}
-        self.debug_circle_counter += 1;
-
         // Check if the three input sites create a circle event.
 
         let c_event = VC::CircleEvent::<F2>::new_1(bisector_node);
         let c_event = VC::CircleEventC::<F2>::new_1(c_event);
-        //dbg!(&c_event);
+
         if VP::CircleFormationFunctor::<I1, F1, I2, F2>::circle_formation_predicate(
             &site1, &site2, &site3, &c_event,
         ) {

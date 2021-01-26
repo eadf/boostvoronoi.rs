@@ -635,9 +635,6 @@ pub struct robust_sqrt_expr<
     _fpt: NumCast + Float + fmt::Display + Default + Debug + ops::Neg<Output = _fpt>,
 > {
     _pdf: PhantomData<_fpt>,
-    //one: i32,
-    //two: i32,
-    //_converter convert;
 }
 
 #[allow(non_camel_case_types)]
@@ -645,11 +642,7 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
     robust_sqrt_expr<_fpt>
 {
     pub fn new() -> Self {
-        Self {
-            _pdf: PhantomData,
-            //one: num::cast::<u8, BigInt>(1u8).unwrap(),
-            //two: num::cast::<u8, BigInt>(2u8).unwrap(),
-        }
+        Self { _pdf: PhantomData }
     }
 
     #[inline(always)]
@@ -658,15 +651,6 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
         RobustFpt::<_fpt>::new_1(num::cast::<f64, _fpt>(that).unwrap())
     }
 
-    /*pub fn eval1_fake(&self, a: &[BigInt], b: &[BigInt]) -> RobustFpt<_fpt> {
-        let rv = self.eval1(a, b);
-        println!("eval1");
-        println!("A=[{}]", a[0].to_i128().unwrap());
-        println!("B=[{}]", b[0].to_i128().unwrap());
-        println!("rv={:?}", rv.fpv());
-        rv
-    }*/
-
     /// Evaluates expression (re = 4 EPS):
     /// A[0] * sqrt(B[0]).
     pub fn eval1(&self, a: &[BigInt], b: &[BigInt]) -> RobustFpt<_fpt> {
@@ -674,23 +658,6 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
         let b = Self::i_to_f(&b[0]);
         a * b.sqrt()
     }
-
-    /*pub fn eval2_fake(&self, a: &[BigInt], b: &[BigInt]) -> RobustFpt<_fpt> {
-        let rv = self.eval2(a, b);
-        println!("eval2");
-        println!(
-            "A=[{}, {}]",
-            a[0].to_i128().unwrap(),
-            a[1].to_i128().unwrap()
-        );
-        println!(
-            "B=[{}, {}]",
-            b[0].to_i128().unwrap(),
-            b[1].to_i128().unwrap()
-        );
-        println!("rv={:?}", rv.fpv());
-        rv
-    }*/
 
     // Evaluates expression (re = 7 EPS):
     // A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]).
@@ -707,26 +674,6 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
             - Self::i_to_f(&a[1]) * Self::i_to_f(&a[1]) * Self::i_to_f(&b[1]))
             / (ra - rb)
     }
-
-    /*
-    pub fn eval3_fake(&self, a: &[BigInt], b: &[BigInt]) -> RobustFpt<_fpt> {
-        let rv = self.eval3(a, b);
-        println!("eval3");
-        println!(
-            "A=[{}, {}, {}]",
-            a[0].to_i128().unwrap(),
-            a[1].to_i128().unwrap(),
-            a[2].to_i128().unwrap()
-        );
-        println!(
-            "B=[{}, {}, {}]",
-            b[0].to_i128().unwrap(),
-            b[1].to_i128().unwrap(),
-            b[2].to_i128().unwrap()
-        );
-        println!("rv={:?}", rv.fpv());
-        rv
-    }*/
 
     /// Evaluates expression (re = 16 EPS):
     /// A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) + A[2] * sqrt(B[2]).
@@ -749,28 +696,6 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
         let nom = self.eval2(&ta[..], &tb[..]);
         nom / (ra - rb)
     }
-
-    /*
-    pub fn eval4_fake(&self, a: &[BigInt], b: &[BigInt]) -> RobustFpt<_fpt> {
-        let rv = self.eval4(a, b);
-        println!("eval4");
-        println!(
-            "A=[{}, {}, {}, {}]",
-            a[0].to_i128().unwrap(),
-            a[1].to_i128().unwrap(),
-            a[2].to_i128().unwrap(),
-            a[3].to_i128().unwrap()
-        );
-        println!(
-            "B=[{}, {}, {}, {}]",
-            b[0].to_i128().unwrap(),
-            b[1].to_i128().unwrap(),
-            b[2].to_i128().unwrap(),
-            b[3].to_i128().unwrap()
-        );
-        println!("rv={:?}", rv.fpv());
-        rv
-    }*/
 
     /// Evaluates expression (re = 25 EPS):
     /// A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) +
