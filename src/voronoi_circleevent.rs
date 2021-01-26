@@ -90,6 +90,7 @@ impl<F2: OutputType + Neg<Output = F2>> PartialEq for CircleEvent<F2> {
             && self.center_y_ == other.center_y_
             && self.lower_x_ == other.lower_x_
         // todo! Should self.index_ and beach_line_index be in here too?
+        // todo! ulp comparison, just like vertex_equality_predicate()?
         //&& self.index_  == other.index_
         //&& self.index_  == other.index_
     }

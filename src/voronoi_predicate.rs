@@ -37,7 +37,7 @@ use std::ops::Neg;
 
 // TODO: how to make these generic?
 const ULPS: u64 = 64;
-const ULPSX2: u64 = 64;//128;
+const ULPSX2: u64 = 64; // Todo: This is what c++ boost uses. Find a fix for this
 
 #[inline(always)]
 fn is_neg(number: &BigInt) -> bool {
@@ -436,22 +436,7 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
-
     #[allow(dead_code)]
-    #[allow(clippy::let_and_return)]
-    pub(crate) fn distance_predicate_debug(
-        left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
-        right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
-        new_point: &Coordinate<I1>,
-    ) -> bool {
-        let rv = Self::distance_predicate(left_site, right_site, new_point);
-        //println!(
-        //    "distance_predicate: L:{} R:{} K:{:?}=={}",
-        //    left_site, right_site, new_point, rv
-        //);
-        rv
-    }
-    
     #[allow(clippy::let_and_return)]
     pub fn distance_predicate(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
