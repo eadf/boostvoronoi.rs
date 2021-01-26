@@ -15,7 +15,7 @@ use super::voronoi_structures as VS;
 use super::voronoi_ctypes as CT;
 use super::TypeConverter as TCC;
 
-use super::{BigFloatType, BigIntType, InputType, OutputType};
+pub use super::{BigFloatType, BigIntType, InputType, OutputType};
 use num::{NumCast, PrimInt};
 use std::cell::Cell;
 use std::fmt;
@@ -26,7 +26,7 @@ use std::rc::Rc;
 use vec_map::VecMap;
 use std::cmp::Ordering;
 
-type SourceIndexType = usize;
+pub type SourceIndexType = usize;
 #[derive(Copy, Clone, PartialEq, Eq, Default)]
 pub struct VoronoiCellIndex(pub usize);
 
@@ -104,6 +104,15 @@ impl SourceCategory {
     pub(crate) fn get_value(&self) -> SourceCategoryType {
         self.0
     }
+}
+
+/// An easier version of SourceCategory
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum SourcePointCategory {
+    SinglePoint,
+    SegmentStart,
+    SegmentEnd,
+    Segment,
 }
 
 /// Represents Voronoi cell.
@@ -209,6 +218,20 @@ where
 
     pub fn source_index(&self) -> SourceIndexType {
         self.source_index_
+    }
+
+    /// Returns the origin index of the point that created this cell.
+    /// It also returns the point category
+    pub fn source_index_2(&self) -> (SourceIndexType, SourcePointCategory) {
+        let cat = match self.source_category() {
+            SourceCategory::SOURCE_CATEGORY_SINGLE_POINT => SourcePointCategory::SinglePoint,
+            SourceCategory::SOURCE_CATEGORY_SEGMENT_START_POINT => {
+                SourcePointCategory::SegmentStart
+            }
+            SourceCategory::SOURCE_CATEGORY_SEGMENT_END_POINT => SourcePointCategory::SegmentEnd,
+            _ => SourcePointCategory::Segment,
+        };
+        (self.source_index_, cat)
     }
 
     /// Degenerate cells don't have any incident edges.
