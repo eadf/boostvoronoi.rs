@@ -1051,12 +1051,13 @@ where
     fn retrieve_point(&self, cell_id: VD::VoronoiCellIndex) -> Coordinate<I1> {
         let (index, cat) = self.vd_.get_cell(cell_id).get().source_index_2();
         match cat {
-            VD::SourcePointCategory::SinglePoint =>
-                self.point_data_[index],
-            VD::SourcePointCategory::SegmentStart =>
-                self.segment_data_[index-self.point_data_.len()].start,
-            VD::SourcePointCategory::SegmentEnd =>
-                self.segment_data_[index-self.point_data_.len()].end
+            VD::SourcePointCategory::SinglePoint => self.point_data_[index],
+            VD::SourcePointCategory::SegmentStart => {
+                self.segment_data_[index - self.point_data_.len()].start
+            }
+            VD::SourcePointCategory::Segment | VD::SourcePointCategory::SegmentEnd => {
+                self.segment_data_[index - self.point_data_.len()].end
+            }
         }
     }
 

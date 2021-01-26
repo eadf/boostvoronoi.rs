@@ -1,5 +1,5 @@
 use boostvoronoi::voronoi_builder::VoronoiBuilder;
-use boostvoronoi::InputType;
+use boostvoronoi::voronoi_diagram as VD;
 use geo::{Coordinate, Line};
 use std::ops::Neg;
 
@@ -18,7 +18,7 @@ fn almost_equal(x1: O, x2: O, y1: O, y2: O) -> bool {
 
 fn to_points<T>(points: &[[T; 2]]) -> Vec<Coordinate<T>>
 where
-    T: InputType + Neg<Output = T>,
+    T: VD::InputType + Neg<Output = T>,
 {
     let mut rv = Vec::with_capacity(points.len());
     for p in points.iter() {
@@ -29,7 +29,7 @@ where
 
 fn to_segments<T>(points: &[[T; 4]]) -> Vec<Line<T>>
 where
-    T: InputType + Neg<Output = T>,
+    T: VD::InputType + Neg<Output = T>,
 {
     let mut rv = Vec::with_capacity(points.len());
     for p in points.iter() {
@@ -39,6 +39,23 @@ where
         ));
     }
     rv
+}
+
+fn retrieve_point<T>(
+    point_data_: &Vec<Coordinate<T>>,
+    segment_data_: &Vec<Line<T>>,
+    source: (VD::SourceIndexType, VD::SourcePointCategory),
+) -> Coordinate<T>
+where
+    T: VD::InputType,
+{
+    match source.1 {
+        VD::SourcePointCategory::SinglePoint => point_data_[source.0],
+        VD::SourcePointCategory::SegmentStart => segment_data_[source.0 - point_data_.len()].start,
+        VD::SourcePointCategory::Segment | VD::SourcePointCategory::SegmentEnd => {
+            segment_data_[source.0 - point_data_.len()].end
+        }
+    }
 }
 
 //#[ignore]
@@ -2299,7 +2316,7 @@ fn two_segments_7() {
 #[test]
 /// four segments in a loop
 fn two_segments_8() {
-    let output = {
+    let (output, _v, _s) = {
         let c: I = 300;
         let points: [[I; 2]; 0] = [];
         let segments: [[I; 4]; 4] = [
@@ -2315,54 +2332,79 @@ fn two_segments_8() {
         let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("two_segments_8");
         vb.with_segments(_s.iter()).expect("two_segments_8");
-        vb.construct().expect("two_segments_8")
+        (vb.construct().expect("two_segments_8"), _v, _s)
     };
+
     assert_eq!(output.cells().len(), 8);
     let cell = output.cells()[0].get();
     assert_eq!(cell.get_id(), 0);
-    assert_eq!(cell.source_index(), 0);
+    let (source_index, cat) = cell.source_index_2();
+    assert_eq!(cat, VD::SourcePointCategory::SegmentStart);
+    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    assert_eq!(p, Coordinate { x: 300, y: 300 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), true);
     assert_eq!(cell.contains_segment(), false);
     let cell = output.cells()[1].get();
     assert_eq!(cell.get_id(), 1);
-    assert_eq!(cell.source_index(), 0);
+    let (source_index, cat) = cell.source_index_2();
+    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    assert_eq!(p, Coordinate { x: 300, y: 500 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
     let cell = output.cells()[2].get();
     assert_eq!(cell.get_id(), 2);
-    assert_eq!(cell.source_index(), 0);
+    let (source_index, cat) = cell.source_index_2();
+    assert_eq!(cat, VD::SourcePointCategory::SegmentEnd);
+    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    assert_eq!(p, Coordinate { x: 300, y: 500 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), true);
     assert_eq!(cell.contains_segment(), false);
     let cell = output.cells()[3].get();
     assert_eq!(cell.get_id(), 3);
-    assert_eq!(cell.source_index(), 3);
+    let (source_index, cat) = cell.source_index_2();
+    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    assert_eq!(p, Coordinate { x: 300, y: 300 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
     let cell = output.cells()[4].get();
     assert_eq!(cell.get_id(), 4);
-    assert_eq!(cell.source_index(), 1);
+    let (source_index, cat) = cell.source_index_2();
+    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    assert_eq!(p, Coordinate { x: 500, y: 500 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
     let cell = output.cells()[5].get();
     assert_eq!(cell.get_id(), 5);
-    assert_eq!(cell.source_index(), 2);
+    let (source_index, cat) = cell.source_index_2();
+    assert_eq!(cat, VD::SourcePointCategory::SegmentEnd);
+    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    assert_eq!(p, Coordinate { x: 500, y: 300 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), true);
     assert_eq!(cell.contains_segment(), false);
     let cell = output.cells()[6].get();
     assert_eq!(cell.get_id(), 6);
-    assert_eq!(cell.source_index(), 2);
+    let (source_index, cat) = cell.source_index_2();
+    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    assert_eq!(p, Coordinate { x: 500, y: 300 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
     let cell = output.cells()[7].get();
     assert_eq!(cell.get_id(), 7);
-    assert_eq!(cell.source_index(), 1);
+    let (source_index, cat) = cell.source_index_2();
+    assert_eq!(cat, VD::SourcePointCategory::SegmentEnd);
+    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    assert_eq!(p, Coordinate { x: 500, y: 500 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), true);
     assert_eq!(cell.contains_segment(), false);
