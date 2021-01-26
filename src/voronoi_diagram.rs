@@ -1232,7 +1232,7 @@ where
         if self.vertices_.is_empty() {
             if !self.edges_.is_empty() {
                 // Update prev/next pointers for the line edges.
-                let mut edge_it = self.edges_.iter().enumerate().map(|x|x.0);
+                let mut edge_it = self.edges_.iter().enumerate().map(|x| x.0);
 
                 let mut edge1 = edge_it.next().map(VoronoiEdgeIndex);
                 //dbg!(edge1.unwrap());
@@ -1321,7 +1321,7 @@ where
             }
         }
         for (i, v) in self.vertices_.iter().enumerate() {
-            assert_eq!(i,v.get().id_.0);
+            assert_eq!(i, v.get().id_.0);
             println!("vertex{} {:?}", i, &v.get());
         }
         //self.debug_print_edges();
