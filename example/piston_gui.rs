@@ -1049,17 +1049,14 @@ where
     }
 
     fn retrieve_point(&self, cell_id: VD::VoronoiCellIndex) -> Coordinate<I1> {
-        let cell = self.vd_.get_cell(cell_id).get();
-        let mut index = cell.source_index();
-        let category = cell.source_category();
-        if category.0 == VD::SourceCategory::SOURCE_CATEGORY_SINGLE_POINT.0 {
-            return self.point_data_[index];
-        }
-        index -= self.point_data_.len();
-        if category.0 == VD::SourceCategory::SOURCE_CATEGORY_SEGMENT_START_POINT.0 {
-            self.segment_data_[index].start
-        } else {
-            self.segment_data_[index].end
+        let (index, cat) = self.vd_.get_cell(cell_id).get().source_index_2();
+        match cat {
+            VD::SourcePointCategory::SinglePoint =>
+                self.point_data_[index],
+            VD::SourcePointCategory::SegmentStart =>
+                self.segment_data_[index-self.point_data_.len()].start,
+            VD::SourcePointCategory::SegmentEnd =>
+                self.segment_data_[index-self.point_data_.len()].end
         }
     }
 

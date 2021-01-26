@@ -79,7 +79,7 @@ impl VoronoiCellBits {
 /// Represents category of the input source that forms Voronoi cell.
 pub type SourceCategoryType = u32;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub struct SourceCategory(pub SourceCategoryType);
 
 // Todo: rename these enums (make shorter)
@@ -103,6 +103,12 @@ impl SourceCategory {
     pub(crate) fn get_value(&self) -> SourceCategoryType {
         self.0
     }
+}
+
+pub enum SourcePointCategory {
+   SinglePoint,
+   SegmentStart,
+   SegmentEnd
 }
 
 /// Represents Voronoi cell.
@@ -206,8 +212,22 @@ where
         self.id_.0
     }
 
+    /// Returns the origin index of the cell.
     pub fn source_index(&self) -> SourceIndexType {
         self.source_index_
+    }
+
+    /// Returns the origin index of the cell.
+    pub fn source_index_2(&self) -> (SourceIndexType, SourcePointCategory) {
+
+        let cat = match self.source_category() {
+            SourceCategory::SOURCE_CATEGORY_SINGLE_POINT =>
+                SourcePointCategory::SinglePoint,
+            SourceCategory::SOURCE_CATEGORY_SEGMENT_START_POINT =>
+                SourcePointCategory::SegmentStart,
+            _ =>
+                SourcePointCategory::SegmentEnd, };
+        (self.source_index_,cat)
     }
 
     /// Degenerate cells don't have any incident edges.
