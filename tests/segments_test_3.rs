@@ -47,363 +47,105 @@ where
 /// The rust logo
 fn large_segment_1() {
     let output = {
-        let points: [[I1; 2]; 0] = [];
-        let segments: [[i32; 4]; 355] = [
-            [403, 0, 395, 1],
-            [409, 4, 403, 0],
-            [481, 8, 473, 7],
-            [325, 7, 318, 9],
-            [332, 10, 325, 7],
-            [486, 14, 481, 8],
-            [318, 9, 314, 14],
-            [257, 31, 250, 29],
-            [556, 32, 548, 29],
-            [250, 29, 243, 33],
-            [560, 38, 556, 32],
-            [395, 1, 369, 39],
-            [431, 39, 409, 4],
-            [360, 40, 332, 10],
-            [473, 7, 440, 40],
-            [369, 39, 360, 40],
-            [440, 40, 431, 39],
-            [501, 52, 486, 14],
-            [314, 14, 300, 52],
-            [290, 54, 257, 31],
-            [548, 29, 510, 54],
-            [510, 54, 501, 52],
-            [300, 52, 290, 54],
-            [188, 66, 180, 66],
-            [625, 69, 618, 65],
-            [180, 66, 174, 71],
-            [393, 71, 405, 71],
-            [382, 77, 393, 71],
-            [628, 76, 625, 69],
-            [405, 71, 416, 78],
-            [567, 78, 560, 38],
-            [243, 33, 233, 78],
-            [233, 78, 225, 83],
-            [575, 83, 567, 78],
-            [225, 83, 188, 66],
-            [618, 65, 575, 83],
-            [376, 88, 382, 77],
-            [416, 78, 422, 89],
-            [627, 92, 628, 76],
-            [376, 100, 376, 88],
-            [422, 89, 422, 101],
-            [627, 106, 627, 92],
-            [382, 111, 376, 100],
-            [422, 101, 415, 111],
-            [454, 110, 475, 114],
-            [314, 117, 346, 110],
-            [127, 114, 119, 115],
-            [682, 116, 674, 114],
-            [174, 71, 174, 117],
-            [626, 117, 627, 106],
-            [392, 117, 382, 111],
-            [415, 111, 404, 117],
-            [404, 117, 392, 117],
-            [685, 120, 682, 116],
-            [119, 115, 114, 121],
-            [475, 114, 516, 128],
-            [174, 117, 166, 123],
-            [634, 123, 626, 117],
-            [284, 129, 314, 117],
-            [166, 123, 127, 114],
-            [674, 114, 634, 123],
-            [686, 127, 685, 120],
-            [255, 143, 284, 129],
-            [516, 128, 553, 148],
-            [346, 110, 384, 150],
-            [229, 160, 255, 143],
-            [406, 153, 454, 110],
-            [384, 150, 395, 155],
-            [395, 155, 406, 153],
-            [553, 148, 587, 172],
-            [114, 121, 123, 166],
-            [677, 166, 686, 127],
-            [204, 180, 229, 160],
-            [683, 174, 677, 166],
-            [123, 166, 117, 174],
-            [117, 174, 76, 172],
-            [724, 172, 683, 174],
-            [730, 175, 724, 172],
-            [76, 172, 69, 175],
-            [734, 180, 730, 175],
-            [69, 175, 66, 181],
-            [587, 172, 617, 201],
-            [734, 188, 734, 180],
-            [66, 181, 66, 188],
-            [182, 202, 204, 180],
-            [495, 202, 182, 202],
-            [507, 204, 495, 202],
-            [617, 201, 643, 234],
-            [717, 225, 734, 188],
-            [66, 188, 83, 225],
-            [536, 213, 507, 204],
-            [722, 233, 717, 225],
-            [83, 225, 78, 233],
-            [643, 234, 654, 252],
-            [78, 233, 38, 240],
-            [762, 240, 722, 233],
-            [38, 240, 32, 243],
-            [768, 243, 762, 240],
-            [32, 243, 29, 250],
-            [771, 251, 768, 243],
-            [29, 250, 31, 257],
-            [769, 257, 771, 251],
-            [594, 265, 565, 230],
-            [105, 288, 118, 286],
-            [680, 287, 692, 289],
-            [118, 286, 129, 290],
-            [746, 290, 769, 257],
-            [31, 257, 54, 290],
-            [668, 291, 680, 287],
-            [746, 291, 746, 290],
-            [161, 291, 202, 291],
-            [601, 300, 594, 265],
-            [202, 291, 202, 478],
-            [654, 252, 634, 299],
-            [162, 294, 161, 291],
-            [334, 293, 334, 348],
-            [334, 293, 434, 293],
-            [434, 293, 437, 293],
-            [96, 296, 105, 288],
-            [692, 289, 702, 297],
-            [54, 290, 52, 296],
-            [52, 296, 52, 297],
-            [137, 300, 129, 290],
-            [661, 301, 668, 291],
-            [52, 297, 52, 300],
-            [748, 300, 746, 291],
-            [437, 293, 460, 304],
-            [91, 307, 96, 296],
-            [702, 297, 706, 308],
-            [137, 300, 139, 312],
-            [659, 313, 661, 301],
-            [52, 300, 14, 314],
-            [787, 314, 748, 300],
-            [634, 299, 625, 318],
-            [93, 319, 91, 307],
-            [460, 304, 469, 322],
-            [706, 308, 704, 320],
-            [14, 314, 8, 319],
-            [792, 320, 787, 314],
-            [173, 323, 162, 294],
-            [139, 312, 134, 323],
-            [663, 325, 659, 313],
-            [793, 326, 792, 320],
-            [8, 319, 7, 327],
-            [592, 334, 601, 300],
-            [101, 329, 93, 319],
-            [625, 318, 625, 330],
-            [704, 320, 696, 330],
-            [134, 323, 125, 331],
-            [673, 332, 663, 325],
-            [790, 332, 793, 326],
-            [170, 334, 173, 323],
-            [112, 333, 101, 329],
-            [125, 331, 112, 333],
-            [696, 330, 685, 334],
-            [469, 322, 462, 337],
-            [685, 334, 673, 332],
-            [625, 330, 630, 339],
-            [163, 342, 170, 334],
-            [109, 366, 163, 342],
-            [462, 337, 440, 346],
-            [440, 346, 430, 348],
-            [430, 348, 334, 348],
-            [7, 327, 40, 360],
-            [760, 360, 790, 332],
-            [630, 339, 690, 368],
-            [761, 368, 760, 360],
-            [556, 373, 592, 334],
-            [690, 368, 691, 368],
-            [761, 369, 761, 368],
-            [40, 360, 39, 369],
-            [541, 383, 556, 373],
-            [107, 387, 109, 366],
-            [39, 369, 4, 391],
-            [761, 369, 796, 391],
-            [558, 397, 541, 383],
-            [800, 396, 796, 391],
-            [4, 391, 0, 397],
-            [567, 406, 558, 397],
-            [800, 403, 800, 396],
-            [0, 397, 1, 405],
-            [571, 411, 567, 406],
-            [796, 409, 800, 403],
-            [574, 417, 571, 411],
-            [691, 368, 692, 419],
-            [578, 424, 574, 417],
-            [109, 425, 107, 387],
-            [692, 419, 661, 419],
-            [661, 419, 658, 422],
-            [334, 427, 412, 427],
-            [334, 481, 334, 427],
-            [412, 427, 418, 428],
-            [761, 431, 796, 409],
-            [1, 405, 39, 431],
-            [584, 441, 578, 424],
-            [418, 428, 436, 436],
-            [658, 422, 657, 445],
-            [760, 440, 761, 431],
-            [39, 431, 40, 440],
-            [112, 452, 109, 425],
-            [436, 436, 453, 459],
-            [453, 459, 456, 467],
-            [657, 445, 650, 467],
-            [590, 466, 584, 441],
-            [40, 440, 10, 468],
-            [790, 468, 760, 440],
-            [118, 478, 112, 452],
-            [598, 474, 590, 466],
-            [793, 475, 790, 468],
-            [10, 468, 7, 475],
-            [650, 467, 635, 477],
-            [202, 478, 118, 478],
-            [616, 479, 598, 474],
-            [635, 477, 616, 479],
-            [407, 481, 334, 481],
-            [791, 482, 793, 475],
-            [407, 481, 407, 481],
-            [7, 475, 9, 483],
-            [408, 483, 407, 481],
-            [408, 483, 408, 483],
-            [786, 486, 791, 482],
-            [748, 501, 786, 486],
-            [9, 483, 52, 501],
-            [746, 510, 748, 501],
-            [52, 501, 54, 510],
-            [456, 467, 468, 522],
-            [468, 522, 471, 534],
-            [54, 510, 31, 543],
-            [771, 548, 746, 510],
-            [31, 543, 29, 549],
-            [29, 549, 32, 556],
-            [768, 556, 771, 548],
-            [471, 534, 490, 560],
-            [32, 556, 38, 560],
-            [762, 560, 768, 556],
-            [722, 567, 762, 560],
-            [38, 560, 78, 567],
-            [408, 569, 408, 483],
-            [490, 560, 508, 571],
-            [408, 570, 408, 569],
-            [508, 571, 512, 571],
-            [406, 571, 408, 570],
-            [406, 571, 406, 571],
-            [633, 571, 636, 571],
-            [164, 571, 406, 571],
-            [512, 571, 633, 571],
-            [78, 567, 83, 575],
-            [717, 575, 722, 567],
-            [248, 591, 190, 601],
-            [556, 591, 545, 593],
-            [728, 598, 717, 575],
-            [258, 595, 248, 591],
-            [636, 571, 611, 600],
-            [545, 593, 536, 601],
-            [190, 601, 164, 571],
-            [611, 600, 609, 603],
-            [264, 604, 258, 595],
-            [609, 603, 556, 591],
-            [83, 575, 66, 612],
-            [734, 612, 728, 598],
-            [734, 620, 734, 612],
-            [66, 612, 66, 620],
-            [218, 621, 230, 622],
-            [567, 623, 580, 622],
-            [731, 625, 734, 620],
-            [66, 620, 70, 625],
-            [207, 627, 218, 621],
-            [580, 622, 591, 628],
-            [230, 622, 240, 629],
-            [70, 625, 76, 628],
-            [724, 628, 731, 625],
-            [76, 628, 117, 626],
-            [683, 626, 724, 628],
-            [557, 630, 567, 623],
-            [681, 629, 683, 626],
-            [117, 626, 123, 634],
-            [677, 634, 681, 629],
-            [200, 637, 207, 627],
-            [591, 628, 597, 638],
-            [240, 629, 246, 640],
-            [552, 641, 557, 630],
-            [199, 650, 200, 637],
-            [597, 638, 598, 651],
-            [275, 654, 264, 604],
-            [246, 640, 245, 652],
-            [552, 653, 552, 641],
-            [205, 661, 199, 650],
-            [598, 651, 592, 662],
-            [245, 652, 239, 662],
-            [559, 663, 552, 653],
-            [277, 663, 275, 654],
-            [286, 667, 277, 663],
-            [536, 601, 521, 664],
-            [215, 667, 205, 661],
-            [228, 668, 239, 662],
-            [592, 662, 582, 668],
-            [570, 669, 559, 663],
-            [228, 668, 215, 667],
-            [582, 668, 570, 669],
-            [123, 634, 114, 673],
-            [521, 664, 483, 678],
-            [326, 681, 286, 667],
-            [686, 679, 677, 634],
-            [114, 673, 115, 681],
-            [626, 683, 634, 677],
-            [166, 677, 174, 683],
-            [681, 685, 686, 679],
-            [115, 681, 121, 686],
-            [483, 678, 442, 687],
-            [634, 677, 673, 686],
-            [673, 686, 681, 685],
-            [121, 686, 166, 677],
-            [367, 688, 326, 681],
-            [442, 687, 421, 689],
-            [389, 690, 367, 688],
-            [421, 689, 389, 690],
-            [567, 722, 575, 717],
-            [225, 717, 233, 722],
-            [174, 683, 172, 724],
-            [626, 729, 626, 683],
-            [172, 724, 175, 730],
-            [188, 734, 225, 717],
-            [575, 717, 612, 734],
-            [620, 734, 626, 729],
-            [175, 730, 181, 735],
-            [181, 735, 188, 734],
-            [612, 734, 620, 734],
-            [501, 748, 510, 746],
-            [290, 746, 300, 748],
-            [233, 722, 240, 762],
-            [560, 762, 567, 722],
-            [360, 760, 369, 761],
-            [431, 761, 440, 760],
-            [557, 768, 560, 762],
-            [240, 762, 244, 768],
-            [510, 746, 543, 769],
-            [550, 771, 557, 768],
-            [244, 768, 252, 771],
-            [252, 771, 290, 746],
-            [543, 769, 550, 771],
-            [300, 748, 314, 786],
-            [486, 786, 501, 748],
-            [440, 760, 468, 790],
-            [331, 791, 360, 760],
-            [314, 786, 318, 791],
-            [481, 792, 486, 786],
-            [468, 790, 474, 793],
-            [318, 791, 324, 793],
-            [324, 793, 331, 791],
-            [474, 793, 481, 792],
-            [369, 761, 391, 796],
-            [405, 799, 431, 761],
-            [391, 796, 397, 800],
-            [397, 800, 405, 799],
-            [565, 230, 536, 213],
+        let points: [[I1; 2]; 45] = [
+            [303, 108],
+            [180, 257],
+            [115, 405],
+            [226, 536],
+            [177, 599],
+            [43, 709],
+            [127, 740],
+            [158, 683],
+            [593, 759],
+            [583, 672],
+            [587, 543],
+            [514, 503],
+            [408, 543],
+            [401, 642],
+            [580, 380],
+            [308, 304],
+            [260, 343],
+            [258, 240],
+            [344, 238],
+            [346, 189],
+            [198, 150],
+            [238, 59],
+            [679, 37],
+            [727, 134],
+            [733, 276],
+            [679, 327],
+            [698, 404],
+            [744, 544],
+            [764, 673],
+            [710, 770],
+            [611, 687],
+            [298, 536],
+            [244, 675],
+            [313, 618],
+            [433, 760],
+            [301, 773],
+            [127, 758],
+            [40, 644],
+            [612, 105],
+            [743, 37],
+            [581, 26],
+            [402, 20],
+            [318, 45],
+            [130, 102],
+            [98, 141],
+        ];
+        let segments: [[I1; 4]; 51] = [
+            [200, 200, 200, 400],
+            [200, 400, 400, 400],
+            [400, 400, 400, 200],
+            [400, 200, 200, 200],
+            [529, 242, 367, 107],
+            [667, 431, 464, 554],
+            [464, 554, 230, 588],
+            [230, 588, 88, 464],
+            [88, 464, 80, 236],
+            [80, 236, 178, 97],
+            [178, 97, 463, 56],
+            [463, 56, 670, 175],
+            [670, 175, 732, 346],
+            [732, 346, 735, 479],
+            [735, 479, 512, 643],
+            [512, 643, 257, 710],
+            [257, 710, 100, 615],
+            [100, 615, 36, 470],
+            [36, 470, 53, 195],
+            [53, 195, 82, 83],
+            [82, 83, 211, 30],
+            [379, 35, 614, 55],
+            [759, 140, 784, 390],
+            [734, 594, 678, 686],
+            [485, 742, 203, 745],
+            [103, 724, 12, 537],
+            [22, 425, 38, 45],
+            [43, 25, 308, 17],
+            [512, 691, 629, 758],
+            [629, 758, 643, 601],
+            [499, 455, 618, 281],
+            [618, 281, 612, 209],
+            [612, 209, 486, 125],
+            [462, 458, 361, 494],
+            [215, 498, 148, 470],
+            [453, 233, 494, 371],
+            [494, 371, 560, 262],
+            [560, 262, 563, 200],
+            [563, 200, 451, 141],
+            [451, 141, 421, 82],
+            [421, 82, 243, 111],
+            [243, 111, 145, 187],
+            [145, 187, 144, 319],
+            [144, 319, 177, 442],
+            [177, 442, 266, 484],
+            [266, 484, 336, 541],
+            [336, 541, 433, 497],
+            [433, 497, 525, 467],
+            [525, 467, 594, 427],
+            [594, 427, 617, 342],
+            [617, 342, 675, 292],
         ];
 
         let _v = to_points::<I1>(&points);
@@ -414,8 +156,1885 @@ fn large_segment_1() {
         vb.with_segments(_s.iter()).expect("large_segment_1");
         vb.construct().expect("large_segment_1")
     };
-    assert_eq!(output.cells().len(), 704);
-    assert_eq!(output.vertices().len(), 1318);
-    assert_eq!(output.edges().len(), 4042);
-    // The 'small' generated test code got too large for the compiler.
+    assert_eq!(output.cells().len(), 161);
+    let cell = output.cells()[0].get();
+    assert_eq!(cell.get_id(), 0);
+    assert_eq!(cell.source_index(), 70);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[1].get();
+    assert_eq!(cell.get_id(), 1);
+    assert_eq!(cell.source_index(), 70);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[2].get();
+    assert_eq!(cell.get_id(), 2);
+    assert_eq!(cell.source_index(), 71);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[3].get();
+    assert_eq!(cell.get_id(), 3);
+    assert_eq!(cell.source_index(), 71);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[4].get();
+    assert_eq!(cell.get_id(), 4);
+    assert_eq!(cell.source_index(), 63);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[5].get();
+    assert_eq!(cell.get_id(), 5);
+    assert_eq!(cell.source_index(), 62);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[6].get();
+    assert_eq!(cell.get_id(), 6);
+    assert_eq!(cell.source_index(), 63);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[7].get();
+    assert_eq!(cell.get_id(), 7);
+    assert_eq!(cell.source_index(), 71);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[8].get();
+    assert_eq!(cell.get_id(), 8);
+    assert_eq!(cell.source_index(), 37);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[9].get();
+    assert_eq!(cell.get_id(), 9);
+    assert_eq!(cell.source_index(), 72);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[10].get();
+    assert_eq!(cell.get_id(), 10);
+    assert_eq!(cell.source_index(), 5);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[11].get();
+    assert_eq!(cell.get_id(), 11);
+    assert_eq!(cell.source_index(), 72);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[12].get();
+    assert_eq!(cell.get_id(), 12);
+    assert_eq!(cell.source_index(), 63);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[13].get();
+    assert_eq!(cell.get_id(), 13);
+    assert_eq!(cell.source_index(), 64);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[14].get();
+    assert_eq!(cell.get_id(), 14);
+    assert_eq!(cell.source_index(), 54);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[15].get();
+    assert_eq!(cell.get_id(), 15);
+    assert_eq!(cell.source_index(), 53);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[16].get();
+    assert_eq!(cell.get_id(), 16);
+    assert_eq!(cell.source_index(), 54);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[17].get();
+    assert_eq!(cell.get_id(), 17);
+    assert_eq!(cell.source_index(), 64);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[18].get();
+    assert_eq!(cell.get_id(), 18);
+    assert_eq!(cell.source_index(), 65);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[19].get();
+    assert_eq!(cell.get_id(), 19);
+    assert_eq!(cell.source_index(), 53);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[20].get();
+    assert_eq!(cell.get_id(), 20);
+    assert_eq!(cell.source_index(), 52);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[21].get();
+    assert_eq!(cell.get_id(), 21);
+    assert_eq!(cell.source_index(), 44);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[22].get();
+    assert_eq!(cell.get_id(), 22);
+    assert_eq!(cell.source_index(), 61);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[23].get();
+    assert_eq!(cell.get_id(), 23);
+    assert_eq!(cell.source_index(), 61);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[24].get();
+    assert_eq!(cell.get_id(), 24);
+    assert_eq!(cell.source_index(), 70);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[25].get();
+    assert_eq!(cell.get_id(), 25);
+    assert_eq!(cell.source_index(), 2);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[26].get();
+    assert_eq!(cell.get_id(), 26);
+    assert_eq!(cell.source_index(), 6);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[27].get();
+    assert_eq!(cell.get_id(), 27);
+    assert_eq!(cell.source_index(), 36);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[28].get();
+    assert_eq!(cell.get_id(), 28);
+    assert_eq!(cell.source_index(), 43);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[29].get();
+    assert_eq!(cell.get_id(), 29);
+    assert_eq!(cell.source_index(), 88);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[30].get();
+    assert_eq!(cell.get_id(), 30);
+    assert_eq!(cell.source_index(), 88);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[31].get();
+    assert_eq!(cell.get_id(), 31);
+    assert_eq!(cell.source_index(), 87);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[32].get();
+    assert_eq!(cell.get_id(), 32);
+    assert_eq!(cell.source_index(), 86);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[33].get();
+    assert_eq!(cell.get_id(), 33);
+    assert_eq!(cell.source_index(), 86);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[34].get();
+    assert_eq!(cell.get_id(), 34);
+    assert_eq!(cell.source_index(), 79);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[35].get();
+    assert_eq!(cell.get_id(), 35);
+    assert_eq!(cell.source_index(), 79);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[36].get();
+    assert_eq!(cell.get_id(), 36);
+    assert_eq!(cell.source_index(), 7);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[37].get();
+    assert_eq!(cell.get_id(), 37);
+    assert_eq!(cell.source_index(), 89);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[38].get();
+    assert_eq!(cell.get_id(), 38);
+    assert_eq!(cell.source_index(), 4);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[39].get();
+    assert_eq!(cell.get_id(), 39);
+    assert_eq!(cell.source_index(), 89);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[40].get();
+    assert_eq!(cell.get_id(), 40);
+    assert_eq!(cell.source_index(), 54);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[41].get();
+    assert_eq!(cell.get_id(), 41);
+    assert_eq!(cell.source_index(), 55);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[42].get();
+    assert_eq!(cell.get_id(), 42);
+    assert_eq!(cell.source_index(), 1);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[43].get();
+    assert_eq!(cell.get_id(), 43);
+    assert_eq!(cell.source_index(), 20);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[44].get();
+    assert_eq!(cell.get_id(), 44);
+    assert_eq!(cell.source_index(), 48);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[45].get();
+    assert_eq!(cell.get_id(), 45);
+    assert_eq!(cell.source_index(), 45);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[46].get();
+    assert_eq!(cell.get_id(), 46);
+    assert_eq!(cell.source_index(), 45);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[47].get();
+    assert_eq!(cell.get_id(), 47);
+    assert_eq!(cell.source_index(), 48);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[48].get();
+    assert_eq!(cell.get_id(), 48);
+    assert_eq!(cell.source_index(), 46);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[49].get();
+    assert_eq!(cell.get_id(), 49);
+    assert_eq!(cell.source_index(), 69);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[50].get();
+    assert_eq!(cell.get_id(), 50);
+    assert_eq!(cell.source_index(), 69);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[51].get();
+    assert_eq!(cell.get_id(), 51);
+    assert_eq!(cell.source_index(), 65);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[52].get();
+    assert_eq!(cell.get_id(), 52);
+    assert_eq!(cell.source_index(), 79);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[53].get();
+    assert_eq!(cell.get_id(), 53);
+    assert_eq!(cell.source_index(), 3);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[54].get();
+    assert_eq!(cell.get_id(), 54);
+    assert_eq!(cell.source_index(), 51);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[55].get();
+    assert_eq!(cell.get_id(), 55);
+    assert_eq!(cell.source_index(), 51);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[56].get();
+    assert_eq!(cell.get_id(), 56);
+    assert_eq!(cell.source_index(), 21);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[57].get();
+    assert_eq!(cell.get_id(), 57);
+    assert_eq!(cell.source_index(), 85);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[58].get();
+    assert_eq!(cell.get_id(), 58);
+    assert_eq!(cell.source_index(), 85);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[59].get();
+    assert_eq!(cell.get_id(), 59);
+    assert_eq!(cell.source_index(), 32);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[60].get();
+    assert_eq!(cell.get_id(), 60);
+    assert_eq!(cell.source_index(), 61);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[61].get();
+    assert_eq!(cell.get_id(), 61);
+    assert_eq!(cell.source_index(), 60);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[62].get();
+    assert_eq!(cell.get_id(), 62);
+    assert_eq!(cell.source_index(), 17);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[63].get();
+    assert_eq!(cell.get_id(), 63);
+    assert_eq!(cell.source_index(), 16);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[64].get();
+    assert_eq!(cell.get_id(), 64);
+    assert_eq!(cell.source_index(), 90);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[65].get();
+    assert_eq!(cell.get_id(), 65);
+    assert_eq!(cell.source_index(), 90);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[66].get();
+    assert_eq!(cell.get_id(), 66);
+    assert_eq!(cell.source_index(), 31);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[67].get();
+    assert_eq!(cell.get_id(), 67);
+    assert_eq!(cell.source_index(), 35);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[68].get();
+    assert_eq!(cell.get_id(), 68);
+    assert_eq!(cell.source_index(), 0);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[69].get();
+    assert_eq!(cell.get_id(), 69);
+    assert_eq!(cell.source_index(), 72);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[70].get();
+    assert_eq!(cell.get_id(), 70);
+    assert_eq!(cell.source_index(), 15);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[71].get();
+    assert_eq!(cell.get_id(), 71);
+    assert_eq!(cell.source_index(), 33);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[72].get();
+    assert_eq!(cell.get_id(), 72);
+    assert_eq!(cell.source_index(), 42);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[73].get();
+    assert_eq!(cell.get_id(), 73);
+    assert_eq!(cell.source_index(), 90);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[74].get();
+    assert_eq!(cell.get_id(), 74);
+    assert_eq!(cell.source_index(), 91);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[75].get();
+    assert_eq!(cell.get_id(), 75);
+    assert_eq!(cell.source_index(), 18);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[76].get();
+    assert_eq!(cell.get_id(), 76);
+    assert_eq!(cell.source_index(), 19);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[77].get();
+    assert_eq!(cell.get_id(), 77);
+    assert_eq!(cell.source_index(), 78);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[78].get();
+    assert_eq!(cell.get_id(), 78);
+    assert_eq!(cell.source_index(), 78);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[79].get();
+    assert_eq!(cell.get_id(), 79);
+    assert_eq!(cell.source_index(), 49);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[80].get();
+    assert_eq!(cell.get_id(), 80);
+    assert_eq!(cell.source_index(), 49);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[81].get();
+    assert_eq!(cell.get_id(), 81);
+    assert_eq!(cell.source_index(), 66);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[82].get();
+    assert_eq!(cell.get_id(), 82);
+    assert_eq!(cell.source_index(), 66);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[83].get();
+    assert_eq!(cell.get_id(), 83);
+    assert_eq!(cell.source_index(), 47);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[84].get();
+    assert_eq!(cell.get_id(), 84);
+    assert_eq!(cell.source_index(), 47);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[85].get();
+    assert_eq!(cell.get_id(), 85);
+    assert_eq!(cell.source_index(), 46);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[86].get();
+    assert_eq!(cell.get_id(), 86);
+    assert_eq!(cell.source_index(), 13);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[87].get();
+    assert_eq!(cell.get_id(), 87);
+    assert_eq!(cell.source_index(), 41);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[88].get();
+    assert_eq!(cell.get_id(), 88);
+    assert_eq!(cell.source_index(), 12);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[89].get();
+    assert_eq!(cell.get_id(), 89);
+    assert_eq!(cell.source_index(), 85);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[90].get();
+    assert_eq!(cell.get_id(), 90);
+    assert_eq!(cell.source_index(), 84);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[91].get();
+    assert_eq!(cell.get_id(), 91);
+    assert_eq!(cell.source_index(), 92);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[92].get();
+    assert_eq!(cell.get_id(), 92);
+    assert_eq!(cell.source_index(), 34);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[93].get();
+    assert_eq!(cell.get_id(), 93);
+    assert_eq!(cell.source_index(), 92);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[94].get();
+    assert_eq!(cell.get_id(), 94);
+    assert_eq!(cell.source_index(), 84);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[95].get();
+    assert_eq!(cell.get_id(), 95);
+    assert_eq!(cell.source_index(), 83);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[96].get();
+    assert_eq!(cell.get_id(), 96);
+    assert_eq!(cell.source_index(), 80);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[97].get();
+    assert_eq!(cell.get_id(), 97);
+    assert_eq!(cell.source_index(), 80);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[98].get();
+    assert_eq!(cell.get_id(), 98);
+    assert_eq!(cell.source_index(), 78);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[99].get();
+    assert_eq!(cell.get_id(), 99);
+    assert_eq!(cell.source_index(), 55);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[100].get();
+    assert_eq!(cell.get_id(), 100);
+    assert_eq!(cell.source_index(), 56);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[101].get();
+    assert_eq!(cell.get_id(), 101);
+    assert_eq!(cell.source_index(), 50);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[102].get();
+    assert_eq!(cell.get_id(), 102);
+    assert_eq!(cell.source_index(), 50);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[103].get();
+    assert_eq!(cell.get_id(), 103);
+    assert_eq!(cell.source_index(), 69);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[104].get();
+    assert_eq!(cell.get_id(), 104);
+    assert_eq!(cell.source_index(), 77);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[105].get();
+    assert_eq!(cell.get_id(), 105);
+    assert_eq!(cell.source_index(), 77);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[106].get();
+    assert_eq!(cell.get_id(), 106);
+    assert_eq!(cell.source_index(), 81);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[107].get();
+    assert_eq!(cell.get_id(), 107);
+    assert_eq!(cell.source_index(), 81);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[108].get();
+    assert_eq!(cell.get_id(), 108);
+    assert_eq!(cell.source_index(), 75);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[109].get();
+    assert_eq!(cell.get_id(), 109);
+    assert_eq!(cell.source_index(), 75);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[110].get();
+    assert_eq!(cell.get_id(), 110);
+    assert_eq!(cell.source_index(), 59);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[111].get();
+    assert_eq!(cell.get_id(), 111);
+    assert_eq!(cell.source_index(), 73);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[112].get();
+    assert_eq!(cell.get_id(), 112);
+    assert_eq!(cell.source_index(), 59);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[113].get();
+    assert_eq!(cell.get_id(), 113);
+    assert_eq!(cell.source_index(), 73);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[114].get();
+    assert_eq!(cell.get_id(), 114);
+    assert_eq!(cell.source_index(), 11);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[115].get();
+    assert_eq!(cell.get_id(), 115);
+    assert_eq!(cell.source_index(), 93);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[116].get();
+    assert_eq!(cell.get_id(), 116);
+    assert_eq!(cell.source_index(), 93);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[117].get();
+    assert_eq!(cell.get_id(), 117);
+    assert_eq!(cell.source_index(), 49);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[118].get();
+    assert_eq!(cell.get_id(), 118);
+    assert_eq!(cell.source_index(), 81);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[119].get();
+    assert_eq!(cell.get_id(), 119);
+    assert_eq!(cell.source_index(), 82);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[120].get();
+    assert_eq!(cell.get_id(), 120);
+    assert_eq!(cell.source_index(), 83);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[121].get();
+    assert_eq!(cell.get_id(), 121);
+    assert_eq!(cell.source_index(), 14);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[122].get();
+    assert_eq!(cell.get_id(), 122);
+    assert_eq!(cell.source_index(), 40);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[123].get();
+    assert_eq!(cell.get_id(), 123);
+    assert_eq!(cell.source_index(), 9);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[124].get();
+    assert_eq!(cell.get_id(), 124);
+    assert_eq!(cell.source_index(), 10);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[125].get();
+    assert_eq!(cell.get_id(), 125);
+    assert_eq!(cell.source_index(), 8);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[126].get();
+    assert_eq!(cell.get_id(), 126);
+    assert_eq!(cell.source_index(), 93);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[127].get();
+    assert_eq!(cell.get_id(), 127);
+    assert_eq!(cell.source_index(), 94);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[128].get();
+    assert_eq!(cell.get_id(), 128);
+    assert_eq!(cell.source_index(), 30);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[129].get();
+    assert_eq!(cell.get_id(), 129);
+    assert_eq!(cell.source_index(), 38);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[130].get();
+    assert_eq!(cell.get_id(), 130);
+    assert_eq!(cell.source_index(), 76);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[131].get();
+    assert_eq!(cell.get_id(), 131);
+    assert_eq!(cell.source_index(), 76);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[132].get();
+    assert_eq!(cell.get_id(), 132);
+    assert_eq!(cell.source_index(), 66);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[133].get();
+    assert_eq!(cell.get_id(), 133);
+    assert_eq!(cell.source_index(), 94);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[134].get();
+    assert_eq!(cell.get_id(), 134);
+    assert_eq!(cell.source_index(), 95);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[135].get();
+    assert_eq!(cell.get_id(), 135);
+    assert_eq!(cell.source_index(), 76);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[136].get();
+    assert_eq!(cell.get_id(), 136);
+    assert_eq!(cell.source_index(), 74);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[137].get();
+    assert_eq!(cell.get_id(), 137);
+    assert_eq!(cell.source_index(), 74);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[138].get();
+    assert_eq!(cell.get_id(), 138);
+    assert_eq!(cell.source_index(), 74);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[139].get();
+    assert_eq!(cell.get_id(), 139);
+    assert_eq!(cell.source_index(), 50);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[140].get();
+    assert_eq!(cell.get_id(), 140);
+    assert_eq!(cell.source_index(), 57);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[141].get();
+    assert_eq!(cell.get_id(), 141);
+    assert_eq!(cell.source_index(), 57);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[142].get();
+    assert_eq!(cell.get_id(), 142);
+    assert_eq!(cell.source_index(), 95);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[143].get();
+    assert_eq!(cell.get_id(), 143);
+    assert_eq!(cell.source_index(), 68);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[144].get();
+    assert_eq!(cell.get_id(), 144);
+    assert_eq!(cell.source_index(), 68);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[145].get();
+    assert_eq!(cell.get_id(), 145);
+    assert_eq!(cell.source_index(), 22);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[146].get();
+    assert_eq!(cell.get_id(), 146);
+    assert_eq!(cell.source_index(), 25);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[147].get();
+    assert_eq!(cell.get_id(), 147);
+    assert_eq!(cell.source_index(), 26);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[148].get();
+    assert_eq!(cell.get_id(), 148);
+    assert_eq!(cell.source_index(), 29);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[149].get();
+    assert_eq!(cell.get_id(), 149);
+    assert_eq!(cell.source_index(), 23);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[150].get();
+    assert_eq!(cell.get_id(), 150);
+    assert_eq!(cell.source_index(), 58);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[151].get();
+    assert_eq!(cell.get_id(), 151);
+    assert_eq!(cell.source_index(), 58);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[152].get();
+    assert_eq!(cell.get_id(), 152);
+    assert_eq!(cell.source_index(), 24);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[153].get();
+    assert_eq!(cell.get_id(), 153);
+    assert_eq!(cell.source_index(), 68);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[154].get();
+    assert_eq!(cell.get_id(), 154);
+    assert_eq!(cell.source_index(), 59);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[155].get();
+    assert_eq!(cell.get_id(), 155);
+    assert_eq!(cell.source_index(), 39);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[156].get();
+    assert_eq!(cell.get_id(), 156);
+    assert_eq!(cell.source_index(), 27);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[157].get();
+    assert_eq!(cell.get_id(), 157);
+    assert_eq!(cell.source_index(), 67);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[158].get();
+    assert_eq!(cell.get_id(), 158);
+    assert_eq!(cell.source_index(), 67);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[159].get();
+    assert_eq!(cell.get_id(), 159);
+    assert_eq!(cell.source_index(), 28);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[160].get();
+    assert_eq!(cell.get_id(), 160);
+    assert_eq!(cell.source_index(), 67);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    assert_eq!(output.vertices().len(), 304);
+    assert_eq!(output.edges().len(), 928);
+    let v = output.vertices()[0].get();
+    assert!(almost_equal(v.x(), -1174.3944223, v.y(), 374.6254980));
+    assert_eq!(v.get_incident_edge().unwrap().0, 7);
+    let v = output.vertices()[1].get();
+    assert!(almost_equal(v.x(), 36.0000000, v.y(), 470.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 15);
+    let v = output.vertices()[2].get();
+    assert!(almost_equal(v.x(), -57.3429138, v.y(), 474.3622398));
+    assert_eq!(v.get_incident_edge().unwrap().0, 17);
+    let v = output.vertices()[3].get();
+    assert!(almost_equal(v.x(), -30.1728061, v.y(), 465.9093174));
+    assert_eq!(v.get_incident_edge().unwrap().0, 19);
+    let v = output.vertices()[4].get();
+    assert!(almost_equal(v.x(), 30.3683167, v.y(), 425.3523502));
+    assert_eq!(v.get_incident_edge().unwrap().0, 23);
+    let v = output.vertices()[5].get();
+    assert!(almost_equal(v.x(), -11.2724640, v.y(), 490.8650875));
+    assert_eq!(v.get_incident_edge().unwrap().0, 27);
+    let v = output.vertices()[6].get();
+    assert!(almost_equal(v.x(), -242.1180849, v.y(), 660.6617418));
+    assert_eq!(v.get_incident_edge().unwrap().0, 29);
+    let v = output.vertices()[7].get();
+    assert!(almost_equal(v.x(), -376.3385590, v.y(), 695.7848566));
+    assert_eq!(v.get_incident_edge().unwrap().0, 37);
+    let v = output.vertices()[8].get();
+    assert!(almost_equal(v.x(), 53.0000000, v.y(), 195.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 43);
+    let v = output.vertices()[9].get();
+    assert!(almost_equal(v.x(), 42.3708015, v.y(), 194.3429223));
+    assert_eq!(v.get_incident_edge().unwrap().0, 45);
+    let v = output.vertices()[10].get();
+    assert!(almost_equal(v.x(), 42.5755898, v.y(), 192.3008224));
+    assert_eq!(v.get_incident_edge().unwrap().0, 47);
+    let v = output.vertices()[11].get();
+    assert!(almost_equal(v.x(), 43.3231939, v.y(), 35.7057985));
+    assert_eq!(v.get_incident_edge().unwrap().0, 49);
+    let v = output.vertices()[12].get();
+    assert!(almost_equal(v.x(), -22930.4262948, v.y(), -922.0916335));
+    assert_eq!(v.get_incident_edge().unwrap().0, 51);
+    let v = output.vertices()[13].get();
+    assert!(almost_equal(v.x(), 34.0424487, v.y(), 526.2734608));
+    assert_eq!(v.get_incident_edge().unwrap().0, 53);
+    let v = output.vertices()[14].get();
+    assert!(almost_equal(v.x(), 43.5817605, v.y(), 676.4039187));
+    assert_eq!(v.get_incident_edge().unwrap().0, 55);
+    let v = output.vertices()[15].get();
+    assert!(almost_equal(v.x(), 80.0000000, v.y(), 236.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 63);
+    let v = output.vertices()[16].get();
+    assert!(almost_equal(v.x(), 65.2353585, v.y(), 236.5180576));
+    assert_eq!(v.get_incident_edge().unwrap().0, 65);
+    let v = output.vertices()[17].get();
+    assert!(almost_equal(v.x(), 59.3649404, v.y(), 45.8995764));
+    assert_eq!(v.get_incident_edge().unwrap().0, 67);
+    let v = output.vertices()[18].get();
+    assert!(almost_equal(v.x(), 82.0000000, v.y(), 83.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 73);
+    let v = output.vertices()[19].get();
+    assert!(almost_equal(v.x(), 59.6994840, v.y(), 77.2257592));
+    assert_eq!(v.get_incident_edge().unwrap().0, 75);
+    let v = output.vertices()[20].get();
+    assert!(almost_equal(v.x(), 66.9861495, v.y(), 226.8247673));
+    assert_eq!(v.get_incident_edge().unwrap().0, 77);
+    let v = output.vertices()[21].get();
+    assert!(almost_equal(v.x(), 88.0000000, v.y(), 464.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 83);
+    let v = output.vertices()[22].get();
+    assert!(almost_equal(v.x(), 62.1900542, v.y(), 464.9056121));
+    assert_eq!(v.get_incident_edge().unwrap().0, 85);
+    let v = output.vertices()[23].get();
+    assert!(almost_equal(v.x(), 62.1862043, v.y(), 465.3170750));
+    assert_eq!(v.get_incident_edge().unwrap().0, 87);
+    let v = output.vertices()[24].get();
+    assert!(almost_equal(v.x(), 70.7460129, v.y(), 483.7585982));
+    assert_eq!(v.get_incident_edge().unwrap().0, 89);
+    let v = output.vertices()[25].get();
+    assert!(almost_equal(v.x(), 68.5231008, v.y(), 55.1673809));
+    assert_eq!(v.get_incident_edge().unwrap().0, 93);
+    let v = output.vertices()[26].get();
+    assert!(almost_equal(v.x(), 100.0000000, v.y(), 615.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 99);
+    let v = output.vertices()[27].get();
+    assert!(almost_equal(v.x(), 76.8384688, v.y(), 198.7871843));
+    assert_eq!(v.get_incident_edge().unwrap().0, 101);
+    let v = output.vertices()[28].get();
+    assert!(almost_equal(v.x(), 70.3891562, v.y(), 54.7396443));
+    assert_eq!(v.get_incident_edge().unwrap().0, 103);
+    let v = output.vertices()[29].get();
+    assert!(almost_equal(v.x(), 79.4098241, v.y(), 624.0880777));
+    assert_eq!(v.get_incident_edge().unwrap().0, 105);
+    let v = output.vertices()[30].get();
+    assert!(almost_equal(v.x(), 66.7100457, v.y(), 741.6598174));
+    assert_eq!(v.get_incident_edge().unwrap().0, 109);
+    let v = output.vertices()[31].get();
+    assert!(almost_equal(v.x(), 87.3387120, v.y(), 635.9244443));
+    assert_eq!(v.get_incident_edge().unwrap().0, 111);
+    let v = output.vertices()[32].get();
+    assert!(almost_equal(v.x(), 90.2866683, v.y(), 169.7504629));
+    assert_eq!(v.get_incident_edge().unwrap().0, 115);
+    let v = output.vertices()[33].get();
+    assert!(almost_equal(v.x(), 103.6666667, v.y(), 749.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 121);
+    let v = output.vertices()[34].get();
+    assert!(almost_equal(v.x(), 103.9513759, v.y(), 102.1430840));
+    assert_eq!(v.get_incident_edge().unwrap().0, 125);
+    let v = output.vertices()[35].get();
+    assert!(almost_equal(v.x(), 56.5625000, v.y(), 782.2500000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 127);
+    let v = output.vertices()[36].get();
+    assert!(almost_equal(v.x(), 103.6928324, v.y(), 113.0428369));
+    assert_eq!(v.get_incident_edge().unwrap().0, 129);
+    let v = output.vertices()[37].get();
+    assert!(almost_equal(v.x(), 144.0000000, v.y(), 319.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 137);
+    let v = output.vertices()[38].get();
+    assert!(almost_equal(v.x(), 113.4619164, v.y(), 318.7686509));
+    assert_eq!(v.get_incident_edge().unwrap().0, 139);
+    let v = output.vertices()[39].get();
+    assert!(almost_equal(v.x(), 112.4568064, v.y(), 245.6682878));
+    assert_eq!(v.get_incident_edge().unwrap().0, 141);
+    let v = output.vertices()[40].get();
+    assert!(almost_equal(v.x(), 145.0000000, v.y(), 187.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 147);
+    let v = output.vertices()[41].get();
+    assert!(almost_equal(v.x(), 131.3372641, v.y(), 186.8964944));
+    assert_eq!(v.get_incident_edge().unwrap().0, 149);
+    let v = output.vertices()[42].get();
+    assert!(almost_equal(v.x(), 114.1343309, v.y(), 327.0127405));
+    assert_eq!(v.get_incident_edge().unwrap().0, 151);
+    let v = output.vertices()[43].get();
+    assert!(almost_equal(v.x(), 122.3376920, v.y(), 128.3411832));
+    assert_eq!(v.get_incident_edge().unwrap().0, 157);
+    let v = output.vertices()[44].get();
+    assert!(almost_equal(v.x(), 137.2028817, v.y(), 176.9458211));
+    assert_eq!(v.get_incident_edge().unwrap().0, 159);
+    let v = output.vertices()[45].get();
+    assert!(almost_equal(v.x(), 121.7452809, v.y(), 447.9473901));
+    assert_eq!(v.get_incident_edge().unwrap().0, 161);
+    let v = output.vertices()[46].get();
+    assert!(almost_equal(v.x(), 120.5132924, v.y(), 369.6243596));
+    assert_eq!(v.get_incident_edge().unwrap().0, 163);
+    let v = output.vertices()[47].get();
+    assert!(almost_equal(v.x(), 128.6569921, v.y(), 711.5145119));
+    assert_eq!(v.get_incident_edge().unwrap().0, 165);
+    let v = output.vertices()[48].get();
+    assert!(almost_equal(v.x(), 141.0848907, v.y(), 486.5468686));
+    assert_eq!(v.get_incident_edge().unwrap().0, 169);
+    let v = output.vertices()[49].get();
+    assert!(almost_equal(v.x(), 120.8761604, v.y(), 672.6712790));
+    assert_eq!(v.get_incident_edge().unwrap().0, 171);
+    let v = output.vertices()[50].get();
+    assert!(almost_equal(v.x(), 124.5018028, v.y(), 441.0529309));
+    assert_eq!(v.get_incident_edge().unwrap().0, 173);
+    let v = output.vertices()[51].get();
+    assert!(almost_equal(v.x(), 132.5058123, v.y(), 706.0645646));
+    assert_eq!(v.get_incident_edge().unwrap().0, 175);
+    let v = output.vertices()[52].get();
+    assert!(almost_equal(v.x(), 136.8261871, v.y(), 434.7959358));
+    assert_eq!(v.get_incident_edge().unwrap().0, 177);
+    let v = output.vertices()[53].get();
+    assert!(almost_equal(v.x(), 177.0000000, v.y(), 442.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 185);
+    let v = output.vertices()[54].get();
+    assert!(almost_equal(v.x(), 154.7471610, v.y(), 447.9702739));
+    assert_eq!(v.get_incident_edge().unwrap().0, 187);
+    let v = output.vertices()[55].get();
+    assert!(almost_equal(v.x(), 178.0000000, v.y(), 97.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 193);
+    let v = output.vertices()[56].get();
+    assert!(almost_equal(v.x(), 156.4635417, v.y(), 449.7479539));
+    assert_eq!(v.get_incident_edge().unwrap().0, 195);
+    let v = output.vertices()[57].get();
+    assert!(almost_equal(v.x(), 135.0400623, v.y(), 584.1961079));
+    assert_eq!(v.get_incident_edge().unwrap().0, 197);
+    let v = output.vertices()[58].get();
+    assert!(almost_equal(v.x(), 152.2164348, v.y(), 84.6357643));
+    assert_eq!(v.get_incident_edge().unwrap().0, 201);
+    let v = output.vertices()[59].get();
+    assert!(almost_equal(v.x(), 156.0857605, v.y(), 81.5496728));
+    assert_eq!(v.get_incident_edge().unwrap().0, 203);
+    let v = output.vertices()[60].get();
+    assert!(almost_equal(v.x(), 135.3473554, v.y(), 571.5629890));
+    assert_eq!(v.get_incident_edge().unwrap().0, 205);
+    let v = output.vertices()[61].get();
+    assert!(almost_equal(v.x(), 169.0970276, v.y(), 458.7467748));
+    assert_eq!(v.get_incident_edge().unwrap().0, 207);
+    let v = output.vertices()[62].get();
+    assert!(almost_equal(v.x(), 174.4263632, v.y(), 72.1588663));
+    assert_eq!(v.get_incident_edge().unwrap().0, 211);
+    let v = output.vertices()[63].get();
+    assert!(almost_equal(v.x(), 172.7321989, v.y(), 200.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 217);
+    let v = output.vertices()[64].get();
+    assert!(almost_equal(v.x(), 172.4489632, v.y(), 200.5780786));
+    assert_eq!(v.get_incident_edge().unwrap().0, 219);
+    let v = output.vertices()[65].get();
+    assert!(almost_equal(v.x(), 172.3359319, v.y(), 230.4187524));
+    assert_eq!(v.get_incident_edge().unwrap().0, 221);
+    let v = output.vertices()[66].get();
+    assert!(almost_equal(v.x(), 172.1339878, v.y(), 283.7327605));
+    assert_eq!(v.get_incident_edge().unwrap().0, 223);
+    let v = output.vertices()[67].get();
+    assert!(almost_equal(v.x(), 172.0139802, v.y(), 315.4152249));
+    assert_eq!(v.get_incident_edge().unwrap().0, 225);
+    let v = output.vertices()[68].get();
+    assert!(almost_equal(v.x(), 183.1635651, v.y(), 400.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 229);
+    let v = output.vertices()[69].get();
+    assert!(almost_equal(v.x(), 200.0000000, v.y(), 200.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 233);
+    let v = output.vertices()[70].get();
+    assert!(almost_equal(v.x(), 200.0000000, v.y(), 400.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 237);
+    let v = output.vertices()[71].get();
+    assert!(almost_equal(v.x(), 164.5723684, v.y(), 749.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 243);
+    let v = output.vertices()[72].get();
+    assert!(almost_equal(v.x(), 166.1917762, v.y(), 724.3850011));
+    assert_eq!(v.get_incident_edge().unwrap().0, 245);
+    let v = output.vertices()[73].get();
+    assert!(almost_equal(v.x(), 209.0238909, v.y(), 25.1902251));
+    assert_eq!(v.get_incident_edge().unwrap().0, 249);
+    let v = output.vertices()[74].get();
+    assert!(almost_equal(v.x(), 191.9065740, v.y(), 119.6929455));
+    assert_eq!(v.get_incident_edge().unwrap().0, 253);
+    let v = output.vertices()[75].get();
+    assert!(almost_equal(v.x(), 197.8607829, v.y(), 424.5715117));
+    assert_eq!(v.get_incident_edge().unwrap().0, 255);
+    let v = output.vertices()[76].get();
+    assert!(almost_equal(v.x(), 184.3835006, v.y(), 711.1813302));
+    assert_eq!(v.get_incident_edge().unwrap().0, 257);
+    let v = output.vertices()[77].get();
+    assert!(almost_equal(v.x(), 200.0000000, v.y(), 175.4342171));
+    assert_eq!(v.get_incident_edge().unwrap().0, 259);
+    let v = output.vertices()[78].get();
+    assert!(almost_equal(v.x(), 200.0000000, v.y(), 425.0997269));
+    assert_eq!(v.get_incident_edge().unwrap().0, 261);
+    let v = output.vertices()[79].get();
+    assert!(almost_equal(v.x(), 201.6597254, v.y(), 174.8660641));
+    assert_eq!(v.get_incident_edge().unwrap().0, 265);
+    let v = output.vertices()[80].get();
+    assert!(almost_equal(v.x(), 199.9344795, v.y(), 523.1841408));
+    assert_eq!(v.get_incident_edge().unwrap().0, 267);
+    let v = output.vertices()[81].get();
+    assert!(almost_equal(v.x(), 230.0000000, v.y(), 588.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 273);
+    let v = output.vertices()[82].get();
+    assert!(almost_equal(v.x(), 205.2100089, v.y(), 521.4260500));
+    assert_eq!(v.get_incident_edge().unwrap().0, 275);
+    let v = output.vertices()[83].get();
+    assert!(almost_equal(v.x(), 202.6670680, v.y(), 713.7043925));
+    assert_eq!(v.get_incident_edge().unwrap().0, 277);
+    let v = output.vertices()[84].get();
+    assert!(almost_equal(v.x(), 208.7641689, v.y(), 62.7902787));
+    assert_eq!(v.get_incident_edge().unwrap().0, 281);
+    let v = output.vertices()[85].get();
+    assert!(almost_equal(v.x(), 221.6406921, v.y(), 482.1097726));
+    assert_eq!(v.get_incident_edge().unwrap().0, 283);
+    let v = output.vertices()[86].get();
+    assert!(almost_equal(v.x(), 219.0442769, v.y(), 49.5794664));
+    assert_eq!(v.get_incident_edge().unwrap().0, 285);
+    let v = output.vertices()[87].get();
+    assert!(almost_equal(v.x(), 207.6665847, v.y(), 613.5753627));
+    assert_eq!(v.get_incident_edge().unwrap().0, 287);
+    let v = output.vertices()[88].get();
+    assert!(almost_equal(v.x(), 243.0000000, v.y(), 111.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 293);
+    let v = output.vertices()[89].get();
+    assert!(almost_equal(v.x(), 235.4232780, v.y(), 101.2300164));
+    assert_eq!(v.get_incident_edge().unwrap().0, 297);
+    let v = output.vertices()[90].get();
+    assert!(almost_equal(v.x(), 229.1313403, v.y(), 40.1880625));
+    assert_eq!(v.get_incident_edge().unwrap().0, 299);
+    let v = output.vertices()[91].get();
+    assert!(almost_equal(v.x(), 241.1415449, v.y(), 99.5929305));
+    assert_eq!(v.get_incident_edge().unwrap().0, 301);
+    let v = output.vertices()[92].get();
+    assert!(almost_equal(v.x(), 210.8909700, v.y(), 629.1110373));
+    assert_eq!(v.get_incident_edge().unwrap().0, 303);
+    let v = output.vertices()[93].get();
+    assert!(almost_equal(v.x(), 257.0000000, v.y(), 710.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 309);
+    let v = output.vertices()[94].get();
+    assert!(almost_equal(v.x(), 229.8824545, v.y(), 229.8824545));
+    assert_eq!(v.get_incident_edge().unwrap().0, 313);
+    let v = output.vertices()[95].get();
+    assert!(almost_equal(v.x(), 228.5720220, v.y(), 165.6535147));
+    assert_eq!(v.get_incident_edge().unwrap().0, 317);
+    let v = output.vertices()[96].get();
+    assert!(almost_equal(v.x(), 238.3312309, v.y(), 559.7489573));
+    assert_eq!(v.get_incident_edge().unwrap().0, 319);
+    let v = output.vertices()[97].get();
+    assert!(almost_equal(v.x(), 247.3670632, v.y(), 725.9196956));
+    assert_eq!(v.get_incident_edge().unwrap().0, 321);
+    let v = output.vertices()[98].get();
+    assert!(almost_equal(v.x(), 266.0000000, v.y(), 484.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 327);
+    let v = output.vertices()[99].get();
+    assert!(almost_equal(v.x(), 221.6243311, v.y(), 633.9742456));
+    assert_eq!(v.get_incident_edge().unwrap().0, 329);
+    let v = output.vertices()[100].get();
+    assert!(almost_equal(v.x(), 234.2957075, v.y(), 365.7042925));
+    assert_eq!(v.get_incident_edge().unwrap().0, 331);
+    let v = output.vertices()[101].get();
+    assert!(almost_equal(v.x(), 245.0763323, v.y(), 509.8857985));
+    assert_eq!(v.get_incident_edge().unwrap().0, 333);
+    let v = output.vertices()[102].get();
+    assert!(almost_equal(v.x(), 261.4408687, v.y(), 726.9018136));
+    assert_eq!(v.get_incident_edge().unwrap().0, 335);
+    let v = output.vertices()[103].get();
+    assert!(almost_equal(v.x(), 236.3360372, v.y(), 631.6068446));
+    assert_eq!(v.get_incident_edge().unwrap().0, 337);
+    let v = output.vertices()[104].get();
+    assert!(almost_equal(v.x(), 260.2101571, v.y(), 687.8005985));
+    assert_eq!(v.get_incident_edge().unwrap().0, 339);
+    let v = output.vertices()[105].get();
+    assert!(almost_equal(v.x(), 248.3738450, v.y(), 511.9798227));
+    assert_eq!(v.get_incident_edge().unwrap().0, 341);
+    let v = output.vertices()[106].get();
+    assert!(almost_equal(v.x(), 262.0000000, v.y(), 528.2358142));
+    assert_eq!(v.get_incident_edge().unwrap().0, 345);
+    let v = output.vertices()[107].get();
+    assert!(almost_equal(v.x(), 262.0000000, v.y(), 545.6802052));
+    assert_eq!(v.get_incident_edge().unwrap().0, 347);
+    let v = output.vertices()[108].get();
+    assert!(almost_equal(v.x(), 269.6162952, v.y(), 50.8287818));
+    assert_eq!(v.get_incident_edge().unwrap().0, 351);
+    let v = output.vertices()[109].get();
+    assert!(almost_equal(v.x(), 251.9853267, v.y(), 291.6362072));
+    assert_eq!(v.get_incident_edge().unwrap().0, 355);
+    let v = output.vertices()[110].get();
+    assert!(almost_equal(v.x(), 261.8343867, v.y(), 154.2672261));
+    assert_eq!(v.get_incident_edge().unwrap().0, 357);
+    let v = output.vertices()[111].get();
+    assert!(almost_equal(v.x(), 258.0155317, v.y(), 291.5191159));
+    assert_eq!(v.get_incident_edge().unwrap().0, 363);
+    let v = output.vertices()[112].get();
+    assert!(almost_equal(v.x(), 266.3920861, v.y(), 631.8430516));
+    assert_eq!(v.get_incident_edge().unwrap().0, 367);
+    let v = output.vertices()[113].get();
+    assert!(almost_equal(v.x(), 286.6059238, v.y(), 49.3549986));
+    assert_eq!(v.get_incident_edge().unwrap().0, 371);
+    let v = output.vertices()[114].get();
+    assert!(almost_equal(v.x(), 308.4714667, v.y(), 32.6173333));
+    assert_eq!(v.get_incident_edge().unwrap().0, 373);
+    let v = output.vertices()[115].get();
+    assert!(almost_equal(v.x(), 284.8247952, v.y(), 444.1093626));
+    assert_eq!(v.get_incident_edge().unwrap().0, 375);
+    let v = output.vertices()[116].get();
+    assert!(almost_equal(v.x(), 285.4433922, v.y(), 654.9051590));
+    assert_eq!(v.get_incident_edge().unwrap().0, 377);
+    let v = output.vertices()[117].get();
+    assert!(almost_equal(v.x(), 285.5606950, v.y(), 152.3471231));
+    assert_eq!(v.get_incident_edge().unwrap().0, 379);
+    let v = output.vertices()[118].get();
+    assert!(almost_equal(v.x(), 336.0000000, v.y(), 541.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 385);
+    let v = output.vertices()[119].get();
+    assert!(almost_equal(v.x(), 313.8723560, v.y(), 552.6029228));
+    assert_eq!(v.get_incident_edge().unwrap().0, 387);
+    let v = output.vertices()[120].get();
+    assert!(almost_equal(v.x(), 324.2232914, v.y(), 555.4626247));
+    assert_eq!(v.get_incident_edge().unwrap().0, 389);
+    let v = output.vertices()[121].get();
+    assert!(almost_equal(v.x(), 295.8742489, v.y(), 447.3123259));
+    assert_eq!(v.get_incident_edge().unwrap().0, 391);
+    let v = output.vertices()[122].get();
+    assert!(almost_equal(v.x(), 301.0980947, v.y(), 243.2180721));
+    assert_eq!(v.get_incident_edge().unwrap().0, 395);
+    let v = output.vertices()[123].get();
+    assert!(almost_equal(v.x(), 301.4325482, v.y(), 257.5995717));
+    assert_eq!(v.get_incident_edge().unwrap().0, 399);
+    let v = output.vertices()[124].get();
+    assert!(almost_equal(v.x(), 307.1532156, v.y(), 351.9962654));
+    assert_eq!(v.get_incident_edge().unwrap().0, 401);
+    let v = output.vertices()[125].get();
+    assert!(almost_equal(v.x(), 342.5884507, v.y(), 555.5245390));
+    assert_eq!(v.get_incident_edge().unwrap().0, 403);
+    let v = output.vertices()[126].get();
+    assert!(almost_equal(v.x(), 315.8228628, v.y(), 153.1063815));
+    assert_eq!(v.get_incident_edge().unwrap().0, 409);
+    let v = output.vertices()[127].get();
+    assert!(almost_equal(v.x(), 339.9989303, v.y(), 510.1171002));
+    assert_eq!(v.get_incident_edge().unwrap().0, 411);
+    let v = output.vertices()[128].get();
+    assert!(almost_equal(v.x(), 320.0618342, v.y(), 455.9145395));
+    assert_eq!(v.get_incident_edge().unwrap().0, 417);
+    let v = output.vertices()[129].get();
+    assert!(almost_equal(v.x(), 348.6958227, v.y(), 41.1945186));
+    assert_eq!(v.get_incident_edge().unwrap().0, 423);
+    let v = output.vertices()[130].get();
+    assert!(almost_equal(v.x(), 333.2976577, v.y(), 143.8296385));
+    assert_eq!(v.get_incident_edge().unwrap().0, 425);
+    let v = output.vertices()[131].get();
+    assert!(almost_equal(v.x(), 345.1426991, v.y(), 19.5204646));
+    assert_eq!(v.get_incident_edge().unwrap().0, 427);
+    let v = output.vertices()[132].get();
+    assert!(almost_equal(v.x(), 366.4611605, v.y(), 509.3215891));
+    assert_eq!(v.get_incident_edge().unwrap().0, 429);
+    let v = output.vertices()[133].get();
+    assert!(almost_equal(v.x(), 373.1847157, v.y(), 99.5783412));
+    assert_eq!(v.get_incident_edge().unwrap().0, 431);
+    let v = output.vertices()[134].get();
+    assert!(almost_equal(v.x(), 337.3019780, v.y(), 142.6376264));
+    assert_eq!(v.get_incident_edge().unwrap().0, 433);
+    let v = output.vertices()[135].get();
+    assert!(almost_equal(v.x(), 204.9025641, v.y(), 923.8410256));
+    assert_eq!(v.get_incident_edge().unwrap().0, 435);
+    let v = output.vertices()[136].get();
+    assert!(almost_equal(v.x(), 337.1881287, v.y(), 143.0544731));
+    assert_eq!(v.get_incident_edge().unwrap().0, 437);
+    let v = output.vertices()[137].get();
+    assert!(almost_equal(v.x(), 344.7482761, v.y(), 448.4048858));
+    assert_eq!(v.get_incident_edge().unwrap().0, 439);
+    let v = output.vertices()[138].get();
+    assert!(almost_equal(v.x(), 377.5933595, v.y(), 51.5280262));
+    assert_eq!(v.get_incident_edge().unwrap().0, 441);
+    let v = output.vertices()[139].get();
+    assert!(almost_equal(v.x(), 400.0000000, v.y(), 200.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 447);
+    let v = output.vertices()[140].get();
+    assert!(almost_equal(v.x(), 371.2380257, v.y(), 228.7619743));
+    assert_eq!(v.get_incident_edge().unwrap().0, 449);
+    let v = output.vertices()[141].get();
+    assert!(almost_equal(v.x(), 352.0848706, v.y(), 285.2281112));
+    assert_eq!(v.get_incident_edge().unwrap().0, 451);
+    let v = output.vertices()[142].get();
+    assert!(almost_equal(v.x(), 344.9059818, v.y(), 344.9059818));
+    assert_eq!(v.get_incident_edge().unwrap().0, 453);
+    let v = output.vertices()[143].get();
+    assert!(almost_equal(v.x(), 400.0000000, v.y(), 400.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 457);
+    let v = output.vertices()[144].get();
+    assert!(almost_equal(v.x(), 198.3827160, v.y(), 946.6604938));
+    assert_eq!(v.get_incident_edge().unwrap().0, 459);
+    let v = output.vertices()[145].get();
+    assert!(almost_equal(v.x(), 355.2211116, v.y(), 636.5225907));
+    assert_eq!(v.get_incident_edge().unwrap().0, 463);
+    let v = output.vertices()[146].get();
+    assert!(almost_equal(v.x(), 380.8920954, v.y(), 12.7678795));
+    assert_eq!(v.get_incident_edge().unwrap().0, 467);
+    let v = output.vertices()[147].get();
+    assert!(almost_equal(v.x(), 385.7416252, v.y(), 542.8784343));
+    assert_eq!(v.get_incident_edge().unwrap().0, 471);
+    let v = output.vertices()[148].get();
+    assert!(almost_equal(v.x(), 360.5265260, v.y(), 617.0694048));
+    assert_eq!(v.get_incident_edge().unwrap().0, 473);
+    let v = output.vertices()[149].get();
+    assert!(almost_equal(v.x(), 372.8562699, v.y(), 161.7154894));
+    assert_eq!(v.get_incident_edge().unwrap().0, 475);
+    let v = output.vertices()[150].get();
+    assert!(almost_equal(v.x(), 356.3823529, v.y(), -24.8137255));
+    assert_eq!(v.get_incident_edge().unwrap().0, 477);
+    let v = output.vertices()[151].get();
+    assert!(almost_equal(v.x(), 421.0000000, v.y(), 82.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 483);
+    let v = output.vertices()[152].get();
+    assert!(almost_equal(v.x(), 400.0000000, v.y(), 171.5428751));
+    assert_eq!(v.get_incident_edge().unwrap().0, 485);
+    let v = output.vertices()[153].get();
+    assert!(almost_equal(v.x(), 419.4115863, v.y(), 72.2504265));
+    assert_eq!(v.get_incident_edge().unwrap().0, 487);
+    let v = output.vertices()[154].get();
+    assert!(almost_equal(v.x(), 407.3496843, v.y(), 108.9094919));
+    assert_eq!(v.get_incident_edge().unwrap().0, 489);
+    let v = output.vertices()[155].get();
+    assert!(almost_equal(v.x(), 433.0000000, v.y(), 497.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 497);
+    let v = output.vertices()[156].get();
+    assert!(almost_equal(v.x(), 400.0000000, v.y(), 438.8523777));
+    assert_eq!(v.get_incident_edge().unwrap().0, 499);
+    let v = output.vertices()[157].get();
+    assert!(almost_equal(v.x(), 427.4135860, v.y(), 484.6844964));
+    assert_eq!(v.get_incident_edge().unwrap().0, 501);
+    let v = output.vertices()[158].get();
+    assert!(almost_equal(v.x(), 428.8140207, v.y(), 484.1629967));
+    assert_eq!(v.get_incident_edge().unwrap().0, 503);
+    let v = output.vertices()[159].get();
+    assert!(almost_equal(v.x(), 434.3229054, v.y(), 75.2256413));
+    assert_eq!(v.get_incident_edge().unwrap().0, 505);
+    let v = output.vertices()[160].get();
+    assert!(almost_equal(v.x(), 451.0000000, v.y(), 141.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 511);
+    let v = output.vertices()[161].get();
+    assert!(almost_equal(v.x(), 438.1526246, v.y(), 147.5325638));
+    assert_eq!(v.get_incident_edge().unwrap().0, 513);
+    let v = output.vertices()[162].get();
+    assert!(almost_equal(v.x(), 427.0603160, v.y(), 240.7067177));
+    assert_eq!(v.get_incident_edge().unwrap().0, 519);
+    let v = output.vertices()[163].get();
+    assert!(almost_equal(v.x(), 444.4836586, v.y(), 153.3700040));
+    assert_eq!(v.get_incident_edge().unwrap().0, 521);
+    let v = output.vertices()[164].get();
+    assert!(almost_equal(v.x(), 430.6785590, v.y(), 200.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 523);
+    let v = output.vertices()[165].get();
+    assert!(almost_equal(v.x(), 433.6088985, v.y(), 528.8508555));
+    assert_eq!(v.get_incident_edge().unwrap().0, 527);
+    let v = output.vertices()[166].get();
+    assert!(almost_equal(v.x(), 463.0000000, v.y(), 56.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 533);
+    let v = output.vertices()[167].get();
+    assert!(almost_equal(v.x(), 464.0000000, v.y(), 554.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 539);
+    let v = output.vertices()[168].get();
+    assert!(almost_equal(v.x(), 433.4354821, v.y(), 205.8861456));
+    assert_eq!(v.get_incident_edge().unwrap().0, 541);
+    let v = output.vertices()[169].get();
+    assert!(almost_equal(v.x(), 462.0045434, v.y(), 49.0803625));
+    assert_eq!(v.get_incident_edge().unwrap().0, 543);
+    let v = output.vertices()[170].get();
+    assert!(almost_equal(v.x(), 466.6086393, v.y(), 49.7227871));
+    assert_eq!(v.get_incident_edge().unwrap().0, 545);
+    let v = output.vertices()[171].get();
+    assert!(almost_equal(v.x(), 444.1708802, v.y(), 525.7556504));
+    assert_eq!(v.get_incident_edge().unwrap().0, 547);
+    let v = output.vertices()[172].get();
+    assert!(almost_equal(v.x(), 466.7160588, v.y(), 471.2311650));
+    assert_eq!(v.get_incident_edge().unwrap().0, 549);
+    let v = output.vertices()[173].get();
+    assert!(almost_equal(v.x(), 375.2807514, v.y(), 850.5814757));
+    assert_eq!(v.get_incident_edge().unwrap().0, 551);
+    let v = output.vertices()[174].get();
+    assert!(almost_equal(v.x(), 453.1144143, v.y(), 523.6639203));
+    assert_eq!(v.get_incident_edge().unwrap().0, 553);
+    let v = output.vertices()[175].get();
+    assert!(almost_equal(v.x(), 465.9853449, v.y(), 126.2295195));
+    assert_eq!(v.get_incident_edge().unwrap().0, 561);
+    let v = output.vertices()[176].get();
+    assert!(almost_equal(v.x(), 457.0519803, v.y(), 87.0227389));
+    assert_eq!(v.get_incident_edge().unwrap().0, 563);
+    let v = output.vertices()[177].get();
+    assert!(almost_equal(v.x(), 440.0618632, v.y(), 609.0911561));
+    assert_eq!(v.get_incident_edge().unwrap().0, 565);
+    let v = output.vertices()[178].get();
+    assert!(almost_equal(v.x(), 477.5270465, v.y(), 137.7094302));
+    assert_eq!(v.get_incident_edge().unwrap().0, 567);
+    let v = output.vertices()[179].get();
+    assert!(almost_equal(v.x(), 445.9624227, v.y(), 413.0056860));
+    assert_eq!(v.get_incident_edge().unwrap().0, 569);
+    let v = output.vertices()[180].get();
+    assert!(almost_equal(v.x(), 494.0000000, v.y(), 371.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 575);
+    let v = output.vertices()[181].get();
+    assert!(almost_equal(v.x(), 447.9937680, v.y(), 384.6685182));
+    assert_eq!(v.get_incident_edge().unwrap().0, 577);
+    let v = output.vertices()[182].get();
+    assert!(almost_equal(v.x(), 474.8348325, v.y(), 226.5128396));
+    assert_eq!(v.get_incident_edge().unwrap().0, 579);
+    let v = output.vertices()[183].get();
+    assert!(almost_equal(v.x(), 480.8838423, v.y(), 461.2340549));
+    assert_eq!(v.get_incident_edge().unwrap().0, 585);
+    let v = output.vertices()[184].get();
+    assert!(almost_equal(v.x(), 466.7018481, v.y(), 97.1811906));
+    assert_eq!(v.get_incident_edge().unwrap().0, 587);
+    let v = output.vertices()[185].get();
+    assert!(almost_equal(v.x(), 451.4734043, v.y(), 400.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 589);
+    let v = output.vertices()[186].get();
+    assert!(almost_equal(v.x(), 479.2851505, v.y(), 441.5168558));
+    assert_eq!(v.get_incident_edge().unwrap().0, 591);
+    let v = output.vertices()[187].get();
+    assert!(almost_equal(v.x(), 453.1240000, v.y(), 405.3502069));
+    assert_eq!(v.get_incident_edge().unwrap().0, 593);
+    let v = output.vertices()[188].get();
+    assert!(almost_equal(v.x(), 512.0000000, v.y(), 643.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 601);
+    let v = output.vertices()[189].get();
+    assert!(almost_equal(v.x(), 469.4682806, v.y(), 698.9030418));
+    assert_eq!(v.get_incident_edge().unwrap().0, 605);
+    let v = output.vertices()[190].get();
+    assert!(almost_equal(v.x(), 487.1751523, v.y(), 508.0435798));
+    assert_eq!(v.get_incident_edge().unwrap().0, 609);
+    let v = output.vertices()[191].get();
+    assert!(almost_equal(v.x(), 484.6507237, v.y(), 709.1680302));
+    assert_eq!(v.get_incident_edge().unwrap().0, 611);
+    let v = output.vertices()[192].get();
+    assert!(almost_equal(v.x(), 471.5545509, v.y(), 412.1292601));
+    assert_eq!(v.get_incident_edge().unwrap().0, 613);
+    let v = output.vertices()[193].get();
+    assert!(almost_equal(v.x(), 507.9648712, v.y(), 461.1311476));
+    assert_eq!(v.get_incident_edge().unwrap().0, 615);
+    let v = output.vertices()[194].get();
+    assert!(almost_equal(v.x(), 471.0879873, v.y(), 602.7820301));
+    assert_eq!(v.get_incident_edge().unwrap().0, 617);
+    let v = output.vertices()[195].get();
+    assert!(almost_equal(v.x(), 499.4264473, v.y(), 104.8603291));
+    assert_eq!(v.get_incident_edge().unwrap().0, 619);
+    let v = output.vertices()[196].get();
+    assert!(almost_equal(v.x(), 525.0000000, v.y(), 467.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 625);
+    let v = output.vertices()[197].get();
+    assert!(almost_equal(v.x(), 497.6539352, v.y(), 716.0520833));
+    assert_eq!(v.get_incident_edge().unwrap().0, 627);
+    let v = output.vertices()[198].get();
+    assert!(almost_equal(v.x(), 518.7613497, v.y(), 453.0408324));
+    assert_eq!(v.get_incident_edge().unwrap().0, 631);
+    let v = output.vertices()[199].get();
+    assert!(almost_equal(v.x(), 489.9905970, v.y(), 596.9113752));
+    assert_eq!(v.get_incident_edge().unwrap().0, 633);
+    let v = output.vertices()[200].get();
+    assert!(almost_equal(v.x(), 489.9976364, v.y(), 596.9066682));
+    assert_eq!(v.get_incident_edge().unwrap().0, 635);
+    let v = output.vertices()[201].get();
+    assert!(almost_equal(v.x(), 516.0634823, v.y(), 384.3595397));
+    assert_eq!(v.get_incident_edge().unwrap().0, 637);
+    let v = output.vertices()[202].get();
+    assert!(almost_equal(v.x(), 504.4438216, v.y(), 271.4674140));
+    assert_eq!(v.get_incident_edge().unwrap().0, 639);
+    let v = output.vertices()[203].get();
+    assert!(almost_equal(v.x(), 518.3058824, v.y(), 667.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 641);
+    let v = output.vertices()[204].get();
+    assert!(almost_equal(v.x(), 506.4241349, v.y(), 274.3379841));
+    assert_eq!(v.get_incident_edge().unwrap().0, 643);
+    let v = output.vertices()[205].get();
+    assert!(almost_equal(v.x(), 530.2061647, v.y(), 488.3094489));
+    assert_eq!(v.get_incident_edge().unwrap().0, 645);
+    let v = output.vertices()[206].get();
+    assert!(almost_equal(v.x(), 525.7435897, v.y(), 667.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 647);
+    let v = output.vertices()[207].get();
+    assert!(almost_equal(v.x(), 531.7220424, v.y(), 487.6142635));
+    assert_eq!(v.get_incident_edge().unwrap().0, 649);
+    let v = output.vertices()[208].get();
+    assert!(almost_equal(v.x(), 535.7328635, v.y(), 485.5141895));
+    assert_eq!(v.get_incident_edge().unwrap().0, 651);
+    let v = output.vertices()[209].get();
+    assert!(almost_equal(v.x(), 529.5686025, v.y(), 666.8890144));
+    assert_eq!(v.get_incident_edge().unwrap().0, 653);
+    let v = output.vertices()[210].get();
+    assert!(almost_equal(v.x(), 560.0000000, v.y(), 262.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 659);
+    let v = output.vertices()[211].get();
+    assert!(almost_equal(v.x(), 541.3528746, v.y(), 256.3051731));
+    assert_eq!(v.get_incident_edge().unwrap().0, 661);
+    let v = output.vertices()[212].get();
+    assert!(almost_equal(v.x(), 541.7574333, v.y(), 226.6910800));
+    assert_eq!(v.get_incident_edge().unwrap().0, 663);
+    let v = output.vertices()[213].get();
+    assert!(almost_equal(v.x(), 536.6438082, v.y(), 215.0486016));
+    assert_eq!(v.get_incident_edge().unwrap().0, 665);
+    let v = output.vertices()[214].get();
+    assert!(almost_equal(v.x(), 563.0000000, v.y(), 200.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 669);
+    let v = output.vertices()[215].get();
+    assert!(almost_equal(v.x(), 485.9231707, v.y(), 828.7780488));
+    assert_eq!(v.get_incident_edge().unwrap().0, 671);
+    let v = output.vertices()[216].get();
+    assert!(almost_equal(v.x(), 567.6011411, v.y(), 191.2656305));
+    assert_eq!(v.get_incident_edge().unwrap().0, 673);
+    let v = output.vertices()[217].get();
+    assert!(almost_equal(v.x(), 545.2510903, v.y(), 665.9938109));
+    assert_eq!(v.get_incident_edge().unwrap().0, 681);
+    let v = output.vertices()[218].get();
+    assert!(almost_equal(v.x(), 575.9926968, v.y(), 200.6286789));
+    assert_eq!(v.get_incident_edge().unwrap().0, 685);
+    let v = output.vertices()[219].get();
+    assert!(almost_equal(v.x(), 543.3512304, v.y(), 561.2273785));
+    assert_eq!(v.get_incident_edge().unwrap().0, 687);
+    let v = output.vertices()[220].get();
+    assert!(almost_equal(v.x(), 594.0000000, v.y(), 427.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 695);
+    let v = output.vertices()[221].get();
+    assert!(almost_equal(v.x(), 535.5372274, v.y(), 772.4987907));
+    assert_eq!(v.get_incident_edge().unwrap().0, 697);
+    let v = output.vertices()[222].get();
+    assert!(almost_equal(v.x(), 567.8763297, v.y(), 407.4540484));
+    assert_eq!(v.get_incident_edge().unwrap().0, 699);
+    let v = output.vertices()[223].get();
+    assert!(almost_equal(v.x(), 568.4973753, v.y(), 407.4171139));
+    assert_eq!(v.get_incident_edge().unwrap().0, 701);
+    let v = output.vertices()[224].get();
+    assert!(almost_equal(v.x(), 589.6072108, v.y(), 360.7022464));
+    assert_eq!(v.get_incident_edge().unwrap().0, 705);
+    let v = output.vertices()[225].get();
+    assert!(almost_equal(v.x(), 612.0000000, v.y(), 209.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 713);
+    let v = output.vertices()[226].get();
+    assert!(almost_equal(v.x(), 587.5053351, v.y(), 223.4496521));
+    assert_eq!(v.get_incident_edge().unwrap().0, 715);
+    let v = output.vertices()[227].get();
+    assert!(almost_equal(v.x(), 585.8085961, v.y(), 700.3906207));
+    assert_eq!(v.get_incident_edge().unwrap().0, 719);
+    let v = output.vertices()[228].get();
+    assert!(almost_equal(v.x(), 585.0828452, v.y(), 277.1877779));
+    assert_eq!(v.get_incident_edge().unwrap().0, 721);
+    let v = output.vertices()[229].get();
+    assert!(almost_equal(v.x(), 588.1997608, v.y(), 263.3645046));
+    assert_eq!(v.get_incident_edge().unwrap().0, 723);
+    let v = output.vertices()[230].get();
+    assert!(almost_equal(v.x(), 617.0000000, v.y(), 342.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 729);
+    let v = output.vertices()[231].get();
+    assert!(almost_equal(v.x(), 587.5644917, v.y(), 272.9572005));
+    assert_eq!(v.get_incident_edge().unwrap().0, 731);
+    let v = output.vertices()[232].get();
+    assert!(almost_equal(v.x(), 583.7445960, v.y(), 86.3840693));
+    assert_eq!(v.get_incident_edge().unwrap().0, 733);
+    let v = output.vertices()[233].get();
+    assert!(almost_equal(v.x(), 600.3129897, v.y(), 337.4846913));
+    assert_eq!(v.get_incident_edge().unwrap().0, 735);
+    let v = output.vertices()[234].get();
+    assert!(almost_equal(v.x(), 618.0000000, v.y(), 281.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 739);
+    let v = output.vertices()[235].get();
+    assert!(almost_equal(v.x(), 605.8405676, v.y(), 329.0550585));
+    assert_eq!(v.get_incident_edge().unwrap().0, 741);
+    let v = output.vertices()[236].get();
+    assert!(almost_equal(v.x(), 604.3450942, v.y(), 444.8452874));
+    assert_eq!(v.get_incident_edge().unwrap().0, 743);
+    let v = output.vertices()[237].get();
+    assert!(almost_equal(v.x(), 629.0000000, v.y(), 758.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 749);
+    let v = output.vertices()[238].get();
+    assert!(almost_equal(v.x(), 605.8065278, v.y(), 713.5468718));
+    assert_eq!(v.get_incident_edge().unwrap().0, 751);
+    let v = output.vertices()[239].get();
+    assert!(almost_equal(v.x(), 611.8761662, v.y(), 79.9550466));
+    assert_eq!(v.get_incident_edge().unwrap().0, 753);
+    let v = output.vertices()[240].get();
+    assert!(almost_equal(v.x(), 608.5858114, v.y(), 657.8731520));
+    assert_eq!(v.get_incident_edge().unwrap().0, 755);
+    let v = output.vertices()[241].get();
+    assert!(almost_equal(v.x(), 597.7646129, v.y(), 632.3943898));
+    assert_eq!(v.get_incident_edge().unwrap().0, 757);
+    let v = output.vertices()[242].get();
+    assert!(almost_equal(v.x(), 617.1017027, v.y(), 433.2510490));
+    assert_eq!(v.get_incident_edge().unwrap().0, 759);
+    let v = output.vertices()[243].get();
+    assert!(almost_equal(v.x(), 616.7589723, v.y(), 598.6600357));
+    assert_eq!(v.get_incident_edge().unwrap().0, 763);
+    let v = output.vertices()[244].get();
+    assert!(almost_equal(v.x(), 611.8194939, v.y(), 788.0017794));
+    assert_eq!(v.get_incident_edge().unwrap().0, 765);
+    let v = output.vertices()[245].get();
+    assert!(almost_equal(v.x(), 617.1356621, v.y(), 18.1559708));
+    assert_eq!(v.get_incident_edge().unwrap().0, 767);
+    let v = output.vertices()[246].get();
+    assert!(almost_equal(v.x(), 628.2103477, v.y(), 184.6844784));
+    assert_eq!(v.get_incident_edge().unwrap().0, 769);
+    let v = output.vertices()[247].get();
+    assert!(almost_equal(v.x(), 637.1186829, v.y(), 294.0754211));
+    assert_eq!(v.get_incident_edge().unwrap().0, 771);
+    let v = output.vertices()[248].get();
+    assert!(almost_equal(v.x(), 617.1530210, v.y(), 511.8737125));
+    assert_eq!(v.get_incident_edge().unwrap().0, 773);
+    let v = output.vertices()[249].get();
+    assert!(almost_equal(v.x(), 670.0000000, v.y(), 175.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 781);
+    let v = output.vertices()[250].get();
+    assert!(almost_equal(v.x(), 646.5880885, v.y(), 278.6176593));
+    assert_eq!(v.get_incident_edge().unwrap().0, 785);
+    let v = output.vertices()[251].get();
+    assert!(almost_equal(v.x(), 643.0426971, v.y(), 197.6341305));
+    assert_eq!(v.get_incident_edge().unwrap().0, 787);
+    let v = output.vertices()[252].get();
+    assert!(almost_equal(v.x(), 645.5275612, v.y(), 206.2060366));
+    assert_eq!(v.get_incident_edge().unwrap().0, 797);
+    let v = output.vertices()[253].get();
+    assert!(almost_equal(v.x(), 658.9026767, v.y(), 674.3755423));
+    assert_eq!(v.get_incident_edge().unwrap().0, 799);
+    let v = output.vertices()[254].get();
+    assert!(almost_equal(v.x(), 513.9388260, v.y(), 909.7121641));
+    assert_eq!(v.get_incident_edge().unwrap().0, 801);
+    let v = output.vertices()[255].get();
+    assert!(almost_equal(v.x(), 645.5000812, v.y(), 395.5163942));
+    assert_eq!(v.get_incident_edge().unwrap().0, 803);
+    let v = output.vertices()[256].get();
+    assert!(almost_equal(v.x(), 652.0166959, v.y(), 265.3393672));
+    assert_eq!(v.get_incident_edge().unwrap().0, 805);
+    let v = output.vertices()[257].get();
+    assert!(almost_equal(v.x(), 633.6008471, v.y(), -0.5802743));
+    assert_eq!(v.get_incident_edge().unwrap().0, 807);
+    let v = output.vertices()[258].get();
+    assert!(almost_equal(v.x(), 497.4615489, v.y(), -154.8528761));
+    assert_eq!(v.get_incident_edge().unwrap().0, 809);
+    let v = output.vertices()[259].get();
+    assert!(almost_equal(v.x(), 656.4537249, v.y(), 256.1234352));
+    assert_eq!(v.get_incident_edge().unwrap().0, 811);
+    let v = output.vertices()[260].get();
+    assert!(almost_equal(v.x(), 654.4268711, v.y(), 385.2678891));
+    assert_eq!(v.get_incident_edge().unwrap().0, 815);
+    let v = output.vertices()[261].get();
+    assert!(almost_equal(v.x(), 657.5904061, v.y(), 367.5499538));
+    assert_eq!(v.get_incident_edge().unwrap().0, 817);
+    let v = output.vertices()[262].get();
+    assert!(almost_equal(v.x(), 656.3960797, v.y(), 81.7358432));
+    assert_eq!(v.get_incident_edge().unwrap().0, 819);
+    let v = output.vertices()[263].get();
+    assert!(almost_equal(v.x(), 659.9045381, v.y(), 372.5560231));
+    assert_eq!(v.get_incident_edge().unwrap().0, 821);
+    let v = output.vertices()[264].get();
+    assert!(almost_equal(v.x(), 688.9125561, v.y(), 308.1385650));
+    assert_eq!(v.get_incident_edge().unwrap().0, 825);
+    let v = output.vertices()[265].get();
+    assert!(almost_equal(v.x(), 669.8492433, v.y(), 761.6426077));
+    assert_eq!(v.get_incident_edge().unwrap().0, 827);
+    let v = output.vertices()[266].get();
+    assert!(almost_equal(v.x(), 692.8391698, v.y(), 307.6898092));
+    assert_eq!(v.get_incident_edge().unwrap().0, 829);
+    let v = output.vertices()[267].get();
+    assert!(almost_equal(v.x(), 681.9032429, v.y(), 604.4690790));
+    assert_eq!(v.get_incident_edge().unwrap().0, 831);
+    let v = output.vertices()[268].get();
+    assert!(almost_equal(v.x(), 679.0601012, v.y(), 733.6913900));
+    assert_eq!(v.get_incident_edge().unwrap().0, 833);
+    let v = output.vertices()[269].get();
+    assert!(almost_equal(v.x(), 687.4987316, v.y(), 464.8312399));
+    assert_eq!(v.get_incident_edge().unwrap().0, 837);
+    let v = output.vertices()[270].get();
+    assert!(almost_equal(v.x(), 689.2098887, v.y(), 141.5844794));
+    assert_eq!(v.get_incident_edge().unwrap().0, 839);
+    let v = output.vertices()[271].get();
+    assert!(almost_equal(v.x(), 732.0000000, v.y(), 346.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 845);
+    let v = output.vertices()[272].get();
+    assert!(almost_equal(v.x(), 699.6541453, v.y(), 352.0596290));
+    assert_eq!(v.get_incident_edge().unwrap().0, 847);
+    let v = output.vertices()[273].get();
+    assert!(almost_equal(v.x(), 692.5352674, v.y(), 364.5042847));
+    assert_eq!(v.get_incident_edge().unwrap().0, 849);
+    let v = output.vertices()[274].get();
+    assert!(almost_equal(v.x(), 672.7868069, v.y(), 106.4661106));
+    assert_eq!(v.get_incident_edge().unwrap().0, 853);
+    let v = output.vertices()[275].get();
+    assert!(almost_equal(v.x(), 700.1857471, v.y(), 437.8058578));
+    assert_eq!(v.get_incident_edge().unwrap().0, 857);
+    let v = output.vertices()[276].get();
+    assert!(almost_equal(v.x(), 694.8607078, v.y(), 459.2594162));
+    assert_eq!(v.get_incident_edge().unwrap().0, 859);
+    let v = output.vertices()[277].get();
+    assert!(almost_equal(v.x(), 735.0000000, v.y(), 479.0000000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 863);
+    let v = output.vertices()[278].get();
+    assert!(almost_equal(v.x(), 686.3533327, v.y(), 576.5557752));
+    assert_eq!(v.get_incident_edge().unwrap().0, 865);
+    let v = output.vertices()[279].get();
+    assert!(almost_equal(v.x(), 674.5199734, v.y(), 99.5932091));
+    assert_eq!(v.get_incident_edge().unwrap().0, 867);
+    let v = output.vertices()[280].get();
+    assert!(almost_equal(v.x(), 704.3001872, v.y(), 162.5636748));
+    assert_eq!(v.get_incident_edge().unwrap().0, 869);
+    let v = output.vertices()[281].get();
+    assert!(almost_equal(v.x(), 693.1519629, v.y(), 569.1359774));
+    assert_eq!(v.get_incident_edge().unwrap().0, 871);
+    let v = output.vertices()[282].get();
+    assert!(almost_equal(v.x(), 701.0929604, v.y(), 561.4185921));
+    assert_eq!(v.get_incident_edge().unwrap().0, 877);
+    let v = output.vertices()[283].get();
+    assert!(almost_equal(v.x(), 742.1210191, v.y(), 141.6878981));
+    assert_eq!(v.get_incident_edge().unwrap().0, 883);
+    let v = output.vertices()[284].get();
+    assert!(almost_equal(v.x(), 718.1320317, v.y(), 177.5020688));
+    assert_eq!(v.get_incident_edge().unwrap().0, 885);
+    let v = output.vertices()[285].get();
+    assert!(almost_equal(v.x(), 711.0000000, v.y(), 81.5412371));
+    assert_eq!(v.get_incident_edge().unwrap().0, 889);
+    let v = output.vertices()[286].get();
+    assert!(almost_equal(v.x(), 732.2352217, v.y(), 239.4776595));
+    assert_eq!(v.get_incident_edge().unwrap().0, 891);
+    let v = output.vertices()[287].get();
+    assert!(almost_equal(v.x(), 746.3236663, v.y(), 301.3884525));
+    assert_eq!(v.get_incident_edge().unwrap().0, 893);
+    let v = output.vertices()[288].get();
+    assert!(almost_equal(v.x(), 754.6099983, v.y(), 337.8022228));
+    assert_eq!(v.get_incident_edge().unwrap().0, 895);
+    let v = output.vertices()[289].get();
+    assert!(almost_equal(v.x(), 755.7110972, v.y(), 345.4651632));
+    assert_eq!(v.get_incident_edge().unwrap().0, 897);
+    let v = output.vertices()[290].get();
+    assert!(almost_equal(v.x(), 726.4395880, v.y(), 715.4849666));
+    assert_eq!(v.get_incident_edge().unwrap().0, 899);
+    let v = output.vertices()[291].get();
+    assert!(almost_equal(v.x(), 726.4620419, v.y(), 715.6335079));
+    assert_eq!(v.get_incident_edge().unwrap().0, 901);
+    let v = output.vertices()[292].get();
+    assert!(almost_equal(v.x(), 758.5915076, v.y(), 392.5408492));
+    assert_eq!(v.get_incident_edge().unwrap().0, 905);
+    let v = output.vertices()[293].get();
+    assert!(almost_equal(v.x(), 757.1083213, v.y(), 509.0619247));
+    assert_eq!(v.get_incident_edge().unwrap().0, 907);
+    let v = output.vertices()[294].get();
+    assert!(almost_equal(v.x(), 752.1265625, v.y(), 88.3250000));
+    assert_eq!(v.get_incident_edge().unwrap().0, 909);
+    let v = output.vertices()[295].get();
+    assert!(almost_equal(v.x(), 779.7246659, v.y(), 621.8324053));
+    assert_eq!(v.get_incident_edge().unwrap().0, 911);
+    let v = output.vertices()[296].get();
+    assert!(almost_equal(v.x(), 836.1811616, v.y(), 476.7177182));
+    assert_eq!(v.get_incident_edge().unwrap().0, 913);
+    let v = output.vertices()[297].get();
+    assert!(almost_equal(v.x(), 620.3654971, v.y(), 1095.6578947));
+    assert_eq!(v.get_incident_edge().unwrap().0, 915);
+    let v = output.vertices()[298].get();
+    assert!(almost_equal(v.x(), 856.8056769, v.y(), 592.5611354));
+    assert_eq!(v.get_incident_edge().unwrap().0, 917);
+    let v = output.vertices()[299].get();
+    assert!(almost_equal(v.x(), 867.2333166, v.y(), 493.8138485));
+    assert_eq!(v.get_incident_edge().unwrap().0, 919);
+    let v = output.vertices()[300].get();
+    assert!(almost_equal(v.x(), 711.0000000, v.y(), -690.1363636));
+    assert_eq!(v.get_incident_edge().unwrap().0, 921);
+    let v = output.vertices()[301].get();
+    assert!(almost_equal(v.x(), 1101.4076456, v.y(), 554.6383495));
+    assert_eq!(v.get_incident_edge().unwrap().0, 923);
+    let v = output.vertices()[302].get();
+    assert!(almost_equal(v.x(), 521.6624933, v.y(), 2145.4989345));
+    assert_eq!(v.get_incident_edge().unwrap().0, 925);
+    let v = output.vertices()[303].get();
+    assert!(almost_equal(v.x(), 516.6056696, v.y(), 2285.5729527));
+    assert_eq!(v.get_incident_edge().unwrap().0, 927);
 }

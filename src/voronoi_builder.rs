@@ -172,10 +172,10 @@ where
         println!(
             "********************************************************************************"
         );
+
         self.init_beach_line(&mut site_event_iterator_, &mut output);
         let mut i=0;
         // The algorithm stops when there are no events to process.
-        //event_comparison_predicate event_comparison; wtf is this?
         while !self.circle_events_.is_empty() || (site_event_iterator_ != self.site_events_.len()) {
             /*self.beach_line_.debug_print_all();
             */

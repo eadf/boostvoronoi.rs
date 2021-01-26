@@ -436,6 +436,7 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
+
     #[allow(dead_code)]
     #[allow(clippy::let_and_return)]
     pub(crate) fn distance_predicate_debug(
@@ -488,8 +489,6 @@ where
         }
     }
 
-    //private:
-    
     #[allow(clippy::let_and_return)]
     pub fn pp(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -751,6 +750,7 @@ where
     I2: InputType + Neg<Output = I2>,
     F2: OutputType + Neg<Output = F2>,
 {
+    #[allow(clippy::let_and_return)]
     pub fn node_comparison_predicate(
         node1: &VB::BeachLineNodeKey<I1, F1, I2, F2>,
         node2: &VB::BeachLineNodeKey<I1, F1, I2, F2>,
@@ -875,8 +875,6 @@ where
     }
 }
 
-//#[derive(Default)]
-
 pub struct CircleExistencePredicate<I1, F1, I2, F2>
 where
     I1: InputType + Neg<Output = I1>,
@@ -919,7 +917,7 @@ where
         OrientationTest::<I1, F1, I2, F2>::eval_3(site1.point0(), site2.point0(), site3.point0())
             == Orientation::RIGHT
     }
-    
+
     #[allow(clippy::let_and_return)]
     pub(crate) fn pps(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -970,6 +968,7 @@ where
         true
     }
 
+    #[allow(clippy::let_and_return)]
     pub(crate) fn pss(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1010,6 +1009,7 @@ where
         true
     }
 
+    #[allow(clippy::let_and_return)]
     pub(crate) fn sss(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1055,6 +1055,7 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
+    #[allow(clippy::let_and_return)]
     pub(crate) fn ppp(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -1701,6 +1702,7 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
+    #[allow(clippy::let_and_return)]
     pub(crate) fn lies_outside_vertical_segment(
         circle: &VC::CircleEventType<F2>,
         site: &VSE::SiteEvent<I1, F1, I2, F2>,

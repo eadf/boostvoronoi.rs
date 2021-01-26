@@ -408,7 +408,7 @@ where
                 let _ = self.c_list_.remove(circle_id);
                 let _ = self.inactive_circle_ids_.insert(circle_id);
             } else {
-                panic!("This should not happend")
+                panic!("This should not have happened")
             }
         }
         /*dbg!(

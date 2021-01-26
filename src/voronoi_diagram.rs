@@ -386,22 +386,6 @@ where
     const BIT_IS_LINEAR: ColorType = 0x1; // linear is opposite to curved
     const BIT_IS_PRIMARY: ColorType = 0x2; // primary is opposite to secondary
 
-    /*fn new_1(id: VoronoiEdgeIndex) -> Self {
-        Self {
-            id,
-            cell_: None,
-            vertex_: None,
-            twin_: None,
-            next_ccw_: None,
-            prev_ccw_: None,
-            color_: 0,
-            _pdi: PhantomData,
-            _pdo: PhantomData,
-            _pdbi: PhantomData,
-            _pdbf: PhantomData,
-        }
-    }*/
-
     fn new_4(
         id: VoronoiEdgeIndex,
         cell: VoronoiCellIndex,

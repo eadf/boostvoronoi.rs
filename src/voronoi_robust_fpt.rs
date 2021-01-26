@@ -635,9 +635,6 @@ pub struct robust_sqrt_expr<
     _fpt: NumCast + Float + fmt::Display + Default + Debug + ops::Neg<Output = _fpt>,
 > {
     _pdf: PhantomData<_fpt>,
-    //one: i32,
-    //two: i32,
-    //_converter convert;
 }
 
 #[allow(non_camel_case_types)]
@@ -645,11 +642,7 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
     robust_sqrt_expr<_fpt>
 {
     pub fn new() -> Self {
-        Self {
-            _pdf: PhantomData,
-            //one: num::cast::<u8, BigInt>(1u8).unwrap(),
-            //two: num::cast::<u8, BigInt>(2u8).unwrap(),
-        }
+        Self { _pdf: PhantomData }
     }
 
     #[inline(always)]
