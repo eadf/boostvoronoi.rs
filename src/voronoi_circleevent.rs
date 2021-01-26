@@ -92,6 +92,7 @@ impl<F2: OutputType + Neg<Output = F2>> PartialEq for CircleEvent<F2> {
             && self.center_y_ == other.center_y_
             && self.lower_x_ == other.lower_x_
         // todo! Should self.index_ and beach_line_index be in here too?
+        // todo! ulp comparison, just like vertex_equality_predicate()?
         //&& self.index_  == other.index_
         //&& self.index_  == other.index_
     }
@@ -113,9 +114,7 @@ impl<F2: OutputType + Neg<Output = F2>> Ord for CircleEvent<F2> {
             } else {
                 Ordering::Greater
             };
-        } else if self.y() < other.y()
-            || self.beach_line_index_.unwrap().0 < other.beach_line_index_.unwrap().0
-        {
+        } else if self.y() < other.y() {
             return Ordering::Less;
         }
         Ordering::Greater

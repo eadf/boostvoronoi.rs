@@ -37,7 +37,7 @@ use std::ops::Neg;
 
 // TODO: how to make these generic?
 const ULPS: u64 = 64;
-const ULPSX2: u64 = 128;
+const ULPSX2: u64 = 64; // Todo: This is what c++ boost uses. Find a fix for this
 
 #[inline(always)]
 fn is_neg(number: &BigInt) -> bool {
@@ -939,7 +939,8 @@ where
             c_y.dif().fpv() * inv_orientation.fpv(),
             lower_x.dif().fpv() * inv_orientation.fpv(),
         );
-        let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
+        //let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
+        let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(ULPS);
         let recompute_c_x = c_x.dif().ulp() > ulps;
         let recompute_c_y = c_y.dif().ulp() > ulps;
         let recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1488,8 +1489,8 @@ where
         let y1 = i1_to_f64(if s.is_inverse() { s.y0() } else { s.y1() });
         let cc_y = f2_to_f64(c.0.get().y().into_inner());
 
-        UlpComparison::ulp_comparison(cc_y, y0, 128) == cmp::Ordering::Less
-            || UlpComparison::ulp_comparison(cc_y, y1, 128) == cmp::Ordering::Greater
+        UlpComparison::ulp_comparison(cc_y, y0, 64) == cmp::Ordering::Less
+            || UlpComparison::ulp_comparison(cc_y, y1, 64) == cmp::Ordering::Greater
     }
 
     // Create a circle event from the given three sites.

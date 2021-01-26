@@ -10,6 +10,7 @@
 // Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
 
 use super::voronoi_circleevent as VC;
+use super::voronoi_ctypes as CT;
 use super::voronoi_siteevent as VSE;
 use super::voronoi_structures as VS;
 use super::TypeConverter as TCC;
@@ -17,6 +18,7 @@ use super::TypeConverter as TCC;
 use super::{BigFloatType, BigIntType, InputType, OutputType};
 use num::{NumCast, PrimInt};
 use std::cell::Cell;
+use std::cmp::Ordering;
 use std::fmt;
 use std::hash::Hash;
 use std::marker::PhantomData;
@@ -273,15 +275,16 @@ where
             _pdi: PhantomData,
         }))
     }
-    /*
-       TODO: add ULPS!
-       return (ulp_cmp(v1.x(), v2.x(), ULPS) ==
-                   detail::ulp_comparison<T>::EQUAL) &&
-                  (ulp_cmp(v1.y(), v2.y(), ULPS) ==
-                   detail::ulp_comparison<T>::EQUAL);
-    */
+
     fn vertex_equality_predicate_eq(&self, other: &Self) -> bool {
-        self.x_ == other.x_ && self.y_ == other.y_
+        let ulp = 128;
+        let x1: f64 = NumCast::from(self.x()).unwrap();
+        let y1: f64 = NumCast::from(self.y()).unwrap();
+        let x2: f64 = NumCast::from(other.x()).unwrap();
+        let y2: f64 = NumCast::from(other.y()).unwrap();
+
+        CT::UlpComparison::ulp_comparison(x1, x2, ulp) == Ordering::Equal
+            && CT::UlpComparison::ulp_comparison(y1, y2, ulp) == Ordering::Equal
     }
 
     pub fn get_id(&self) -> VoronoiVertexIndex {
