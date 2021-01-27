@@ -16,7 +16,6 @@ use super::voronoi_endpoint as VEP;
 use super::voronoi_error::BVError;
 use super::voronoi_predicate as VP;
 use super::voronoi_siteevent as VSE;
-use super::voronoi_structures as VS;
 
 use geo::{Coordinate, Line};
 use num::{NumCast, PrimInt};
@@ -62,11 +61,10 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
-    pub site_events_: Vec<VSE::SiteEvent<I1, F1, I2, F2>>,
+    pub(crate) site_events_: Vec<VSE::SiteEvent<I1, F1, I2, F2>>,
     circle_events_: VC::CircleEventQueue<F2>,
     end_points_: BinaryHeap<VEP::EndPointPair<I1>>,
-    // todo! make pub(crate)
-    pub beach_line_: VB::Beachline<I1, F1, I2, F2>,
+    pub(crate) beach_line_: VB::Beachline<I1, F1, I2, F2>,
     index_: usize,
     segments_added: bool, // make sure eventual vertices are added before segments
 }
@@ -103,7 +101,7 @@ where
         }
         for v in vertices {
             let mut s = VSE::SiteEvent::<I1, F1, I2, F2>::new_3(*v, *v, self.index_);
-            s.or_source_category(&VD::SourceCategory::SOURCE_CATEGORY_SINGLE_POINT);
+            s.or_source_category(&VD::ColorBits::SINGLE_POINT);
             self.site_events_.push(s);
             self.index_ += 1;
         }
@@ -115,7 +113,7 @@ where
         I1: 'a,
         T: Iterator<Item = &'a Line<I1>>,
     {
-        type SC = VD::SourceCategory;
+        type SC = VD::ColorBits;
         for s in segments {
             let p1 = Coordinate {
                 x: s.start.x,
@@ -126,19 +124,19 @@ where
                 y: s.end.y,
             };
             let mut s1 = VSE::SiteEvent::<I1, F1, I2, F2>::new_3(p1, p1, self.index_);
-            s1.or_source_category(&SC::SOURCE_CATEGORY_SEGMENT_START_POINT);
+            s1.or_source_category(&SC::SEGMENT_START_POINT);
             let mut s2 = VSE::SiteEvent::new_3(p2, p2, self.index_);
-            s2.or_source_category(&SC::SOURCE_CATEGORY_SEGMENT_END_POINT);
+            s2.or_source_category(&SC::SEGMENT_END_POINT);
 
             self.site_events_.push(s1);
             self.site_events_.push(s2);
             let s3 = if VP::PointComparisonPredicate::<I1>::point_comparison_predicate(&p1, &p2) {
                 let mut s3 = VSE::SiteEvent::<I1, F1, I2, F2>::new_3(p1, p2, self.index_);
-                s3.or_source_category(&SC::SOURCE_CATEGORY_INITIAL_SEGMENT);
+                s3.or_source_category(&SC::INITIAL_SEGMENT);
                 s3
             } else {
                 let mut s3 = VSE::SiteEvent::<I1, F1, I2, F2>::new_3(p2, p1, self.index_);
-                s3.or_source_category(&SC::SOURCE_CATEGORY_REVERSE_SEGMENT);
+                s3.or_source_category(&SC::REVERSE_SEGMENT);
                 s3
             };
             self.site_events_.push(s3);
@@ -149,8 +147,6 @@ where
         // TODO: fail at intersecting segments
     }
 
-    // todo: remove this clippy exception
-    #[allow(clippy::collapsible_if)]
     /// Run sweepline algorithm and fill output data structure.
     pub fn construct(&mut self) -> Result<VD::VoronoiDiagram<I1, F1, I2, F2>, BVError> {
         let mut output: VD::VoronoiDiagram<I1, F1, I2, F2> =
@@ -166,16 +162,15 @@ where
                 self.process_site_event(&mut site_event_iterator_, &mut output);
             } else if site_event_iterator_ == self.site_events_.len() {
                 self.process_circle_event(&mut output);
+            } else if VP::EventComparisonPredicate::<I1, F1, I2, F2>::event_comparison_predicate_bif(
+                &self.site_events_[site_event_iterator_],
+                &self.circle_events_.peek().unwrap().0.get(),
+            ) {
+                self.process_site_event(&mut site_event_iterator_, &mut output);
             } else {
-                if VP::EventComparisonPredicate::<I1, F1, I2, F2>::event_comparison_predicate_bif(
-                    &self.site_events_[site_event_iterator_],
-                    &self.circle_events_.peek().unwrap().0.get(),
-                ) {
-                    self.process_site_event(&mut site_event_iterator_, &mut output);
-                } else {
-                    self.process_circle_event(&mut output);
-                }
+                self.process_circle_event(&mut output);
             }
+
             self.circle_events_.pop_inactive_at_top();
         }
 

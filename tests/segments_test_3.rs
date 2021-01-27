@@ -46,15 +46,15 @@ where
 fn retrieve_point<T>(
     point_data_: &Vec<Coordinate<T>>,
     segment_data_: &Vec<Line<T>>,
-    source: (VD::SourceIndexType, VD::SourcePointCategory),
+    source: (VD::SourceIndex, VD::SourceCategory),
 ) -> Coordinate<T>
 where
     T: VD::InputType,
 {
     match source.1 {
-        VD::SourcePointCategory::SinglePoint => point_data_[source.0],
-        VD::SourcePointCategory::SegmentStart => segment_data_[source.0 - point_data_.len()].start,
-        VD::SourcePointCategory::Segment | VD::SourcePointCategory::SegmentEnd => {
+        VD::SourceCategory::SinglePoint => point_data_[source.0],
+        VD::SourceCategory::SegmentStart => segment_data_[source.0 - point_data_.len()].start,
+        VD::SourceCategory::Segment | VD::SourceCategory::SegmentEnd => {
             segment_data_[source.0 - point_data_.len()].end
         }
     }
@@ -186,7 +186,7 @@ fn large_segment_1() {
     let cell = output.cells()[1].get();
     assert_eq!(cell.get_id(), 1);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 12, y: 537 });
     assert_eq!(cell.is_degenerate(), false);
@@ -203,7 +203,7 @@ fn large_segment_1() {
     let cell = output.cells()[3].get();
     assert_eq!(cell.get_id(), 3);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 38, y: 45 });
     assert_eq!(cell.is_degenerate(), false);
@@ -220,7 +220,7 @@ fn large_segment_1() {
     let cell = output.cells()[5].get();
     assert_eq!(cell.get_id(), 5);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 36, y: 470 });
     assert_eq!(cell.is_degenerate(), false);
@@ -229,7 +229,7 @@ fn large_segment_1() {
     let cell = output.cells()[6].get();
     assert_eq!(cell.get_id(), 6);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 53, y: 195 });
     assert_eq!(cell.is_degenerate(), false);
@@ -246,7 +246,7 @@ fn large_segment_1() {
     let cell = output.cells()[8].get();
     assert_eq!(cell.get_id(), 8);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 40, y: 644 });
     assert_eq!(cell.is_degenerate(), false);
@@ -263,7 +263,7 @@ fn large_segment_1() {
     let cell = output.cells()[10].get();
     assert_eq!(cell.get_id(), 10);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 43, y: 709 });
     assert_eq!(cell.is_degenerate(), false);
@@ -272,7 +272,7 @@ fn large_segment_1() {
     let cell = output.cells()[11].get();
     assert_eq!(cell.get_id(), 11);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 308, y: 17 });
     assert_eq!(cell.is_degenerate(), false);
@@ -289,7 +289,7 @@ fn large_segment_1() {
     let cell = output.cells()[13].get();
     assert_eq!(cell.get_id(), 13);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 82, y: 83 });
     assert_eq!(cell.is_degenerate(), false);
@@ -306,7 +306,7 @@ fn large_segment_1() {
     let cell = output.cells()[15].get();
     assert_eq!(cell.get_id(), 15);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 80, y: 236 });
     assert_eq!(cell.is_degenerate(), false);
@@ -315,7 +315,7 @@ fn large_segment_1() {
     let cell = output.cells()[16].get();
     assert_eq!(cell.get_id(), 16);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 178, y: 97 });
     assert_eq!(cell.is_degenerate(), false);
@@ -332,7 +332,7 @@ fn large_segment_1() {
     let cell = output.cells()[18].get();
     assert_eq!(cell.get_id(), 18);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 211, y: 30 });
     assert_eq!(cell.is_degenerate(), false);
@@ -349,7 +349,7 @@ fn large_segment_1() {
     let cell = output.cells()[20].get();
     assert_eq!(cell.get_id(), 20);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 88, y: 464 });
     assert_eq!(cell.is_degenerate(), false);
@@ -358,7 +358,7 @@ fn large_segment_1() {
     let cell = output.cells()[21].get();
     assert_eq!(cell.get_id(), 21);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 98, y: 141 });
     assert_eq!(cell.is_degenerate(), false);
@@ -375,7 +375,7 @@ fn large_segment_1() {
     let cell = output.cells()[23].get();
     assert_eq!(cell.get_id(), 23);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 100, y: 615 });
     assert_eq!(cell.is_degenerate(), false);
@@ -392,7 +392,7 @@ fn large_segment_1() {
     let cell = output.cells()[25].get();
     assert_eq!(cell.get_id(), 25);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 115, y: 405 });
     assert_eq!(cell.is_degenerate(), false);
@@ -401,7 +401,7 @@ fn large_segment_1() {
     let cell = output.cells()[26].get();
     assert_eq!(cell.get_id(), 26);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 127, y: 740 });
     assert_eq!(cell.is_degenerate(), false);
@@ -410,7 +410,7 @@ fn large_segment_1() {
     let cell = output.cells()[27].get();
     assert_eq!(cell.get_id(), 27);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 127, y: 758 });
     assert_eq!(cell.is_degenerate(), false);
@@ -419,7 +419,7 @@ fn large_segment_1() {
     let cell = output.cells()[28].get();
     assert_eq!(cell.get_id(), 28);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 130, y: 102 });
     assert_eq!(cell.is_degenerate(), false);
@@ -436,7 +436,7 @@ fn large_segment_1() {
     let cell = output.cells()[30].get();
     assert_eq!(cell.get_id(), 30);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 177, y: 442 });
     assert_eq!(cell.is_degenerate(), false);
@@ -445,7 +445,7 @@ fn large_segment_1() {
     let cell = output.cells()[31].get();
     assert_eq!(cell.get_id(), 31);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 144, y: 319 });
     assert_eq!(cell.is_degenerate(), false);
@@ -462,7 +462,7 @@ fn large_segment_1() {
     let cell = output.cells()[33].get();
     assert_eq!(cell.get_id(), 33);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 145, y: 187 });
     assert_eq!(cell.is_degenerate(), false);
@@ -479,7 +479,7 @@ fn large_segment_1() {
     let cell = output.cells()[35].get();
     assert_eq!(cell.get_id(), 35);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 148, y: 470 });
     assert_eq!(cell.is_degenerate(), false);
@@ -488,7 +488,7 @@ fn large_segment_1() {
     let cell = output.cells()[36].get();
     assert_eq!(cell.get_id(), 36);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 158, y: 683 });
     assert_eq!(cell.is_degenerate(), false);
@@ -505,7 +505,7 @@ fn large_segment_1() {
     let cell = output.cells()[38].get();
     assert_eq!(cell.get_id(), 38);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 177, y: 599 });
     assert_eq!(cell.is_degenerate(), false);
@@ -514,7 +514,7 @@ fn large_segment_1() {
     let cell = output.cells()[39].get();
     assert_eq!(cell.get_id(), 39);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 266, y: 484 });
     assert_eq!(cell.is_degenerate(), false);
@@ -531,7 +531,7 @@ fn large_segment_1() {
     let cell = output.cells()[41].get();
     assert_eq!(cell.get_id(), 41);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 463, y: 56 });
     assert_eq!(cell.is_degenerate(), false);
@@ -540,7 +540,7 @@ fn large_segment_1() {
     let cell = output.cells()[42].get();
     assert_eq!(cell.get_id(), 42);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 180, y: 257 });
     assert_eq!(cell.is_degenerate(), false);
@@ -549,7 +549,7 @@ fn large_segment_1() {
     let cell = output.cells()[43].get();
     assert_eq!(cell.get_id(), 43);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 198, y: 150 });
     assert_eq!(cell.is_degenerate(), false);
@@ -566,7 +566,7 @@ fn large_segment_1() {
     let cell = output.cells()[45].get();
     assert_eq!(cell.get_id(), 45);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 200, y: 400 });
     assert_eq!(cell.is_degenerate(), false);
@@ -583,7 +583,7 @@ fn large_segment_1() {
     let cell = output.cells()[47].get();
     assert_eq!(cell.get_id(), 47);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 200, y: 200 });
     assert_eq!(cell.is_degenerate(), false);
@@ -592,7 +592,7 @@ fn large_segment_1() {
     let cell = output.cells()[48].get();
     assert_eq!(cell.get_id(), 48);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 400, y: 400 });
     assert_eq!(cell.is_degenerate(), false);
@@ -609,7 +609,7 @@ fn large_segment_1() {
     let cell = output.cells()[50].get();
     assert_eq!(cell.get_id(), 50);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 203, y: 745 });
     assert_eq!(cell.is_degenerate(), false);
@@ -634,7 +634,7 @@ fn large_segment_1() {
     let cell = output.cells()[53].get();
     assert_eq!(cell.get_id(), 53);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 226, y: 536 });
     assert_eq!(cell.is_degenerate(), false);
@@ -651,7 +651,7 @@ fn large_segment_1() {
     let cell = output.cells()[55].get();
     assert_eq!(cell.get_id(), 55);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 230, y: 588 });
     assert_eq!(cell.is_degenerate(), false);
@@ -660,7 +660,7 @@ fn large_segment_1() {
     let cell = output.cells()[56].get();
     assert_eq!(cell.get_id(), 56);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 238, y: 59 });
     assert_eq!(cell.is_degenerate(), false);
@@ -677,7 +677,7 @@ fn large_segment_1() {
     let cell = output.cells()[58].get();
     assert_eq!(cell.get_id(), 58);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 243, y: 111 });
     assert_eq!(cell.is_degenerate(), false);
@@ -686,7 +686,7 @@ fn large_segment_1() {
     let cell = output.cells()[59].get();
     assert_eq!(cell.get_id(), 59);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 244, y: 675 });
     assert_eq!(cell.is_degenerate(), false);
@@ -703,7 +703,7 @@ fn large_segment_1() {
     let cell = output.cells()[61].get();
     assert_eq!(cell.get_id(), 61);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 257, y: 710 });
     assert_eq!(cell.is_degenerate(), false);
@@ -712,7 +712,7 @@ fn large_segment_1() {
     let cell = output.cells()[62].get();
     assert_eq!(cell.get_id(), 62);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 258, y: 240 });
     assert_eq!(cell.is_degenerate(), false);
@@ -721,7 +721,7 @@ fn large_segment_1() {
     let cell = output.cells()[63].get();
     assert_eq!(cell.get_id(), 63);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 260, y: 343 });
     assert_eq!(cell.is_degenerate(), false);
@@ -738,7 +738,7 @@ fn large_segment_1() {
     let cell = output.cells()[65].get();
     assert_eq!(cell.get_id(), 65);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 336, y: 541 });
     assert_eq!(cell.is_degenerate(), false);
@@ -747,7 +747,7 @@ fn large_segment_1() {
     let cell = output.cells()[66].get();
     assert_eq!(cell.get_id(), 66);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 298, y: 536 });
     assert_eq!(cell.is_degenerate(), false);
@@ -756,7 +756,7 @@ fn large_segment_1() {
     let cell = output.cells()[67].get();
     assert_eq!(cell.get_id(), 67);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 301, y: 773 });
     assert_eq!(cell.is_degenerate(), false);
@@ -765,7 +765,7 @@ fn large_segment_1() {
     let cell = output.cells()[68].get();
     assert_eq!(cell.get_id(), 68);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 303, y: 108 });
     assert_eq!(cell.is_degenerate(), false);
@@ -782,7 +782,7 @@ fn large_segment_1() {
     let cell = output.cells()[70].get();
     assert_eq!(cell.get_id(), 70);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 308, y: 304 });
     assert_eq!(cell.is_degenerate(), false);
@@ -791,7 +791,7 @@ fn large_segment_1() {
     let cell = output.cells()[71].get();
     assert_eq!(cell.get_id(), 71);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 313, y: 618 });
     assert_eq!(cell.is_degenerate(), false);
@@ -800,7 +800,7 @@ fn large_segment_1() {
     let cell = output.cells()[72].get();
     assert_eq!(cell.get_id(), 72);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 318, y: 45 });
     assert_eq!(cell.is_degenerate(), false);
@@ -817,7 +817,7 @@ fn large_segment_1() {
     let cell = output.cells()[74].get();
     assert_eq!(cell.get_id(), 74);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 433, y: 497 });
     assert_eq!(cell.is_degenerate(), false);
@@ -826,7 +826,7 @@ fn large_segment_1() {
     let cell = output.cells()[75].get();
     assert_eq!(cell.get_id(), 75);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 344, y: 238 });
     assert_eq!(cell.is_degenerate(), false);
@@ -835,7 +835,7 @@ fn large_segment_1() {
     let cell = output.cells()[76].get();
     assert_eq!(cell.get_id(), 76);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 346, y: 189 });
     assert_eq!(cell.is_degenerate(), false);
@@ -852,7 +852,7 @@ fn large_segment_1() {
     let cell = output.cells()[78].get();
     assert_eq!(cell.get_id(), 78);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 361, y: 494 });
     assert_eq!(cell.is_degenerate(), false);
@@ -869,7 +869,7 @@ fn large_segment_1() {
     let cell = output.cells()[80].get();
     assert_eq!(cell.get_id(), 80);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 367, y: 107 });
     assert_eq!(cell.is_degenerate(), false);
@@ -886,7 +886,7 @@ fn large_segment_1() {
     let cell = output.cells()[82].get();
     assert_eq!(cell.get_id(), 82);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 614, y: 55 });
     assert_eq!(cell.is_degenerate(), false);
@@ -903,7 +903,7 @@ fn large_segment_1() {
     let cell = output.cells()[84].get();
     assert_eq!(cell.get_id(), 84);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 400, y: 200 });
     assert_eq!(cell.is_degenerate(), false);
@@ -920,7 +920,7 @@ fn large_segment_1() {
     let cell = output.cells()[86].get();
     assert_eq!(cell.get_id(), 86);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 401, y: 642 });
     assert_eq!(cell.is_degenerate(), false);
@@ -929,7 +929,7 @@ fn large_segment_1() {
     let cell = output.cells()[87].get();
     assert_eq!(cell.get_id(), 87);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 402, y: 20 });
     assert_eq!(cell.is_degenerate(), false);
@@ -938,7 +938,7 @@ fn large_segment_1() {
     let cell = output.cells()[88].get();
     assert_eq!(cell.get_id(), 88);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 408, y: 543 });
     assert_eq!(cell.is_degenerate(), false);
@@ -955,7 +955,7 @@ fn large_segment_1() {
     let cell = output.cells()[90].get();
     assert_eq!(cell.get_id(), 90);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 421, y: 82 });
     assert_eq!(cell.is_degenerate(), false);
@@ -972,7 +972,7 @@ fn large_segment_1() {
     let cell = output.cells()[92].get();
     assert_eq!(cell.get_id(), 92);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 433, y: 760 });
     assert_eq!(cell.is_degenerate(), false);
@@ -981,7 +981,7 @@ fn large_segment_1() {
     let cell = output.cells()[93].get();
     assert_eq!(cell.get_id(), 93);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 525, y: 467 });
     assert_eq!(cell.is_degenerate(), false);
@@ -998,7 +998,7 @@ fn large_segment_1() {
     let cell = output.cells()[95].get();
     assert_eq!(cell.get_id(), 95);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 451, y: 141 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1015,7 +1015,7 @@ fn large_segment_1() {
     let cell = output.cells()[97].get();
     assert_eq!(cell.get_id(), 97);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 494, y: 371 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1040,7 +1040,7 @@ fn large_segment_1() {
     let cell = output.cells()[100].get();
     assert_eq!(cell.get_id(), 100);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 670, y: 175 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1057,7 +1057,7 @@ fn large_segment_1() {
     let cell = output.cells()[102].get();
     assert_eq!(cell.get_id(), 102);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 464, y: 554 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1082,7 +1082,7 @@ fn large_segment_1() {
     let cell = output.cells()[105].get();
     assert_eq!(cell.get_id(), 105);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 486, y: 125 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1099,7 +1099,7 @@ fn large_segment_1() {
     let cell = output.cells()[107].get();
     assert_eq!(cell.get_id(), 107);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 560, y: 262 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1116,7 +1116,7 @@ fn large_segment_1() {
     let cell = output.cells()[109].get();
     assert_eq!(cell.get_id(), 109);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 618, y: 281 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1141,7 +1141,7 @@ fn large_segment_1() {
     let cell = output.cells()[112].get();
     assert_eq!(cell.get_id(), 112);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 512, y: 643 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1150,7 +1150,7 @@ fn large_segment_1() {
     let cell = output.cells()[113].get();
     assert_eq!(cell.get_id(), 113);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 629, y: 758 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1159,7 +1159,7 @@ fn large_segment_1() {
     let cell = output.cells()[114].get();
     assert_eq!(cell.get_id(), 114);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 514, y: 503 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1176,7 +1176,7 @@ fn large_segment_1() {
     let cell = output.cells()[116].get();
     assert_eq!(cell.get_id(), 116);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 594, y: 427 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1201,7 +1201,7 @@ fn large_segment_1() {
     let cell = output.cells()[119].get();
     assert_eq!(cell.get_id(), 119);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 563, y: 200 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1218,7 +1218,7 @@ fn large_segment_1() {
     let cell = output.cells()[121].get();
     assert_eq!(cell.get_id(), 121);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 580, y: 380 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1227,7 +1227,7 @@ fn large_segment_1() {
     let cell = output.cells()[122].get();
     assert_eq!(cell.get_id(), 122);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 581, y: 26 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1236,7 +1236,7 @@ fn large_segment_1() {
     let cell = output.cells()[123].get();
     assert_eq!(cell.get_id(), 123);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 583, y: 672 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1245,7 +1245,7 @@ fn large_segment_1() {
     let cell = output.cells()[124].get();
     assert_eq!(cell.get_id(), 124);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 587, y: 543 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1254,7 +1254,7 @@ fn large_segment_1() {
     let cell = output.cells()[125].get();
     assert_eq!(cell.get_id(), 125);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 593, y: 759 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1271,7 +1271,7 @@ fn large_segment_1() {
     let cell = output.cells()[127].get();
     assert_eq!(cell.get_id(), 127);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 617, y: 342 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1280,7 +1280,7 @@ fn large_segment_1() {
     let cell = output.cells()[128].get();
     assert_eq!(cell.get_id(), 128);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 611, y: 687 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1289,7 +1289,7 @@ fn large_segment_1() {
     let cell = output.cells()[129].get();
     assert_eq!(cell.get_id(), 129);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 612, y: 105 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1306,7 +1306,7 @@ fn large_segment_1() {
     let cell = output.cells()[131].get();
     assert_eq!(cell.get_id(), 131);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 612, y: 209 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1331,7 +1331,7 @@ fn large_segment_1() {
     let cell = output.cells()[134].get();
     assert_eq!(cell.get_id(), 134);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 675, y: 292 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1356,7 +1356,7 @@ fn large_segment_1() {
     let cell = output.cells()[137].get();
     assert_eq!(cell.get_id(), 137);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 643, y: 601 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1389,7 +1389,7 @@ fn large_segment_1() {
     let cell = output.cells()[141].get();
     assert_eq!(cell.get_id(), 141);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 732, y: 346 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1414,7 +1414,7 @@ fn large_segment_1() {
     let cell = output.cells()[144].get();
     assert_eq!(cell.get_id(), 144);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 678, y: 686 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1423,7 +1423,7 @@ fn large_segment_1() {
     let cell = output.cells()[145].get();
     assert_eq!(cell.get_id(), 145);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 679, y: 37 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1432,7 +1432,7 @@ fn large_segment_1() {
     let cell = output.cells()[146].get();
     assert_eq!(cell.get_id(), 146);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 679, y: 327 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1441,7 +1441,7 @@ fn large_segment_1() {
     let cell = output.cells()[147].get();
     assert_eq!(cell.get_id(), 147);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 698, y: 404 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1450,7 +1450,7 @@ fn large_segment_1() {
     let cell = output.cells()[148].get();
     assert_eq!(cell.get_id(), 148);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 710, y: 770 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1459,7 +1459,7 @@ fn large_segment_1() {
     let cell = output.cells()[149].get();
     assert_eq!(cell.get_id(), 149);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 727, y: 134 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1476,7 +1476,7 @@ fn large_segment_1() {
     let cell = output.cells()[151].get();
     assert_eq!(cell.get_id(), 151);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 735, y: 479 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1485,7 +1485,7 @@ fn large_segment_1() {
     let cell = output.cells()[152].get();
     assert_eq!(cell.get_id(), 152);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 733, y: 276 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1510,7 +1510,7 @@ fn large_segment_1() {
     let cell = output.cells()[155].get();
     assert_eq!(cell.get_id(), 155);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 743, y: 37 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1519,7 +1519,7 @@ fn large_segment_1() {
     let cell = output.cells()[156].get();
     assert_eq!(cell.get_id(), 156);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 744, y: 544 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1536,7 +1536,7 @@ fn large_segment_1() {
     let cell = output.cells()[158].get();
     assert_eq!(cell.get_id(), 158);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::Segment);
+    assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 784, y: 390 });
     assert_eq!(cell.is_degenerate(), false);
@@ -1545,7 +1545,7 @@ fn large_segment_1() {
     let cell = output.cells()[159].get();
     assert_eq!(cell.get_id(), 159);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourcePointCategory::SinglePoint);
+    assert_eq!(cat, VD::SourceCategory::SinglePoint);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Coordinate { x: 764, y: 673 });
     assert_eq!(cell.is_degenerate(), false);

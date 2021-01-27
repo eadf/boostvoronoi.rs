@@ -16,7 +16,6 @@ use super::voronoi_circleevent as VC;
 use super::voronoi_ctypes::UlpComparison;
 use super::voronoi_robust_fpt as VR;
 use super::voronoi_siteevent as VSE;
-use super::voronoi_structures as VS;
 use super::TypeCheckF as TCF;
 use super::TypeCheckI as TCI;
 use super::TypeConverter as TCC;
@@ -26,7 +25,6 @@ use geo::Coordinate;
 use num::FromPrimitive;
 use num::ToPrimitive;
 use num::{BigInt, Float, NumCast, PrimInt, Zero};
-//use num_traits;
 use ordered_float::OrderedFloat;
 use std::cmp;
 use std::convert::TryInto;
@@ -204,7 +202,7 @@ where
     /// Return orientation based on the sign of the determinant.
     #[allow(dead_code)]
     fn eval_i(value: I1) -> Orientation {
-        if TCI::<I1>::is_zero(value) {
+        if value.is_zero() {
             return Orientation::COLLINEAR;
         }
         match TCI::<I1>::is_neg(value) {
@@ -534,7 +532,7 @@ where
             let mut k: F2 = (a1 * a1 + b1 * b1).sqrt();
             // Avoid subtraction while computing k.
             #[allow(clippy::suspicious_operation_groupings)]
-            if !TCF::<F2>::is_neg(b1) {
+            if !b1.is_sign_negative() {
                 k = TCF::<F2>::one() / (b1 + k);
             } else {
                 k = (k - b1) / (a1 * a1);
@@ -1646,8 +1644,8 @@ where
                 // this value will be invalid after call to set_lower_x()
                 let tmp_circle_x: F2 = *circle.0.get().x();
 
-                if !TCF::<F2>::is_neg(tmp_circle_x) {
-                    if !TCF::<F2>::is_neg(inv_denom) {
+                if !tmp_circle_x.is_sign_negative() {
+                    if !inv_denom.is_sign_negative() {
                         circle.set_lower_x_raw(tmp_circle_x + r * inv_denom);
                     } else {
                         circle.set_lower_x_raw(tmp_circle_x - r * inv_denom);

@@ -10,7 +10,6 @@
 // Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
 
 use super::voronoi_diagram as VD;
-use super::voronoi_structures as VS;
 use super::{BigFloatType, BigIntType, InputType, OutputType};
 
 use geo::{Coordinate, Line};
@@ -88,8 +87,7 @@ where
         let _ = discretization.pop();
 
         // Use stack to avoid recursion.
-        let mut point_stack = Vec::<F1>::new();
-        point_stack.push(projection_end);
+        let mut point_stack = vec![projection_end];
         let mut cur_x = projection_start;
         let mut cur_y = Self::parabola_y(cur_x, rot_x, rot_y);
 

@@ -15,7 +15,6 @@ use super::voronoi_circleevent as VC;
 use super::voronoi_diagram as VD;
 use super::voronoi_predicate as VP;
 use super::voronoi_siteevent as VSE;
-use super::voronoi_structures as VS;
 
 use super::{BigFloatType, BigIntType, InputType, OutputType};
 use std::cell::Cell;
@@ -28,10 +27,18 @@ use std::ops::Neg;
 use std::rc::Rc;
 use vec_map::VecMap;
 
-#[derive(Copy, Clone)]
+/// debug utility function
+pub(crate) fn debug_print_bli_id(value: Option<BeachLineIndex>) -> String {
+    if let Some(value) = value {
+        value.to_string()
+    } else {
+        String::from("-")
+    }
+}
 
 /// Type-checked placeholder for usize
 /// Hopefully rust zero cost abstractions will flatten this out.
+#[derive(Copy, Clone)]
 pub(crate) struct BeachLineIndex(pub(crate) usize);
 
 impl BeachLineIndex {
@@ -261,7 +268,7 @@ where
             None
         }
     }
-
+/*
     pub fn lower_bound_experiment(
         &self,
         key: BeachLineNodeKey<I, O, BI, BF>,
@@ -273,7 +280,7 @@ where
         }
         None
     }
-
+*/
     /// returns a copy of the last element (key,value)
     pub(crate) fn peek_last(&self) -> Option<(BeachLineNodeKey<I, O, BI, BF>, BeachLineIndex)> {
         self.beach_line_
@@ -290,8 +297,8 @@ where
             .map(|x| (*x.0, *x.1))
     }
 
-    #[allow(unused_variables)]
-    pub fn debug_cmp_all(&self, key: BeachLineNodeKey<I, O, BI, BF>) {
+    #[allow(dead_code)]
+    pub(crate) fn debug_cmp_all(&self, key: BeachLineNodeKey<I, O, BI, BF>) {
         for (i, v) in self.beach_line_.iter().enumerate() {
             print!("#{}:", i);
             let _rv =
@@ -299,7 +306,8 @@ where
         }
     }
 
-    pub fn debug_print_all(&self) {
+    #[allow(dead_code)]
+    pub(crate) fn debug_print_all(&self) {
         println!();
         println!("beachline.len()={}", self.beach_line_.len());
         for (i, (node, id)) in self.beach_line_.iter().enumerate() {
@@ -316,7 +324,7 @@ where
                 } else {
                     print!(" -> CircleEvent:-");
                 }
-                print!(", edge:{}", data.edge_);
+                print!(", edge:{:?}", data.edge_);
             } else {
                 print!(" temporary bisector");
             }

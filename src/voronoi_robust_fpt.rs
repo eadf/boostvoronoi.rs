@@ -148,8 +148,8 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::Add<RobustFpt<F>> for RobustFpt<
 
     fn add(self, _rhs: RobustFpt<F>) -> Self {
         let fpv: F = self.fpv_ + _rhs.fpv_;
-        let re = if (!TCF::<F>::is_neg(self.fpv_) && !TCF::<F>::is_neg(_rhs.fpv_))
-            || (!TCF::<F>::is_pos(self.fpv_) && !TCF::<F>::is_pos(_rhs.fpv_))
+        let re = if (!self.fpv_.is_sign_negative() && !_rhs.fpv_.is_sign_negative())
+            || (!self.fpv_.is_sign_positive() && !_rhs.fpv_.is_sign_positive())
         {
             std::cmp::max(self.re_, _rhs.re_)
                 + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap())
@@ -157,7 +157,7 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::Add<RobustFpt<F>> for RobustFpt<
             let mut temp = OrderedFloat(
                 (self.fpv_ * *self.re_.as_ref() - _rhs.fpv_ * *_rhs.re_.as_ref()) / fpv,
             );
-            if TCF::<F>::is_neg(*temp.as_ref()) {
+            if temp.is_sign_negative() {
                 temp = -temp;
             }
             temp + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap())
@@ -169,8 +169,8 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::Add<RobustFpt<F>> for RobustFpt<
 impl<F: OutputType + ops::Neg<Output = F>> ops::AddAssign<RobustFpt<F>> for RobustFpt<F> {
     fn add_assign(&mut self, _rhs: RobustFpt<F>) {
         let fpv: F = self.fpv_ + _rhs.fpv_;
-        let re = if (!TCF::<F>::is_neg(self.fpv_) && !TCF::<F>::is_neg(_rhs.fpv_))
-            || (!TCF::<F>::is_pos(self.fpv_) && !TCF::<F>::is_pos(_rhs.fpv_))
+        let re = if (!self.fpv_.is_sign_negative() && !_rhs.fpv_.is_sign_negative())
+            || (!self.fpv_.is_sign_positive() && !_rhs.fpv_.is_sign_positive())
         {
             std::cmp::max(self.re_, _rhs.re_)
                 + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap())
@@ -178,7 +178,7 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::AddAssign<RobustFpt<F>> for Robu
             let mut temp = OrderedFloat(
                 (self.fpv_ * *self.re_.as_ref() - _rhs.fpv_ * *_rhs.re_.as_ref()) / fpv,
             );
-            if TCF::<F>::is_neg(*temp.as_ref()) {
+            if temp.is_sign_negative() {
                 temp = -temp;
             }
             temp + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap())
@@ -221,14 +221,14 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::Sub<RobustFpt<F>> for RobustFpt<
 
     fn sub(self, _rhs: RobustFpt<F>) -> Self {
         let fpv: F = self.fpv_ - _rhs.fpv_;
-        let re = if (!TCF::<F>::is_neg(self.fpv_) && !TCF::<F>::is_pos(_rhs.fpv_))
-            || (!TCF::<F>::is_pos(self.fpv_) && !TCF::<F>::is_neg(_rhs.fpv_))
+        let re = if (!self.fpv_.is_sign_negative() && !_rhs.fpv_.is_sign_positive())
+            || (!self.fpv_.is_sign_positive() && !_rhs.fpv_.is_sign_negative())
         {
             std::cmp::max(self.re_, _rhs.re_)
                 + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap())
         } else {
             let mut temp = (self.fpv_ * *self.re_ + _rhs.fpv_ * *_rhs.re_) / fpv;
-            if TCF::<F>::is_neg(temp) {
+            if temp.is_sign_negative() {
                 temp = -temp;
             }
             OrderedFloat(temp) + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap())
@@ -240,15 +240,15 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::Sub<RobustFpt<F>> for RobustFpt<
 impl<F: OutputType + ops::Neg<Output = F>> ops::SubAssign<RobustFpt<F>> for RobustFpt<F> {
     fn sub_assign(&mut self, _rhs: RobustFpt<F>) {
         let fpv = self.fpv_ - _rhs.fpv_;
-        if (!TCF::<F>::is_neg(self.fpv_) && !TCF::<F>::is_pos(_rhs.fpv_))
-            || (!TCF::<F>::is_pos(self.fpv_) && !TCF::<F>::is_neg(_rhs.fpv_))
+        if (!self.fpv_.is_sign_negative() && !_rhs.fpv_.is_sign_positive())
+            || (!self.fpv_.is_sign_positive() && !_rhs.fpv_.is_sign_negative())
         {
             self.re_ = std::cmp::max(self.re_, _rhs.re_)
                 + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap());
         } else {
             let mut temp: F =
                 (self.fpv_ * *self.re_.as_ref() + _rhs.fpv_ * *_rhs.re_.as_ref()) / fpv;
-            if TCF::<F>::is_neg(temp) {
+            if temp.is_sign_negative() {
                 temp = -temp;
             }
             self.re_ =
@@ -351,7 +351,7 @@ impl<F: OutputType + ops::Neg<Output = F>> RobustDif<F> {
 
     #[allow(dead_code)]
     pub fn new_1(value: F) -> Self {
-        if TCF::<F>::is_pos(value) {
+        if value.is_sign_positive() {
             Self {
                 positive_sum_: RobustFpt::<F>::new_1(value),
                 negative_sum_: RobustFpt::<F>::default(),
@@ -366,8 +366,8 @@ impl<F: OutputType + ops::Neg<Output = F>> RobustDif<F> {
 
     #[allow(dead_code)]
     pub fn new_2(pos: F, neg: F) -> Self {
-        assert!(TCF::<F>::is_pos(pos));
-        assert!(TCF::<F>::is_pos(neg));
+        assert!(!pos.is_sign_negative());
+        assert!(!neg.is_sign_negative());
         Self {
             positive_sum_: RobustFpt::<F>::new_1(pos),
             negative_sum_: RobustFpt::<F>::new_1(neg),

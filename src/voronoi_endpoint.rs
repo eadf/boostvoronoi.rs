@@ -15,7 +15,6 @@ use super::voronoi_diagram as VD;
 use super::voronoi_error::BVError;
 use super::voronoi_predicate as VP;
 use super::voronoi_siteevent as VSE;
-use super::voronoi_structures as VS;
 use super::{BigFloatType, BigIntType, InputType, OutputType};
 use geo::Coordinate;
 use std::cmp::Ordering;

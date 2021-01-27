@@ -9,10 +9,11 @@
 
 // Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
 
+mod tests;
+
 use super::voronoi_beachline as VB;
 use super::voronoi_diagram as VD;
 use super::voronoi_predicate as VP;
-use super::voronoi_structures as VS;
 use ordered_float::OrderedFloat;
 use std::cmp::Ordering;
 
@@ -64,7 +65,7 @@ where
     pub(crate) point1_: Coordinate<I>,
     pub sorted_index_: SiteEventIndexType,
     initial_index_: SiteEventIndexType,
-    flags_: VD::SourceCategoryType,
+    flags_: VD::ColorType,
     _pdo: PhantomData<O>,
     _pdbi: PhantomData<BI>,
     _pdbf: PhantomData<BF>,
@@ -190,7 +191,7 @@ where
             point1_: a,
             sorted_index_: 0,
             initial_index_,
-            flags_: VD::SourceCategory::SOURCE_CATEGORY_SINGLE_POINT.0,
+            flags_: VD::ColorBits::SINGLE_POINT.0,
             _pdo: PhantomData,
             _pdbi: PhantomData,
             _pdbf: PhantomData,
@@ -301,31 +302,25 @@ where
     }
 
     #[inline(always)]
-    pub fn initial_index(&self) -> usize {
+    pub(crate) fn initial_index(&self) -> usize {
         self.initial_index_
     }
 
-    /*
-    pub(crate) fn set_initial_index(&mut self, index: usize) -> &mut Self {
-        self.initial_index_ = index;
-        self
-    }*/
-
-    pub fn is_inverse(&self) -> bool {
-        (self.flags_ & VS::Bits::IS_INVERSE) != 0
+    pub(crate) fn is_inverse(&self) -> bool {
+        (self.flags_ & VD::ColorBits::IS_INVERSE_BITMASK.0) != 0
     }
 
-    pub fn inverse(&mut self) -> &mut Self {
+    pub(crate) fn inverse(&mut self) -> &mut Self {
         mem::swap(&mut self.point0_, &mut self.point1_);
-        self.flags_ ^= VS::Bits::IS_INVERSE;
+        self.flags_ ^= VD::ColorBits::IS_INVERSE_BITMASK.0;
         self
     }
 
-    pub fn source_category(&self) -> VD::SourceCategory {
-        VD::SourceCategory(self.flags_ & VD::SourceCategory::SOURCE_CATEGORY_BITMASK.0)
+    pub(crate) fn source_category(&self) -> VD::ColorBits {
+        VD::ColorBits(self.flags_ & VD::ColorBits::BITMASK.0)
     }
 
-    pub(crate) fn or_source_category(&mut self, source_category: &VD::SourceCategory) {
+    pub(crate) fn or_source_category(&mut self, source_category: &VD::ColorBits) {
         self.flags_ |= source_category.0;
     }
 

@@ -12,7 +12,6 @@
 use super::voronoi_beachline as VB;
 use super::voronoi_diagram as VD;
 use super::voronoi_predicate as VP;
-use super::voronoi_structures as VS;
 
 use super::{BigFloatType, BigIntType, InputType, OutputType};
 use fnv::FnvHashSet;
@@ -61,11 +60,11 @@ where
         rv.push_str(
             format!(
                 "CE(id:{} cx:{:.3} cy:{:.3} lx:{:.3}, bi:{})",
-                VS::format_id(self.index_),
+                super::format_id(self.index_),
                 self.center_x_,
                 self.center_y_,
                 self.lower_x_,
-                VS::debug_print_bli_id(self.beach_line_index_),
+                VB::debug_print_bli_id(self.beach_line_index_),
             )
             .as_str(),
         );
@@ -135,7 +134,7 @@ where
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
         let cell = self.0.get();
-        rv.push_str(format!("CEC({:?}, bl:{})", cell, VS::debug_print_bli_id(self.1),).as_str());
+        rv.push_str(format!("CEC({:?}, bl:{})", cell, VB::debug_print_bli_id(self.1),).as_str());
         write!(f, "{}", rv)
     }
 }

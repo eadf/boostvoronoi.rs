@@ -5,7 +5,6 @@ use super::super::voronoi_diagram::VoronoiDiagram;
 use super::super::voronoi_error::BVError;
 use super::super::voronoi_predicate as VP;
 use super::super::voronoi_siteevent as VSE;
-use super::super::voronoi_structures as VS;
 use super::{BigFloatType, BigIntType, InputType, OutputType};
 use geo::{Coordinate, Line};
 use std::ops::Neg;

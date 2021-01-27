@@ -12,7 +12,6 @@
 use super::voronoi_circleevent as VC;
 use super::voronoi_ctypes as CT;
 use super::voronoi_siteevent as VSE;
-use super::voronoi_structures as VS;
 use super::TypeConverter as TCC;
 
 pub use super::{BigFloatType, BigIntType, InputType, OutputType};
@@ -25,89 +24,72 @@ use std::marker::PhantomData;
 use std::ops::Neg;
 use std::rc::Rc;
 
-pub type SourceIndexType = usize;
+pub type SourceIndex = usize;
+
+/// Typed container for cell indices
 #[derive(Copy, Clone, PartialEq, Eq, Default)]
 pub struct VoronoiCellIndex(pub usize);
 
-impl fmt::Display for VoronoiCellIndex {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "VoronoiCellIndex({})", self.0)
-    }
-}
 impl fmt::Debug for VoronoiCellIndex {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "VoronoiCellIndex({})", self.0)
     }
 }
 
-//pub type VoronoiEdgeIndex = usize;
+/// Typed container for edge indices
 #[derive(Copy, Clone, PartialEq, Eq, Default)]
 pub struct VoronoiEdgeIndex(pub usize);
 
-impl fmt::Display for VoronoiEdgeIndex {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "VoronoiEdgeIndex({})", self.0)
-    }
-}
 impl fmt::Debug for VoronoiEdgeIndex {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "VoronoiEdgeIndex({})", self.0)
     }
 }
-//pub type VoronoiVertexIndex = usize;
+
+/// Typed container for vertex indices
 #[derive(Copy, Clone, PartialEq, Eq, Default)]
 pub struct VoronoiVertexIndex(pub usize);
-impl fmt::Display for VoronoiVertexIndex {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "VoronoiVertexIndex({})", self.0)
-    }
-}
+
 impl fmt::Debug for VoronoiVertexIndex {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "VoronoiVertexIndex({})", self.0)
     }
 }
-type ColorType = SourceCategoryType;
 
-// 5 color bits are reserved.
-struct VoronoiCellBits;
-impl VoronoiCellBits {
-    pub const BITS_SHIFT: ColorType = 0x5;
-    pub const BITS_MASK: ColorType = 0x1F;
-}
+pub(crate) type ColorType = u32;
 
 /// Represents category of the input source that forms Voronoi cell.
-pub type SourceCategoryType = u32;
-
+/// Todo: sort out all of these bits, seems like they overlap in functionality
 #[derive(Copy, Clone, PartialEq, Eq)]
-pub struct SourceCategory(pub SourceCategoryType);
+pub(crate) struct ColorBits(pub ColorType);
 
-// Todo: rename these enums (make shorter)
-impl SourceCategory {
+impl ColorBits {
     // Point subtypes.
-    pub const SOURCE_CATEGORY_SINGLE_POINT: Self = SourceCategory(0x0);
-    pub const SOURCE_CATEGORY_SEGMENT_START_POINT: Self = SourceCategory(0x1);
-    pub const SOURCE_CATEGORY_SEGMENT_END_POINT: Self = SourceCategory(0x2);
+    pub(crate) const SINGLE_POINT: Self = ColorBits(0x0);
+    pub(crate) const SEGMENT_START_POINT: Self = ColorBits(0x1);
+    pub(crate) const SEGMENT_END_POINT: Self = ColorBits(0x2);
 
     // Segment subtypes.
-    pub const SOURCE_CATEGORY_INITIAL_SEGMENT: Self = SourceCategory(0x8);
-    pub const SOURCE_CATEGORY_REVERSE_SEGMENT: Self = SourceCategory(0x9);
+    pub(crate) const INITIAL_SEGMENT: Self = ColorBits(0x8);
+    pub(crate) const REVERSE_SEGMENT: Self = ColorBits(0x9);
 
-    pub const SOURCE_CATEGORY_GEOMETRY_SHIFT: Self = SourceCategory(0x3);
-    pub const SOURCE_CATEGORY_BITMASK: Self = SourceCategory(0x1F);
+    pub(crate) const BITMASK: Self = ColorBits(0x1F);
 
-    pub const GEOMETRY_CATEGORY_POINT: Self = SourceCategory(0x0);
-    pub const GEOMETRY_CATEGORY_SEGMENT: Self = SourceCategory(0x1);
+    pub(crate) const GEOMETRY_SHIFT: Self = ColorBits(0x3);
+    pub(crate) const GEOMETRY_CATEGORY_POINT: Self = ColorBits(0x0);
+    pub(crate) const GEOMETRY_CATEGORY_SEGMENT: Self = ColorBits(0x1);
 
-    pub const SOURCE_CATEGORY_TEMPORARY_CELL: Self = SourceCategory(u32::max_value());
-    pub(crate) fn get_value(&self) -> SourceCategoryType {
-        self.0
-    }
+    // 5 color bits are reserved for internal use.
+    pub(crate) const BITS_SHIFT: Self = Self(0x5);
+    pub(crate) const IS_INVERSE_BITMASK: Self = Self(0x20); // 32
+
+    // todo: remove this
+    pub(crate) const TEMPORARY_CELL: Self = ColorBits(u32::MAX);
 }
 
-/// An easier version of SourceCategory
+/// Represents the type of input geometry a cell was created from
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum SourcePointCategory {
+pub enum SourceCategory {
     SinglePoint,
     SegmentStart,
     SegmentEnd,
@@ -131,11 +113,11 @@ where
     // sorted_index of the site event
     id_: VoronoiCellIndex,
     // source_index/initial_index of the site event
-    source_index_: SourceIndexType,
+    source_index_: SourceIndex,
     incident_edge_: Option<VoronoiEdgeIndex>,
     color_: ColorType,
-    _pdi: PhantomData<I1>, // st00pid rust
-    _pdo: PhantomData<F1>, // st00pid rust
+    _pdi: PhantomData<I1>,
+    _pdo: PhantomData<F1>,
 }
 
 impl<I1, F1> fmt::Debug for VoronoiCell<I1, F1>
@@ -151,7 +133,7 @@ where
                 "(id:{:?} ii:{} ie:{:?} col:{})",
                 self.id_.0,
                 self.source_index_,
-                VS::format_id(self.incident_edge_.map(|x| x.0)),
+                super::format_id(self.incident_edge_.map(|x| x.0)),
                 self.color_
             )
             .as_str(),
@@ -167,7 +149,7 @@ where
 {
     pub fn new(
         id: VoronoiCellIndex,
-        source_index: SourceIndexType,
+        source_index: SourceIndex,
         source_category: ColorType,
     ) -> Self {
         VoronoiCell {
@@ -181,57 +163,62 @@ where
     }
 
     #[inline(always)]
+    pub(crate) fn internal_color(&self) -> ColorBits {
+        ColorBits(self.color_ & ColorBits::BITMASK.0)
+    }
+
+    #[inline(always)]
     pub fn source_category(&self) -> SourceCategory {
-        SourceCategory(self.color_ & SourceCategory::SOURCE_CATEGORY_BITMASK.0)
+        match self.internal_color() {
+            ColorBits::SINGLE_POINT => SourceCategory::SinglePoint,
+            ColorBits::SEGMENT_START_POINT => SourceCategory::SegmentStart,
+            ColorBits::SEGMENT_END_POINT => SourceCategory::SegmentEnd,
+            _ => SourceCategory::Segment,
+        }
     }
 
     /// Returns true if the cell contains point site, false else.
+    #[inline(always)]
     pub fn contains_point(&self) -> bool {
-        let source_category = self.source_category().0;
-        let geometry = source_category >> SourceCategory::SOURCE_CATEGORY_GEOMETRY_SHIFT.0;
-        geometry == SourceCategory::GEOMETRY_CATEGORY_POINT.0
+        let geometry = self.internal_color().0 >> ColorBits::GEOMETRY_SHIFT.0;
+        geometry == ColorBits::GEOMETRY_CATEGORY_POINT.0
     }
 
     /// Returns true if the cell contains segment site, false othervice.
+    #[inline(always)]
     pub fn contains_segment(&self) -> bool {
-        let source_category = self.source_category().0;
-        let geometry = source_category >> SourceCategory::SOURCE_CATEGORY_GEOMETRY_SHIFT.0;
-        geometry == SourceCategory::GEOMETRY_CATEGORY_SEGMENT.0
+        let geometry = self.internal_color().0 >> ColorBits::GEOMETRY_SHIFT.0;
+        geometry == ColorBits::GEOMETRY_CATEGORY_SEGMENT.0
     }
 
     /// Returns true if the cell contains segment start point, false othervice.
+    #[inline(always)]
     pub fn contains_segment_startpoint(&self) -> bool {
-        let source_category = self.source_category().0;
-        source_category == SourceCategory::SOURCE_CATEGORY_SEGMENT_START_POINT.0
+        self.internal_color().0 == ColorBits::SEGMENT_START_POINT.0
     }
 
     /// Returns true if the cell contains segment end point, false othervice.
+    #[inline(always)]
     pub fn contains_segment_endpoint(&self) -> bool {
-        let source_category = self.source_category().0;
-        source_category == SourceCategory::SOURCE_CATEGORY_SEGMENT_END_POINT.0
+        self.internal_color().0 == ColorBits::SEGMENT_END_POINT.0
     }
 
-    pub fn get_id(&self) -> SourceIndexType {
+    #[inline(always)]
+    pub fn get_id(&self) -> SourceIndex {
         self.id_.0
     }
 
     /// Returns the origin index of the cell.
-    pub fn source_index(&self) -> SourceIndexType {
+    #[inline(always)]
+    pub fn source_index(&self) -> SourceIndex {
         self.source_index_
     }
 
     /// Returns the origin index of the point that created this cell.
     /// It also returns the point category
-    pub fn source_index_2(&self) -> (SourceIndexType, SourcePointCategory) {
-        let cat = match self.source_category() {
-            SourceCategory::SOURCE_CATEGORY_SINGLE_POINT => SourcePointCategory::SinglePoint,
-            SourceCategory::SOURCE_CATEGORY_SEGMENT_START_POINT => {
-                SourcePointCategory::SegmentStart
-            }
-            SourceCategory::SOURCE_CATEGORY_SEGMENT_END_POINT => SourcePointCategory::SegmentEnd,
-            _ => SourcePointCategory::Segment,
-        };
-        (self.source_index_, cat)
+    #[inline(always)]
+    pub fn source_index_2(&self) -> (SourceIndex, SourceCategory) {
+        (self.source_index_, self.source_category())
     }
 
     /// Degenerate cells don't have any incident edges.
@@ -256,7 +243,7 @@ where
     pub(crate) y_: F1,
     pub(crate) incident_edge_: Option<VoronoiEdgeIndex>,
     pub(crate) color_: ColorType,
-    _pdi: PhantomData<I1>, // st00pid rust
+    _pdi: PhantomData<I1>, 
 }
 
 impl<I1, F1> fmt::Debug for VoronoiVertex<I1, F1>
@@ -273,7 +260,7 @@ where
                 self.id_.0,
                 self.x_,
                 self.y_,
-                VS::format_id(self.incident_edge_.map(|x| x.0)),
+                super::format_id(self.incident_edge_.map(|x| x.0)),
                 self.color_
             )
             .as_str(),
@@ -330,13 +317,13 @@ where
 
     /// get_color returns the custom edge info. (not the internal bits)
     pub fn get_color(&self) -> ColorType {
-        self.color_ >> VoronoiCellBits::BITS_SHIFT
+        self.color_ >> ColorBits::BITS_SHIFT.0
     }
 
     /// set_color sets the custom edge info. (not the internal bits)
     pub fn set_color(&mut self, color: ColorType) -> ColorType {
-        self.color_ &= VoronoiCellBits::BITS_MASK;
-        self.color_ |= color << VoronoiCellBits::BITS_SHIFT;
+        self.color_ &= ColorBits::BITMASK.0;
+        self.color_ |= color << ColorBits::BITS_SHIFT.0;
         self.color_
     }
 }
@@ -365,10 +352,10 @@ where
     next_ccw_: Option<VoronoiEdgeIndex>,
     prev_ccw_: Option<VoronoiEdgeIndex>,
     color_: ColorType,
-    _pdi: PhantomData<I1>,  // st00pid rust
-    _pdo: PhantomData<F1>,  // st00pid rust
-    _pdbi: PhantomData<I2>, // st00pid rust
-    _pdbf: PhantomData<F2>, // st00pid rust
+    _pdi: PhantomData<I1>,  
+    _pdo: PhantomData<F1>,  
+    _pdbi: PhantomData<I2>, 
+    _pdbf: PhantomData<F2>, 
 }
 
 impl<I1, F1, I2, F2> fmt::Debug for VoronoiEdge<I1, F1, I2, F2>
@@ -385,11 +372,11 @@ where
             format!(
                 "(id:{} cell:{} v0:{} tw:{} nxt:{} prv:{} col:{})",
                 self.id.0,
-                VS::format_id(self.cell_.map(|c| c.0)),
-                VS::format_id(self.vertex_.map(|v| v.0)),
-                VS::format_id(self.twin_.map(|e| e.0)),
-                VS::format_id(self.next_ccw_.map(|e| e.0)),
-                VS::format_id(self.prev_ccw_.map(|e| e.0)),
+                super::format_id(self.cell_.map(|c| c.0)),
+                super::format_id(self.vertex_.map(|v| v.0)),
+                super::format_id(self.twin_.map(|e| e.0)),
+                super::format_id(self.next_ccw_.map(|e| e.0)),
+                super::format_id(self.prev_ccw_.map(|e| e.0)),
                 self.color_
             )
             .as_str(),
@@ -490,13 +477,13 @@ where
 
     /// get_color returns the custom edge info. (not the internal bits)
     pub fn get_color(&self) -> ColorType {
-        self.color_ >> VoronoiCellBits::BITS_SHIFT
+        self.color_ >> ColorBits::BITS_SHIFT.0
     }
 
     /// set_color sets the custom edge info. (not the internal bits)
     pub fn set_color(&mut self, color: ColorType) -> ColorType {
-        self.color_ &= VoronoiCellBits::BITS_MASK;
-        self.color_ |= color << VoronoiCellBits::BITS_SHIFT;
+        self.color_ &= ColorBits::BITMASK.0;
+        self.color_ |= color << ColorBits::BITS_SHIFT.0;
         self.color_
     }
 }
@@ -518,8 +505,6 @@ where
     cells_: Vec<CellType<I1, F1>>,         // indexed by VoronoiCellIndex
     vertices_: Vec<VertexType<I1, F1>>,    // indexed by VoronoiVertexIndex
     edges_: Vec<EdgeType<I1, F1, I2, F2>>, // indexed by VoronoiEdgeIndex
-    next_edge_id_: usize,
-    next_vertex_id_: usize,
 }
 
 impl<I1, F1, I2, F2> VoronoiDiagram<I1, F1, I2, F2>
@@ -534,8 +519,6 @@ where
             cells_: Vec::<CellType<I1, F1>>::with_capacity(input_size),
             vertices_: Vec::<VertexType<I1, F1>>::with_capacity(input_size),
             edges_: Vec::<EdgeType<I1, F1, I2, F2>>::with_capacity(input_size * 2),
-            next_edge_id_: 0,
-            next_vertex_id_: 0,
         }
     }
 
@@ -581,8 +564,8 @@ where
     fn _make_new_cell_with_catagory(
         &mut self,
         cell_id: VoronoiCellIndex, // same as sorted_index
-        initial_index: SourceIndexType,
-        sc: SourceCategory,
+        initial_index: SourceIndex,
+        sc: ColorBits,
     ) -> VoronoiCellIndex {
         // fill cell with temporary blocks- they will be over-written later
         // Todo: fix this dirty hack with Option<>
@@ -591,14 +574,14 @@ where
                 .push(Rc::new(Cell::new(VoronoiCell::<I1, F1>::new(
                     VoronoiCellIndex(usize::max_value()),
                     usize::max_value(),
-                    SourceCategory::SOURCE_CATEGORY_TEMPORARY_CELL.0,
+                    ColorBits::TEMPORARY_CELL.0,
                 ))));
         }
         self.cells_
             .push(Rc::new(Cell::new(VoronoiCell::<I1, F1>::new(
                 cell_id,
                 initial_index,
-                sc.get_value(),
+                sc.0,
             ))));
         assert_eq!(self.cells_[cell_id.0].get().get_id(), cell_id.0);
 
@@ -607,7 +590,7 @@ where
             let cell = ccell.get();
             assert_eq!(cell.id_.0, cell_id.0);
             assert_eq!(cell.source_index_, initial_index);
-            assert_eq!(cell.color_, sc.get_value());
+            assert_eq!(cell.color_, sc.0);
             //cell.color_ = sc.get_value();
             ccell.set(cell);
         }
@@ -737,9 +720,7 @@ where
         is_linear: bool,
         is_primary: bool,
     ) -> VoronoiEdgeIndex {
-        let new_edge_id = VoronoiEdgeIndex(self.next_edge_id_);
-        //dbg!(self.next_edge_id_);
-        self.next_edge_id_ += 1;
+        let new_edge_id = VoronoiEdgeIndex(self.edges_.len());
         let new_edge = VoronoiEdge::new_4(new_edge_id, cell_id, is_linear, is_primary);
         let _ = self.edges_.insert(new_edge_id.0, new_edge);
         new_edge_id
@@ -758,14 +739,9 @@ where
     /// Overwrites the content of dest with the content of source.
     /// edge_id is compensated accordingly
     fn _edge_copy(&self, dest: usize, source: usize) {
-        //println!("copying src {} {:?}", source, &self.edges_[source]);
-        //println!("copying dest{} {:?}", dest, &self.edges_[dest]);
-
         let mut e = self.edges_[source].get();
         e.id = VoronoiEdgeIndex(dest);
         self.edges_[dest].set(e);
-        //println!("result: src {} {:?}", source, &self.edges_[source]);
-        //println!("result: dst {} {:?}", dest, &self.edges_[dest]);
     }
 
     pub fn edge_get_color(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<ColorType> {
@@ -882,8 +858,7 @@ where
     }
 
     fn _vertex_new_2(&mut self, x: F1, y: F1) -> VoronoiVertexIndex {
-        let new_vertex_id = VoronoiVertexIndex(self.next_vertex_id_);
-        self.next_vertex_id_ += 1;
+        let new_vertex_id = VoronoiVertexIndex(self.vertices_.len());
         let new_edge = VoronoiVertex::new_3(new_vertex_id, x, y);
         let _ = self.vertices_.insert(new_vertex_id.0, new_edge);
         new_vertex_id
@@ -1106,7 +1081,7 @@ where
         (new_edge1_id, new_edge2_id)
     }
 
-    pub fn _build(&mut self) {
+    pub(crate) fn _build(&mut self) {
         // Remove degenerate edges.
         if !self.edges_.is_empty() {
             let mut last_edge: usize = 0;
@@ -1165,7 +1140,6 @@ where
             }
             for e in (last_edge..edges_end).rev() {
                 let _ = self.edges_.remove(e);
-                self.next_edge_id_ = e;
             }
         }
 
@@ -1202,12 +1176,8 @@ where
                 }
             }
             if let Some(last_vertex) = last_vertex {
-                //dbg!(last_vertex, self.vertices_.len());
                 for v in (last_vertex.0..self.vertices_.len()).rev() {
-                    //edges_to_erase.push(last_edge);
-                    //vertices_.erase(last_vertex, vertices_.end());
                     let _ = self.vertices_.remove(v);
-                    self.next_vertex_id_ = v;
                 }
             }
         }

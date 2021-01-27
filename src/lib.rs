@@ -26,8 +26,16 @@ pub mod voronoi_error;
 pub mod voronoi_predicate;
 mod voronoi_robust_fpt;
 pub mod voronoi_siteevent;
-pub mod voronoi_structures;
 pub mod voronoi_visual_utils;
+
+/// Debug utility function, formats an id string
+pub(crate) fn format_id(value: Option<usize>) -> String {
+    if let Some(value) = value {
+        value.to_string()
+    } else {
+        String::from("-")
+    }
+}
 
 pub trait InputType:
     Display
@@ -148,23 +156,23 @@ impl<F> TypeCheckF<F>
 where
     F: Default + Copy + Clone + Float + Zero + Neg<Output = F>,
 {
-    #[inline]
+    //#[inline]
     // todo: remove!
-    pub fn is_zero(v: F) -> bool {
-        v == F::zero()
-    }
+    //pub fn is_zero(v: F) -> bool {
+    //    v == F::zero()
+    //}
 
-    #[inline]
+    //#[inline]
     // todo: remove!
-    pub fn is_neg(v: F) -> bool {
-        v < F::zero()
-    }
+    //pub fn is_neg(v: F) -> bool {
+    //    v < F::zero()
+    //}
 
-    #[inline]
+    //#[inline]
     // todo: remove!
-    pub fn is_pos(v: F) -> bool {
-        v > F::zero()
-    }
+    //pub fn is_pos(v: F) -> bool {
+    //    v > F::zero()
+    //}
 
     // TODO: this is stupid: why can't I1 just use a float literal?
     #[inline]
@@ -195,31 +203,25 @@ impl<I1> TypeCheckI<I1>
 where
     I1: Default + Copy + Clone + PrimInt + Zero + Neg<Output = I1>,
 {
-    #[inline]
     // todo: remove!
-    pub fn is_zero(v: I1) -> bool {
-        v == I1::zero()
-    }
-
-    #[inline]
-    // todo: remove!
+    #[inline(always)]
     pub fn is_neg(v: I1) -> bool {
         v < I1::zero()
     }
 
-    #[inline]
     // todo: remove!
+    #[inline(always)]
     pub fn is_pos(v: I1) -> bool {
-        v > I1::zero()
+        v >= I1::zero()
     }
 
     // TODO: this is stupid: why can't I1 just use an int literal?
-    #[inline]
+    #[inline(always)]
     pub fn one() -> I1 {
         num::cast::<i8, I1>(1i8).unwrap()
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn two() -> I1 {
         num::cast::<i8, I1>(2i8).unwrap()
     }
@@ -256,6 +258,7 @@ where
         num::cast::<I1, F2>(input).unwrap()
     }
 
+    // todo! is there no way to solve this more efficiently?
     #[inline(always)]
     pub fn i1_to_bi(input: I1) -> BigInt {
         let stupid_generics = num::cast::<I1, i128>(input).unwrap();
@@ -267,11 +270,13 @@ where
         num::cast::<I1, i128>(input).unwrap()
     }
 
+    // todo! is there no way to solve this more efficiently?
     #[inline(always)]
     pub fn i2_to_bi(input: I2) -> BigInt {
         let stupid_generics = num::cast::<I2, i128>(input).unwrap();
         BigInt::from(stupid_generics)
     }
+
     #[inline(always)]
     pub fn i2_to_f1(input: I2) -> F1 {
         num::cast::<I2, F1>(input).unwrap()

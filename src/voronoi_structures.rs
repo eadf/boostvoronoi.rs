@@ -27,33 +27,6 @@ use std::rc::Weak;
 
 mod tests;
 
-pub(crate) struct Bits;
-impl Bits {
-    pub const IS_INVERSE: VD::SourceCategoryType = 0x20; // 32
-}
 
-pub type GeometryCategoryType = usize;
 
-/// Represents topology type of the voronoi site.
-pub struct GeometryCategory(GeometryCategoryType);
-impl GeometryCategory {
-    pub const GEOMETRY_CATEGORY_POINT: GeometryCategoryType = 0x0;
-    pub const GEOMETRY_CATEGORY_SEGMENT: GeometryCategoryType = 0x1;
-}
 
-/// todo! make debug_print_id & debug_print_bli_id into one function with generics
-pub(crate) fn format_id(value: Option<usize>) -> String {
-    if let Some(value) = value {
-        value.to_string()
-    } else {
-        String::from("-")
-    }
-}
-
-pub(crate) fn debug_print_bli_id(value: Option<VB::BeachLineIndex>) -> String {
-    if let Some(value) = value {
-        value.to_string()
-    } else {
-        String::from("-")
-    }
-}

@@ -4,7 +4,6 @@ use super::super::voronoi_diagram as VD;
 use super::super::voronoi_error::BVError;
 use super::super::voronoi_predicate as VP;
 use super::super::voronoi_siteevent as VSE;
-use super::super::voronoi_structures as VS;
 use super::{BeachLineIndex, BeachLineNodeData, BeachLineNodeKey, Beachline};
 use geo::{Coordinate, Line};
 use std::cmp::Ordering;
