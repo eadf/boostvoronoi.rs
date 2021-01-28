@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/eadf/boostvoronoi.rs.svg?branch=master)](https://travis-ci.org/eadf/boostvoronoi.rs)
+[![](https://meritbadge.herokuapp.com/boostvoronoi.rs)](https://crates.io/crates/boostvoronoi.rs)
+[![Documentation](https://docs.rs/boostvoronoi.rs/badge.svg)](https://docs.rs/boostvoronoi.rs)
+
 # Segmented Voronoi for Rust
 [Boost 1.75.0 polygon::voronoi](https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_main.htm) ported to 100% rust.
 This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) works on line segments as well as points, making it useful for calculating centerlines.
