@@ -2,6 +2,7 @@
 [![Crates.io](https://meritbadge.herokuapp.com/boostvoronoi)](https://crates.io/crates/boostvoronoi)
 [![Documentation](https://docs.rs/boostvoronoi/badge.svg)](https://docs.rs/boostvoronoi)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)
+[![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Clippy/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Clippy/badge.svg)
 
 # Segmented Voronoi for Rust
 [Boost 1.75.0 polygon::voronoi](https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_main.htm) ported to 100% rust.
