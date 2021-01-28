@@ -2,6 +2,8 @@
 [Boost 1.75.0 polygon::voronoi](https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_main.htm) ported to 100% rust.
 This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) works on line segments as well as points, making it useful for calculating centerlines.
 
+Code still in development, not ready for any purpose.
+
 ![Rusty voronoi](img.png)
 
 Quick example:
@@ -36,12 +38,14 @@ vb.construct().expect("test")
 Edges may become curves when line segments are used as input, see the example code for discretization and interpolation. 
 
 ## Todo
+- [ ] Error handling
 - [ ] Evaluate the generic API. Is <I1, F1, I2, F2> really needed?
 - [ ] Replace the builtin ulp implementation
 - [ ] Replace num::BigInt with something lighter
 - [ ] Add many more test cases for voronoi_robust_ftp.rs, specially for ulp
 - [x] Remove use of vec_map::VecMap where not absolutely needed.
 - [ ] Benchmark and optimize
+- [ ] Example GUI with more features. fltk?
 
 #
 

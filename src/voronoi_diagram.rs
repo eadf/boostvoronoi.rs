@@ -184,20 +184,20 @@ where
         geometry == ColorBits::GEOMETRY_CATEGORY_POINT.0
     }
 
-    /// Returns true if the cell contains segment site, false othervice.
+    /// Returns true if the cell contains segment site, false otherwise.
     #[inline(always)]
     pub fn contains_segment(&self) -> bool {
         let geometry = self.internal_color().0 >> ColorBits::GEOMETRY_SHIFT.0;
         geometry == ColorBits::GEOMETRY_CATEGORY_SEGMENT.0
     }
 
-    /// Returns true if the cell contains segment start point, false othervice.
+    /// Returns true if the cell contains segment start point, false otherwise.
     #[inline(always)]
     pub fn contains_segment_startpoint(&self) -> bool {
         self.internal_color().0 == ColorBits::SEGMENT_START_POINT.0
     }
 
-    /// Returns true if the cell contains segment end point, false othervice.
+    /// Returns true if the cell contains segment end point, false otherwise.
     #[inline(always)]
     pub fn contains_segment_endpoint(&self) -> bool {
         self.internal_color().0 == ColorBits::SEGMENT_END_POINT.0
@@ -215,7 +215,7 @@ where
     }
 
     /// Returns the origin index of the point that created this cell.
-    /// It also returns the point category
+    /// It also returns the source category
     #[inline(always)]
     pub fn source_index_2(&self) -> (SourceIndex, SourceCategory) {
         (self.source_index_, self.source_category())
@@ -243,7 +243,7 @@ where
     pub(crate) y_: F1,
     pub(crate) incident_edge_: Option<VoronoiEdgeIndex>,
     pub(crate) color_: ColorType,
-    _pdi: PhantomData<I1>, 
+    _pdi: PhantomData<I1>,
 }
 
 impl<I1, F1> fmt::Debug for VoronoiVertex<I1, F1>
@@ -352,10 +352,10 @@ where
     next_ccw_: Option<VoronoiEdgeIndex>,
     prev_ccw_: Option<VoronoiEdgeIndex>,
     color_: ColorType,
-    _pdi: PhantomData<I1>,  
-    _pdo: PhantomData<F1>,  
-    _pdbi: PhantomData<I2>, 
-    _pdbf: PhantomData<F2>, 
+    _pdi: PhantomData<I1>,
+    _pdo: PhantomData<F1>,
+    _pdbi: PhantomData<I2>,
+    _pdbf: PhantomData<F2>,
 }
 
 impl<I1, F1, I2, F2> fmt::Debug for VoronoiEdge<I1, F1, I2, F2>
@@ -572,8 +572,8 @@ where
         while self.cells_.len() < cell_id.0 {
             self.cells_
                 .push(Rc::new(Cell::new(VoronoiCell::<I1, F1>::new(
-                    VoronoiCellIndex(usize::max_value()),
-                    usize::max_value(),
+                    VoronoiCellIndex(usize::MAX),
+                    usize::MAX,
                     ColorBits::TEMPORARY_CELL.0,
                 ))));
         }

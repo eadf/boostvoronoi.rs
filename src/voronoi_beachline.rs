@@ -128,8 +128,7 @@ where
             }
             let _ = self.beach_line_vec.remove(beachline_index.0);
         } else {
-            // tried to remove non-existing beachline
-            panic!();
+            panic!("tried to remove a non-existent beachline.");
         }
     }
 
@@ -268,19 +267,7 @@ where
             None
         }
     }
-/*
-    pub fn lower_bound_experiment(
-        &self,
-        key: BeachLineNodeKey<I, O, BI, BF>,
-    ) -> Option<BeachLineNodeKey<I, O, BI, BF>> {
-        for v in self.beach_line_.iter() {
-            if !VP::NodeComparisonPredicate::<I, O, BI, BF>::node_comparison_predicate(v.0, &key) {
-                return Some(*v.0);
-            }
-        }
-        None
-    }
-*/
+
     /// returns a copy of the last element (key,value)
     pub(crate) fn peek_last(&self) -> Option<(BeachLineNodeKey<I, O, BI, BF>, BeachLineIndex)> {
         self.beach_line_
