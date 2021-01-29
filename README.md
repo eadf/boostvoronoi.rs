@@ -1,4 +1,3 @@
-[![Travis](https://travis-ci.org/eadf/boostvoronoi.rs.svg?branch=master)](https://travis-ci.org/eadf/boostvoronoi.rs)
 [![Crates.io](https://meritbadge.herokuapp.com/boostvoronoi)](https://crates.io/crates/boostvoronoi)
 [![Documentation](https://docs.rs/boostvoronoi/badge.svg)](https://docs.rs/boostvoronoi)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)
