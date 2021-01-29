@@ -6,7 +6,7 @@ script:
         - cargo build --verbose --workspace
         - cargo test --verbose --workspace
 
-# safelist
-branches:
-      only:
-         - main
+# safelist doesn't work
+#branches:
+#      only:
+#         - main
