@@ -631,6 +631,7 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::DivAssign<RobustFpt<F>> for Robu
 pub struct robust_sqrt_expr<
     _fpt: NumCast + Float + fmt::Display + Default + Debug + ops::Neg<Output = _fpt>,
 > {
+    #[doc(hidden)]
     _pdf: PhantomData<_fpt>,
 }
 

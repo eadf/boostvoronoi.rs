@@ -53,9 +53,13 @@ where
     I2: InputType + Neg<Output = I2>,
     F2: OutputType + Neg<Output = F2>,
 {
+    #[doc(hidden)]
     _pdo: PhantomData<F1>,
+    #[doc(hidden)]
     _pdi: PhantomData<I1>,
+    #[doc(hidden)]
     _pdbi: PhantomData<I2>,
+    #[doc(hidden)]
     _pdbf: PhantomData<F2>,
 }
 
@@ -180,9 +184,13 @@ where
     I2: InputType + Neg<Output = I2>,
     F2: OutputType + Neg<Output = F2>,
 {
+    #[doc(hidden)]
     _pdo: PhantomData<F1>,
+    #[doc(hidden)]
     _pdi: PhantomData<I1>,
+    #[doc(hidden)]
     _pdbi: PhantomData<I2>,
+    #[doc(hidden)]
     _pdbf: PhantomData<F2>,
 }
 
@@ -258,6 +266,7 @@ pub struct PointComparisonPredicate<I1>
 where
     I1: InputType + Neg<Output = I1>,
 {
+    #[doc(hidden)]
     _pdi: PhantomData<I1>,
 }
 
@@ -282,9 +291,13 @@ where
     I2: InputType + Neg<Output = I2>,
     F2: OutputType + Neg<Output = F2>,
 {
+    #[doc(hidden)]
     _pdo: PhantomData<F1>,
+    #[doc(hidden)]
     _pdi: PhantomData<I1>,
+    #[doc(hidden)]
     _pdbi: PhantomData<I2>,
+    #[doc(hidden)]
     _pdbf: PhantomData<F2>,
 }
 
@@ -387,9 +400,13 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
+    #[doc(hidden)]
     _pdo: PhantomData<F1>,
+    #[doc(hidden)]
     _pdi: PhantomData<I1>,
+    #[doc(hidden)]
     _pdbi: PhantomData<I2>,
+    #[doc(hidden)]
     _pdbf: PhantomData<F2>,
 }
 
@@ -628,9 +645,13 @@ where
     I2: InputType + Neg<Output = I2>,
     F2: OutputType + Neg<Output = F2>,
 {
+    #[doc(hidden)]
     _pdo: PhantomData<F1>,
+    #[doc(hidden)]
     _pdi: PhantomData<I1>,
+    #[doc(hidden)]
     _pdbi: PhantomData<I2>,
+    #[doc(hidden)]
     _pdbf: PhantomData<F2>,
 }
 
@@ -762,9 +783,13 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
+    #[doc(hidden)]
     _pdo: PhantomData<F1>,
+    #[doc(hidden)]
     _pdi: PhantomData<I1>,
+    #[doc(hidden)]
     _pdbi: PhantomData<I2>,
+    #[doc(hidden)]
     _pdbf: PhantomData<F2>,
 }
 
@@ -863,9 +888,13 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
+    #[doc(hidden)]
     _pdo: PhantomData<F1>,
+    #[doc(hidden)]
     _pdi: PhantomData<I1>,
+    #[doc(hidden)]
     _pdbi: PhantomData<I2>,
+    #[doc(hidden)]
     _pdbf: PhantomData<F2>,
 }
 
@@ -1455,9 +1484,13 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
+    #[doc(hidden)]
     _pdo: PhantomData<F1>,
+    #[doc(hidden)]
     _pdi: PhantomData<I1>,
+    #[doc(hidden)]
     _pdbi: PhantomData<I2>,
+    #[doc(hidden)]
     _pdbf: PhantomData<F2>,
 }
 
@@ -1571,9 +1604,13 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
+    #[doc(hidden)]
     _pdo: PhantomData<F1>,
+    #[doc(hidden)]
     _pdi: PhantomData<I1>,
+    #[doc(hidden)]
     _pdbi: PhantomData<I2>,
+    #[doc(hidden)]
     _pdbf: PhantomData<F2>,
 }
 

@@ -23,9 +23,13 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
+    #[doc(hidden)]
     _pdi: PhantomData<I1>,
+    #[doc(hidden)]
     _pdo: PhantomData<F1>,
+    #[doc(hidden)]
     _pdbi: PhantomData<I2>,
+    #[doc(hidden)]
     _pdbf: PhantomData<F2>,
 }
 

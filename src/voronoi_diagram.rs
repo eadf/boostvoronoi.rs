@@ -115,7 +115,9 @@ where
     source_index_: SourceIndex,
     incident_edge_: Option<VoronoiEdgeIndex>,
     color_: ColorType,
+    #[doc(hidden)]
     _pdi: PhantomData<I1>,
+    #[doc(hidden)]
     _pdo: PhantomData<F1>,
 }
 
@@ -242,6 +244,7 @@ where
     pub(crate) y_: F1,
     pub(crate) incident_edge_: Option<VoronoiEdgeIndex>,
     pub(crate) color_: ColorType,
+    #[doc(hidden)]
     _pdi: PhantomData<I1>,
 }
 
@@ -351,9 +354,13 @@ where
     next_ccw_: Option<VoronoiEdgeIndex>,
     prev_ccw_: Option<VoronoiEdgeIndex>,
     color_: ColorType,
+    #[doc(hidden)]
     _pdi: PhantomData<I1>,
+    #[doc(hidden)]
     _pdo: PhantomData<F1>,
+    #[doc(hidden)]
     _pdbi: PhantomData<I2>,
+    #[doc(hidden)]
     _pdbf: PhantomData<F2>,
 }
 

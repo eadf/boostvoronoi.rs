@@ -48,29 +48,32 @@ pub type SiteEventIndexType = usize;
 /// Note: for all sites is_inverse_ flag is equal to false by default.
 
 #[derive(Copy, Clone)]
-pub struct SiteEvent<I, O, BI, BF>
+pub struct SiteEvent<I1, F1, I2, F2>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: InputType + Neg<Output =I1>,
+    F1: OutputType + Neg<Output =F1>,
+    I2: BigIntType + Neg<Output =I2>,
+    F2: BigFloatType + Neg<Output =F2>,
 {
-    pub(crate) point0_: Coordinate<I>,
-    pub(crate) point1_: Coordinate<I>,
+    pub(crate) point0_: Coordinate<I1>,
+    pub(crate) point1_: Coordinate<I1>,
     pub sorted_index_: SiteEventIndexType,
     initial_index_: SiteEventIndexType,
     flags_: VD::ColorType,
-    _pdo: PhantomData<O>,
-    _pdbi: PhantomData<BI>,
-    _pdbf: PhantomData<BF>,
+    #[doc(hidden)]
+    _pdo: PhantomData<F1>,
+    #[doc(hidden)]
+    _pdbi: PhantomData<I2>,
+    #[doc(hidden)]
+    _pdbf: PhantomData<F2>,
 }
 
-impl<I, O, BI, BF> fmt::Debug for SiteEvent<I, O, BI, BF>
+impl<I1, F1, I2, F2> fmt::Debug for SiteEvent<I1, F1, I2, F2>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: InputType + Neg<Output =I1>,
+    F1: OutputType + Neg<Output =F1>,
+    I2: BigIntType + Neg<Output =I2>,
+    F2: BigFloatType + Neg<Output =F2>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
@@ -172,53 +175,59 @@ where
     }
 }
 
-impl<I, O, BI, BF> SiteEvent<I, O, BI, BF>
+impl<I1, F1, I2, F2> SiteEvent<I1, F1, I2, F2>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: InputType + Neg<Output =I1>,
+    F1: OutputType + Neg<Output =F1>,
+    I2: BigIntType + Neg<Output =I2>,
+    F2: BigFloatType + Neg<Output =F2>,
 {
-    pub fn new_2(a: Coordinate<I>, initial_index_: SiteEventIndexType) -> SiteEvent<I, O, BI, BF> {
+    pub fn new_2(a: Coordinate<I1>, initial_index_: SiteEventIndexType) -> SiteEvent<I1, F1, I2, F2> {
         Self {
             point0_: a,
             point1_: a,
             sorted_index_: 0,
             initial_index_,
             flags_: VD::ColorBits::SINGLE_POINT.0,
+            #[doc(hidden)]
             _pdo: PhantomData,
+            #[doc(hidden)]
             _pdbi: PhantomData,
+            #[doc(hidden)]
             _pdbf: PhantomData,
         }
     }
 
     pub fn new_3(
-        a: Coordinate<I>,
-        b: Coordinate<I>,
+        a: Coordinate<I1>,
+        b: Coordinate<I1>,
         initial_index_: SiteEventIndexType,
-    ) -> SiteEvent<I, O, BI, BF> {
+    ) -> SiteEvent<I1, F1, I2, F2> {
         Self {
             point0_: a,
             point1_: b,
             sorted_index_: 0,
             initial_index_,
             flags_: 0,
+            #[doc(hidden)]
             _pdo: PhantomData,
+            #[doc(hidden)]
             _pdbi: PhantomData,
+            #[doc(hidden)]
             _pdbf: PhantomData,
         }
     }
 
     /// used by test code
     pub fn new_7(
-        x1: I,
-        y1: I,
-        x2: I,
-        y2: I,
+        x1: I1,
+        y1: I1,
+        x2: I1,
+        y2: I1,
         initial_index: usize,
         sorted_index: usize,
         flags: u32,
-    ) -> SiteEvent<I, O, BI, BF> {
+    ) -> SiteEvent<I1, F1, I2, F2> {
         Self {
             point0_: Coordinate { x: x1, y: y1 },
             point1_: Coordinate { x: x2, y: y2 },
@@ -247,41 +256,41 @@ where
     }*/
 
     #[inline(always)]
-    pub fn x(&self) -> I {
+    pub fn x(&self) -> I1 {
         self.point0_.x
     }
 
     #[inline(always)]
-    pub fn y(&self) -> I {
+    pub fn y(&self) -> I1 {
         self.point0_.y
     }
 
     #[inline(always)]
-    pub fn x0(&self) -> I {
+    pub fn x0(&self) -> I1 {
         self.point0_.x
     }
 
     #[inline(always)]
-    pub fn y0(&self) -> I {
+    pub fn y0(&self) -> I1 {
         self.point0_.y
     }
 
     #[inline(always)]
-    pub fn x1(&self) -> I {
+    pub fn x1(&self) -> I1 {
         self.point1_.x
     }
 
     #[inline(always)]
-    pub fn y1(&self) -> I {
+    pub fn y1(&self) -> I1 {
         self.point1_.y
     }
 
     #[inline(always)]
-    pub fn point0(&self) -> &Coordinate<I> {
+    pub fn point0(&self) -> &Coordinate<I1> {
         &self.point0_
     }
     #[inline(always)]
-    pub fn point1(&self) -> &Coordinate<I> {
+    pub fn point1(&self) -> &Coordinate<I1> {
         &self.point1_
     }
 
@@ -338,8 +347,8 @@ where
     #[allow(unknown_lints)]
     #[allow(clippy::suspicious_operation_groupings)]
     pub fn is_primary_edge(
-        site1: &SiteEvent<I, O, BI, BF>,
-        site2: &SiteEvent<I, O, BI, BF>,
+        site1: &SiteEvent<I1, F1, I2, F2>,
+        site2: &SiteEvent<I1, F1, I2, F2>,
     ) -> bool {
         let flag1 = site1.is_segment();
         let flag2 = site2.is_segment();
@@ -353,8 +362,8 @@ where
     }
 
     pub fn is_linear_edge(
-        site1: &SiteEvent<I, O, BI, BF>,
-        site2: &SiteEvent<I, O, BI, BF>,
+        site1: &SiteEvent<I1, F1, I2, F2>,
+        site2: &SiteEvent<I1, F1, I2, F2>,
     ) -> bool {
         if !Self::is_primary_edge(site1, site2) {
             return true;
