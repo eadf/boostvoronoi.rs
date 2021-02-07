@@ -1,5 +1,5 @@
+#![allow(unused_imports)]
 use super::super::voronoi_beachline as VB;
-use super::super::voronoi_builder::VoronoiBuilder;
 use super::super::voronoi_diagram as VD;
 use super::super::voronoi_diagram::VoronoiDiagram;
 use super::super::voronoi_error::BVError;

@@ -9,7 +9,6 @@
 
 // Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
 
-use super::voronoi_diagram as VD;
 use super::{BigFloatType, BigIntType, InputType, OutputType};
 
 use geo::{Coordinate, Line};

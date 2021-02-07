@@ -11,23 +11,17 @@
 
 mod tests;
 
-use super::voronoi_beachline as VB;
 use super::voronoi_diagram as VD;
 use super::voronoi_predicate as VP;
-use ordered_float::OrderedFloat;
 use std::cmp::Ordering;
 
 use super::{BigFloatType, BigIntType, InputType, OutputType};
-use geo::{Coordinate, Line};
-use num::{NumCast, PrimInt};
-use std::cell::Cell;
+use geo::Coordinate;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
 use std::mem;
 use std::ops::Neg;
-use std::rc::Rc;
-use std::rc::Weak;
 
 pub type SiteEventIndexType = usize;
 

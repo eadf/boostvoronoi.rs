@@ -18,14 +18,14 @@ use super::voronoi_predicate as VP;
 use super::voronoi_siteevent as VSE;
 
 use geo::{Coordinate, Line};
-use num::{NumCast, PrimInt};
-use std::cell::Cell;
-use std::cmp::Ordering;
+//use num::{NumCast, PrimInt};
+//use std::cell::Cell;
+//use std::cmp::Ordering;
 use std::collections::BinaryHeap;
-use std::fmt;
-use std::hash::Hash;
+//use std::fmt;
+//use std::hash::Hash;
 use std::ops::Neg;
-use std::rc::Rc;
+//use std::rc::Rc;
 
 use super::{BigFloatType, BigIntType, InputType, OutputType};
 use crate::voronoi_beachline::BeachLineNodeData;

@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 use super::RobustFpt;
 use crate::voronoi_robust_fpt as VR;
 use crate::TypeConverter as TCC;

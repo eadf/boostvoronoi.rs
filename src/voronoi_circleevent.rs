@@ -10,10 +10,10 @@
 // Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
 
 use super::voronoi_beachline as VB;
-use super::voronoi_diagram as VD;
-use super::voronoi_predicate as VP;
+//use super::voronoi_diagram as VD;
+//use super::voronoi_predicate as VP;
 
-use super::{BigFloatType, BigIntType, InputType, OutputType};
+use super::OutputType;
 use fnv::FnvHashSet;
 use ordered_float::OrderedFloat;
 use rb_tree::RBTree;

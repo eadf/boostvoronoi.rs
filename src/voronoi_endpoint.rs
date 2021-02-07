@@ -10,12 +10,8 @@
 // Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
 
 use super::voronoi_beachline as VB;
-use super::voronoi_circleevent as VC;
-use super::voronoi_diagram as VD;
-use super::voronoi_error::BVError;
 use super::voronoi_predicate as VP;
-use super::voronoi_siteevent as VSE;
-use super::{BigFloatType, BigIntType, InputType, OutputType};
+use super::InputType;
 use geo::Coordinate;
 use std::cmp::Ordering;
 use std::ops::Neg;

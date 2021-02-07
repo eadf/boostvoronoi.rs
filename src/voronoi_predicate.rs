@@ -22,14 +22,9 @@ use super::TypeConverter as TCC;
 use super::TypeConverter as TC;
 use super::{BigFloatType, BigIntType, InputType, OutputType};
 use geo::Coordinate;
-use num::FromPrimitive;
-use num::ToPrimitive;
 use num::{BigInt, Float, NumCast, PrimInt, Zero};
-use ordered_float::OrderedFloat;
 use std::cmp;
-use std::convert::TryInto;
 use std::fmt::{Debug, Display};
-use std::hash::Hash;
 use std::marker::PhantomData;
 use std::ops::Neg;
 

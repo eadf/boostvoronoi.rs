@@ -3,11 +3,11 @@
 #![deny(non_upper_case_globals)]
 #![deny(unused_qualifications)]
 #![deny(unused_results)]
-#![allow(unused_imports)]
+#![deny(unused_imports)]
 
 use core::fmt::Debug;
 use num::bigint::BigInt;
-use num::FromPrimitive;
+//use num::FromPrimitive;
 use num::ToPrimitive;
 use num::{Float, NumCast, PrimInt, Zero};
 use std::fmt::Display;
@@ -15,7 +15,6 @@ use std::hash::Hash;
 use std::marker::PhantomData;
 use std::ops::Neg;
 
-//mod voronoi_builder;
 mod voronoi_beachline;
 pub mod voronoi_builder;
 mod voronoi_circleevent;

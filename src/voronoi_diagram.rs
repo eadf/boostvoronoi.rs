@@ -15,11 +15,10 @@ use super::voronoi_siteevent as VSE;
 use super::TypeConverter as TCC;
 
 pub use super::{BigFloatType, BigIntType, InputType, OutputType};
-use num::{NumCast, PrimInt};
+use num::NumCast;
 use std::cell::Cell;
 use std::cmp::Ordering;
 use std::fmt;
-use std::hash::Hash;
 use std::marker::PhantomData;
 use std::ops::Neg;
 use std::rc::Rc;

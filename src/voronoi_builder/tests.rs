@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 use super::super::voronoi_diagram::VoronoiDiagram;
 use super::super::voronoi_error::BVError;
 use super::VoronoiBuilder;

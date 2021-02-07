@@ -50,14 +50,11 @@
 mod robustdif_tests;
 mod robustfpt_tests;
 
-use super::TypeCheckF as TCF;
-use super::TypeCheckI as TCI;
-use super::{BigFloatType, BigIntType, InputType, OutputType};
+use super::OutputType;
 use core::fmt::Debug;
-use num::{BigInt, Float, FromPrimitive, Num, NumCast, ToPrimitive, Zero};
+use num::{BigInt, Float, NumCast, ToPrimitive, Zero};
 //use num_traits;
 use ordered_float::OrderedFloat;
-use std::convert::TryInto;
 use std::fmt;
 use std::marker::PhantomData;
 use std::ops;
