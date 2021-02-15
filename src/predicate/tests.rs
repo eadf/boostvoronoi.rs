@@ -3,10 +3,10 @@ use super::super::beachline as VB;
 use super::super::diagram as VD;
 use super::super::diagram::VoronoiDiagram;
 use super::super::error::BVError;
-use super::super::voronoi_predicate as VP;
-use super::super::voronoi_siteevent as VSE;
+use super::super::predicate as VP;
+use super::super::siteevent as VSE;
+use super::super::{Point, Line};
 use super::{BigFloatType, BigIntType, InputType, OutputType};
-use geo::{Coordinate, Line};
 use std::ops::Neg;
 
 use std::collections::BTreeMap;
@@ -27,9 +27,9 @@ where
     I2: InputType + Neg<Output = I2>,
     F2: OutputType + Neg<Output = F2>,
 {
-    let mut site1 = VSE::SiteEvent::<I1, F1, I2, F2>::new_2(Coordinate { x: x1, y: y1 }, si1);
+    let mut site1 = VSE::SiteEvent::<I1, F1, I2, F2>::new_2(Point { x: x1, y: y1 }, si1);
     site1.sorted_index_ = si1;
-    let mut site2 = VSE::SiteEvent::<I1, F1, I2, F2>::new_2(Coordinate { x: x2, y: y2 }, si2);
+    let mut site2 = VSE::SiteEvent::<I1, F1, I2, F2>::new_2(Point { x: x2, y: y2 }, si2);
     site2.sorted_index_ = si2;
     VB::BeachLineNodeKey::<I1, F1, I2, F2>::new_2(site1, site2)
 }
@@ -72,7 +72,7 @@ fn cross_product_1() {
     let b1 = -9;
     let b2 = 4;
 
-    let x = VP::VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(a1, b1, a2, b2);
+    let x = VP::Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(a1, b1, a2, b2);
     assert_eq!(x, 9.0);
 }
 
@@ -254,7 +254,7 @@ fn distance_predicate_pp() {
     type F2 = f64;
     let pp = super::DistancePredicate::<I1, F1, I2, F2>::pp;
     let new_site = VSE::SiteEvent::<I1, F1, I2, F2>::new_7;
-    let new_point = |x, y| Coordinate::<I1> { x, y };
+    let new_point = |x, y| Point::<I1> { x, y };
 
     // test data copy & pasted from c++ debug session
     assert_eq!(
@@ -291,7 +291,7 @@ fn distance_predicate_ps_32() {
     type F2 = f64;
     let ps = super::DistancePredicate::<I1, F1, I2, F2>::ps;
     let new_site = VSE::SiteEvent::<I1, F1, I2, F2>::new_7;
-    let new_point = |x, y| Coordinate::<I1> { x, y };
+    let new_point = |x, y| Point::<I1> { x, y };
 
     // test data copy & pasted from c++ debug session
     assert_eq!(
@@ -457,7 +457,7 @@ fn distance_predicate_ps_64() {
     type F2 = f64;
     let ps = super::DistancePredicate::<I1, F1, I2, F2>::ps;
     let new_site = VSE::SiteEvent::<I1, F1, I2, F2>::new_7;
-    let new_point = |x, y| Coordinate::<I1> { x, y };
+    let new_point = |x, y| Point::<I1> { x, y };
 
     // test data copy & pasted from c++ debug session
     assert_eq!(
@@ -623,7 +623,7 @@ fn distance_predicate_ss_32() {
     type F2 = f64;
     let ss = super::DistancePredicate::<I1, F1, I2, F2>::ss;
     let new_site = VSE::SiteEvent::<I1, F1, I2, F2>::new_7;
-    let new_point = |x, y| Coordinate::<I1> { x, y };
+    let new_point = |x, y| Point::<I1> { x, y };
 
     // test data copy & pasted from c++ debug session
     assert_eq!(
@@ -707,7 +707,7 @@ fn distance_predicate_ss_64() {
     type F2 = f64;
     let ss = super::DistancePredicate::<I1, F1, I2, F2>::ss;
     let new_site = VSE::SiteEvent::<I1, F1, I2, F2>::new_7;
-    let new_point = |x, y| Coordinate::<I1> { x, y };
+    let new_point = |x, y| Point::<I1> { x, y };
 
     // test data copy & pasted from c++ debug session
     assert_eq!(

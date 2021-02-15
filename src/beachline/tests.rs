@@ -1,12 +1,12 @@
 #![allow(unused_imports)]
-use super::super::voronoi_beachline as VB;
-use super::super::voronoi_builder::VoronoiBuilder;
-use super::super::voronoi_diagram as VD;
-use super::super::voronoi_error::BVError;
-use super::super::voronoi_predicate as VP;
-use super::super::voronoi_siteevent as VSE;
+use super::super::beachline as VB;
+use super::super::builder::Builder;
+use super::super::diagram as VD;
+use super::super::error::BVError;
+use super::super::predicate as VP;
+use super::super::siteevent as VSE;
+use super::super::{Point, Line};
 use super::{BeachLineIndex, BeachLineNodeData, BeachLineNodeKey, Beachline};
-use geo::{Coordinate, Line};
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::ops::Bound::{Excluded, Included, Unbounded};
@@ -46,12 +46,12 @@ fn beachline_1() {
     type F1 = f32;
     type I2 = i64;
     type F2 = f64;
-    let coord = |x, y| Coordinate { x, y };
+    let coord = |x, y| Point { x, y };
 
     // Co-linear sites
     let _v = vec![coord(10, 10), coord(1, 1), coord(1, 6)];
 
-    let mut vb = VoronoiBuilder::<I1, F1, I2, F2>::new();
+    let mut vb = Builder::<I1, F1, I2, F2>::new();
     vb.with_vertices(_v.iter()).unwrap();
     let _output = vb.construct();
     //assert!(false);
@@ -66,13 +66,13 @@ fn beachline_2() {
     type F2 = f64;
 
     {
-        let coord = |x, y| Coordinate { x, y };
+        let coord = |x, y| Point { x, y };
 
         let _v = vec![coord(10, 18), coord(12, 3), coord(4, 21), coord(8, 62)];
         let mut output: VD::VoronoiDiagram<I1, F1, I2, F2> =
             VD::VoronoiDiagram::<I1, F1, I2, F2>::default();
 
-        let mut b = VoronoiBuilder::<I1, F1, I2, F2>::new();
+        let mut b = Builder::<I1, F1, I2, F2>::new();
         b.with_vertices(_v.iter()).unwrap();
         let mut site_event_iterator_: VSE::SiteEventIndexType = b.init_sites_queue();
         println!("site_event_iterator_:{:?}", site_event_iterator_);
@@ -107,13 +107,13 @@ fn beachline_3() {
 
     {
         let _s = vec![Line::new(
-            Coordinate { x: 10, y: 10 },
-            Coordinate { x: 50, y: 50 },
+            Point { x: 10, y: 10 },
+            Point { x: 50, y: 50 },
         )];
         let mut output: VD::VoronoiDiagram<I1, F1, I2, F2> =
             VD::VoronoiDiagram::<I1, F1, I2, F2>::default();
 
-        let mut b = VoronoiBuilder::<I1, F1, I2, F2>::new();
+        let mut b = Builder::<I1, F1, I2, F2>::new();
         b.with_segments(_s.iter()).unwrap();
         let mut site_event_iterator_: VSE::SiteEventIndexType = b.init_sites_queue();
         println!("site_event_iterator_:{:?}", site_event_iterator_);
@@ -147,7 +147,7 @@ fn beachline_4() {
     type I2 = i64;
     type F2 = f64;
 
-    let coord = |x, y| Coordinate { x, y };
+    let coord = |x, y| Point { x, y };
 
     let mut a_site = VSE::SiteEvent::<I1, F1, I2, F2>::new_3(coord(10, 10), coord(50, 50), 1);
     assert!(!a_site.is_inverse());
@@ -204,7 +204,7 @@ fn beachline_5() {
     type I2 = i64;
     type F2 = f64;
 
-    let coord = |x, y| Coordinate::<I1> { x, y };
+    let coord = |x, y| Point::<I1> { x, y };
 
     let node1 = {
         let mut site1 =

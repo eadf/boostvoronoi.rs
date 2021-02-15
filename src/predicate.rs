@@ -15,13 +15,13 @@ use super::beachline as VB;
 use super::circleevent as VC;
 use super::ctypes::UlpComparison;
 use super::robust_fpt as VR;
-use super::voronoi_siteevent as VSE;
+use super::siteevent as VSE;
+use super::Point;
 use super::TypeCheckF as TCF;
 use super::TypeCheckI as TCI;
 use super::TypeConverter as TCC;
 use super::TypeConverter as TC;
 use super::{BigFloatType, BigIntType, InputType, OutputType};
-use geo::Coordinate;
 use num::{BigInt, Float, NumCast, PrimInt, Zero};
 use std::cmp;
 use std::fmt::{Debug, Display};
@@ -46,7 +46,7 @@ fn is_zero(number: &BigInt) -> bool {
 /// be converted to the 32-bit signed integer without precision loss.
 /// Todo! give this a lookover
 #[derive(Default)]
-pub struct VoronoiPredicates<I1, F1, I2, F2>
+pub struct Predicates<I1, F1, I2, F2>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
@@ -63,7 +63,7 @@ where
     _pdbf: PhantomData<F2>,
 }
 
-impl<I1, F1, I2, F2> VoronoiPredicates<I1, F1, I2, F2>
+impl<I1, F1, I2, F2> Predicates<I1, F1, I2, F2>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
@@ -76,7 +76,7 @@ where
     }
 
     #[inline(always)]
-    pub(crate) fn is_vertical_2(point1: &Coordinate<I1>, point2: &Coordinate<I1>) -> bool {
+    pub(crate) fn is_vertical_2(point1: &Point<I1>, point2: &Point<I1>) -> bool {
         point1.x == point2.x
     }
 
@@ -239,22 +239,21 @@ where
     }
 
     fn eval_3(
-        point1: &Coordinate<I1>,
-        point2: &Coordinate<I1>,
-        point3: &Coordinate<I1>,
+        point1: &Point<I1>,
+        point2: &Point<I1>,
+        point3: &Point<I1>,
     ) -> Orientation {
         let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
         let dx1: I2 = i1_to_i2(point1.x) - i1_to_i2(point2.x);
         let dx2: I2 = i1_to_i2(point2.x) - i1_to_i2(point3.x);
         let dy1: I2 = i1_to_i2(point1.y) - i1_to_i2(point2.y);
         let dy2: I2 = i1_to_i2(point2.y) - i1_to_i2(point3.y);
-        let cp: F2 =
-            VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(dx1, dy1, dx2, dy2);
+        let cp: F2 = Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(dx1, dy1, dx2, dy2);
         Self::eval_bf(cp)
     }
 
     fn eval_4(dif_x1_: I2, dif_y1_: I2, dif_x2_: I2, dif_y2_: I2) -> Orientation {
-        let a = VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+        let a = Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
             dif_x1_, dif_y1_, dif_x2_, dif_y2_,
         );
         Self::eval_bf(a)
@@ -274,7 +273,7 @@ impl<I1> PointComparisonPredicate<I1>
 where
     I1: InputType + Neg<Output = I1>,
 {
-    pub(crate) fn point_comparison_predicate(lhs: &Coordinate<I1>, rhs: &Coordinate<I1>) -> bool {
+    pub(crate) fn point_comparison_predicate(lhs: &Point<I1>, rhs: &Point<I1>) -> bool {
         if lhs.x == rhs.x {
             lhs.y < rhs.y
         } else {
@@ -320,18 +319,18 @@ where
             if !rhs.is_segment() {
                 return lhs.y0() < rhs.y0();
             }
-            if VoronoiPredicates::<I1, F1, I2, F2>::is_vertical_2(&rhs.point0_, &rhs.point1_) {
+            if Predicates::<I1, F1, I2, F2>::is_vertical_2(&rhs.point0_, &rhs.point1_) {
                 return lhs.y0() <= rhs.y0();
             }
             true
         } else {
-            if VoronoiPredicates::<I1, F1, I2, F2>::is_vertical_2(&rhs.point0_, &rhs.point1_) {
-                if VoronoiPredicates::<I1, F1, I2, F2>::is_vertical_2(&lhs.point0_, &lhs.point1_) {
+            if Predicates::<I1, F1, I2, F2>::is_vertical_2(&rhs.point0_, &rhs.point1_) {
+                if Predicates::<I1, F1, I2, F2>::is_vertical_2(&lhs.point0_, &lhs.point1_) {
                     return lhs.y0() < rhs.y0();
                 }
                 return false;
             }
-            if VoronoiPredicates::<I1, F1, I2, F2>::is_vertical_2(&lhs.point0_, &lhs.point1_) {
+            if Predicates::<I1, F1, I2, F2>::is_vertical_2(&lhs.point0_, &lhs.point1_) {
                 return true;
             }
             if lhs.y0() != rhs.y0() {
@@ -366,7 +365,7 @@ where
     ) -> bool {
         let lhs = TC::<I1, F1, I2, F2>::i1_to_f64(lhs.x0());
         let rhs = TC::<I1, F1, I2, F2>::f2_to_f64(rhs.lower_x().into_inner());
-        let ulps = VoronoiPredicates::<I1, F1, I2, F2>::ulps();
+        let ulps = Predicates::<I1, F1, I2, F2>::ulps();
 
         UlpComparison::ulp_comparison(lhs, rhs, ulps) == cmp::Ordering::Less
     }
@@ -423,7 +422,7 @@ where
     pub(crate) fn distance_predicate(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
-        new_point: &Coordinate<I1>,
+        new_point: &Point<I1>,
     ) -> bool {
         //dbg!(&left_site, &right_site, &new_point);
 
@@ -447,7 +446,7 @@ where
     fn pp(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
-        new_point: &Coordinate<I1>,
+        new_point: &Point<I1>,
     ) -> bool {
         let left_point = left_site.point0();
         let right_point = right_site.point0();
@@ -480,7 +479,7 @@ where
     fn ps(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
-        new_point: &Coordinate<I1>,
+        new_point: &Point<I1>,
         reverse_order: bool,
     ) -> bool {
         let fast_res = Self::fast_ps(left_site, right_site, new_point, reverse_order);
@@ -498,7 +497,7 @@ where
     fn ss(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
-        new_point: &Coordinate<I1>,
+        new_point: &Point<I1>,
     ) -> bool {
         // Handle temporary segment sites.
         if left_site.sorted_index() == right_site.sorted_index() {
@@ -518,7 +517,7 @@ where
 
     fn find_distance_to_point_arc(
         site: &VSE::SiteEvent<I1, F1, I2, F2>,
-        point: &Coordinate<I1>,
+        point: &Point<I1>,
     ) -> F2 {
         let dx = TC::<I1, F1, I2, F2>::i1_to_f2(site.x()) - TC::<I1, F1, I2, F2>::i1_to_f2(point.x);
         let dy = TC::<I1, F1, I2, F2>::i1_to_f2(site.y()) - TC::<I1, F1, I2, F2>::i1_to_f2(point.y);
@@ -528,15 +527,15 @@ where
 
     fn find_distance_to_segment_arc(
         site: &VSE::SiteEvent<I1, F1, I2, F2>,
-        point: &Coordinate<I1>,
+        point: &Point<I1>,
     ) -> F2 {
         let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
-        if VoronoiPredicates::<I1, F1, I2, F2>::is_vertical_1(site) {
+        if Predicates::<I1, F1, I2, F2>::is_vertical_1(site) {
             (TC::<I1, F1, I2, F2>::i1_to_f2(site.x()) - TC::<I1, F1, I2, F2>::i1_to_f2(point.x))
                 * TCF::<F2>::half()
         } else {
-            let segment0: &Coordinate<I1> = site.point0();
-            let segment1: &Coordinate<I1> = site.point1();
+            let segment0: &Point<I1> = site.point0();
+            let segment1: &Point<I1> = site.point1();
             let a1: F2 = TC::<I1, F1, I2, F2>::i1_to_f2(segment1.x)
                 - TC::<I1, F1, I2, F2>::i1_to_f2(segment0.x);
             let b1: F2 = TC::<I1, F1, I2, F2>::i1_to_f2(segment1.y)
@@ -550,7 +549,7 @@ where
                 k = (k - b1) / (a1 * a1);
             }
             // The relative error is at most 7EPS.
-            k * VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+            k * Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(segment1.x) - i1_to_i2(segment0.x),
                 i1_to_i2(segment1.y) - i1_to_i2(segment0.y),
                 i1_to_i2(point.x) - i1_to_i2(segment0.x),
@@ -562,16 +561,16 @@ where
     fn fast_ps(
         left_site: &VSE::SiteEvent<I1, F1, I2, F2>,
         right_site: &VSE::SiteEvent<I1, F1, I2, F2>,
-        new_point: &Coordinate<I1>,
+        new_point: &Point<I1>,
         reverse_order: bool,
     ) -> KPredicateResult {
         let i1_to_f2 = TC::<I1, F1, I2, F2>::i1_to_f2;
         let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
         let f2_to_f64 = TC::<I1, F1, I2, F2>::f2_to_f64;
 
-        let site_point: &Coordinate<I1> = left_site.point0();
-        let segment_start: &Coordinate<I1> = right_site.point0();
-        let segment_end: &Coordinate<I1> = right_site.point1();
+        let site_point: &Point<I1> = left_site.point0();
+        let segment_start: &Point<I1> = right_site.point0();
+        let segment_end: &Point<I1> = right_site.point1();
         let eval: Orientation =
             OrientationTest::<I1, F1, I2, F2>::eval_3(segment_start, segment_end, new_point);
         if eval != Orientation::RIGHT {
@@ -587,7 +586,7 @@ where
         let a = i1_to_f2(segment_end.x) - i1_to_f2(segment_start.x);
         let b = i1_to_f2(segment_end.y) - i1_to_f2(segment_start.y);
 
-        if VoronoiPredicates::<I1, F1, I2, F2>::is_vertical_1(right_site) {
+        if Predicates::<I1, F1, I2, F2>::is_vertical_1(right_site) {
             if new_point.y < site_point.y && !reverse_order {
                 return KPredicateResult::MORE;
             } else if new_point.y > site_point.y && reverse_order {
@@ -677,9 +676,9 @@ where
             NodeComparisonPredicate::<I1, F1, I2, F2>::get_comparison_site(node1);
         let site2: &VSE::SiteEvent<I1, F1, I2, F2> =
             NodeComparisonPredicate::<I1, F1, I2, F2>::get_comparison_site(node2);
-        let point1: &Coordinate<I1> =
+        let point1: &Point<I1> =
             NodeComparisonPredicate::<I1, F1, I2, F2>::get_comparison_point(site1);
-        let point2: &Coordinate<I1> =
+        let point2: &Point<I1> =
             NodeComparisonPredicate::<I1, F1, I2, F2>::get_comparison_point(site2);
 
         #[allow(clippy::comparison_chain)]
@@ -744,7 +743,7 @@ where
         }
     }
 
-    pub(crate) fn get_comparison_point(site: &VSE::SiteEvent<I1, F1, I2, F2>) -> &Coordinate<I1> {
+    pub(crate) fn get_comparison_point(site: &VSE::SiteEvent<I1, F1, I2, F2>) -> &Point<I1> {
         if PointComparisonPredicate::<I1>::point_comparison_predicate(site.point0(), site.point1())
         {
             site.point0()
@@ -764,7 +763,7 @@ where
         if node.left_site().sorted_index() > node.right_site().sorted_index() {
             if !is_new_node
                 && node.left_site().is_segment()
-                && VoronoiPredicates::<I1, F1, I2, F2>::is_vertical_1(node.left_site())
+                && Predicates::<I1, F1, I2, F2>::is_vertical_1(node.left_site())
             {
                 return (node.left_site().y0(), 1);
             }
@@ -919,7 +918,7 @@ where
         let dif_x2 = i1_to_f2(site2.x()) - i1_to_f2(site3.x());
         let dif_y1 = i1_to_f2(site1.y()) - i1_to_f2(site2.y());
         let dif_y2 = i1_to_f2(site2.y()) - i1_to_f2(site3.y());
-        let orientation = VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+        let orientation = Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
             i1_to_i2(site1.x()) - i1_to_i2(site2.x()),
             i1_to_i2(site2.x()) - i1_to_i2(site3.x()),
             i1_to_i2(site1.y()) - i1_to_i2(site2.y()),
@@ -1000,7 +999,7 @@ where
         let vec_x = i1_to_f2(site2.y()) - i1_to_f2(site1.y());
         let vec_y = i1_to_f2(site1.x()) - i1_to_f2(site2.x());
         let teta = VR::RobustFpt::<F2>::new_2(
-            VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+            Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(site3.y1()) - i1_to_i2(site3.y0()),
                 i1_to_i2(site3.x0()) - i1_to_i2(site3.x1()),
                 i1_to_i2(site2.x()) - i1_to_i2(site1.x()),
@@ -1009,7 +1008,7 @@ where
             one,
         );
         let A = VR::RobustFpt::<F2>::new_2(
-            VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+            Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(site3.y0()) - i1_to_i2(site3.y1()),
                 i1_to_i2(site3.x0()) - i1_to_i2(site3.x1()),
                 i1_to_i2(site3.y1()) - i1_to_i2(site1.y()),
@@ -1018,7 +1017,7 @@ where
             one,
         );
         let B = VR::RobustFpt::<F2>::new_2(
-            VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+            Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(site3.y0()) - i1_to_i2(site3.y1()),
                 i1_to_i2(site3.x0()) - i1_to_i2(site3.x1()),
                 i1_to_i2(site3.y1()) - i1_to_i2(site2.y()),
@@ -1027,7 +1026,7 @@ where
             one,
         );
         let denom = VR::RobustFpt::<F2>::new_2(
-            VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+            Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(site1.y()) - i1_to_i2(site2.y()),
                 i1_to_i2(site1.x()) - i1_to_i2(site2.x()),
                 i1_to_i2(site3.y1()) - i1_to_i2(site3.y0()),
@@ -1082,7 +1081,7 @@ where
             c_eventc.set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
             c_event.0.set(c_eventc);
         }
-        let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
+        let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(Predicates::<I1, F1, I2, F2>::ulps());
         let recompute_c_x = c_x.dif().ulp() > ulps;
         let recompute_c_y = c_y.dif().ulp() > ulps;
         let recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1135,7 +1134,7 @@ where
         let mut recompute_lower_x = false;
 
         let orientation = VR::RobustFpt::<F2>::new_2(
-            VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+            Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(segm_end1.y) - i1_to_i2(segm_start1.y),
                 i1_to_i2(segm_end1.x) - i1_to_i2(segm_start1.x),
                 i1_to_i2(segm_end2.y) - i1_to_i2(segm_start2.y),
@@ -1146,7 +1145,7 @@ where
         if OrientationTest::<I1, F1, I2, F2>::eval_f(orientation.fpv()) == Orientation::COLLINEAR {
             let a = VR::RobustFpt::<F2>::new_2(a1 * a1 + b1 * b1, two);
             let c = VR::RobustFpt::<F2>::new_2(
-                VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+                Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                     i1_to_i2(segm_end1.y) - i1_to_i2(segm_start1.y),
                     i1_to_i2(segm_end1.x) - i1_to_i2(segm_start1.x),
                     i1_to_i2(segm_start2.y) - i1_to_i2(segm_start1.y),
@@ -1155,12 +1154,12 @@ where
                 one,
             );
             let det = VR::RobustFpt::<F2>::new_2(
-                VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+                Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                     i1_to_i2(segm_end1.x) - i1_to_i2(segm_start1.x),
                     i1_to_i2(segm_end1.y) - i1_to_i2(segm_start1.y),
                     i1_to_i2(site1.x()) - i1_to_i2(segm_start1.x),
                     i1_to_i2(site1.y()) - i1_to_i2(segm_start1.y),
-                ) * VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+                ) * Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                     i1_to_i2(segm_end1.y) - i1_to_i2(segm_start1.y),
                     i1_to_i2(segm_end1.x) - i1_to_i2(segm_start1.x),
                     i1_to_i2(site1.y()) - i1_to_i2(segm_start2.y),
@@ -1202,8 +1201,7 @@ where
             } else {
                 lower_x += VR::RobustFpt::<F2>::new_1(half) * c / a.sqrt();
             }
-            let ulps =
-                TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
+            let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(Predicates::<I1, F1, I2, F2>::ulps());
             recompute_c_x = c_x.dif().ulp() > ulps;
             recompute_c_y = c_y.dif().ulp() > ulps;
             recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1212,7 +1210,7 @@ where
             let sqr_sum1 = VR::RobustFpt::<F2>::new_2((a1 * a1 + b1 * b1).sqrt(), two);
             let sqr_sum2 = VR::RobustFpt::<F2>::new_2((a2 * a2 + b2 * b2).sqrt(), two);
             let mut a = VR::RobustFpt::<F2>::new_2(
-                VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+                Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                     i1_to_i2(segm_end1.x) - i1_to_i2(segm_start1.x),
                     i1_to_i2(segm_end1.y) - i1_to_i2(segm_start1.y),
                     i1_to_i2(segm_start2.y) - i1_to_i2(segm_end2.y),
@@ -1226,7 +1224,7 @@ where
                 a = (orientation * orientation) / (sqr_sum1 * sqr_sum2 - a);
             }
             let or1 = VR::RobustFpt::<F2>::new_2(
-                VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+                Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                     i1_to_i2(segm_end1.y) - i1_to_i2(segm_start1.y),
                     i1_to_i2(segm_end1.x) - i1_to_i2(segm_start1.x),
                     i1_to_i2(segm_end1.y) - i1_to_i2(site1.y()),
@@ -1235,7 +1233,7 @@ where
                 one,
             );
             let or2 = VR::RobustFpt::<F2>::new_2(
-                VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+                Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                     i1_to_i2(segm_end2.x) - i1_to_i2(segm_start2.x),
                     i1_to_i2(segm_end2.y) - i1_to_i2(segm_start2.y),
                     i1_to_i2(segm_end2.x) - i1_to_i2(site1.x()),
@@ -1245,7 +1243,7 @@ where
             );
             let det = VR::RobustFpt::<F2>::new_1(two) * a * or1 * or2;
             let c1 = VR::RobustFpt::<F2>::new_2(
-                VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+                Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                     i1_to_i2(segm_end1.y) - i1_to_i2(segm_start1.y),
                     i1_to_i2(segm_end1.x) - i1_to_i2(segm_start1.x),
                     i1_to_i2(segm_end1.y),
@@ -1254,7 +1252,7 @@ where
                 one,
             );
             let c2 = VR::RobustFpt::<F2>::new_2(
-                VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+                Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                     i1_to_i2(segm_end2.x) - i1_to_i2(segm_start2.x),
                     i1_to_i2(segm_end2.y) - i1_to_i2(segm_start2.y),
                     i1_to_i2(segm_end2.x),
@@ -1279,7 +1277,7 @@ where
             b += iy * (VR::RobustFpt::<F2>::new_1(b2) * sqr_sum1);
             b -= sqr_sum1
                 * VR::RobustFpt::<F2>::new_2(
-                    VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+                    Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                         i1_to_i2(segm_end2.x) - i1_to_i2(segm_start2.x),
                         i1_to_i2(segm_end2.y) - i1_to_i2(segm_start2.y),
                         i1_to_i2(-site1.y()),
@@ -1289,7 +1287,7 @@ where
                 );
             b -= sqr_sum2
                 * VR::RobustFpt::<F2>::new_2(
-                    VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+                    Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                         i1_to_i2(segm_end1.x) - i1_to_i2(segm_start1.x),
                         i1_to_i2(segm_end1.y) - i1_to_i2(segm_start1.y),
                         i1_to_i2(-site1.y()),
@@ -1322,8 +1320,7 @@ where
             } else {
                 lower_x += t * orientation;
             }
-            let ulps =
-                TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
+            let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(Predicates::<I1, F1, I2, F2>::ulps());
             recompute_c_x = c_x.dif().ulp() > ulps;
             recompute_c_y = c_y.dif().ulp() > ulps;
             recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1358,7 +1355,7 @@ where
         let a1 = VR::RobustFpt::<F2>::new_1(i1_to_f2(site1.x1()) - i1_to_f2(site1.x0()));
         let b1 = VR::RobustFpt::<F2>::new_1(i1_to_f2(site1.y1()) - i1_to_f2(site1.y0()));
         let c1 = VR::RobustFpt::<F2>::new_2(
-            VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product(
+            Predicates::<I1, F1, I2, F2>::robust_cross_product(
                 site1.x0(),
                 site1.y0(),
                 site1.x1(),
@@ -1370,7 +1367,7 @@ where
         let a2 = VR::RobustFpt::<F2>::new_1(i1_to_f2(site2.x1()) - i1_to_f2(site2.x0()));
         let b2 = VR::RobustFpt::<F2>::new_1(i1_to_f2(site2.y1()) - i1_to_f2(site2.y0()));
         let c2 = VR::RobustFpt::<F2>::new_2(
-            VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product(
+            Predicates::<I1, F1, I2, F2>::robust_cross_product(
                 site2.x0(),
                 site2.y0(),
                 site2.x1(),
@@ -1382,7 +1379,7 @@ where
         let a3 = VR::RobustFpt::<F2>::new_1(i1_to_f2(site3.x1()) - i1_to_f2(site3.x0()));
         let b3 = VR::RobustFpt::<F2>::new_1(i1_to_f2(site3.y1()) - i1_to_f2(site3.y0()));
         let c3 = VR::RobustFpt::<F2>::new_2(
-            VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product(
+            Predicates::<I1, F1, I2, F2>::robust_cross_product(
                 site3.x0(),
                 site3.y0(),
                 site3.x1(),
@@ -1395,7 +1392,7 @@ where
         let len2 = (a2 * a2 + b2 * b2).sqrt();
         let len3 = (a3 * a3 + b3 * b3).sqrt();
         let cross_12 = VR::RobustFpt::<F2>::new_2(
-            VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+            Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(site1.x1()) - i1_to_i2(site1.x0()),
                 i1_to_i2(site1.y1()) - i1_to_i2(site1.y0()),
                 i1_to_i2(site2.x1()) - i1_to_i2(site2.x0()),
@@ -1404,7 +1401,7 @@ where
             one,
         );
         let cross_23 = VR::RobustFpt::<F2>::new_2(
-            VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+            Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(site2.x1()) - i1_to_i2(site2.x0()),
                 i1_to_i2(site2.y1()) - i1_to_i2(site2.y0()),
                 i1_to_i2(site3.x1()) - i1_to_i2(site3.x0()),
@@ -1413,7 +1410,7 @@ where
             one,
         );
         let cross_31 = VR::RobustFpt::<F2>::new_2(
-            VoronoiPredicates::<I1, F1, I2, F2>::robust_cross_product_2i(
+            Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(site3.x1()) - i1_to_i2(site3.x0()),
                 i1_to_i2(site3.y1()) - i1_to_i2(site3.y0()),
                 i1_to_i2(site1.x1()) - i1_to_i2(site1.x0()),
@@ -1457,7 +1454,7 @@ where
         let c_y_dif = VR::RobustFpt::<F2>::copy_from(&c_y.dif()) / denom_dif;
         let lower_x_dif = VR::RobustFpt::<F2>::copy_from(&lower_x.dif()) / denom_dif;
 
-        let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
+        let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(Predicates::<I1, F1, I2, F2>::ulps());
         let recompute_c_x = c_x_dif.ulp() > ulps;
         let recompute_c_y = c_y_dif.ulp() > ulps;
         let recompute_lower_x = lower_x_dif.ulp() > ulps;
@@ -1508,7 +1505,7 @@ where
         let i1_to_f64 = TC::<I1, F1, I2, F2>::i1_to_f64;
         let f2_to_f64 = TC::<I1, F1, I2, F2>::f2_to_f64;
 
-        if !s.is_segment() || !VoronoiPredicates::<I1, F1, I2, F2>::is_vertical_1(s) {
+        if !s.is_segment() || !Predicates::<I1, F1, I2, F2>::is_vertical_1(s) {
             return false;
         }
         let y0 = i1_to_f64(if s.is_inverse() { s.y1() } else { s.y0() });

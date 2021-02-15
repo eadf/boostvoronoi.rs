@@ -11,7 +11,7 @@
 
 use super::beachline as VB;
 //use super::voronoi_diagram as VD;
-//use super::voronoi_predicate as VP;
+//use super::predicate as VP;
 
 use super::OutputType;
 use fnv::FnvHashSet;

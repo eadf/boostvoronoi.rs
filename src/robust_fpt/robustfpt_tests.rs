@@ -1,6 +1,6 @@
 #![allow(unused_imports)]
 use super::RobustFpt;
-use crate::voronoi_robust_fpt as VR;
+use crate::robust_fpt as VR;
 use crate::TypeConverter as TCC;
 use num::{BigInt, Float, Num, NumCast, Zero};
 

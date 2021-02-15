@@ -1,7 +1,5 @@
-use boostvoronoi::voronoi_builder::VoronoiBuilder;
+use boostvoronoi::builder::Builder;
 use boostvoronoi::InputType;
-use geo::{Coordinate, Line};
-use std::ops::Neg;
 
 type I1 = i32;
 //type F1 = f32;
@@ -17,29 +15,14 @@ fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
     (F1::abs(x1 - x2) < delta) && (F1::abs(y1 - y2) < delta)
 }
 
-fn to_points<T>(points: &[[T; 2]]) -> Vec<Coordinate<T>>
-where
-    T: InputType + Neg<Output = T>,
+fn to_points<T: InputType>(points: &[[T; 2]]) -> Vec<boostvoronoi::Point<T>>
 {
-    let mut rv = Vec::with_capacity(points.len());
-    for p in points.iter() {
-        rv.push(Coordinate::<T> { x: p[0], y: p[1] });
-    }
-    rv
+    points.iter().map(|x|x.into()).collect()
 }
 
-fn to_segments<T>(points: &[[T; 4]]) -> Vec<Line<T>>
-where
-    T: InputType + Neg<Output = T>,
+fn to_segments<T: InputType>(points: &[[T; 4]]) -> Vec<boostvoronoi::Line<T>>
 {
-    let mut rv = Vec::with_capacity(points.len());
-    for p in points.iter() {
-        rv.push(Line::<T>::new(
-            Coordinate { x: p[0], y: p[1] },
-            Coordinate { x: p[2], y: p[3] },
-        ));
-    }
-    rv
+    points.iter().map(|x|x.into()).collect()
 }
 
 //#[ignore]
@@ -55,11 +38,12 @@ fn two_segments_9() {
             [400, 200, 200, 200],
             [529, 242, 367, 107],
         ];
+        //let s = segments.iter().map(|x|x.into()).collect();
 
         let _v = to_points::<I1>(&points);
         let _s = to_segments::<I1>(&segments);
 
-        let mut vb = VoronoiBuilder::<I1, F1, I2, F2>::new();
+        let mut vb = Builder::<I1, F1, I2, F2>::new();
         vb.with_vertices(_v.iter()).expect("two_segments_9");
         vb.with_segments(_s.iter()).expect("two_segments_9");
         vb.construct().expect("two_segments_9")

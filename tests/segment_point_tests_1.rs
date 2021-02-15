@@ -1,5 +1,5 @@
-use boostvoronoi::voronoi_builder::VoronoiBuilder;
-use geo::{Coordinate, Line};
+use boostvoronoi::builder::Builder;
+use boostvoronoi::{Point, Line};
 
 type I1 = i32;
 type F1 = f32;
@@ -18,12 +18,12 @@ fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
 #[test]
 fn single_segment_point_1() {
     let output = {
-        let _p = vec![Coordinate { x: 9, y: 10 }];
+        let _p = vec![Point { x: 9, y: 10 }];
         let _s = vec![Line::new(
-            Coordinate { x: 10, y: 11 },
-            Coordinate { x: 12, y: 13 },
+            Point { x: 10, y: 11 },
+            Point { x: 12, y: 13 },
         )];
-        let mut vb = VoronoiBuilder::<I1, F1, I2, F2>::new();
+        let mut vb = Builder::<I1, F1, I2, F2>::new();
         vb.with_vertices(_p.iter()).expect("single_segment_point_1");
         vb.with_segments(_s.iter()).expect("single_segment_point_1");
         vb.construct().expect("single_segment_point_1")
@@ -78,12 +78,12 @@ fn single_segment_point_1() {
 //#[ignore]
 #[test]
 fn single_segment_point_2() {
-    let point_new = |x, y| Coordinate::<I1> { x, y };
+    let point_new = |x, y| Point::<I1> { x, y };
 
     let output = {
         let _p = vec![point_new(12, 14)];
         let _s = vec![Line::new(point_new(10, 11), point_new(12, 13))];
-        let mut vb = VoronoiBuilder::<I1, F1, I2, F2>::new();
+        let mut vb = Builder::<I1, F1, I2, F2>::new();
         vb.with_vertices(_p.iter()).expect("single_segment_point_2");
         vb.with_segments(_s.iter()).expect("single_segment_point_2");
         vb.construct().expect("single_segment_point_2")
@@ -276,11 +276,11 @@ fn single_segment_point_2() {
 //#[ignore]
 #[test]
 fn single_segment_point_3() {
-    let point_new = |x, y| Coordinate::<I1> { x, y };
+    let point_new = |x, y| Point::<I1> { x, y };
     let output = {
         let _p = vec![point_new(12, 14), point_new(4, 5)];
         let _s = vec![Line::new(point_new(10, 11), point_new(12, 13))];
-        let mut vb = VoronoiBuilder::<I1, F1, I2, F2>::new();
+        let mut vb = Builder::<I1, F1, I2, F2>::new();
         vb.with_vertices(_p.iter()).expect("single_segment_point_3");
         vb.with_segments(_s.iter()).expect("single_segment_point_3");
         vb.construct().expect("single_segment_point_3")
@@ -393,11 +393,11 @@ fn single_segment_point_3() {
 //#[ignore]
 #[test]
 fn single_segment_point_4() {
-    let point_new = |x, y| Coordinate::<I1> { x, y };
+    let point_new = |x, y| Point::<I1> { x, y };
     let output = {
         let _p = vec![point_new(10, 14), point_new(8, 7), point_new(11, 11)];
         let _s = vec![Line::new(point_new(10, 11), point_new(12, 13))];
-        let mut vb = VoronoiBuilder::<I1, F1, I2, F2>::new();
+        let mut vb = Builder::<I1, F1, I2, F2>::new();
         vb.with_vertices(_p.iter()).expect("single_segment_point_3");
         vb.with_segments(_s.iter()).expect("single_segment_point_3");
         vb.construct().expect("single_segment_point_3")
@@ -577,11 +577,11 @@ fn single_segment_point_4() {
 //#[ignore]
 #[test]
 fn single_segment_point_5() {
-    let point_new = |x, y| Coordinate::<I1> { x, y };
+    let point_new = |x, y| Point::<I1> { x, y };
     let output = {
         let _p = vec![point_new(10, 14), point_new(8, 7), point_new(11, 11)];
         let _s = vec![Line::new(point_new(12, 13), point_new(10, 11))];
-        let mut vb = VoronoiBuilder::<I1, F1, I2, F2>::new();
+        let mut vb = Builder::<I1, F1, I2, F2>::new();
         vb.with_vertices(_p.iter()).expect("single_segment_point_3");
         vb.with_segments(_s.iter()).expect("single_segment_point_3");
         vb.construct().expect("single_segment_point_3")

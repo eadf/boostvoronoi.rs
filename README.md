@@ -52,8 +52,8 @@ Edges may become curves when line segments are used as input, see the example co
 - [x] Remove use of vec_map::VecMap where not absolutely needed.
 - [ ] Benchmark and optimize
 - [ ] Example GUI with more features. fltk?
+- [ ] Maybe make geo feature based. Use cgmath or vecmath as internal format
 
-#
 
 All credit goes to the original author (Andrii Sydorchuk), except the porting mistakes. They are all mine.
 

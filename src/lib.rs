@@ -10,22 +10,23 @@ use num::bigint::BigInt;
 //use num::FromPrimitive;
 use num::ToPrimitive;
 use num::{Float, NumCast, PrimInt, Zero};
+use std::cmp;
 use std::fmt::Display;
 use std::hash::Hash;
 use std::marker::PhantomData;
 use std::ops::Neg;
 
-mod voronoi_beachline;
-pub mod voronoi_builder;
-mod voronoi_circleevent;
-mod voronoi_ctypes;
-pub mod voronoi_diagram;
-mod voronoi_endpoint;
-pub mod voronoi_error;
-pub mod voronoi_predicate;
-mod voronoi_robust_fpt;
-pub mod voronoi_siteevent;
-pub mod voronoi_visual_utils;
+mod beachline;
+pub mod builder;
+mod circleevent;
+mod ctypes;
+pub mod diagram;
+mod endpoint;
+pub mod error;
+pub mod predicate;
+mod robust_fpt;
+pub mod siteevent;
+pub mod visual_utils;
 
 /// Debug utility function, formats an id string
 pub(crate) fn format_id(value: Option<usize>) -> String {
@@ -33,6 +34,112 @@ pub(crate) fn format_id(value: Option<usize>) -> String {
         value.to_string()
     } else {
         String::from("-")
+    }
+}
+
+/// 2d coordinate type - integer only
+#[derive(Copy, Clone, cmp::PartialEq, cmp::Eq, Hash, Debug)]
+pub struct Point<T: InputType> {
+    pub x: T,
+    pub y: T,
+}
+
+impl<T> From<[T; 2]> for Point<T>
+where
+    T: InputType,
+{
+    fn from(coordinate: [T; 2]) -> Point<T> {
+        Point {
+            x: coordinate[0],
+            y: coordinate[1],
+        }
+    }
+}
+
+impl<T> From<&[T; 2]> for Point<T>
+    where
+        T: InputType,
+{
+    fn from(coordinate: &[T; 2]) -> Point<T> {
+        Point {
+            x: coordinate[0],
+            y: coordinate[1],
+        }
+    }
+}
+
+/// 2d line type - integer only
+#[derive(Copy, Clone, cmp::PartialEq, cmp::Eq, Hash, Debug)]
+pub struct Line<T: InputType> {
+    pub start: Point<T>,
+    pub end: Point<T>,
+}
+
+impl<T, IT> From<[IT; 2]> for Line<T>
+where
+    T: InputType,
+    IT: Copy + Into<Point<T>>,
+{
+    fn from(coordinate: [IT; 2]) -> Line<T> {
+        Line::<T> {
+            start: coordinate[0].into(),
+            end: coordinate[1].into(),
+        }
+    }
+}
+
+impl<T, IT> From<&[IT; 2]> for Line<T>
+    where
+        T: InputType,
+        IT: Copy + Into<Point<T>>,
+{
+    fn from(coordinate: &[IT; 2]) -> Line<T> {
+        Line::<T> {
+            start: coordinate[0].into(),
+            end: coordinate[1].into(),
+        }
+    }
+}
+
+impl<T: InputType> Line<T> {
+    pub fn new(start: Point<T>, end: Point<T>) -> Line<T> {
+        Line::<T> { start, end }
+    }
+}
+
+impl<T> From<[T; 4]> for Line<T>
+where
+    T: InputType,
+{
+    fn from(coordinate: [T; 4]) -> Line<T> {
+        Line {
+            start: Point {
+                x: coordinate[0],
+                y: coordinate[1],
+            },
+            end: Point {
+                x: coordinate[2],
+                y: coordinate[3],
+            },
+        }
+    }
+}
+
+impl<T> From<&[T; 4]> for Line<T>
+    where
+        T: InputType,
+{
+    fn from(coordinate: &[T; 4]) -> Line<T> {
+        Line {
+            start: Point {
+                x: coordinate[0],
+                y: coordinate[1],
+            },
+            end: Point {
+                x: coordinate[2],
+                y: coordinate[3],
+            },
+        }
     }
 }
 
@@ -52,6 +159,7 @@ pub trait InputType:
     + Default
 {
 }
+
 pub trait BigIntType:
     Display
     + Ord

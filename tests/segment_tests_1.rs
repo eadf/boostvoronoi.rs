@@ -1,7 +1,6 @@
-use boostvoronoi::voronoi_builder::VoronoiBuilder;
-use boostvoronoi::voronoi_diagram as VD;
-use geo::{Coordinate, Line};
-use std::ops::Neg;
+use boostvoronoi::builder::Builder;
+use boostvoronoi::diagram as VD;
+use boostvoronoi::{Point, Line};
 
 type I = i32;
 type O = f32;
@@ -16,36 +15,21 @@ fn almost_equal(x1: O, x2: O, y1: O, y2: O) -> bool {
     (O::abs(x1 - x2) < delta) && (O::abs(y1 - y2) < delta)
 }
 
-fn to_points<T>(points: &[[T; 2]]) -> Vec<Coordinate<T>>
-where
-    T: VD::InputType + Neg<Output = T>,
+fn to_points<T:VD::InputType>(points: &[[T; 2]]) -> Vec<boostvoronoi::Point<T>>
 {
-    let mut rv = Vec::with_capacity(points.len());
-    for p in points.iter() {
-        rv.push(Coordinate { x: p[0], y: p[1] });
-    }
-    rv
+    points.iter().map(|x|x.into()).collect()
 }
 
-fn to_segments<T>(points: &[[T; 4]]) -> Vec<Line<T>>
-where
-    T: VD::InputType + Neg<Output = T>,
+fn to_segments<T:VD::InputType>(points: &[[T; 4]]) -> Vec<boostvoronoi::Line<T>>
 {
-    let mut rv = Vec::with_capacity(points.len());
-    for p in points.iter() {
-        rv.push(Line::<T>::new(
-            Coordinate::<T> { x: p[0], y: p[1] },
-            Coordinate::<T> { x: p[2], y: p[3] },
-        ));
-    }
-    rv
+    points.iter().map(|x|x.into()).collect()
 }
 
 fn retrieve_point<T>(
-    point_data_: &Vec<Coordinate<T>>,
+    point_data_: &Vec<Point<T>>,
     segment_data_: &Vec<Line<T>>,
     source: (VD::SourceIndex, VD::SourceCategory),
-) -> Coordinate<T>
+) -> Point<T>
 where
     T: VD::InputType,
 {
@@ -63,10 +47,10 @@ where
 fn single_segment_1() {
     let output = {
         let _s = vec![Line::new(
-            Coordinate { x: 10, y: 10 },
-            Coordinate { x: 50, y: 50 },
+            Point { x: 10, y: 10 },
+            Point { x: 50, y: 50 },
         )];
-        let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
+        let mut vb = Builder::<I, O, DI, DF>::new();
         vb.with_segments(_s.iter()).expect("single_segment_1");
         vb.construct().expect("single_segment_1")
     };
@@ -112,10 +96,10 @@ fn single_segment_1() {
 fn single_segment_2() {
     let output = {
         let _s = vec![Line::new(
-            Coordinate { x: 10, y: 10 },
-            Coordinate { x: 50, y: 50 },
+            Point { x: 10, y: 10 },
+            Point { x: 50, y: 50 },
         )];
-        let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
+        let mut vb = Builder::<I, O, DI, DF>::new();
         vb.with_segments(_s.iter()).expect("single_segment_2");
         vb.construct().expect("single_segment_2")
     };
@@ -157,10 +141,10 @@ fn single_segment_2() {
 fn single_segment_3() {
     let output = {
         let _s = vec![Line::new(
-            Coordinate { x: 10, y: 10 },
-            Coordinate { x: 50, y: 10 },
+            Point { x: 10, y: 10 },
+            Point { x: 50, y: 10 },
         )];
-        let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
+        let mut vb = Builder::<I, O, DI, DF>::new();
         vb.with_segments(_s.iter()).expect("single_segment_3");
         vb.construct().expect("single_segment_3")
     };
@@ -202,10 +186,10 @@ fn single_segment_3() {
 fn single_segment_4() {
     let output = {
         let _s = vec![Line::new(
-            Coordinate { x: 50, y: 10 },
-            Coordinate { x: 10, y: 10 },
+            Point { x: 50, y: 10 },
+            Point { x: 10, y: 10 },
         )];
-        let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
+        let mut vb = Builder::<I, O, DI, DF>::new();
         vb.with_segments(_s.iter()).expect("single_segment_4");
         vb.construct().expect("single_segment_4")
     };
@@ -249,10 +233,10 @@ fn single_segment_4() {
 fn two_segments_1() {
     let output = {
         let _s = vec![
-            Line::new(Coordinate { x: 1, y: 2 }, Coordinate { x: 3, y: 4 }),
-            Line::new(Coordinate { x: 2, y: 2 }, Coordinate { x: 5, y: 4 }),
+            Line::new(Point { x: 1, y: 2 }, Point { x: 3, y: 4 }),
+            Line::new(Point { x: 2, y: 2 }, Point { x: 5, y: 4 }),
         ];
-        let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
+        let mut vb = Builder::<I, O, DI, DF>::new();
         vb.with_segments(_s.iter()).expect("two_segments_1");
         vb.construct().expect("two_segments_1")
     };
@@ -415,12 +399,12 @@ fn two_segments_1() {
 /// two segments and one point
 fn two_segments_2() {
     let output = {
-        let _v = vec![Coordinate { x: 10, y: 11 }];
+        let _v = vec![Point { x: 10, y: 11 }];
         let _s = vec![
-            Line::new(Coordinate { x: 1, y: 2 }, Coordinate { x: 3, y: 4 }),
-            Line::new(Coordinate { x: 2, y: 2 }, Coordinate { x: 5, y: 4 }),
+            Line::new(Point { x: 1, y: 2 }, Point { x: 3, y: 4 }),
+            Line::new(Point { x: 2, y: 2 }, Point { x: 5, y: 4 }),
         ];
-        let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
+        let mut vb = Builder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("two_segments_2");
         vb.with_segments(_s.iter()).expect("two_segments_2");
         vb.construct().expect("two_segments_2")
@@ -824,12 +808,12 @@ fn two_segments_2() {
 /// two segments and two points
 fn two_segments_3() {
     let output = {
-        let _v = vec![Coordinate { x: 4, y: 3 }, Coordinate { x: 1, y: 1 }];
+        let _v = vec![Point { x: 4, y: 3 }, Point { x: 1, y: 1 }];
         let _s = vec![
-            Line::new(Coordinate { x: 1, y: 2 }, Coordinate { x: 3, y: 4 }),
-            Line::new(Coordinate { x: 2, y: 2 }, Coordinate { x: 5, y: 4 }),
+            Line::new(Point { x: 1, y: 2 }, Point { x: 3, y: 4 }),
+            Line::new(Point { x: 2, y: 2 }, Point { x: 5, y: 4 }),
         ];
-        let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
+        let mut vb = Builder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("two_segments_3");
         vb.with_segments(_s.iter()).expect("two_segments_3");
         vb.construct().expect("two_segments_3")
@@ -1375,13 +1359,13 @@ fn two_segments_3() {
 /// three segments and one point
 fn two_segments_4() {
     let output = {
-        let _v = vec![Coordinate { x: 4, y: 3 }];
+        let _v = vec![Point { x: 4, y: 3 }];
         let _s = vec![
-            Line::new(Coordinate { x: 1, y: 2 }, Coordinate { x: 3, y: 4 }),
-            Line::new(Coordinate { x: 2, y: 2 }, Coordinate { x: 5, y: 4 }),
-            Line::new(Coordinate { x: 5, y: 6 }, Coordinate { x: 3, y: 1 }),
+            Line::new(Point { x: 1, y: 2 }, Point { x: 3, y: 4 }),
+            Line::new(Point { x: 2, y: 2 }, Point { x: 5, y: 4 }),
+            Line::new(Point { x: 5, y: 6 }, Point { x: 3, y: 1 }),
         ];
-        let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
+        let mut vb = Builder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("two_segments_4");
         vb.with_segments(_s.iter()).expect("two_segments_4");
         vb.construct().expect("two_segments_4")
@@ -1498,7 +1482,7 @@ fn two_segments_5() {
         let _v = to_points::<I>(&points);
         let _s = to_segments::<I>(&segments);
 
-        let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
+        let mut vb = Builder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("two_segments_5");
         vb.with_segments(_s.iter()).expect("two_segments_5");
         vb.construct().expect("two_segments_5")
@@ -1615,7 +1599,7 @@ fn two_segments_6() {
         let _v = to_points::<I>(&points);
         let _s = to_segments::<I>(&segments);
 
-        let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
+        let mut vb = Builder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("two_segments_6");
         vb.with_segments(_s.iter()).expect("two_segments_6");
         vb.construct().expect("two_segments_6")
@@ -1969,7 +1953,7 @@ fn two_segments_7() {
         let _v = to_points::<I>(&points);
         let _s = to_segments::<I>(&segments);
 
-        let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
+        let mut vb = Builder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("two_segments_7");
         vb.with_segments(_s.iter()).expect("two_segments_7");
         vb.construct().expect("two_segments_7")
@@ -2329,7 +2313,7 @@ fn two_segments_8() {
         let _v = to_points::<I>(&points);
         let _s = to_segments::<I>(&segments);
 
-        let mut vb = VoronoiBuilder::<I, O, DI, DF>::new();
+        let mut vb = Builder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter()).expect("two_segments_8");
         vb.with_segments(_s.iter()).expect("two_segments_8");
         (vb.construct().expect("two_segments_8"), _v, _s)
@@ -2340,7 +2324,7 @@ fn two_segments_8() {
     assert_eq!(cell.get_id(), 0);
     let (source_index, cat) = cell.source_index_2();
     let p = retrieve_point(&_v, &_s, (source_index, cat));
-    assert_eq!(p, Coordinate { x: 300, y: 300 });
+    assert_eq!(p, Point { x: 300, y: 300 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), true);
     assert_eq!(cell.contains_segment(), false);
@@ -2349,7 +2333,7 @@ fn two_segments_8() {
     let (source_index, cat) = cell.source_index_2();
     assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
-    assert_eq!(p, Coordinate { x: 300, y: 500 });
+    assert_eq!(p, Point { x: 300, y: 500 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -2357,7 +2341,7 @@ fn two_segments_8() {
     assert_eq!(cell.get_id(), 2);
     let (source_index, cat) = cell.source_index_2();
     let p = retrieve_point(&_v, &_s, (source_index, cat));
-    assert_eq!(p, Coordinate { x: 300, y: 500 });
+    assert_eq!(p, Point { x: 300, y: 500 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), true);
     assert_eq!(cell.contains_segment(), false);
@@ -2366,7 +2350,7 @@ fn two_segments_8() {
     let (source_index, cat) = cell.source_index_2();
     assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
-    assert_eq!(p, Coordinate { x: 300, y: 300 });
+    assert_eq!(p, Point { x: 300, y: 300 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -2375,7 +2359,7 @@ fn two_segments_8() {
     let (source_index, cat) = cell.source_index_2();
     assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
-    assert_eq!(p, Coordinate { x: 500, y: 500 });
+    assert_eq!(p, Point { x: 500, y: 500 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -2383,7 +2367,7 @@ fn two_segments_8() {
     assert_eq!(cell.get_id(), 5);
     let (source_index, cat) = cell.source_index_2();
     let p = retrieve_point(&_v, &_s, (source_index, cat));
-    assert_eq!(p, Coordinate { x: 500, y: 300 });
+    assert_eq!(p, Point { x: 500, y: 300 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), true);
     assert_eq!(cell.contains_segment(), false);
@@ -2392,7 +2376,7 @@ fn two_segments_8() {
     let (source_index, cat) = cell.source_index_2();
     assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
-    assert_eq!(p, Coordinate { x: 500, y: 300 });
+    assert_eq!(p, Point { x: 500, y: 300 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -2400,7 +2384,7 @@ fn two_segments_8() {
     assert_eq!(cell.get_id(), 7);
     let (source_index, cat) = cell.source_index_2();
     let p = retrieve_point(&_v, &_s, (source_index, cat));
-    assert_eq!(p, Coordinate { x: 500, y: 500 });
+    assert_eq!(p, Point { x: 500, y: 500 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), true);
     assert_eq!(cell.contains_segment(), false);

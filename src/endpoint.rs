@@ -10,9 +10,9 @@
 // Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
 
 use super::beachline as VB;
-use super::voronoi_predicate as VP;
+use super::predicate as VP;
+use super::Point;
 use super::InputType;
-use geo::Coordinate;
 use std::cmp::Ordering;
 use std::ops::Neg;
 
@@ -24,7 +24,7 @@ pub(crate) struct EndPointPair<I>
 where
     I: InputType + Neg<Output = I>,
 {
-    pub(crate) first: Coordinate<I>,       // TODO: better name
+    pub(crate) first: Point<I>,       // TODO: better name
     pub(crate) second: VB::BeachLineIndex, // TODO: better name
 }
 
@@ -32,7 +32,7 @@ impl<I> EndPointPair<I>
 where
     I: InputType + Neg<Output = I>,
 {
-    pub(crate) fn new_2(first: Coordinate<I>, second: VB::BeachLineIndex) -> Self {
+    pub(crate) fn new_2(first: Point<I>, second: VB::BeachLineIndex) -> Self {
         Self { first, second }
     }
 }

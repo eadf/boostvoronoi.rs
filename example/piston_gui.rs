@@ -4,11 +4,11 @@ extern crate piston;
 extern crate sdl2_window;
 extern crate touch_visualizer;
 
-use boostvoronoi::voronoi_builder as VB;
-use boostvoronoi::voronoi_diagram as VD;
-use boostvoronoi::voronoi_diagram::VoronoiEdgeIndex;
-use boostvoronoi::voronoi_error::BVError;
-use boostvoronoi::voronoi_visual_utils as VV;
+use boostvoronoi::builder as VB;
+use boostvoronoi::diagram as VD;
+use boostvoronoi::diagram::VoronoiEdgeIndex;
+use boostvoronoi::error::BVError;
+use boostvoronoi::visual_utils as VV;
 use boostvoronoi::TypeConverter;
 use boostvoronoi::{BigFloatType, BigIntType, InputType, OutputType};
 use ordered_float::OrderedFloat;
@@ -20,8 +20,6 @@ use std::ops::Neg;
 use std::rc::Rc;
 
 use geo::algorithm::intersects::Intersects;
-use geo::{Coordinate, Line, Rect};
-use num;
 
 use graphics::math::Scalar;
 use graphics::{Context, Graphics};
@@ -89,7 +87,7 @@ fn event_loop() -> Result<String, BVError> {
     //let mut colors = Vec::new();
     let mut is_drawing_lines = false;
     let mut is_drawing_line_strings = false;
-    let mut previous_dot: Option<Coordinate<i32>> = None;
+    let mut previous_dot: Option<boostvoronoi::Point<i32>> = None;
     let mut mx: i32 = 0;
     let mut my: i32 = 0;
 
@@ -150,7 +148,7 @@ fn event_loop() -> Result<String, BVError> {
                     }
                 }
                 Button::Mouse(_) => {
-                    let point = Coordinate { x: mx, y: my };
+                    let point = boostvoronoi::Point { x: mx, y: my };
                     let mut vis = visualizer.borrow_mut();
 
                     // Two points at the same place is a problem
@@ -158,7 +156,10 @@ fn event_loop() -> Result<String, BVError> {
                         vis.previous_points.insert(point);
                         if is_drawing_lines {
                             if let Some(tpp) = previous_dot {
-                                let line = Line::new(tpp, point);
+                                let line = boostvoronoi::Line {
+                                    start: tpp,
+                                    end: point,
+                                };
                                 if !vis.self_intersecting_check(&line) {
                                     vis.segment_data_.push(line);
                                     data_is_dirty = true;
@@ -174,7 +175,10 @@ fn event_loop() -> Result<String, BVError> {
                             }
                         } else if is_drawing_line_strings {
                             if let Some(tpp) = previous_dot {
-                                let line = Line::new(tpp, point);
+                                let line = boostvoronoi::Line {
+                                    start: tpp,
+                                    end: point,
+                                };
                                 if !vis.self_intersecting_check(&line) {
                                     vis.segment_data_.push(line);
                                     data_is_dirty = true;
@@ -189,7 +193,8 @@ fn event_loop() -> Result<String, BVError> {
                                 previous_dot = Some(point);
                             }
                         } else {
-                            vis.point_data_.push(Coordinate { x: mx, y: my });
+                            vis.point_data_
+                                .push(boostvoronoi::Point { x: mx, y: my });
                             data_is_dirty = true;
                         }
                     }
@@ -226,13 +231,13 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
-    bounding_rect: Rect<F1>,
+    bounding_rect: geo::Rect<F1>,
     vd_: VD::VoronoiDiagram<I1, F1, I2, F2>,
     primary_edges_only_: bool,
     internal_edges_only_: bool,
-    point_data_: Vec<Coordinate<I1>>,
-    segment_data_: Vec<Line<I1>>,
-    pub previous_points: HashSet<Coordinate<i32>>,
+    point_data_: Vec<boostvoronoi::Point<I1>>,
+    segment_data_: Vec<boostvoronoi::Line<I1>>,
+    pub previous_points: HashSet<boostvoronoi::Point<i32>>,
     _pdo: PhantomData<F1>,
 }
 
@@ -245,12 +250,12 @@ where
 {
     pub fn new() -> Self {
         Self {
-            bounding_rect: Rect::<F1>::new(
-                Coordinate {
+            bounding_rect: geo::Rect::<F1>::new(
+                geo::Coordinate {
                     x: F1::from(DEFAULT_WINDOW_HEIGHT).unwrap(),
                     y: F1::from(DEFAULT_WINDOW_WIDTH).unwrap(),
                 },
-                Coordinate {
+                geo::Coordinate {
                     x: F1::from(0).unwrap(),
                     y: F1::from(0).unwrap(),
                 },
@@ -258,8 +263,8 @@ where
             vd_: VD::VoronoiDiagram::<I1, F1, I2, F2>::new(0),
             primary_edges_only_: false,
             internal_edges_only_: false,
-            point_data_: Vec::<Coordinate<I1>>::new(),
-            segment_data_: Vec::<Line<I1>>::new(),
+            point_data_: Vec::<boostvoronoi::Point<I1>>::new(),
+            segment_data_: Vec::<boostvoronoi::Line<I1>>::new(),
             previous_points: HashSet::new(),
             _pdo: PhantomData,
         }
@@ -280,7 +285,7 @@ where
         }
         println!("];");
 
-        let mut vb = VB::VoronoiBuilder::<I1, F1, I2, F2>::new();
+        let mut vb = VB::Builder::<I1, F1, I2, F2>::new();
         vb.with_vertices(self.point_data_.iter())?;
         vb.with_segments(self.segment_data_.iter())?;
 
@@ -312,7 +317,7 @@ where
     }
 
     // returns true if l intersects with any of the lines in self.segment_data_
-    fn self_intersecting_check(&self, l: &Line<I1>) -> bool {
+    fn self_intersecting_check(&self, l: &boostvoronoi::Line<I1>) -> bool {
         let l_ = Self::line_i1_to_f64(l);
         for s in self.segment_data_.iter() {
             // allow end point intersection
@@ -352,7 +357,7 @@ where
         let to_points = |points: &[[i32; 2]]| {
             let mut rv = Vec::new();
             for p in points.iter() {
-                rv.push(Coordinate {
+                rv.push(boostvoronoi::Point {
                     x: i32_to_i1(p[0]),
                     y: i32_to_i1(p[1]),
                 });
@@ -363,12 +368,12 @@ where
         let to_segments = |segments_: &[[i32; 4]]| {
             let mut rv = Vec::new();
             for p in segments_.iter() {
-                let line = Line::<I1>::new(
-                    Coordinate {
+                let line = boostvoronoi::Line::<I1>::new(
+                    boostvoronoi::Point {
                         x: i32_to_i1(p[0]),
                         y: i32_to_i1(p[1]),
                     },
-                    Coordinate {
+                    boostvoronoi::Point {
                         x: i32_to_i1(p[2]),
                         y: i32_to_i1(p[3]),
                     },
@@ -787,7 +792,7 @@ where
     /// Draw input points and endpoints of the input segments.
     fn draw_points<G: Graphics>(&self, c: &Context, g: &mut G) {
         let color = [0.8, 0.1, 0.1, 1.0];
-        let mut draw = |point: &Coordinate<F1>| {
+        let mut draw = |point: &geo::Coordinate<F1>| {
             graphics::ellipse(
                 color,
                 graphics::ellipse::circle(
@@ -842,15 +847,11 @@ where
             if self.internal_edges_only_ && it.get_color() == EXTERNAL_COLOR {
                 continue;
             }
-            let point = Coordinate {
-                x: it.x(),
-                y: it.y(),
-            };
             graphics::ellipse(
                 color,
                 graphics::ellipse::circle(
-                    Self::f1_to_f64(point.x).into(),
-                    Self::f1_to_f64(point.y).into(),
+                    Self::f1_to_f64(it.x()).into(),
+                    Self::f1_to_f64(it.y()).into(),
                     2.0,
                 ),
                 c.transform,
@@ -886,23 +887,17 @@ where
                 // internal edgecolor
                 color = [0.2, 0.7, 0.0, 1.0];
             }
-            let mut samples = Vec::<Coordinate<F1>>::new();
+            let mut samples = Vec::<(F1, F1)>::new();
             if !self.vd_.edge_is_finite(Some(edge_id)).unwrap() {
                 self.clip_infinite_edge(edge_id, &mut samples);
             } else {
                 let vertex0 = self.vd_.vertex_get(edge.vertex0()).unwrap().get();
-                let vertex0 = Coordinate {
-                    x: vertex0.x(),
-                    y: vertex0.y(),
-                };
-                samples.push(vertex0);
+
+                samples.push((vertex0.x(), vertex0.y()));
                 let vertex1 = self.vd_.edge_get_vertex1(Some(edge_id));
                 let vertex1 = self.vd_.vertex_get(vertex1).unwrap().get();
-                let vertex1 = Coordinate {
-                    x: vertex1.x(),
-                    y: vertex1.y(),
-                };
-                samples.push(vertex1);
+
+                samples.push((vertex1.x(), vertex1.y()));
                 if edge.is_curved() {
                     self.sample_curved_edge(VoronoiEdgeIndex(it.0), &mut samples);
                 }
@@ -915,10 +910,10 @@ where
                     color,
                     1.0,
                     [
-                        Self::f1_to_f64(vertex1.x).into(),
-                        Self::f1_to_f64(vertex1.y).into(),
-                        Self::f1_to_f64(vertex2.x).into(),
-                        Self::f1_to_f64(vertex2.y).into(),
+                        Self::f1_to_f64(vertex1.0).into(),
+                        Self::f1_to_f64(vertex1.1).into(),
+                        Self::f1_to_f64(vertex2.0).into(),
+                        Self::f1_to_f64(vertex2.1).into(),
                     ],
                     c.transform,
                     g,
@@ -927,11 +922,7 @@ where
         }
     }
 
-    fn clip_infinite_edge(
-        &self,
-        edge_id: VD::VoronoiEdgeIndex,
-        clipped_edge: &mut Vec<Coordinate<F1>>,
-    ) {
+    fn clip_infinite_edge(&self, edge_id: VD::VoronoiEdgeIndex, clipped_edge: &mut Vec<(F1, F1)>) {
         let edge = self.vd_.get_edge(edge_id);
         //const cell_type& cell1 = *edge.cell();
         let cell1_id = self.vd_.edge_get_cell(Some(edge_id)).unwrap();
@@ -944,11 +935,11 @@ where
             .unwrap();
         let cell2 = self.vd_.get_cell(cell2_id).get();
 
-        let mut origin: Coordinate<F1> = Coordinate {
+        let mut origin: geo::Coordinate<F1> = geo::Coordinate {
             x: F1::default(),
             y: F1::default(),
         };
-        let mut direction: Coordinate<F1> = Coordinate {
+        let mut direction: geo::Coordinate<F1> = geo::Coordinate {
             x: F1::default(),
             y: F1::default(),
         };
@@ -986,37 +977,21 @@ where
 
         let vertex0 = edge.get().vertex0();
         if vertex0.is_none() {
-            clipped_edge.push(Coordinate {
-                x: origin.x - direction.x * koef,
-                y: origin.y - direction.y * koef,
-            });
+            clipped_edge.push((origin.x - direction.x * koef, origin.y - direction.y * koef));
         } else {
             let vertex0 = self.vd_.vertex_get(vertex0).unwrap().get();
-            clipped_edge.push(Coordinate {
-                x: vertex0.x(),
-                y: vertex0.y(),
-            });
+            clipped_edge.push((vertex0.x(), vertex0.y()));
         }
         let vertex1 = self.vd_.edge_get_vertex1(Some(edge_id));
         if vertex1.is_none() {
-            clipped_edge.push(Coordinate {
-                x: origin.x + direction.x * koef,
-                y: origin.y + direction.y * koef,
-            });
+            clipped_edge.push((origin.x + direction.x * koef, origin.y + direction.y * koef));
         } else {
             let vertex1 = self.vd_.vertex_get(vertex1).unwrap().get();
-            clipped_edge.push(Coordinate {
-                x: vertex1.x(),
-                y: vertex1.y(),
-            });
+            clipped_edge.push((vertex1.x(), vertex1.y()));
         }
     }
 
-    fn sample_curved_edge(
-        &self,
-        edge_id: VD::VoronoiEdgeIndex,
-        sampled_edge: &mut Vec<Coordinate<F1>>,
-    ) {
+    fn sample_curved_edge(&self, edge_id: VD::VoronoiEdgeIndex, sampled_edge: &mut Vec<(F1, F1)>) {
         let max_dist =
             Self::f32_to_f1(1E-3) * (self.bounding_rect.max().x - self.bounding_rect.min().x);
 
@@ -1043,7 +1018,7 @@ where
         );
     }
 
-    fn retrieve_point(&self, cell_id: VD::VoronoiCellIndex) -> Coordinate<I1> {
+    fn retrieve_point(&self, cell_id: VD::VoronoiCellIndex) -> boostvoronoi::Point<I1> {
         let (index, cat) = self.vd_.get_cell(cell_id).get().source_index_2();
         match cat {
             VD::SourceCategory::SinglePoint => self.point_data_[index],
@@ -1056,26 +1031,26 @@ where
         }
     }
 
-    fn retrieve_segment(&self, cell_id: VD::VoronoiCellIndex) -> &Line<I1> {
+    fn retrieve_segment(&self, cell_id: VD::VoronoiCellIndex) -> &boostvoronoi::Line<I1> {
         let cell = self.vd_.get_cell(cell_id).get();
         let index = cell.source_index() - self.point_data_.len();
         &self.segment_data_[index]
     }
 
-    fn line_i1_to_f64(value: &Line<I1>) -> Line<f64> {
-        let ps = Coordinate {
+    fn line_i1_to_f64(value: &boostvoronoi::Line<I1>) -> geo::Line<f64> {
+        let ps = geo::Coordinate {
             x: Self::i1_to_f64(value.start.x),
             y: Self::i1_to_f64(value.start.y),
         };
-        let pe = Coordinate {
+        let pe = geo::Coordinate {
             x: Self::i1_to_f64(value.end.x),
             y: Self::i1_to_f64(value.end.y),
         };
-        Line::<f64>::new(ps, pe)
+        geo::Line::<f64>::new(ps, pe)
     }
 
-    fn coord_i1_to_f1(value: &Coordinate<I1>) -> Coordinate<F1> {
-        Coordinate {
+    fn coord_i1_to_f1(value: &boostvoronoi::Point<I1>) -> geo::Coordinate<F1> {
+        geo::Coordinate {
             x: Self::i1_to_f1(value.x),
             y: Self::i1_to_f1(value.y),
         }

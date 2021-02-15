@@ -1,8 +1,8 @@
 #![allow(unused_imports)]
-use super::super::voronoi_diagram::VoronoiDiagram;
-use super::super::voronoi_error::BVError;
-use super::VoronoiBuilder;
-use geo::{Coordinate, Line};
+use super::super::diagram::VoronoiDiagram;
+use super::super::error::BVError;
+use super::Builder;
+use super::{Point, Line};
 
 #[test]
 fn sort_1() {
@@ -12,11 +12,11 @@ fn sort_1() {
     type F2 = f64;
 
     {
-        let coord = |x, y| Coordinate { x, y };
+        let coord = |x, y| Point { x, y };
 
         let _v = vec![coord(10, 11), coord(0, 100), coord(10, 11), coord(0, 100)];
 
-        let mut vb = VoronoiBuilder::<I1, F1, I2, F2>::new();
+        let mut vb = Builder::<I1, F1, I2, F2>::new();
         assert!(vb.site_events_.is_empty());
         vb.with_vertices(_v.iter()).expect("sort_1");
         assert_eq!(vb.site_events_.len(), 4);

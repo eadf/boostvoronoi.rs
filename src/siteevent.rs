@@ -12,11 +12,11 @@
 mod tests;
 
 use super::diagram as VD;
-use super::voronoi_predicate as VP;
+use super::predicate as VP;
 use std::cmp::Ordering;
 
+use super::Point;
 use super::{BigFloatType, BigIntType, InputType, OutputType};
-use geo::Coordinate;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
@@ -50,13 +50,13 @@ pub type SiteEventIndexType = usize;
 #[derive(Copy, Clone)]
 pub struct SiteEvent<I1, F1, I2, F2>
 where
-    I1: InputType + Neg<Output =I1>,
-    F1: OutputType + Neg<Output =F1>,
-    I2: BigIntType + Neg<Output =I2>,
-    F2: BigFloatType + Neg<Output =F2>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
-    pub(crate) point0_: Coordinate<I1>,
-    pub(crate) point1_: Coordinate<I1>,
+    pub(crate) point0_: Point<I1>,
+    pub(crate) point1_: Point<I1>,
     pub sorted_index_: SiteEventIndexType,
     initial_index_: SiteEventIndexType,
     flags_: VD::ColorType,
@@ -70,10 +70,10 @@ where
 
 impl<I1, F1, I2, F2> fmt::Debug for SiteEvent<I1, F1, I2, F2>
 where
-    I1: InputType + Neg<Output =I1>,
-    F1: OutputType + Neg<Output =F1>,
-    I2: BigIntType + Neg<Output =I2>,
-    F2: BigFloatType + Neg<Output =F2>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
@@ -177,12 +177,15 @@ where
 
 impl<I1, F1, I2, F2> SiteEvent<I1, F1, I2, F2>
 where
-    I1: InputType + Neg<Output =I1>,
-    F1: OutputType + Neg<Output =F1>,
-    I2: BigIntType + Neg<Output =I2>,
-    F2: BigFloatType + Neg<Output =F2>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
-    pub fn new_2(a: Coordinate<I1>, initial_index_: SiteEventIndexType) -> SiteEvent<I1, F1, I2, F2> {
+    pub fn new_2(
+        a: Point<I1>,
+        initial_index_: SiteEventIndexType,
+    ) -> SiteEvent<I1, F1, I2, F2> {
         Self {
             point0_: a,
             point1_: a,
@@ -199,8 +202,8 @@ where
     }
 
     pub fn new_3(
-        a: Coordinate<I1>,
-        b: Coordinate<I1>,
+        a: Point<I1>,
+        b: Point<I1>,
         initial_index_: SiteEventIndexType,
     ) -> SiteEvent<I1, F1, I2, F2> {
         Self {
@@ -229,8 +232,8 @@ where
         flags: u32,
     ) -> SiteEvent<I1, F1, I2, F2> {
         Self {
-            point0_: Coordinate { x: x1, y: y1 },
-            point1_: Coordinate { x: x2, y: y2 },
+            point0_: Point { x: x1, y: y1 },
+            point1_: Point { x: x2, y: y2 },
             sorted_index_: sorted_index,
             initial_index_: initial_index,
             flags_: flags,
@@ -286,11 +289,11 @@ where
     }
 
     #[inline(always)]
-    pub fn point0(&self) -> &Coordinate<I1> {
+    pub fn point0(&self) -> &Point<I1> {
         &self.point0_
     }
     #[inline(always)]
-    pub fn point1(&self) -> &Coordinate<I1> {
+    pub fn point1(&self) -> &Point<I1> {
         &self.point1_
     }
 

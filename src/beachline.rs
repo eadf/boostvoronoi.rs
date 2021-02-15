@@ -11,10 +11,10 @@
 
 mod tests;
 
-use super::voronoi_circleevent as VC;
-use super::voronoi_diagram as VD;
-use super::voronoi_predicate as VP;
-use super::voronoi_siteevent as VSE;
+use super::circleevent as VC;
+use super::diagram as VD;
+use super::predicate as VP;
+use super::siteevent as VSE;
 
 use super::{BigFloatType, BigIntType, InputType, OutputType};
 use std::cell::Cell;

@@ -9,26 +9,20 @@
 
 // Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
 
-use super::voronoi_beachline as VB;
-use super::voronoi_circleevent as VC;
-use super::voronoi_diagram as VD;
-use super::voronoi_endpoint as VEP;
-use super::voronoi_error::BVError;
-use super::voronoi_predicate as VP;
-use super::voronoi_siteevent as VSE;
+use super::beachline as VB;
+use super::circleevent as VC;
+use super::diagram as VD;
+use super::endpoint as VEP;
+use super::error::BVError;
+use super::predicate as VP;
+use super::siteevent as VSE;
 
-use geo::{Coordinate, Line};
-//use num::{NumCast, PrimInt};
-//use std::cell::Cell;
-//use std::cmp::Ordering;
+use super::{Point, Line};
 use std::collections::BinaryHeap;
-//use std::fmt;
-//use std::hash::Hash;
 use std::ops::Neg;
-//use std::rc::Rc;
 
 use super::{BigFloatType, BigIntType, InputType, OutputType};
-use crate::voronoi_beachline::BeachLineNodeData;
+use crate::beachline::BeachLineNodeData;
 
 mod tests;
 
@@ -54,7 +48,7 @@ mod tests;
 /// correspond to the neighboring sites that form a bisector and values map to
 /// the corresponding Voronoi edges in the output data structure.
 
-pub struct VoronoiBuilder<I1, F1, I2, F2>
+pub struct Builder<I1, F1, I2, F2>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
@@ -69,7 +63,7 @@ where
     segments_added: bool, // make sure eventual vertices are added before segments
 }
 
-impl<I1, F1, I2, F2> VoronoiBuilder<I1, F1, I2, F2>
+impl<I1, F1, I2, F2> Builder<I1, F1, I2, F2>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
@@ -77,7 +71,7 @@ where
     F2: BigFloatType + Neg<Output = F2>,
 {
     #[allow(clippy::new_without_default)]
-    pub fn new() -> VoronoiBuilder<I1, F1, I2, F2> {
+    pub fn new() -> Builder<I1, F1, I2, F2> {
         Self {
             /// key by SiteEventIndexType
             site_events_: Vec::new(),
@@ -92,7 +86,7 @@ where
     pub fn with_vertices<'a, T>(&mut self, vertices: T) -> Result<(), BVError>
     where
         I1: 'a,
-        T: Iterator<Item = &'a Coordinate<I1>>,
+        T: Iterator<Item = &'a Point<I1>>,
     {
         if self.segments_added {
             return Err(BVError::VerticesGoesFirst {
@@ -111,18 +105,12 @@ where
     pub fn with_segments<'a, T>(&mut self, segments: T) -> Result<(), BVError>
     where
         I1: 'a,
-        T: Iterator<Item = &'a Line<I1>>,
+        T: Iterator<Item = &'a Line<I1>> ,
     {
         type SC = VD::ColorBits;
         for s in segments {
-            let p1 = Coordinate {
-                x: s.start.x,
-                y: s.start.y,
-            };
-            let p2 = Coordinate {
-                x: s.end.x,
-                y: s.end.y,
-            };
+            let p1 = s.start;
+            let p2 = s.end;
             let mut s1 = VSE::SiteEvent::<I1, F1, I2, F2>::new_3(p1, p1, self.index_);
             s1.or_source_category(&SC::SEGMENT_START_POINT);
             let mut s2 = VSE::SiteEvent::new_3(p2, p2, self.index_);
@@ -144,7 +132,6 @@ where
         }
         self.segments_added = true;
         Ok(())
-        // TODO: fail at intersecting segments
     }
 
     /// Run sweepline algorithm and fill output data structure.
@@ -216,11 +203,11 @@ where
             let mut skip = 0;
 
             while *site_event_iterator_ < self.site_events_.len()
-                && VP::VoronoiPredicates::<I1, F1, I2, F2>::is_vertical_2(
+                && VP::Predicates::<I1, F1, I2, F2>::is_vertical_2(
                     self.site_events_[*site_event_iterator_].point0(),
                     self.site_events_[0].point0(),
                 )
-                && VP::VoronoiPredicates::<I1, F1, I2, F2>::is_vertical_1(
+                && VP::Predicates::<I1, F1, I2, F2>::is_vertical_1(
                     &self.site_events_[*site_event_iterator_],
                 )
             {

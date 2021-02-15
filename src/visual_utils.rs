@@ -11,7 +11,7 @@
 
 use super::{BigFloatType, BigIntType, InputType, OutputType};
 
-use geo::{Coordinate, Line};
+use super::{Point, Line};
 use std::marker::PhantomData;
 use std::ops::Neg;
 
@@ -58,10 +58,10 @@ where
     /// Important:
     ///   discretization should contain both edge endpoints initially.
     pub fn discretize(
-        point: &Coordinate<I1>,
+        point: &Point<I1>,
         segment: &Line<I1>,
         max_dist: F1,
-        discretization: &mut Vec<Coordinate<F1>>,
+        discretization: &mut Vec<(F1, F1)>,
     ) {
         // Apply the linear transformation to move start point of the segment to
         // the point with coordinates (0, 0) and the direction of the segment to
@@ -120,10 +120,7 @@ where
                     + Self::cast_io(segment.start.x);
                 let inter_y = (segm_vec_x * new_y + segm_vec_y * new_x) / sqr_segment_length
                     + Self::cast_io(segment.start.y);
-                discretization.push(Coordinate {
-                    x: inter_x,
-                    y: inter_y,
-                });
+                discretization.push((inter_x, inter_y));
                 cur_x = new_x;
                 cur_y = new_y;
             } else {
@@ -139,11 +136,9 @@ where
 
     /// Compute y(x) = ((x - a) * (x - a) + b * b) / (2 * b).
     #[inline(always)]
+    #[allow(clippy::suspicious_operation_groupings)]
     fn parabola_y(x: F1, a: F1, b: F1) -> F1 {
-        #[allow(clippy::suspicious_operation_groupings)]
-        {
-            ((x - a) * (x - a) + b * b) / (b + b)
-        }
+        ((x - a) * (x - a) + b * b) / (b + b)
     }
 
     // Get normalized length of the distance between:
@@ -153,11 +148,11 @@ where
     // sqrt computation during transformation from the initial space to the
     // transformed one and vice versa. The assumption is made that projection of
     // the point lies between the start-point and endpoint of the segment.
-    pub fn get_point_projection(point: &Coordinate<F1>, segment: &Line<I1>) -> F1 {
+    pub fn get_point_projection(point: &(F1, F1), segment: &Line<I1>) -> F1 {
         let segment_vec_x = Self::cast_io(segment.end.x) - Self::cast_io(segment.start.x);
         let segment_vec_y = Self::cast_io(segment.end.y) - Self::cast_io(segment.start.y);
-        let point_vec_x = point.x - Self::cast_io(segment.start.x);
-        let point_vec_y = point.y - Self::cast_io(segment.start.y);
+        let point_vec_x = point.0 - Self::cast_io(segment.start.x);
+        let point_vec_y = point.1 - Self::cast_io(segment.start.y);
         let sqr_segment_length = segment_vec_x * segment_vec_x + segment_vec_y * segment_vec_y;
         let vec_dot = segment_vec_x * point_vec_x + segment_vec_y * point_vec_y;
         vec_dot / sqr_segment_length
