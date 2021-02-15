@@ -11,10 +11,10 @@
 
 mod tests;
 
-use super::voronoi_beachline as VB;
-use super::voronoi_circleevent as VC;
-use super::voronoi_ctypes::UlpComparison;
-use super::voronoi_robust_fpt as VR;
+use super::beachline as VB;
+use super::circleevent as VC;
+use super::ctypes::UlpComparison;
+use super::robust_fpt as VR;
 use super::voronoi_siteevent as VSE;
 use super::TypeCheckF as TCF;
 use super::TypeCheckI as TCI;

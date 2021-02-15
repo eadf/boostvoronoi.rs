@@ -11,7 +11,7 @@
 
 mod tests;
 
-use super::voronoi_diagram as VD;
+use super::diagram as VD;
 use super::voronoi_predicate as VP;
 use std::cmp::Ordering;
 

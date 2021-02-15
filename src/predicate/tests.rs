@@ -1,8 +1,8 @@
 #![allow(unused_imports)]
-use super::super::voronoi_beachline as VB;
-use super::super::voronoi_diagram as VD;
-use super::super::voronoi_diagram::VoronoiDiagram;
-use super::super::voronoi_error::BVError;
+use super::super::beachline as VB;
+use super::super::diagram as VD;
+use super::super::diagram::VoronoiDiagram;
+use super::super::error::BVError;
 use super::super::voronoi_predicate as VP;
 use super::super::voronoi_siteevent as VSE;
 use super::{BigFloatType, BigIntType, InputType, OutputType};

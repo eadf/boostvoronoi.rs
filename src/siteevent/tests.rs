@@ -1,6 +1,6 @@
 #![allow(unused_imports)]
-use super::super::voronoi_diagram::VoronoiDiagram;
-use super::super::voronoi_error::BVError;
+use super::super::diagram::VoronoiDiagram;
+use super::super::error::BVError;
 use super::super::voronoi_siteevent as VSE;
 use geo::{Coordinate, Line};
 
