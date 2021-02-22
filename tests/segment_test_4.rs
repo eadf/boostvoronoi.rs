@@ -1,6 +1,6 @@
 use boostvoronoi::builder::Builder;
-use boostvoronoi::{BvError, InputType};
 use boostvoronoi::Line;
+use boostvoronoi::{BvError, InputType};
 
 type I1 = i32;
 type F1 = f64;
@@ -21,7 +21,7 @@ fn to_segments<T: InputType>(points: &[[T; 4]]) -> Vec<Line<T>> {
 }
 
 #[test]
-fn segment_4_1_intersecting()  {
+fn segment_4_1_intersecting() {
     let _output = {
         let segments: [[I1; 4]; 9] = [
             [207, 208, 405, 400],
@@ -42,7 +42,6 @@ fn segment_4_1_intersecting()  {
     };
     _output.expect_err("should fail");
 }
-
 
 #[ignore]
 #[test]

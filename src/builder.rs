@@ -289,11 +289,11 @@ where
         }
     }
 
-    pub(crate) fn process_site_event (
+    pub(crate) fn process_site_event(
         &mut self,
         site_event_iterator_: &mut VSE::SiteEventIndexType,
         output: &mut VD::VoronoiDiagram<I1, F1, I2, F2>,
-    )  -> Result<(),BvError> {
+    ) -> Result<(), BvError> {
         let (mut right_it, last_index) = {
             // Get next site event to process.
             let site_event = self.site_events_.get(*site_event_iterator_).unwrap();
@@ -455,7 +455,10 @@ where
     /// why we use const_cast there and take all the responsibility that
     /// map data structure keeps correct ordering.
     #[allow(clippy::unnecessary_unwrap)]
-    pub(crate) fn process_circle_event(&mut self, output: &mut VD::VoronoiDiagram<I1, F1, I2, F2>) -> Result<(),BvError> {
+    pub(crate) fn process_circle_event(
+        &mut self,
+        output: &mut VD::VoronoiDiagram<I1, F1, I2, F2>,
+    ) -> Result<(), BvError> {
         // Get the topmost circle event.
         let e = self.circle_events_.top().unwrap();
         let circle_event = e.0.get();

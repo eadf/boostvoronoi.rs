@@ -17,6 +17,7 @@ use super::predicate as VP;
 use super::siteevent as VSE;
 
 use super::{BigFloatType, BigIntType, InputType, OutputType};
+use crate::BvError;
 use std::cell::Cell;
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
@@ -26,7 +27,6 @@ use std::ops::Bound::{Excluded, Included, Unbounded};
 use std::ops::Neg;
 use std::rc::Rc;
 use vec_map::VecMap;
-use crate::BvError;
 
 /// debug utility function
 pub(crate) fn debug_print_bli_id(value: Option<BeachLineIndex>) -> String {
@@ -117,7 +117,7 @@ where
         key
     }
 
-    pub(crate) fn erase(&mut self, beachline_index: BeachLineIndex) -> Result<(),BvError>{
+    pub(crate) fn erase(&mut self, beachline_index: BeachLineIndex) -> Result<(), BvError> {
         //todo is this correct?
         if let Some(node) = self.beach_line_vec.get(beachline_index.0) {
             let node = node.0;
@@ -125,7 +125,9 @@ where
                 return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting".to_string()});
             }
             if self.beach_line_.contains_key(&node) {
-                return Err(BvError::SomeError {txt:"Beachline: internal error there are more identical keys".to_string()});
+                return Err(BvError::SomeError {
+                    txt: "Beachline: internal error there are more identical keys".to_string(),
+                });
             }
             let _ = self.beach_line_vec.remove(beachline_index.0);
         } else {
