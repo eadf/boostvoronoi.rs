@@ -146,16 +146,16 @@ where
         // The algorithm stops when there are no events to process.
         while !self.circle_events_.is_empty() || (site_event_iterator_ != self.site_events_.len()) {
             if self.circle_events_.is_empty() {
-                self.process_site_event(&mut site_event_iterator_, &mut output);
+                self.process_site_event(&mut site_event_iterator_, &mut output)?;
             } else if site_event_iterator_ == self.site_events_.len() {
-                self.process_circle_event(&mut output);
+                self.process_circle_event(&mut output)?;
             } else if VP::EventComparisonPredicate::<I1, F1, I2, F2>::event_comparison_predicate_bif(
                 &self.site_events_[site_event_iterator_],
                 &self.circle_events_.peek().unwrap().0.get(),
             ) {
-                self.process_site_event(&mut site_event_iterator_, &mut output);
+                self.process_site_event(&mut site_event_iterator_, &mut output)?;
             } else {
-                self.process_circle_event(&mut output);
+                self.process_circle_event(&mut output)?;
             }
 
             self.circle_events_.pop_inactive_at_top();
@@ -289,11 +289,11 @@ where
         }
     }
 
-    pub(crate) fn process_site_event(
+    pub(crate) fn process_site_event (
         &mut self,
         site_event_iterator_: &mut VSE::SiteEventIndexType,
         output: &mut VD::VoronoiDiagram<I1, F1, I2, F2>,
-    ) {
+    )  -> Result<(),BvError> {
         let (mut right_it, last_index) = {
             // Get next site event to process.
             let site_event = self.site_events_.get(*site_event_iterator_).unwrap();
@@ -311,7 +311,7 @@ where
                     let b_it = b_it.second;
                     let _ = self.end_points_.pop();
 
-                    self.beach_line_.erase(b_it);
+                    self.beach_line_.erase(b_it)?;
                 }
             } else {
                 let mut last = self.site_events_.get(last_index);
@@ -442,6 +442,7 @@ where
             }
             *site_event_iterator_ += 1;
         }
+        Ok(())
     }
 
     /// In general case circle event is made of the three consecutive sites
@@ -454,7 +455,7 @@ where
     /// why we use const_cast there and take all the responsibility that
     /// map data structure keeps correct ordering.
     #[allow(clippy::unnecessary_unwrap)]
-    pub(crate) fn process_circle_event(&mut self, output: &mut VD::VoronoiDiagram<I1, F1, I2, F2>) {
+    pub(crate) fn process_circle_event(&mut self, output: &mut VD::VoronoiDiagram<I1, F1, I2, F2>) -> Result<(),BvError> {
         // Get the topmost circle event.
         let e = self.circle_events_.top().unwrap();
         let circle_event = e.0.get();
@@ -516,7 +517,7 @@ where
             it_first.1.set(data);
         }
         // Remove the (B, C) bisector node from the beach line.
-        self.beach_line_.erase(it_last.0.get_index());
+        self.beach_line_.erase(it_last.0.get_index())?;
         let it_last = (it_first.0, it_first.0.get_index());
 
         // Pop the topmost circle event from the event queue.
@@ -553,6 +554,7 @@ where
             let site_r1 = it_last.right_site();
             self.activate_circle_event(site1, site3, *site_r1, it_last.get_index());
         }
+        Ok(())
     }
 
     /// Insert new nodes into the beach line. Update the output.

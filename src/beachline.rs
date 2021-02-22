@@ -26,6 +26,7 @@ use std::ops::Bound::{Excluded, Included, Unbounded};
 use std::ops::Neg;
 use std::rc::Rc;
 use vec_map::VecMap;
+use crate::BvError;
 
 /// debug utility function
 pub(crate) fn debug_print_bli_id(value: Option<BeachLineIndex>) -> String {
@@ -116,20 +117,21 @@ where
         key
     }
 
-    pub(crate) fn erase(&mut self, beachline_index: BeachLineIndex) {
+    pub(crate) fn erase(&mut self, beachline_index: BeachLineIndex) -> Result<(),BvError>{
         //todo is this correct?
         if let Some(node) = self.beach_line_vec.get(beachline_index.0) {
             let node = node.0;
             if self.beach_line_.remove(&node).is_none() {
-                panic!("tried to remove a non-existent beachline.");
+                return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting".to_string()});
             }
             if self.beach_line_.contains_key(&node) {
-                panic!("There are more identical keys");
+                return Err(BvError::SomeError {txt:"Beachline: internal error there are more identical keys".to_string()});
             }
             let _ = self.beach_line_vec.remove(beachline_index.0);
         } else {
-            panic!("tried to remove a non-existent beachline.");
+            return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting".to_string()});
         }
+        Ok(())
     }
 
     pub fn clear(&mut self) {

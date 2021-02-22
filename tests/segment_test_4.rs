@@ -1,5 +1,5 @@
 use boostvoronoi::builder::Builder;
-use boostvoronoi::InputType;
+use boostvoronoi::{BvError, InputType};
 use boostvoronoi::Line;
 
 type I1 = i32;
@@ -20,9 +20,33 @@ fn to_segments<T: InputType>(points: &[[T; 4]]) -> Vec<Line<T>> {
     points.iter().map(|x| x.into()).collect()
 }
 
+#[test]
+fn segment_4_1_intersecting()  {
+    let _output = {
+        let segments: [[I1; 4]; 9] = [
+            [207, 208, 405, 400],
+            [409, 401, 200, 201],
+            [400, 402, 403, 230],
+            [410, 203, 204, 220],
+            [529, 244, 367, 107],
+            [94, 628, 512, 632],
+            [680, 608, 669, 291],
+            [572, 96, 363, 51],
+            [147, 103, 96, 170],
+        ];
+        let segments = to_segments(&segments);
+
+        let mut vb = Builder::<I1, F1, I2, F2>::new();
+        vb.with_segments(segments.iter()).expect("should not fail");
+        vb.construct()
+    };
+    _output.expect_err("should fail");
+}
+
+
 #[ignore]
 #[test]
-fn segment_1() {
+fn segment_4_1() -> Result<(), BvError> {
     let _output = {
         let segments: [[I1; 4]; 9] = [
             [200, 200, 200, 400],
@@ -38,7 +62,8 @@ fn segment_1() {
         let segments = to_segments(&segments);
 
         let mut vb = Builder::<I1, F1, I2, F2>::new();
-        vb.with_segments(segments.iter()).expect("segment_1");
-        vb.construct().expect("segment_1")
+        vb.with_segments(segments.iter())?;
+        vb.construct()?
     };
+    Ok(())
 }
