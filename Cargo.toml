@@ -1,6 +1,6 @@
 [package]
 name = "boostvoronoi"
-version = "0.3.1"
+version = "0.4.0"
 authors = ["eadf"]
 edition = "2018"
 description = "Boost voronoi ported to 100% rust"
@@ -22,10 +22,6 @@ thiserror = "^1.0.23"
 [[example]]
 name = "piston_gui"
 path = "example/piston_gui.rs"
-
-[[example]]
-name = "simple"
-path = "example/simple.rs"
 
 # this bin is for development test purposes
 [[example]]

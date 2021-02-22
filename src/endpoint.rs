@@ -11,8 +11,8 @@
 
 use super::beachline as VB;
 use super::predicate as VP;
-use super::Point;
 use super::InputType;
+use super::Point;
 use std::cmp::Ordering;
 use std::ops::Neg;
 
@@ -24,7 +24,7 @@ pub(crate) struct EndPointPair<I>
 where
     I: InputType + Neg<Output = I>,
 {
-    pub(crate) first: Point<I>,       // TODO: better name
+    pub(crate) first: Point<I>,            // TODO: better name
     pub(crate) second: VB::BeachLineIndex, // TODO: better name
 }
 

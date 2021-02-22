@@ -2,10 +2,10 @@
 use super::super::beachline as VB;
 use super::super::builder::Builder;
 use super::super::diagram as VD;
-use super::super::error::BVError;
 use super::super::predicate as VP;
 use super::super::siteevent as VSE;
-use super::super::{Point, Line};
+use super::super::BvError;
+use super::super::{Line, Point};
 use super::{BeachLineIndex, BeachLineNodeData, BeachLineNodeKey, Beachline};
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
@@ -106,10 +106,7 @@ fn beachline_3() {
     type F2 = f64;
 
     {
-        let _s = vec![Line::new(
-            Point { x: 10, y: 10 },
-            Point { x: 50, y: 50 },
-        )];
+        let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 50 })];
         let mut output: VD::VoronoiDiagram<I1, F1, I2, F2> =
             VD::VoronoiDiagram::<I1, F1, I2, F2>::default();
 

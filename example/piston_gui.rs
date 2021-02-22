@@ -7,8 +7,8 @@ extern crate touch_visualizer;
 use boostvoronoi::builder as VB;
 use boostvoronoi::diagram as VD;
 use boostvoronoi::diagram::VoronoiEdgeIndex;
-use boostvoronoi::error::BVError;
 use boostvoronoi::visual_utils as VV;
+use boostvoronoi::BvError;
 use boostvoronoi::TypeConverter;
 use boostvoronoi::{BigFloatType, BigIntType, InputType, OutputType};
 use ordered_float::OrderedFloat;
@@ -57,7 +57,7 @@ fn main() {
     let _ = event_loop();
 }
 
-fn event_loop() -> Result<String, BVError> {
+fn event_loop() -> Result<String, BvError> {
     let mut data_is_dirty = false;
 
     let visualizer = Rc::new(RefCell::new(
@@ -86,6 +86,7 @@ fn event_loop() -> Result<String, BVError> {
     let mut events = Events::new(EventSettings::new().lazy(true));
     //let mut colors = Vec::new();
     let mut is_drawing_lines = false;
+    let mut is_drawing_text = true;
     let mut is_drawing_line_strings = false;
     let mut previous_dot: Option<boostvoronoi::Point<i32>> = None;
     let mut mx: i32 = 0;
@@ -146,6 +147,9 @@ fn event_loop() -> Result<String, BVError> {
                         let mut vis = visualizer.borrow_mut();
                         vis.primary_edges_only_ = !vis.primary_edges_only_;
                     }
+                    if key == piston::input::keyboard::Key::T {
+                        is_drawing_text = !is_drawing_text;
+                    }
                 }
                 Button::Mouse(_) => {
                     let point = boostvoronoi::Point { x: mx, y: my };
@@ -193,8 +197,7 @@ fn event_loop() -> Result<String, BVError> {
                                 previous_dot = Some(point);
                             }
                         } else {
-                            vis.point_data_
-                                .push(boostvoronoi::Point { x: mx, y: my });
+                            vis.point_data_.push(boostvoronoi::Point { x: mx, y: my });
                             data_is_dirty = true;
                         }
                     }
@@ -209,6 +212,7 @@ fn event_loop() -> Result<String, BVError> {
             data_is_dirty = false;
         }
         if let Some(args) = e.render_args() {
+            let is_drawing_text_copy = is_drawing_text;
             gl.draw(args.viewport(), |c, g| {
                 graphics::clear([1.0; 4], g);
                 {
@@ -217,6 +221,9 @@ fn event_loop() -> Result<String, BVError> {
                     vis.draw_points(&c, g);
                     vis.draw_vertices(&c, g);
                     vis.draw_segments(&c, g);
+                }
+                if is_drawing_text_copy {
+                    // todo! draw help text
                 }
             });
         }
@@ -270,7 +277,7 @@ where
         }
     }
 
-    pub fn build(&mut self) -> Result<String, BVError> {
+    pub fn build(&mut self) -> Result<String, BvError> {
         println!(
             "Running voronoi with this input (in case of a crash, copy&paste and make a test case)"
         );
@@ -887,17 +894,17 @@ where
                 // internal edgecolor
                 color = [0.2, 0.7, 0.0, 1.0];
             }
-            let mut samples = Vec::<(F1, F1)>::new();
+            let mut samples = Vec::<[F1; 2]>::new();
             if !self.vd_.edge_is_finite(Some(edge_id)).unwrap() {
                 self.clip_infinite_edge(edge_id, &mut samples);
             } else {
                 let vertex0 = self.vd_.vertex_get(edge.vertex0()).unwrap().get();
 
-                samples.push((vertex0.x(), vertex0.y()));
+                samples.push([vertex0.x(), vertex0.y()]);
                 let vertex1 = self.vd_.edge_get_vertex1(Some(edge_id));
                 let vertex1 = self.vd_.vertex_get(vertex1).unwrap().get();
 
-                samples.push((vertex1.x(), vertex1.y()));
+                samples.push([vertex1.x(), vertex1.y()]);
                 if edge.is_curved() {
                     self.sample_curved_edge(VoronoiEdgeIndex(it.0), &mut samples);
                 }
@@ -910,10 +917,10 @@ where
                     color,
                     1.0,
                     [
-                        Self::f1_to_f64(vertex1.0).into(),
-                        Self::f1_to_f64(vertex1.1).into(),
-                        Self::f1_to_f64(vertex2.0).into(),
-                        Self::f1_to_f64(vertex2.1).into(),
+                        Self::f1_to_f64(vertex1[0]).into(),
+                        Self::f1_to_f64(vertex1[1]).into(),
+                        Self::f1_to_f64(vertex2[0]).into(),
+                        Self::f1_to_f64(vertex2[1]).into(),
                     ],
                     c.transform,
                     g,
@@ -922,7 +929,7 @@ where
         }
     }
 
-    fn clip_infinite_edge(&self, edge_id: VD::VoronoiEdgeIndex, clipped_edge: &mut Vec<(F1, F1)>) {
+    fn clip_infinite_edge(&self, edge_id: VD::VoronoiEdgeIndex, clipped_edge: &mut Vec<[F1; 2]>) {
         let edge = self.vd_.get_edge(edge_id);
         //const cell_type& cell1 = *edge.cell();
         let cell1_id = self.vd_.edge_get_cell(Some(edge_id)).unwrap();
@@ -977,21 +984,21 @@ where
 
         let vertex0 = edge.get().vertex0();
         if vertex0.is_none() {
-            clipped_edge.push((origin.x - direction.x * koef, origin.y - direction.y * koef));
+            clipped_edge.push([origin.x - direction.x * koef, origin.y - direction.y * koef]);
         } else {
             let vertex0 = self.vd_.vertex_get(vertex0).unwrap().get();
-            clipped_edge.push((vertex0.x(), vertex0.y()));
+            clipped_edge.push([vertex0.x(), vertex0.y()]);
         }
         let vertex1 = self.vd_.edge_get_vertex1(Some(edge_id));
         if vertex1.is_none() {
-            clipped_edge.push((origin.x + direction.x * koef, origin.y + direction.y * koef));
+            clipped_edge.push([origin.x + direction.x * koef, origin.y + direction.y * koef]);
         } else {
             let vertex1 = self.vd_.vertex_get(vertex1).unwrap().get();
-            clipped_edge.push((vertex1.x(), vertex1.y()));
+            clipped_edge.push([vertex1.x(), vertex1.y()]);
         }
     }
 
-    fn sample_curved_edge(&self, edge_id: VD::VoronoiEdgeIndex, sampled_edge: &mut Vec<(F1, F1)>) {
+    fn sample_curved_edge(&self, edge_id: VD::VoronoiEdgeIndex, sampled_edge: &mut Vec<[F1; 2]>) {
         let max_dist =
             Self::f32_to_f1(1E-3) * (self.bounding_rect.max().x - self.bounding_rect.min().x);
 

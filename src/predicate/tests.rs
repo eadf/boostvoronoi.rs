@@ -2,10 +2,10 @@
 use super::super::beachline as VB;
 use super::super::diagram as VD;
 use super::super::diagram::VoronoiDiagram;
-use super::super::error::BVError;
 use super::super::predicate as VP;
 use super::super::siteevent as VSE;
-use super::super::{Point, Line};
+use super::super::BvError;
+use super::super::{Line, Point};
 use super::{BigFloatType, BigIntType, InputType, OutputType};
 use std::ops::Neg;
 

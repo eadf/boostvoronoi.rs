@@ -182,10 +182,7 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
-    pub fn new_2(
-        a: Point<I1>,
-        initial_index_: SiteEventIndexType,
-    ) -> SiteEvent<I1, F1, I2, F2> {
+    pub fn new_2(a: Point<I1>, initial_index_: SiteEventIndexType) -> SiteEvent<I1, F1, I2, F2> {
         Self {
             point0_: a,
             point1_: a,

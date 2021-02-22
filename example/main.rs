@@ -1,4 +1,5 @@
 use boostvoronoi::builder as VB;
+use boostvoronoi::BvError;
 use boostvoronoi::InputType;
 
 type I1 = i32;
@@ -14,18 +15,15 @@ fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
     (F1::abs(x1 - x2) < delta) && (F1::abs(y1 - y2) < delta)
 }
 
-fn to_points<T:InputType>(points: &[[T; 2]]) -> Vec<boostvoronoi::Point<T>>
-{
-    points.iter().map(|x|x.into()).collect()
+fn to_points<T: InputType>(points: &[[T; 2]]) -> Vec<boostvoronoi::Point<T>> {
+    points.iter().map(|x| x.into()).collect()
 }
 
-fn to_segments<T:InputType>(points: &[[T; 4]]) -> Vec<boostvoronoi::Line<T>>
-{
-    points.iter().map(|x|x.into()).collect()
+fn to_segments<T: InputType>(points: &[[T; 4]]) -> Vec<boostvoronoi::Line<T>> {
+    points.iter().map(|x| x.into()).collect()
 }
 
-
-fn main() {
+fn main() -> Result<(), BvError> {
     #[allow(unused_variables)]
     let output = {
         let points: [[I1; 2]; 0] = [];
@@ -41,9 +39,9 @@ fn main() {
         let _s = to_segments::<I1>(&segments);
 
         let mut vb = VB::Builder::<I1, F1, I2, F2>::new();
-        vb.with_vertices(_v.iter()).expect("test_template");
-        vb.with_segments(_s.iter()).expect("test_template");
-        vb.construct().expect("test_template")
+        vb.with_vertices(_v.iter())?;
+        vb.with_segments(_s.iter())?;
+        vb.construct()?
     };
-    println!("done");
+    Ok(())
 }

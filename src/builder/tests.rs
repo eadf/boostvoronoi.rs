@@ -1,8 +1,8 @@
 #![allow(unused_imports)]
 use super::super::diagram::VoronoiDiagram;
-use super::super::error::BVError;
+use super::super::BvError;
 use super::Builder;
-use super::{Point, Line};
+use super::{Line, Point};
 
 #[test]
 fn sort_1() {

@@ -169,6 +169,7 @@ where
     }
 }
 
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, PartialEq, Eq)]
 enum Orientation {
     RIGHT,     // = -1,
@@ -238,11 +239,7 @@ where
         }
     }
 
-    fn eval_3(
-        point1: &Point<I1>,
-        point2: &Point<I1>,
-        point3: &Point<I1>,
-    ) -> Orientation {
+    fn eval_3(point1: &Point<I1>, point2: &Point<I1>, point3: &Point<I1>) -> Orientation {
         let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
         let dx1: I2 = i1_to_i2(point1.x) - i1_to_i2(point2.x);
         let dx2: I2 = i1_to_i2(point2.x) - i1_to_i2(point3.x);
@@ -385,6 +382,7 @@ where
 
 /// Represents the result of the epsilon robust predicate. If the
 /// result is undefined some further processing is usually required.
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, PartialEq, Eq)]
 enum KPredicateResult {
     LESS,      // = -1,
@@ -515,10 +513,7 @@ where
         dist1 < dist2
     }
 
-    fn find_distance_to_point_arc(
-        site: &VSE::SiteEvent<I1, F1, I2, F2>,
-        point: &Point<I1>,
-    ) -> F2 {
+    fn find_distance_to_point_arc(site: &VSE::SiteEvent<I1, F1, I2, F2>, point: &Point<I1>) -> F2 {
         let dx = TC::<I1, F1, I2, F2>::i1_to_f2(site.x()) - TC::<I1, F1, I2, F2>::i1_to_f2(point.x);
         let dy = TC::<I1, F1, I2, F2>::i1_to_f2(site.y()) - TC::<I1, F1, I2, F2>::i1_to_f2(point.y);
         // The relative error is at most 3EPS.

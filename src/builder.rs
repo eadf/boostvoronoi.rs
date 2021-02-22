@@ -13,11 +13,11 @@ use super::beachline as VB;
 use super::circleevent as VC;
 use super::diagram as VD;
 use super::endpoint as VEP;
-use super::error::BVError;
 use super::predicate as VP;
 use super::siteevent as VSE;
+use super::BvError;
 
-use super::{Point, Line};
+use super::{Line, Point};
 use std::collections::BinaryHeap;
 use std::ops::Neg;
 
@@ -83,13 +83,13 @@ where
         }
     }
 
-    pub fn with_vertices<'a, T>(&mut self, vertices: T) -> Result<(), BVError>
+    pub fn with_vertices<'a, T>(&mut self, vertices: T) -> Result<(), BvError>
     where
         I1: 'a,
         T: Iterator<Item = &'a Point<I1>>,
     {
         if self.segments_added {
-            return Err(BVError::VerticesGoesFirst {
+            return Err(BvError::VerticesGoesFirst {
                 txt: "Vertices should be added before segments".to_string(),
             });
         }
@@ -102,29 +102,29 @@ where
         Ok(())
     }
 
-    pub fn with_segments<'a, T>(&mut self, segments: T) -> Result<(), BVError>
+    pub fn with_segments<'a, T>(&mut self, segments: T) -> Result<(), BvError>
     where
         I1: 'a,
-        T: Iterator<Item = &'a Line<I1>> ,
+        T: Iterator<Item = &'a Line<I1>>,
     {
-        type SC = VD::ColorBits;
+        type Cb = VD::ColorBits;
         for s in segments {
             let p1 = s.start;
             let p2 = s.end;
             let mut s1 = VSE::SiteEvent::<I1, F1, I2, F2>::new_3(p1, p1, self.index_);
-            s1.or_source_category(&SC::SEGMENT_START_POINT);
+            s1.or_source_category(&Cb::SEGMENT_START_POINT);
             let mut s2 = VSE::SiteEvent::new_3(p2, p2, self.index_);
-            s2.or_source_category(&SC::SEGMENT_END_POINT);
+            s2.or_source_category(&Cb::SEGMENT_END_POINT);
 
             self.site_events_.push(s1);
             self.site_events_.push(s2);
             let s3 = if VP::PointComparisonPredicate::<I1>::point_comparison_predicate(&p1, &p2) {
                 let mut s3 = VSE::SiteEvent::<I1, F1, I2, F2>::new_3(p1, p2, self.index_);
-                s3.or_source_category(&SC::INITIAL_SEGMENT);
+                s3.or_source_category(&Cb::INITIAL_SEGMENT);
                 s3
             } else {
                 let mut s3 = VSE::SiteEvent::<I1, F1, I2, F2>::new_3(p2, p1, self.index_);
-                s3.or_source_category(&SC::REVERSE_SEGMENT);
+                s3.or_source_category(&Cb::REVERSE_SEGMENT);
                 s3
             };
             self.site_events_.push(s3);
@@ -135,7 +135,7 @@ where
     }
 
     /// Run sweepline algorithm and fill output data structure.
-    pub fn construct(&mut self) -> Result<VD::VoronoiDiagram<I1, F1, I2, F2>, BVError> {
+    pub fn construct(&mut self) -> Result<VD::VoronoiDiagram<I1, F1, I2, F2>, BvError> {
         let mut output: VD::VoronoiDiagram<I1, F1, I2, F2> =
             VD::VoronoiDiagram::<I1, F1, I2, F2>::new(self.site_events_.len());
 

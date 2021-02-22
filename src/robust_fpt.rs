@@ -728,7 +728,7 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
         let mut cA: [BigInt; 2] = [BigInt::zero(), BigInt::zero()];
         let mut cB: [BigInt; 2] = [BigInt::zero(), BigInt::zero()];
 
-        let lh = self.eval2(&A[..], &B[..]);
+        let lh = self.eval2(A, B);
         let rh = self.eval2(&A[2..], &B[2..]);
         if (!lh.is_sign_negative() && !rh.is_sign_negative())
             || (!lh.is_sign_positive() && !rh.is_sign_positive())

@@ -7,7 +7,6 @@
 
 use core::fmt::Debug;
 use num::bigint::BigInt;
-//use num::FromPrimitive;
 use num::ToPrimitive;
 use num::{Float, NumCast, PrimInt, Zero};
 use std::cmp;
@@ -22,7 +21,6 @@ mod circleevent;
 mod ctypes;
 pub mod diagram;
 mod endpoint;
-pub mod error;
 pub mod predicate;
 mod robust_fpt;
 pub mod siteevent;
@@ -44,10 +42,7 @@ pub struct Point<T: InputType> {
     pub y: T,
 }
 
-impl<T> From<[T; 2]> for Point<T>
-where
-    T: InputType,
-{
+impl<T: InputType> From<[T; 2]> for Point<T> {
     fn from(coordinate: [T; 2]) -> Point<T> {
         Point {
             x: coordinate[0],
@@ -56,10 +51,7 @@ where
     }
 }
 
-impl<T> From<&[T; 2]> for Point<T>
-    where
-        T: InputType,
-{
+impl<T: InputType> From<&[T; 2]> for Point<T> {
     fn from(coordinate: &[T; 2]) -> Point<T> {
         Point {
             x: coordinate[0],
@@ -81,19 +73,6 @@ where
     IT: Copy + Into<Point<T>>,
 {
     fn from(coordinate: [IT; 2]) -> Line<T> {
-        Line::<T> {
-            start: coordinate[0].into(),
-            end: coordinate[1].into(),
-        }
-    }
-}
-
-impl<T, IT> From<&[IT; 2]> for Line<T>
-    where
-        T: InputType,
-        IT: Copy + Into<Point<T>>,
-{
-    fn from(coordinate: &[IT; 2]) -> Line<T> {
         Line::<T> {
             start: coordinate[0].into(),
             end: coordinate[1].into(),
@@ -126,8 +105,8 @@ where
 }
 
 impl<T> From<&[T; 4]> for Line<T>
-    where
-        T: InputType,
+where
+    T: InputType,
 {
     fn from(coordinate: &[T; 4]) -> Line<T> {
         Line {
@@ -141,6 +120,18 @@ impl<T> From<&[T; 4]> for Line<T>
             },
         }
     }
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum BvError {
+    #[error("error: given value for the radius is less than 0.0.")]
+    RadiusLessThanZero,
+    #[error("error: vertices should be added before segments")]
+    VerticesGoesFirst { txt: String },
+    #[error("error: Some error")]
+    SomeError { txt: String },
+    #[error("Suspected self-intersecting input data")]
+    SelfIntersecting { txt: String },
 }
 
 pub trait InputType:

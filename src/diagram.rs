@@ -62,6 +62,7 @@ pub(crate) type ColorType = u32;
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub(crate) struct ColorBits(pub ColorType);
 
+#[allow(clippy::upper_case_acronyms)]
 impl ColorBits {
     // Point subtypes.
     pub(crate) const SINGLE_POINT: Self = ColorBits(0x0);

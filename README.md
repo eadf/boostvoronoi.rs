@@ -2,7 +2,7 @@
 [![Documentation](https://docs.rs/boostvoronoi/badge.svg)](https://docs.rs/boostvoronoi)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Clippy/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Clippy/badge.svg)
-[![dependency status](https://deps.rs/crate/boostvoronoi/0.3.1/status.svg)](https://deps.rs/crate/boostvoronoi/0.3.1)
+[![dependency status](https://deps.rs/crate/boostvoronoi/0.4.0/status.svg)](https://deps.rs/crate/boostvoronoi/0.4.0)
 
 # Segmented Voronoi for Rust
 [Boost 1.75.0 polygon::voronoi](https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_main.htm) ported to 100% rust.
@@ -26,19 +26,20 @@ type I2 = i64; // All integer calculations are made in this type (or num::BigInt
 type F2 = f64; // All float calculations are made in this type
 // it is ok to set I1=I2=i64 and F1=F2=f64
 
-// points should be unique
-let p = vec![Coordinate{x:9, y:10}];
-// lines should never intersect with other lines, identical end or start points is ok.
-let s = vec![Line::new(Coordinate{x:10, y:11}, Coordinate{x:12, y:13})];
+// Points should be unique, 
+let p = vec![Point{x:9, y:10}];
+// Lines should never intersect with other lines. 
+// The only points that can intersect are the endpoints.
+let s = vec![Line::new(Point{x:10, y:11}, Point{x:12, y:13})];
 let mut vb = VoronoiBuilder::<I1, F1, I2, F2>::new();
   
 // you will have to keep track of the input geometry. it will be referenced as 
 // input geometry indices in the output. 
-vb.with_vertices(p.iter()).expect("test");
-vb.with_segments(s.iter()).expect("test");
+vb.with_vertices(p.iter())?;
+vb.with_segments(s.iter())?;
 
 // this will generate a the list of cells, edges and circle events (aka vertices)
-vb.construct().expect("test")
+let result = vb.construct()?;
 
 ```
 Edges may become curves when line segments are used as input, see the example code for discretization and interpolation. 
@@ -52,7 +53,6 @@ Edges may become curves when line segments are used as input, see the example co
 - [x] Remove use of vec_map::VecMap where not absolutely needed.
 - [ ] Benchmark and optimize
 - [ ] Example GUI with more features. fltk?
-- [ ] Maybe make geo feature based. Use cgmath or vecmath as internal format
 
 
 All credit goes to the original author (Andrii Sydorchuk), except the porting mistakes. They are all mine.

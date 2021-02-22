@@ -1,6 +1,6 @@
 use boostvoronoi::builder::Builder;
 use boostvoronoi::diagram as VD;
-use boostvoronoi::{Point, Line};
+use boostvoronoi::{BvError, Line, Point};
 
 type I = i32;
 type O = f32;
@@ -15,14 +15,12 @@ fn almost_equal(x1: O, x2: O, y1: O, y2: O) -> bool {
     (O::abs(x1 - x2) < delta) && (O::abs(y1 - y2) < delta)
 }
 
-fn to_points<T:VD::InputType>(points: &[[T; 2]]) -> Vec<boostvoronoi::Point<T>>
-{
-    points.iter().map(|x|x.into()).collect()
+fn to_points<T: VD::InputType>(points: &[[T; 2]]) -> Vec<boostvoronoi::Point<T>> {
+    points.iter().map(|x| x.into()).collect()
 }
 
-fn to_segments<T:VD::InputType>(points: &[[T; 4]]) -> Vec<boostvoronoi::Line<T>>
-{
-    points.iter().map(|x|x.into()).collect()
+fn to_segments<T: VD::InputType>(points: &[[T; 4]]) -> Vec<boostvoronoi::Line<T>> {
+    points.iter().map(|x| x.into()).collect()
 }
 
 fn retrieve_point<T>(
@@ -44,15 +42,12 @@ where
 
 //#[ignore]
 #[test]
-fn single_segment_1() {
+fn single_segment_1() -> Result<(), BvError> {
     let output = {
-        let _s = vec![Line::new(
-            Point { x: 10, y: 10 },
-            Point { x: 50, y: 50 },
-        )];
+        let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 50 })];
         let mut vb = Builder::<I, O, DI, DF>::new();
-        vb.with_segments(_s.iter()).expect("single_segment_1");
-        vb.construct().expect("single_segment_1")
+        vb.with_segments(_s.iter())?;
+        vb.construct()?
     };
     // results verified against c++ boost
     assert_eq!(output.cells().len(), 3);
@@ -89,19 +84,17 @@ fn single_segment_1() {
     assert_eq!(output.edges().get(3).unwrap().get().prev().unwrap().0, 3);
     assert_eq!(output.edges().get(3).unwrap().get().next().unwrap().0, 3);
     assert_eq!(output.edges().get(3).unwrap().get().prev().unwrap().0, 3);
+    Ok(())
 }
 
 //#[ignore]
 #[test]
-fn single_segment_2() {
+fn single_segment_2() -> Result<(), BvError> {
     let output = {
-        let _s = vec![Line::new(
-            Point { x: 10, y: 10 },
-            Point { x: 50, y: 50 },
-        )];
+        let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 50 })];
         let mut vb = Builder::<I, O, DI, DF>::new();
-        vb.with_segments(_s.iter()).expect("single_segment_2");
-        vb.construct().expect("single_segment_2")
+        vb.with_segments(_s.iter())?;
+        vb.construct()?
     };
     assert_eq!(output.cells().len(), 3);
     let cell = output.cells()[0].get();
@@ -135,18 +128,16 @@ fn single_segment_2() {
     assert_eq!(output.edges().get(3).unwrap().get().twin().unwrap().0, 2);
     assert_eq!(output.edges().get(3).unwrap().get().next().unwrap().0, 3);
     assert_eq!(output.edges().get(3).unwrap().get().prev().unwrap().0, 3);
+    Ok(())
 }
 
 #[test]
-fn single_segment_3() {
+fn single_segment_3() -> Result<(), BvError> {
     let output = {
-        let _s = vec![Line::new(
-            Point { x: 10, y: 10 },
-            Point { x: 50, y: 10 },
-        )];
+        let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 10 })];
         let mut vb = Builder::<I, O, DI, DF>::new();
-        vb.with_segments(_s.iter()).expect("single_segment_3");
-        vb.construct().expect("single_segment_3")
+        vb.with_segments(_s.iter())?;
+        vb.construct()?
     };
     assert_eq!(output.cells().len(), 3);
     let cell = output.cells()[0].get();
@@ -180,18 +171,16 @@ fn single_segment_3() {
     assert_eq!(output.edges().get(3).unwrap().get().twin().unwrap().0, 2);
     assert_eq!(output.edges().get(3).unwrap().get().next().unwrap().0, 3);
     assert_eq!(output.edges().get(3).unwrap().get().prev().unwrap().0, 3);
+    Ok(())
 }
 
 #[test]
-fn single_segment_4() {
+fn single_segment_4() -> Result<(), BvError> {
     let output = {
-        let _s = vec![Line::new(
-            Point { x: 50, y: 10 },
-            Point { x: 10, y: 10 },
-        )];
+        let _s = vec![Line::new(Point { x: 50, y: 10 }, Point { x: 10, y: 10 })];
         let mut vb = Builder::<I, O, DI, DF>::new();
-        vb.with_segments(_s.iter()).expect("single_segment_4");
-        vb.construct().expect("single_segment_4")
+        vb.with_segments(_s.iter())?;
+        vb.construct()?
     };
     assert_eq!(output.cells().len(), 3);
     let cell = output.cells()[0].get();
@@ -225,20 +214,21 @@ fn single_segment_4() {
     assert_eq!(output.edges().get(3).unwrap().get().twin().unwrap().0, 2);
     assert_eq!(output.edges().get(3).unwrap().get().next().unwrap().0, 3);
     assert_eq!(output.edges().get(3).unwrap().get().prev().unwrap().0, 3);
+    Ok(())
 }
 
 //#[ignore]
 #[test]
 ///Two segments
-fn two_segments_1() {
+fn two_segments_1() -> Result<(), BvError> {
     let output = {
         let _s = vec![
             Line::new(Point { x: 1, y: 2 }, Point { x: 3, y: 4 }),
             Line::new(Point { x: 2, y: 2 }, Point { x: 5, y: 4 }),
         ];
         let mut vb = Builder::<I, O, DI, DF>::new();
-        vb.with_segments(_s.iter()).expect("two_segments_1");
-        vb.construct().expect("two_segments_1")
+        vb.with_segments(_s.iter())?;
+        vb.construct()?
     };
     assert_eq!(output.cells().len(), 6);
     let cell = output.cells()[0].get();
@@ -392,12 +382,13 @@ fn two_segments_1() {
     assert_eq!(output.edges().get(17).unwrap().get().twin().unwrap().0, 16);
     assert_eq!(output.edges().get(17).unwrap().get().next().unwrap().0, 11);
     assert_eq!(output.edges().get(17).unwrap().get().prev().unwrap().0, 13);
+    Ok(())
 }
 
 //#[ignore]
 #[test]
 /// two segments and one point
-fn two_segments_2() {
+fn two_segments_2() -> Result<(), BvError> {
     let output = {
         let _v = vec![Point { x: 10, y: 11 }];
         let _s = vec![
@@ -405,9 +396,9 @@ fn two_segments_2() {
             Line::new(Point { x: 2, y: 2 }, Point { x: 5, y: 4 }),
         ];
         let mut vb = Builder::<I, O, DI, DF>::new();
-        vb.with_vertices(_v.iter()).expect("two_segments_2");
-        vb.with_segments(_s.iter()).expect("two_segments_2");
-        vb.construct().expect("two_segments_2")
+        vb.with_vertices(_v.iter())?;
+        vb.with_segments(_s.iter())?;
+        vb.construct()?
     };
     assert_eq!(output.cells().len(), 7);
     let cell = output.cells()[0].get();
@@ -801,12 +792,13 @@ fn two_segments_2() {
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
     assert_eq!(e.is_secondary(), false);
+    Ok(())
 }
 
 //#[ignore]
 #[test]
 /// two segments and two points
-fn two_segments_3() {
+fn two_segments_3() -> Result<(), BvError> {
     let output = {
         let _v = vec![Point { x: 4, y: 3 }, Point { x: 1, y: 1 }];
         let _s = vec![
@@ -814,9 +806,9 @@ fn two_segments_3() {
             Line::new(Point { x: 2, y: 2 }, Point { x: 5, y: 4 }),
         ];
         let mut vb = Builder::<I, O, DI, DF>::new();
-        vb.with_vertices(_v.iter()).expect("two_segments_3");
-        vb.with_segments(_s.iter()).expect("two_segments_3");
-        vb.construct().expect("two_segments_3")
+        vb.with_vertices(_v.iter())?;
+        vb.with_segments(_s.iter())?;
+        vb.construct()?
     };
     assert_eq!(output.cells().len(), 8);
     let cell = output.cells()[0].get();
@@ -1352,12 +1344,13 @@ fn two_segments_3() {
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
     assert_eq!(e.is_secondary(), false);
+    Ok(())
 }
 
 //#[ignore]
 #[test]
 /// three segments and one point
-fn two_segments_4() {
+fn two_segments_4() -> Result<(), BvError> {
     let output = {
         let _v = vec![Point { x: 4, y: 3 }];
         let _s = vec![
@@ -1366,9 +1359,9 @@ fn two_segments_4() {
             Line::new(Point { x: 5, y: 6 }, Point { x: 3, y: 1 }),
         ];
         let mut vb = Builder::<I, O, DI, DF>::new();
-        vb.with_vertices(_v.iter()).expect("two_segments_4");
-        vb.with_segments(_s.iter()).expect("two_segments_4");
-        vb.construct().expect("two_segments_4")
+        vb.with_vertices(_v.iter())?;
+        vb.with_segments(_s.iter())?;
+        vb.construct()?
     };
     assert_eq!(output.cells().len(), 10);
     let cell = output.cells()[0].get();
@@ -1469,12 +1462,13 @@ fn two_segments_4() {
     let v = output.vertices()[11].get();
     assert!(almost_equal(v.x(), 11.1250, v.y(), -2.25000));
     assert_eq!(v.get_incident_edge().unwrap().0, 41);
+    Ok(())
 }
 
 //#[ignore]
 #[test]
 /// two segments and four points
-fn two_segments_5() {
+fn two_segments_5() -> Result<(), BvError> {
     let output = {
         let points: [[I; 2]; 4] = [[582, 779], [683, 1329], [741, 1155], [1239, 1102]];
         let segments: [[I; 4]; 2] = [[1394, 1470, 982, 1594], [1047, 1427, 1155, 1228]];
@@ -1483,9 +1477,9 @@ fn two_segments_5() {
         let _s = to_segments::<I>(&segments);
 
         let mut vb = Builder::<I, O, DI, DF>::new();
-        vb.with_vertices(_v.iter()).expect("two_segments_5");
-        vb.with_segments(_s.iter()).expect("two_segments_5");
-        vb.construct().expect("two_segments_5")
+        vb.with_vertices(_v.iter())?;
+        vb.with_segments(_s.iter())?;
+        vb.construct()?
     };
     assert_eq!(output.cells().len(), 10);
     let cell = output.cells()[0].get();
@@ -1586,12 +1580,13 @@ fn two_segments_5() {
     let v = output.vertices()[11].get();
     assert!(almost_equal(v.x(), 1354.4950042, v.y(), 1269.9966694));
     assert_eq!(v.get_incident_edge().unwrap().0, 41);
+    Ok(())
 }
 
 //#[ignore]
 #[test]
 /// two problematic segments
-fn two_segments_6() {
+fn two_segments_6() -> Result<(), BvError> {
     let output = {
         let points: [[I; 2]; 0] = [];
         let segments: [[I; 4]; 2] = [[442, 215, 438, 355], [129, 559, 141, 60]];
@@ -1600,9 +1595,9 @@ fn two_segments_6() {
         let _s = to_segments::<I>(&segments);
 
         let mut vb = Builder::<I, O, DI, DF>::new();
-        vb.with_vertices(_v.iter()).expect("two_segments_6");
-        vb.with_segments(_s.iter()).expect("two_segments_6");
-        vb.construct().expect("two_segments_6")
+        vb.with_vertices(_v.iter())?;
+        vb.with_segments(_s.iter())?;
+        vb.construct()?
     };
     assert_eq!(output.cells().len(), 6);
     let cell = output.cells()[0].get();
@@ -1940,12 +1935,13 @@ fn two_segments_6() {
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
     assert_eq!(e.is_secondary(), false);
+    Ok(())
 }
 
 //#[ignore]
 #[test]
 /// two problematic segments
-fn two_segments_7() {
+fn two_segments_7() -> Result<(), BvError> {
     let output = {
         let points: [[I; 2]; 0] = [];
         let segments: [[I; 4]; 2] = [[498, 224, 475, 335], [250, 507, 60, 77]];
@@ -1954,9 +1950,9 @@ fn two_segments_7() {
         let _s = to_segments::<I>(&segments);
 
         let mut vb = Builder::<I, O, DI, DF>::new();
-        vb.with_vertices(_v.iter()).expect("two_segments_7");
-        vb.with_segments(_s.iter()).expect("two_segments_7");
-        vb.construct().expect("two_segments_7")
+        vb.with_vertices(_v.iter())?;
+        vb.with_segments(_s.iter())?;
+        vb.construct()?
     };
     assert_eq!(output.cells().len(), 6);
     let cell = output.cells()[0].get();
@@ -2294,12 +2290,13 @@ fn two_segments_7() {
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
     assert_eq!(e.is_secondary(), false);
+    Ok(())
 }
 
 //#[ignore]
 #[test]
 /// four segments in a loop
-fn two_segments_8() {
+fn two_segments_8() -> Result<(), BvError> {
     let (output, _v, _s) = {
         let c: I = 300;
         let points: [[I; 2]; 0] = [];
@@ -2314,9 +2311,9 @@ fn two_segments_8() {
         let _s = to_segments::<I>(&segments);
 
         let mut vb = Builder::<I, O, DI, DF>::new();
-        vb.with_vertices(_v.iter()).expect("two_segments_8");
-        vb.with_segments(_s.iter()).expect("two_segments_8");
-        (vb.construct().expect("two_segments_8"), _v, _s)
+        vb.with_vertices(_v.iter())?;
+        vb.with_segments(_s.iter())?;
+        (vb.construct()?, _v, _s)
     };
 
     assert_eq!(output.cells().len(), 8);
@@ -2405,4 +2402,5 @@ fn two_segments_8() {
     let v = output.vertices()[4].get();
     assert!(almost_equal(v.x(), 500.0000000, v.y(), 500.0000000));
     assert_eq!(v.get_incident_edge().unwrap().0, 23);
+    Ok(())
 }

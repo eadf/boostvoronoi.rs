@@ -1,5 +1,4 @@
 use boostvoronoi::builder::Builder;
-//use boostvoronoi::diagram as VD;
 use boostvoronoi::InputType;
 use boostvoronoi::Line;
 
@@ -17,10 +16,8 @@ fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
     (F1::abs(x1 - x2) < delta) && (F1::abs(y1 - y2) < delta)
 }
 
-
-fn to_segments<T:InputType>(points: &[[T; 4]]) -> Vec<Line<T>>
-{
-    points.iter().map(|x|x.into()).collect()
+fn to_segments<T: InputType>(points: &[[T; 4]]) -> Vec<Line<T>> {
+    points.iter().map(|x| x.into()).collect()
 }
 
 #[ignore]

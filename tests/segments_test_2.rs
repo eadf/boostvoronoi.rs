@@ -1,5 +1,5 @@
 use boostvoronoi::builder::Builder;
-use boostvoronoi::InputType;
+use boostvoronoi::{BvError, InputType};
 
 type I1 = i32;
 //type F1 = f32;
@@ -15,20 +15,18 @@ fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
     (F1::abs(x1 - x2) < delta) && (F1::abs(y1 - y2) < delta)
 }
 
-fn to_points<T: InputType>(points: &[[T; 2]]) -> Vec<boostvoronoi::Point<T>>
-{
-    points.iter().map(|x|x.into()).collect()
+fn to_points<T: InputType>(points: &[[T; 2]]) -> Vec<boostvoronoi::Point<T>> {
+    points.iter().map(|x| x.into()).collect()
 }
 
-fn to_segments<T: InputType>(points: &[[T; 4]]) -> Vec<boostvoronoi::Line<T>>
-{
-    points.iter().map(|x|x.into()).collect()
+fn to_segments<T: InputType>(points: &[[T; 4]]) -> Vec<boostvoronoi::Line<T>> {
+    points.iter().map(|x| x.into()).collect()
 }
 
 //#[ignore]
 #[test]
 /// four segments in a loop + one more
-fn two_segments_9() {
+fn two_segments_9() -> Result<(), BvError> {
     let output = {
         let points: [[I1; 2]; 0] = [];
         let segments: [[I1; 4]; 5] = [
@@ -70,4 +68,5 @@ fn two_segments_9() {
     assert!(almost_equal(v.x(), 478.6496933, v.y(), 302.4203680));
     let v = output.vertices()[10].get();
     assert!(almost_equal(v.x(), 561.2596899, v.y(), 400.0000000));
+    Ok(())
 }
