@@ -478,7 +478,9 @@ where
         // Get the half-edge corresponding to the second bisector - (B, C).
         let bisector2 = it_first.1.get();
         if bisector2.is_none() {
-            return Err(BvError::SomeError {txt:"bisector2.is_none()".to_string()});
+            return Err(BvError::SomeError {
+                txt: "bisector2.is_none()".to_string(),
+            });
         }
         let bisector2 = bisector2.unwrap().edge_id();
 
@@ -488,7 +490,9 @@ where
 
         let bisector1 = it_first.1.get();
         if bisector1.is_none() {
-            return Err(BvError::SomeError {txt:"bisector1.is_none()".to_string()});
+            return Err(BvError::SomeError {
+                txt: "bisector1.is_none()".to_string(),
+            });
         }
         let bisector1 = bisector1.unwrap().edge_id();
 
