@@ -998,6 +998,7 @@ where
         }
     }
 
+    /// Important: sampled_edge should contain both edge endpoints initially.
     fn sample_curved_edge(&self, edge_id: VD::VoronoiEdgeIndex, sampled_edge: &mut Vec<[F1; 2]>) {
         let max_dist =
             Self::f32_to_f1(1E-3) * (self.bounding_rect.max().x - self.bounding_rect.min().x);
