@@ -476,13 +476,21 @@ where
         let site3 = it_first.0.right_site();
 
         // Get the half-edge corresponding to the second bisector - (B, C).
-        let bisector2 = it_first.1.get().unwrap().edge_id();
+        let bisector2 = it_first.1.get();
+        if bisector2.is_none() {
+            return Err(BvError::SomeError {txt:"bisector2.is_none()".to_string()});
+        }
+        let bisector2 = bisector2.unwrap().edge_id();
 
         // Get the half-edge corresponding to the first bisector - (A, B).
         let it_first = self.beach_line_.get_left_neighbour(it_first.0).unwrap();
         let it_first = &self.beach_line_.get_node(&it_first.1);
 
-        let bisector1 = it_first.1.get().unwrap().edge_id();
+        let bisector1 = it_first.1.get();
+        if bisector1.is_none() {
+            return Err(BvError::SomeError {txt:"bisector1.is_none()".to_string()});
+        }
+        let bisector1 = bisector1.unwrap().edge_id();
 
         // Get the A site.
         let site1 = *it_first.0.left_site();
