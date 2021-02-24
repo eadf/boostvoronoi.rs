@@ -31,7 +31,7 @@ let p = vec![Point{x:9, y:10}];
 // Lines should never intersect with other lines. 
 // The only points that can intersect are the endpoints.
 let s = vec![Line::new(Point{x:10, y:11}, Point{x:12, y:13})];
-let mut vb = VoronoiBuilder::<I1, F1, I2, F2>::new();
+let mut vb = Builder::<I1, F1, I2, F2>::new();
   
 // you will have to keep track of the input geometry. it will be referenced as 
 // input geometry indices in the output. 
