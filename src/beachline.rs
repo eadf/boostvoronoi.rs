@@ -146,13 +146,14 @@ where
         if let Some(node) = self.beach_line_vec.get(beachline_index.0) {
             let node = node.0;
             if self.beach_line_.remove(&node).is_none() {
+                println!("tried to remove a non-existent beachline:{:?} this error can occur if the input data is self-intersecting", node);
                 return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting".to_string()});
             }
-            if self.beach_line_.contains_key(&node) {
-                return Err(BvError::SomeError {
-                    txt: "Beachline: internal error there are more identical keys".to_string(),
-                });
-            }
+            //if self.beach_line_.contains_key(&node) {
+            //    return Err(BvError::SomeError {
+            //        txt: "Beachline: internal error there are more identical keys".to_string(),
+            //   });
+            //}
             let _ = self.beach_line_vec.remove(beachline_index.0);
         } else {
             return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting".to_string()});

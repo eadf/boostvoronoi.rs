@@ -59,7 +59,7 @@ where
 
         rv.push_str(
             format!(
-                "(x:{:.7},y:{:.7},lx:{:.7})",
+                "(x:{:.12},y:{:.12},lx:{:.12})",
                 self.center_x_, self.center_y_, self.lower_x_,
             )
             .as_str(),

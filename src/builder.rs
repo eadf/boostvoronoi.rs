@@ -166,8 +166,7 @@ where
         while !self.circle_events_.is_empty() || (site_event_iterator_ != self.site_events_.len()) {
             #[cfg(feature = "console_debug")]
             {
-                /*self.beach_line_.debug_print_all();
-                 */
+
                 println!("################################################");
                 println!(
                     "loop:{} circle_events_:{} num_vertices:{} beachline:{} debug_site_counter:{} debug_circle_counter:{}",
@@ -178,7 +177,8 @@ where
                     self.debug_circle_counter,
                 );
                 println!("################################################");
-                if i == 4 {
+                if i >= 8 {
+                    self.beach_line_.debug_print_all_compat(&self.circle_events_);
                     print!("");
                 }
                 i += 1;

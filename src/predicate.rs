@@ -37,11 +37,6 @@ fn is_neg(number: &BigInt) -> bool {
     number < &BigInt::zero()
 }
 
-#[inline(always)]
-fn is_zero(number: &BigInt) -> bool {
-    number.is_zero()
-}
-
 /// Predicate utilities. Operates with the coordinate types that could
 /// be converted to the 32-bit signed integer without precision loss.
 /// Todo! give this a lookover
@@ -374,8 +369,10 @@ where
         let lhs = TC::<I1, F1, I2, F2>::i1_to_f64(lhs.x0());
         let rhs = TC::<I1, F1, I2, F2>::f2_to_f64(rhs.lower_x().into_inner());
         let ulps = Predicates::<I1, F1, I2, F2>::ulps();
-
-        UlpComparison::ulp_comparison(lhs, rhs, ulps) == cmp::Ordering::Less
+        let rv = UlpComparison::ulp_comparison(lhs, rhs, ulps) == cmp::Ordering::Less;
+        #[cfg(feature = "console_debug")]
+        println!("event_comparison_predicate_bif lhs:{} rhs:{} -> {}", lhs, rhs, rv);
+        rv
     }
 
     #[allow(dead_code)]
@@ -1757,7 +1754,7 @@ where
         let b = line_a * dif1 - line_b * dif0;
         let sum_ab = a.clone() + &b;
 
-        if is_zero(&denom) {
+        if denom.is_zero() {
             let numer: BigInt = teta.clone() * &teta - &sum_ab * &sum_ab;
             denom = teta.clone() * &sum_ab;
             ca[0] = denom.clone() * &sum_x * 2 + &numer * &vec_x;
@@ -1967,7 +1964,7 @@ where
         let iy: BigInt = b[0].clone() * &c[1] + &b[1] * &c[0];
         let dx: BigInt = ix.clone() - &orientation * TC::<I1, F1, I2, F2>::i1_to_i128(site1.x());
         let dy: BigInt = iy.clone() - &orientation * TC::<I1, F1, I2, F2>::i1_to_i128(site1.y());
-        if is_zero(&dx) && is_zero(&dy) {
+        if dx.is_zero() && dy.is_zero() {
             let denom: F2 = TC::<I1, F1, I2, F2>::bi_to_f2(&orientation);
             let c_x: F2 = TC::<I1, F1, I2, F2>::bi_to_f2(&ix) / denom;
             let c_y: F2 = TC::<I1, F1, I2, F2>::bi_to_f2(&iy) / denom;

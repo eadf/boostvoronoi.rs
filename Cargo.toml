@@ -27,7 +27,7 @@ name = "piston_gui"
 path = "example/piston_gui.rs"
 
 # this bin is for development test purposes
-[[example]]
+[[bin]]
 name = "main"
 path = "example/main.rs"
 required-features = ["console_debug"]
