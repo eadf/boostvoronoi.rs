@@ -359,9 +359,8 @@ where
         }
     }
 
-    ///
     /// boolean predicate between site and circle (integer<->float)
-    ///
+    #[allow(clippy::let_and_return)]
     pub(crate) fn event_comparison_predicate_bif(
         lhs: &VSE::SiteEvent<I1, F1, I2, F2>,
         rhs: &VC::CircleEvent<F2>,
