@@ -59,12 +59,8 @@ where
 
         rv.push_str(
             format!(
-                "CE(id:{} cx:{:.3} cy:{:.3} lx:{:.3}, bi:{})",
-                super::format_id(self.index_),
-                self.center_x_,
-                self.center_y_,
-                self.lower_x_,
-                VB::debug_print_bli_id(self.beach_line_index_),
+                "(x:{:.7},y:{:.7},lx:{:.7})",
+                self.center_x_, self.center_y_, self.lower_x_,
             )
             .as_str(),
         );
@@ -134,7 +130,7 @@ where
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
         let cell = self.0.get();
-        rv.push_str(format!("CEC({:?}, bl:{})", cell, VB::debug_print_bli_id(self.1),).as_str());
+        rv.push_str(format!("CE{:?}", cell).as_str());
         write!(f, "{}", rv)
     }
 }
@@ -422,8 +418,20 @@ where
     }
 
     pub(crate) fn deactivate(&mut self, circle_event_id: Option<CircleEventIndexType>) {
+        #[cfg(not(feature = "console_debug"))]
         if let Some(circle_event_id) = circle_event_id {
             let _ = self.inactive_circle_ids_.insert(circle_event_id);
+        }
+        #[cfg(feature = "console_debug")]
+        if let Some(circle_event_id) = circle_event_id {
+            if !self.inactive_circle_ids_.contains(&circle_event_id) {
+                if self.c_list_.contains_key(circle_event_id) {
+                    println!("deactivate {:?}", self.c_list_[circle_event_id]);
+                } else {
+                    println!("circle {} not present", circle_event_id);
+                }
+                let _ = self.inactive_circle_ids_.insert(circle_event_id);
+            }
         }
     }
 

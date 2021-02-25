@@ -29,6 +29,8 @@ use std::rc::Rc;
 use vec_map::VecMap;
 
 /// debug utility function
+#[allow(dead_code)]
+#[cfg(feature = "console_debug")]
 pub(crate) fn debug_print_bli_id(value: Option<BeachLineIndex>) -> String {
     if let Some(value) = value {
         value.to_string()
@@ -102,6 +104,7 @@ where
 
     /// updates the node_index of the key, inserts it into the list and
     /// returns a copy of it
+    #[cfg(not(feature = "console_debug"))]
     pub(crate) fn insert(
         &mut self,
         mut key: BeachLineNodeKey<I, O, BI, BF>,
@@ -113,7 +116,28 @@ where
         let _ = self.beach_line_vec.insert(self.next_free_.0, (key, node));
         let _ = self.beach_line_.insert(key, key.node_index_);
         let _ = self.next_free_.increment();
+        key
+    }
 
+    /// updates the node_index of the key, inserts it into the list and
+    /// returns a copy of it
+    #[cfg(feature = "console_debug")]
+    pub(crate) fn insert(
+        &mut self,
+        mut key: BeachLineNodeKey<I, O, BI, BF>,
+        data: Option<BeachLineNodeData>,
+        _ce: &VC::CircleEventQueue<BF>,
+    ) -> BeachLineNodeKey<I, O, BI, BF> {
+        key.node_index_ = self.next_free_;
+
+        let node = Rc::new(Cell::new(data));
+        let _ = self.beach_line_vec.insert(self.next_free_.0, (key, node));
+        let _ = self.beach_line_.insert(key, key.node_index_);
+        let _ = self.next_free_.increment();
+        print!("inserted beachline:");
+        self.debug_print_all_compat_node(&key, _ce);
+        //dbg!("added bl {}", self.next_free_ - 1);
+        //self.debug_print_all();
         key
     }
 
@@ -289,6 +313,7 @@ where
     }
 
     #[allow(dead_code)]
+    #[cfg(feature = "console_debug")]
     pub(crate) fn debug_cmp_all(&self, key: BeachLineNodeKey<I, O, BI, BF>) {
         for (i, v) in self.beach_line_.iter().enumerate() {
             print!("#{}:", i);
@@ -297,6 +322,7 @@ where
         }
     }
 
+    #[cfg(feature = "console_debug")]
     #[allow(dead_code)]
     pub(crate) fn debug_print_all(&self) {
         println!();
@@ -320,6 +346,40 @@ where
                 print!(" temporary bisector");
             }
             println!();
+        }
+        println!();
+    }
+
+    #[cfg(feature = "console_debug")]
+    pub(crate) fn debug_print_all_compat(&self, ce: &VC::CircleEventQueue<BF>) {
+        println!("-----beachline----{}", self.beach_line_.len());
+        for (i, (node, _id)) in self.beach_line_.iter().enumerate() {
+            print!("#{}:", i);
+            self.debug_print_all_compat_node(&node, ce);
+        }
+        println!();
+    }
+
+    #[cfg(feature = "console_debug")]
+    pub(crate) fn debug_print_all_compat_node(
+        &self,
+        node: &BeachLineNodeKey<I, O, BI, BF>,
+        ce: &VC::CircleEventQueue<BF>,
+    ) {
+        let id = &node.get_index();
+        print!("L:{:?},R:{:?}", &node.left_site(), &node.right_site(),);
+        if let Some(data) = self.get_node(id).1.get() {
+            if let Some(_circle_event) = data.circle_event_ {
+                if ce.is_active(_circle_event) {
+                    print!(" -> CircleEvent(..)");
+                } else {
+                    print!(" -> CircleEvent=--");
+                }
+            } else {
+                print!(" -> CircleEvent=-");
+            }
+        } else {
+            print!(" Temporary bisector");
         }
         println!();
     }

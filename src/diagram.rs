@@ -1027,6 +1027,8 @@ where
     ) -> (VoronoiEdgeIndex, VoronoiEdgeIndex) {
         //println!("-> insert_new_edge_5()");
         //dbg!(&site1, &site3, &circle, edge12_id, edge23_id);
+        #[cfg(feature = "console_debug")]
+        println!("new vertex@CE{:?}", circle);
 
         let is_linear = VSE::SiteEvent::<I1, F1, I2, F2>::is_linear_edge(&site1, &site3);
         let is_primary = VSE::SiteEvent::<I1, F1, I2, F2>::is_primary_edge(&site1, &site3);

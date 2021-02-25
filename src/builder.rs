@@ -60,6 +60,10 @@ where
     end_points_: BinaryHeap<VEP::EndPointPair<I1>>,
     pub(crate) beach_line_: VB::Beachline<I1, F1, I2, F2>,
     index_: usize,
+    #[cfg(feature = "console_debug")]
+    debug_circle_counter: isize, // Just for debugging purposes
+    #[cfg(feature = "console_debug")]
+    debug_site_counter: isize, // Just for debugging purposes
     segments_added: bool, // make sure eventual vertices are added before segments
 }
 
@@ -79,6 +83,10 @@ where
             index_: 0,
             end_points_: BinaryHeap::new(),
             circle_events_: VC::CircleEventQueue::<F2>::default(),
+            #[cfg(feature = "console_debug")]
+            debug_circle_counter: 0,
+            #[cfg(feature = "console_debug")]
+            debug_site_counter: 0,
             segments_added: false,
         }
     }
@@ -140,11 +148,45 @@ where
             VD::VoronoiDiagram::<I1, F1, I2, F2>::new(self.site_events_.len());
 
         let mut site_event_iterator_: VSE::SiteEventIndexType = self.init_sites_queue();
-
+        #[cfg(feature = "console_debug")]
+        {
+            println!(
+                "********************************************************************************"
+            );
+            println!("->construct()");
+            println!(
+                "********************************************************************************"
+            );
+        }
         self.init_beach_line(&mut site_event_iterator_, &mut output);
+        #[cfg(feature = "console_debug")]
+        let mut i = 0;
 
         // The algorithm stops when there are no events to process.
         while !self.circle_events_.is_empty() || (site_event_iterator_ != self.site_events_.len()) {
+            #[cfg(feature = "console_debug")]
+            {
+                /*self.beach_line_.debug_print_all();
+                 */
+                println!("################################################");
+                println!(
+                    "loop:{} circle_events_:{} num_vertices:{} beachline:{} debug_site_counter:{} debug_circle_counter:{}",
+                    i,self.circle_events_.len(),
+                    output.num_vertices(),
+                    self.beach_line_.len().0,
+                    self.debug_site_counter,
+                    self.debug_circle_counter,
+                );
+                println!("################################################");
+                if i == 185 {
+                    print!("");
+                }
+                i += 1;
+
+                //if self.debug_site_counter >= 8 {
+                //    print!("");
+                //}
+            }
             if self.circle_events_.is_empty() {
                 self.process_site_event(&mut site_event_iterator_, &mut output)?;
             } else if site_event_iterator_ == self.site_events_.len() {
@@ -180,6 +222,11 @@ where
         // Index sites.
         for (cur, mut s) in self.site_events_.iter_mut().enumerate() {
             s.sorted_index_ = cur;
+        }
+        #[cfg(feature = "console_debug")]
+        {
+            println!("post dedup:");
+            self.debug_site_events();
         }
         // Init site iterator.
         let site_event_iterator_: VSE::SiteEventIndexType = 0;
@@ -263,10 +310,16 @@ where
             let edge = output._insert_new_edge_2(*first, *second).0;
 
             // Insert a new bisector into the beach line.
+            #[cfg(feature = "console_debug")]
+            let _ = self.beach_line_.insert(
+                new_node_key,
+                Some(VB::BeachLineNodeData::new_1(edge)),
+                &self.circle_events_,
+            );
+            #[cfg(not(feature = "console_debug"))]
             let _ = self
                 .beach_line_
                 .insert(new_node_key, Some(VB::BeachLineNodeData::new_1(edge)));
-
             // Update iterators.
             it_first += 1;
             it_second += 1;
@@ -294,9 +347,21 @@ where
         site_event_iterator_: &mut VSE::SiteEventIndexType,
         output: &mut VD::VoronoiDiagram<I1, F1, I2, F2>,
     ) -> Result<(), BvError> {
+        #[cfg(feature = "console_debug")]
+        {
+            //println!("->process_site_event");
+            if self.debug_site_counter >= 109 {
+                print!("");
+            }
+            //self.beach_line_.debug_print_all();
+            //}
+            self.debug_site_counter += 1;
+        }
         let (mut right_it, last_index) = {
             // Get next site event to process.
             let site_event = self.site_events_.get(*site_event_iterator_).unwrap();
+            #[cfg(feature = "console_debug")]
+            println!("processing site:{}", site_event); //dbg!(&site_event);
 
             // Move site iterator.
             let mut last_index = *site_event_iterator_ + 1;
@@ -333,7 +398,17 @@ where
 
             (right_it, last_index)
         };
-
+        #[cfg(feature = "console_debug")]
+        {
+            let debug_range = 999999;
+            if self.debug_circle_counter >= debug_range
+                && self.debug_circle_counter <= debug_range + 2
+            {
+                self.beach_line_
+                    .debug_print_all_compat(&self.circle_events_);
+                //print!("right_it:"); self.beach_line_.debug_print_all_compat_node(&right_it);
+            }
+        }
         while *site_event_iterator_ != last_index {
             // site_event is a copy of the the event site_event_iterator_ is indexing
             let mut site_event = self.site_events_[*site_event_iterator_];
@@ -459,9 +534,22 @@ where
         &mut self,
         output: &mut VD::VoronoiDiagram<I1, F1, I2, F2>,
     ) -> Result<(), BvError> {
+        #[cfg(feature = "console_debug")]
+        {
+            let debug_range = 999999;
+            if self.debug_circle_counter >= debug_range
+                && self.debug_circle_counter <= debug_range + 2
+            {
+                print!("");
+            }
+            self.debug_circle_counter += 1;
+        }
         // Get the topmost circle event.
         let e = self.circle_events_.top().unwrap();
         let circle_event = e.0.get();
+        #[cfg(feature = "console_debug")]
+        println!("processing:CE{:?}", circle_event);
+
         if !self
             .circle_events_
             .is_active(circle_event.get_index().unwrap())
@@ -471,7 +559,19 @@ where
         }
         let it_first = &self.beach_line_.get_node(&e.1.unwrap());
         let it_last = it_first;
-
+        #[cfg(feature = "console_debug")]
+        {
+            let debug_range = 999999;
+            if self.debug_circle_counter >= debug_range
+                && self.debug_circle_counter <= debug_range + 2
+            {
+                self.beach_line_
+                    .debug_print_all_compat(&self.circle_events_);
+                print!("it_first:");
+                self.beach_line_
+                    .debug_print_all_compat_node(&it_first.0, &self.circle_events_);
+            }
+        }
         // Get the C site.
         let site3 = it_first.0.right_site();
 
@@ -595,9 +695,16 @@ where
         // Update the output.
         let edges = output._insert_new_edge_2(site_arc2, site_event);
 
+        #[cfg(not(feature = "console_debug"))]
         let _ = self
             .beach_line_
             .insert(new_right_node, Some(VB::BeachLineNodeData::new_1(edges.1)));
+        #[cfg(feature = "console_debug")]
+        let _ = self.beach_line_.insert(
+            new_right_node,
+            Some(VB::BeachLineNodeData::new_1(edges.1)),
+            &self.circle_events_,
+        );
 
         if site_event.is_segment() {
             // Update the beach line with temporary bisector, that will
@@ -606,8 +713,13 @@ where
             let mut new_node =
                 VB::BeachLineNodeKey::<I1, F1, I2, F2>::new_2(site_event, site_event);
             let _ = new_node.right_site_m().inverse();
-            let new_node = self.beach_line_.insert(new_node, None);
 
+            #[cfg(feature = "console_debug")]
+            let new_node = self
+                .beach_line_
+                .insert(new_node, None, &self.circle_events_);
+            #[cfg(not(feature = "console_debug"))]
+            let new_node = self.beach_line_.insert(new_node, None);
             // Update the data structure that holds temporary bisectors.
             self.end_points_.push(VEP::EndPointPair::new_2(
                 *site_event.point1(),
@@ -616,9 +728,18 @@ where
         }
         let new_node_data = VB::BeachLineNodeData::new_1(edges.0);
         //let rv =
-        self.beach_line_
-            .insert(new_left_node, Some(new_node_data))
-            .get_index()
+        #[cfg(not(feature = "console_debug"))]
+        {
+            self.beach_line_
+                .insert(new_left_node, Some(new_node_data))
+                .get_index()
+        }
+        #[cfg(feature = "console_debug")]
+        {
+            self.beach_line_
+                .insert(new_left_node, Some(new_node_data), &self.circle_events_)
+                .get_index()
+        }
     }
 
     /// Add a new circle event to the event queue.
@@ -641,7 +762,10 @@ where
             // Add the new circle event to the circle events queue.
             // Update bisector's circle event iterator to point to the
             // new circle event in the circle event queue.
-
+            #[cfg(feature = "console_debug")]
+            {
+                println!("added circle event:{:?}", c_event);
+            }
             let e = self.circle_events_.associate_and_push(c_event);
             {
                 let b = self.beach_line_.get_node(&bisector_node);
@@ -649,9 +773,20 @@ where
                     let _ = bd.set_circle_event_id(Some(e.0.get().get_index().unwrap())); // make sure it is_some()
                     b.1.set(Some(bd));
                 } else {
+                    // todo: raise error instead
                     panic!();
                 }
             }
         }
+    }
+
+    #[allow(dead_code)]
+    #[cfg(feature = "console_debug")]
+    fn debug_site_events(&self) {
+        println!("Site event list:");
+        for s in self.site_events_.iter() {
+            println!("{}", s);
+        }
+        println!("#site_events={}", self.site_events_.len());
     }
 }

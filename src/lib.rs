@@ -4,6 +4,9 @@
 #![deny(unused_qualifications)]
 #![deny(unused_results)]
 #![deny(unused_imports)]
+// I use allow clippy::upper_case_acronyms
+#![allow(renamed_and_removed_lints)]
+#![allow(clippy::unknown_clippy_lints)]
 
 use core::fmt::Debug;
 use num::bigint::BigInt;

@@ -346,6 +346,15 @@ where
         lhs: &VSE::SiteEvent<I1, F1, I2, F2>,
         rhs: &VSE::SiteEvent<I1, F1, I2, F2>,
     ) -> cmp::Ordering {
+        #[cfg(feature = "console_debug")]
+        // this is technically not needed as ordering of identical point sites is random in C++ boost
+        if lhs.is_point() && rhs.is_point() && lhs.point0() == rhs.point0() {
+            if lhs.initial_index() < rhs.initial_index() {
+                return cmp::Ordering::Greater;
+            } else {
+                return cmp::Ordering::Less;
+            }
+        }
         if Self::event_comparison_predicate_bii(lhs, rhs) {
             cmp::Ordering::Less
         } else {

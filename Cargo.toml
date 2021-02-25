@@ -17,7 +17,10 @@ rb_tree = "^0.3.3"
 vec_map = "^0.8.2"
 num-bigint = "^0.3.1"
 num-traits = "^0.2.14"
-thiserror = "^1.0.23"
+thiserror = "^1.0.24"
+
+[features]
+console_debug = []
 
 [[example]]
 name = "piston_gui"
@@ -35,3 +38,4 @@ piston2d-graphics = "^0.39.0"
 piston2d-touch_visualizer = "^0.29.0"
 pistoncore-sdl2_window = "^0.67.0"
 geo = "^0.17.0"
+
