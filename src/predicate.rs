@@ -87,10 +87,10 @@ where
     pub(crate) fn robust_cross_product(a1_: I1, b1_: I1, a2_: I1, b2_: I1) -> F2 {
         let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
 
-        let a1: I2 = i1_to_i2(if TCI::<I1>::is_neg(a1_) { -a1_ } else { a1_ });
-        let b1: I2 = i1_to_i2(if TCI::<I1>::is_neg(b1_) { -b1_ } else { b1_ });
-        let a2: I2 = i1_to_i2(if TCI::<I1>::is_neg(a2_) { -a2_ } else { a2_ });
-        let b2: I2 = i1_to_i2(if TCI::<I1>::is_neg(b2_) { -b2_ } else { b2_ });
+        let a1: I2 = i1_to_i2(a1_);
+        let b1: I2 = i1_to_i2(b1_);
+        let a2: I2 = i1_to_i2(a2_);
+        let b2: I2 = i1_to_i2(b2_);
         robust_cross_product_f::<I2, F2>(a1, b1, a2, b2)
     }
 
@@ -140,6 +140,8 @@ where
         + Zero
         + Neg<Output = U>,
 {
+    // Why can't *all* integers implement is_negative()?
+    // It would make it easier to implement generic code
     let a1: T = if a1_ < T::zero() { -a1_ } else { a1_ };
     let b1: T = if b1_ < T::zero() { -b1_ } else { b1_ };
     let a2: T = if a2_ < T::zero() { -a2_ } else { a2_ };

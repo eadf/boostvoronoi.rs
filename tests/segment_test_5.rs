@@ -20,7 +20,7 @@ fn to_segments<T: InputType>(points: &[[T; 4]]) -> Vec<Line<T>> {
     points.iter().map(|x| x.into()).collect()
 }
 
-#[ignore]
+//#[ignore]
 #[test]
 fn segment_5_1() -> Result<(), BvError> {
     let _output = {
@@ -39,7 +39,7 @@ fn segment_5_1() -> Result<(), BvError> {
     Ok(())
 }
 
-#[ignore]
+//#[ignore]
 #[test]
 fn segment_5_2() -> Result<(), BvError> {
     let _output = {

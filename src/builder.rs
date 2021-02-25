@@ -178,7 +178,7 @@ where
                     self.debug_circle_counter,
                 );
                 println!("################################################");
-                if i == 185 {
+                if i == 4 {
                     print!("");
                 }
                 i += 1;
