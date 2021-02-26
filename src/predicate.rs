@@ -2021,6 +2021,7 @@ where
     /// Recompute parameters of the circle event using high-precision library.
     #[allow(non_snake_case)]
     #[allow(clippy::many_single_char_names)]
+    #[allow(clippy::suspicious_operation_groupings)]
     fn sss(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,
@@ -2034,9 +2035,6 @@ where
         let i1_to_i128 = TC::<I1, F1, I2, F2>::i1_to_i128;
         let sqrt_expr_ = VR::robust_sqrt_expr::<F2>::new();
 
-        let mut a: [BigInt; 3] = [BigInt::zero(), BigInt::zero(), BigInt::zero()];
-        let mut b: [BigInt; 3] = [BigInt::zero(), BigInt::zero(), BigInt::zero()];
-        let mut c: [BigInt; 3] = [BigInt::zero(), BigInt::zero(), BigInt::zero()];
         let mut cA: [BigInt; 4] = [
             BigInt::zero(),
             BigInt::zero(),
@@ -2052,23 +2050,27 @@ where
 
         // cA - corresponds to the cross product.
         // cB - corresponds to the squared length.
-        #[allow(clippy::suspicious_operation_groupings)]
-        {
-            a[0] = i1_to_bi(site1.x1()) - i1_to_i128(site1.x0());
-            a[1] = i1_to_bi(site2.x1()) - i1_to_i128(site2.x0());
-            a[2] = i1_to_bi(site3.x1()) - i1_to_i128(site3.x0());
 
-            b[0] = i1_to_bi(site1.y1()) - i1_to_i128(site1.y0());
-            b[1] = i1_to_bi(site2.y1()) - i1_to_i128(site2.y0());
-            b[2] = i1_to_bi(site3.y1()) - i1_to_i128(site3.y0());
+        let a = [
+            i1_to_bi(site1.x1()) - i1_to_i128(site1.x0()),
+            i1_to_bi(site2.x1()) - i1_to_i128(site2.x0()),
+            i1_to_bi(site3.x1()) - i1_to_i128(site3.x0()),
+        ];
+        let b = [
+            i1_to_bi(site1.y1()) - i1_to_i128(site1.y0()),
+            i1_to_bi(site2.y1()) - i1_to_i128(site2.y0()),
+            i1_to_bi(site3.y1()) - i1_to_i128(site3.y0()),
+        ];
 
-            c[0] = i1_to_bi(site1.x0()) * i1_to_i128(site1.y1())
-                - i1_to_i128(site1.y0()) * i1_to_i128(site1.x1());
-            c[1] = i1_to_bi(site2.x0()) * i1_to_i128(site2.y1())
-                - i1_to_i128(site2.y0()) * i1_to_i128(site2.x1());
-            c[2] = i1_to_bi(site3.x0()) * i1_to_i128(site3.y1())
-                - i1_to_i128(site3.y0()) * i1_to_i128(site3.x1());
-        }
+        let c = [
+            i1_to_bi(site1.x0()) * i1_to_i128(site1.y1())
+                - i1_to_i128(site1.y0()) * i1_to_i128(site1.x1()),
+            i1_to_bi(site2.x0()) * i1_to_i128(site2.y1())
+                - i1_to_i128(site2.y0()) * i1_to_i128(site2.x1()),
+            i1_to_bi(site3.x0()) * i1_to_i128(site3.y1())
+                - i1_to_i128(site3.y0()) * i1_to_i128(site3.x1()),
+        ];
+
         for (i, aa) in a.iter().enumerate().take(3) {
             cB[i] = aa.clone() * aa + &b[i] * &b[i];
         }
@@ -2076,7 +2078,7 @@ where
         for i in 0..3 {
             let j = (i + 1) % 3;
             let k = (i + 2) % 3;
-            cA[i] = a[j].clone() * &b[k] - &a[k] * &b[j];
+            cA[i] = &a[j] * &b[k] - &a[k] * &b[j];
         }
         let denom = sqrt_expr_.eval3(&cA, &cB);
 
@@ -2085,7 +2087,7 @@ where
             for i in 0..3 {
                 let j = (i + 1) % 3;
                 let k = (i + 2) % 3;
-                cA[i] = b[j].clone() * &c[k] - &b[k] * &c[j];
+                cA[i] = &b[j] * &c[k] - &b[k] * &c[j];
             }
             let c_y = sqrt_expr_.eval3(&cA, &cB);
             c_event.set_y_raw((c_y / denom).fpv());
@@ -2096,7 +2098,7 @@ where
             for i in 0..3 {
                 let j = (i + 1) % 3;
                 let k = (i + 2) % 3;
-                cA[i] = a[j].clone() * &c[k] - &a[k] * &c[j];
+                cA[i] = &a[j] * &c[k] - &a[k] * &c[j];
                 if recompute_lower_x {
                     cA[3] = cA[3].clone() + &cA[i] * &b[i];
                 }
