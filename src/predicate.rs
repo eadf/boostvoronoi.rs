@@ -370,7 +370,10 @@ where
         let ulps = Predicates::<I1, F1, I2, F2>::ulps();
         let rv = UlpComparison::ulp_comparison(lhs, rhs, ulps) == cmp::Ordering::Less;
         #[cfg(feature = "console_debug")]
-        println!("event_comparison_predicate_bif lhs:{} rhs:{} -> {}", lhs, rhs, rv);
+        println!(
+            "event_comparison_predicate_bif lhs:{} rhs:{} -> {}",
+            lhs, rhs, rv
+        );
         rv
     }
 
@@ -1632,41 +1635,50 @@ where
         recompute_c_y: bool,
         recompute_lower_x: bool,
     ) {
-        let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
-        let i2_to_f2 = TC::<I1, F1, I2, F2>::i2_to_f2;
+        let bi_to_f2 = TC::<I1, F1, I2, F2>::bi_to_f2;
+        let i1_to_bi = TC::<I1, F1, I2, F2>::i1_to_bi;
+        let i1_to_i128 = TC::<I1, F1, I2, F2>::i1_to_i128;
 
         let half: F2 = num::cast::<f32, F2>(0.5f32).unwrap();
 
-        let mut dif_x: [I2; 3] = [I2::zero(); 3];
-        let mut dif_y: [I2; 3] = [I2::zero(); 3];
-        let mut sum_x: [I2; 2] = [I2::zero(); 2];
-        let mut sum_y: [I2; 2] = [I2::zero(); 2];
+        let dif_x = [
+            i1_to_bi(site1.x()) - i1_to_i128(site2.x()),
+            i1_to_bi(site2.x()) - i1_to_i128(site3.x()),
+            i1_to_bi(site1.x()) - i1_to_i128(site3.x()),
+        ];
 
-        dif_x[0] = i1_to_i2(site1.x()) - i1_to_i2(site2.x());
-        dif_x[1] = i1_to_i2(site2.x()) - i1_to_i2(site3.x());
-        dif_x[2] = i1_to_i2(site1.x()) - i1_to_i2(site3.x());
-        dif_y[0] = i1_to_i2(site1.y()) - i1_to_i2(site2.y());
-        dif_y[1] = i1_to_i2(site2.y()) - i1_to_i2(site3.y());
-        dif_y[2] = i1_to_i2(site1.y()) - i1_to_i2(site3.y());
-        sum_x[0] = i1_to_i2(site1.x()) + i1_to_i2(site2.x());
-        sum_x[1] = i1_to_i2(site2.x()) + i1_to_i2(site3.x());
-        sum_y[0] = i1_to_i2(site1.y()) + i1_to_i2(site2.y());
-        sum_y[1] = i1_to_i2(site2.y()) + i1_to_i2(site3.y());
+        let dif_y = [
+            i1_to_bi(site1.y()) - i1_to_i128(site2.y()),
+            i1_to_bi(site2.y()) - i1_to_i128(site3.y()),
+            i1_to_bi(site1.y()) - i1_to_i128(site3.y()),
+        ];
 
-        let inv_denom: F2 = half / i2_to_f2(dif_x[0] * dif_y[1] - dif_x[1] * dif_y[0]);
-        let numer1: I2 = dif_x[0] * sum_x[0] + dif_y[0] * sum_y[0];
-        let numer2: I2 = dif_x[1] * sum_x[1] + dif_y[1] * sum_y[1];
+        let sum_x = [
+            i1_to_bi(site1.x()) + i1_to_i128(site2.x()),
+            i1_to_bi(site2.x()) + i1_to_i128(site3.x()),
+        ];
+        let sum_y = [
+            i1_to_bi(site1.y()) + i1_to_i128(site2.y()),
+            i1_to_bi(site2.y()) + i1_to_i128(site3.y()),
+        ];
+
+        let inv_denom: F2 = {
+            let tmp = &dif_x[0] * &dif_y[1] - &dif_x[1] * &dif_y[0];
+            half / bi_to_f2(&tmp)
+        };
+        let numer1: BigInt = &dif_x[0] * &sum_x[0] + &dif_y[0] * &sum_y[0];
+        let numer2: BigInt = &dif_x[1] * &sum_x[1] + &dif_y[1] * &sum_y[1];
 
         if recompute_c_x || recompute_lower_x {
-            let c_x: I2 = numer1 * dif_y[1] - numer2 * dif_y[0];
-            circle.set_x_raw(i2_to_f2(c_x) * inv_denom);
+            let c_x: BigInt = &numer1 * &dif_y[1] - &numer2 * &dif_y[0];
+            circle.set_x_raw(bi_to_f2(&c_x) * inv_denom);
 
             if recompute_lower_x {
                 // Evaluate radius of the circle.
-                let sqr_r: I2 = (dif_x[0] * dif_x[0] + dif_y[0] * dif_y[0])
-                    * (dif_x[1] * dif_x[1] + dif_y[1] * dif_y[1])
-                    * (dif_x[2] * dif_x[2] + dif_y[2] * dif_y[2]);
-                let r: F2 = i2_to_f2(sqr_r).sqrt();
+                let sqr_r: BigInt = (&dif_x[0] * &dif_x[0] + &dif_y[0] * &dif_y[0])
+                    * (&dif_x[1] * &dif_x[1] + &dif_y[1] * &dif_y[1])
+                    * (&dif_x[2] * &dif_x[2] + &dif_y[2] * &dif_y[2]);
+                let r: F2 = bi_to_f2(&sqr_r).sqrt();
 
                 // If c_x >= 0 then lower_x = c_x + r,
                 // else lower_x = (c_x * c_x - r * r) / (c_x - r).
@@ -1682,16 +1694,16 @@ where
                         circle.set_lower_x_raw(tmp_circle_x - r * inv_denom);
                     }
                 } else {
-                    let numer: I2 = c_x * c_x - sqr_r;
-                    let lower_x: F2 = i2_to_f2(numer) * inv_denom / (i2_to_f2(c_x) + r);
+                    let numer: BigInt = &c_x * &c_x - &sqr_r;
+                    let lower_x: F2 = bi_to_f2(&numer) * inv_denom / (bi_to_f2(&c_x) + r);
                     circle.set_lower_x_raw(lower_x);
                 }
             }
         }
 
         if recompute_c_y {
-            let c_y: I2 = numer2 * dif_x[0] - numer1 * dif_x[1];
-            circle.set_y_raw(i2_to_f2(c_y) * inv_denom);
+            let c_y: BigInt = &numer2 * &dif_x[0] - &numer1 * &dif_x[1];
+            circle.set_y_raw(bi_to_f2(&c_y) * inv_denom);
         }
     }
 
@@ -1716,8 +1728,6 @@ where
         let half: F2 = num::cast::<f64, F2>(1f64 / 2.0f64).unwrap();
         let one: I2 = num::cast::<i8, I2>(1i8).unwrap();
         let neg_one = -1i32;
-        //let two = 2;//: I2 = num::cast::<i8, I2>(2i8).unwrap();
-        //let four: I2 = num::cast::<i8, I2>(4i8).unwrap();
 
         // Todo: is 5 the correct size?
         let mut ca: [BigInt; 5] = [
