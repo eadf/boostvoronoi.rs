@@ -132,12 +132,20 @@ where
 
         let node = Rc::new(Cell::new(data));
         let _ = self.beach_line_vec.insert(self.next_free_.0, (key, node));
-        let _ = self.beach_line_.insert(key, key.node_index_);
+        let _prev_value = self.beach_line_.insert(key, key.node_index_);
+        if _prev_value.is_some() {
+            println!("+++++++++++++++++++++++++++++++++++++++++");
+            println!(
+                "inserted beachline but it collided id:{:?}",
+                _prev_value.unwrap()
+            );
+            println!("with {:?}", _prev_value.unwrap());
+        }
         let _ = self.next_free_.increment();
+        #[cfg(feature = "console_debug")]
         print!("inserted beachline:");
+        #[cfg(feature = "console_debug")]
         self.debug_print_all_compat_node(&key, _ce);
-        //dbg!("added bl {}", self.next_free_ - 1);
-        //self.debug_print_all();
         key
     }
 
@@ -145,8 +153,12 @@ where
         //todo is this correct?
         if let Some(node) = self.beach_line_vec.get(beachline_index.0) {
             let node = node.0;
+            #[cfg(feature = "console_debug")]
+            println!("erased beachline:{:?}", node);
             if self.beach_line_.remove(&node).is_none() {
-                println!("tried to remove a non-existent beachline:{:?} this error can occur if the input data is self-intersecting", node);
+                println!("Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting");
+                println!("{:?}", node);
+                self.debug_print_all_dump_and_cmp(&node);
                 return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting".to_string()});
             }
             //if self.beach_line_.contains_key(&node) {
@@ -361,6 +373,30 @@ where
         println!();
     }
 
+    //#[cfg(feature = "console_debug")]
+    pub(crate) fn debug_print_all_dump_and_cmp(&self, key: &BeachLineNodeKey<I, O, BI, BF>) {
+        println!("-----beachline----{}", self.beach_line_.len());
+        println!("Looking for {:?} in the beachline", key);
+        let found = self.beach_line_.get(key);
+        println!("Found {:?}", found);
+        for (i, (node, _id)) in self.beach_line_.iter().enumerate() {
+            let _cmp = node.cmp(key);
+            print!("#{}: key:{:?}, cmp:{:?}", i, node, _cmp);
+            if _cmp == Ordering::Equal {
+                println!("  <----- THIS IS THE PROBLEM, 'get()' could not find it, but it's here!!")
+            } else {
+                println!()
+            };
+        }
+        println!();
+        let mut it1= self.beach_line_.iter().enumerate();
+        for it2_v in self.beach_line_.iter().enumerate().skip(1) {
+            let it1_v = it1.next().unwrap();
+            print!("key(#{}).cmp(key(#{})) == {:?}", it1_v.0, it2_v.0, it1_v.1.0.cmp(it2_v.1.0));
+            println!("\tkey(#{}).cmp(key(#{})) == {:?}", it2_v.0, it1_v.0, it2_v.1.0.cmp(it1_v.1.0));
+        }
+    }
+
     #[cfg(feature = "console_debug")]
     pub(crate) fn debug_print_all_compat_node(
         &self,
@@ -382,7 +418,7 @@ where
         } else {
             print!(" Temporary bisector");
         }
-        println!();
+        println!(" id={}", id);
     }
 }
 
