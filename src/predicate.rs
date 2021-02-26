@@ -1746,26 +1746,26 @@ where
         ];
         let line_a: BigInt = i1_to_bi(site3.y1()) - i1_to_i128(site3.y0());
         let line_b: BigInt = i1_to_bi(site3.x0()) - i1_to_i128(site3.x1());
-        let segm_len = line_a.clone() * &line_a + &line_b * &line_b;
+        let segm_len: BigInt = &line_a * &line_a + &line_b * &line_b;
         let vec_x: BigInt = i1_to_bi(site2.y()) - i1_to_i128(site1.y());
         let vec_y: BigInt = i1_to_bi(site1.x()) - i1_to_i128(site2.x());
         let sum_x: BigInt = i1_to_bi(site1.x()) + i1_to_i128(site2.x());
         let sum_y: BigInt = i1_to_bi(site1.y()) + i1_to_i128(site2.y());
-        let teta = line_a.clone() * &vec_x + &line_b * &vec_y;
-        let mut denom: BigInt = vec_x.clone() * &line_b - &vec_y * &line_a;
+        let teta: BigInt = &line_a * &vec_x + &line_b * &vec_y;
+        let mut denom: BigInt = &vec_x * &line_b - &vec_y * &line_a;
 
         let mut dif0: BigInt = i1_to_bi(site3.y1()) - i1_to_i128(site1.y());
         let mut dif1: BigInt = i1_to_bi(site1.x()) - i1_to_i128(site3.x1());
-        let a: BigInt = line_a.clone() * &dif1 - &line_b * &dif0;
+        let a: BigInt = &line_a * &dif1 - &line_b * &dif0;
 
         dif0 = i1_to_bi(site3.y1()) - i1_to_i128(site2.y());
         dif1 = i1_to_bi(site2.x()) - i1_to_i128(site3.x1());
         let b = line_a * dif1 - line_b * dif0;
-        let sum_ab = a.clone() + &b;
+        let sum_ab = &a + &b;
 
         if denom.is_zero() {
-            let numer: BigInt = teta.clone() * &teta - &sum_ab * &sum_ab;
-            denom = teta.clone() * &sum_ab;
+            let numer: BigInt = &teta * &teta - &sum_ab * &sum_ab;
+            denom = &teta * &sum_ab;
             ca[0] = denom.clone() * &sum_x * 2 + &numer * &vec_x;
             cb[0] = segm_len.clone();
             ca[1] = denom.clone() * &sum_ab * 2 + &numer * &teta;
@@ -1788,7 +1788,7 @@ where
             }
             return;
         }
-        let det: BigInt = (teta.clone() * &teta + &denom * &denom) * &a * &b * 4;
+        let det: BigInt = (&teta * &teta + &denom * &denom) * &a * &b * 4;
         let mut inv_denom_sqr: F2 =
             TC::<I1, F1, I2, F2>::i2_to_f2(one) / TC::<I1, F1, I2, F2>::bi_to_f2(&denom);
         inv_denom_sqr = inv_denom_sqr * inv_denom_sqr;
@@ -1853,17 +1853,8 @@ where
     ) {
         let i1_to_i128 = TC::<I1, F1, I2, F2>::i1_to_i128;
         let bi_to_f2 = TC::<I1, F1, I2, F2>::bi_to_f2;
-
-        /*if site1.sorted_index() == 5 && site2.sorted_index() == 6 && site3.sorted_index() == 4 {
-            println!("site1:{}", site1);
-            println!("site2:{}", site2);
-            println!("site3:{}", site3);
-        }*/
         let mut sqrt_expr_ = VR::robust_sqrt_expr::<F2>::new();
-        let one: BigInt = BigInt::from(1); //num::cast::<i8, I2>(1i8).unwrap();
 
-        let mut a: [BigInt; 2] = [BigInt::zero(), BigInt::zero()];
-        let mut b: [BigInt; 2] = [BigInt::zero(), BigInt::zero()];
         let mut c: [BigInt; 2] = [BigInt::zero(), BigInt::zero()];
         let mut cA: [BigInt; 4] = [
             BigInt::zero(),
@@ -1882,35 +1873,40 @@ where
         let segm_end1 = site2.point0();
         let segm_start2 = site3.point0();
         let segm_end2 = site3.point1();
-        a[0] = TC::<I1, F1, I2, F2>::i1_to_bi(segm_end1.x)
-            - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.x);
-        b[0] = TC::<I1, F1, I2, F2>::i1_to_bi(segm_end1.y)
-            - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.y);
-        a[1] = TC::<I1, F1, I2, F2>::i1_to_bi(segm_end2.x)
-            - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.x);
-        b[1] = TC::<I1, F1, I2, F2>::i1_to_bi(segm_end2.y)
-            - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.y);
-        let orientation: BigInt = a[1].clone() * &b[0] - &a[0] * &b[1];
+        let a: [BigInt; 2] = [
+            TC::<I1, F1, I2, F2>::i1_to_bi(segm_end1.x)
+                - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.x),
+            TC::<I1, F1, I2, F2>::i1_to_bi(segm_end2.x)
+                - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.x),
+        ];
+
+        let b: [BigInt; 2] = [
+            TC::<I1, F1, I2, F2>::i1_to_bi(segm_end1.y)
+                - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.y),
+            TC::<I1, F1, I2, F2>::i1_to_bi(segm_end2.y)
+                - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.y),
+        ];
+        let orientation: BigInt = &a[1] * &b[0] - &a[0] * &b[1];
         if orientation.is_zero() {
             let denom = {
-                let denomp1 = a[0].clone() * &a[0];
-                let denomp2 = b[0].clone() * &b[0] * 2;
+                let denomp1 = &a[0] * &a[0];
+                let denomp2 = &b[0] * &b[0] * 2;
                 let denom: BigInt = denomp1 + denomp2;
                 bi_to_f2(&denom)
             };
-            c[0] = b[0].clone()
+            c[0] = &b[0]
                 * (TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.x)
                     - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.x))
                 - &a[0]
                     * (TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.y)
                         - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.y));
-            let dx: BigInt = a[0].clone()
+            let dx: BigInt = &a[0]
                 * (TC::<I1, F1, I2, F2>::i1_to_bi(site1.y())
                     - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.y))
                 - &b[0]
                     * (TC::<I1, F1, I2, F2>::i1_to_bi(site1.x())
                         - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.x));
-            let dy: BigInt = b[0].clone()
+            let dy: BigInt = &b[0]
                 * (TC::<I1, F1, I2, F2>::i1_to_bi(site1.x())
                     - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.x))
                 - &a[0]
@@ -1920,8 +1916,8 @@ where
             cB[1] = BigInt::from(1);
 
             if recompute_c_y {
-                cA[0] = b[0].clone() * if point_index == 2i32 { 2i32 } else { -2i32 };
-                cA[1] = a[0].clone()
+                cA[0] = &b[0] * if point_index == 2i32 { 2i32 } else { -2i32 };
+                cA[1] = &a[0]
                     * &a[0]
                     * (TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.y)
                         + TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.y))
@@ -1937,15 +1933,14 @@ where
             }
 
             if recompute_c_x || recompute_lower_x {
-                cA[0] = a[0].clone() * BigInt::from(if point_index == 2i32 { 2i32 } else { -2i32 });
-                cA[1] =
-                    b[0].clone() * &b[0] * (i1_to_i128(segm_start1.x) + i1_to_i128(segm_start2.x))
-                        - &a[0]
-                            * &b[0]
-                            * (i1_to_i128(segm_start1.y) + i1_to_i128(segm_start2.y)
-                                - i1_to_i128(site1.y()))
-                            * 2
-                        + &a[0] * &a[0] * (i1_to_i128(site1.x())) * 2;
+                cA[0] = &a[0] * BigInt::from(if point_index == 2i32 { 2i32 } else { -2i32 });
+                cA[1] = &b[0] * &b[0] * (i1_to_i128(segm_start1.x) + i1_to_i128(segm_start2.x))
+                    - &a[0]
+                        * &b[0]
+                        * (i1_to_i128(segm_start1.y) + i1_to_i128(segm_start2.y)
+                            - i1_to_i128(site1.y()))
+                        * 2
+                    + &a[0] * &a[0] * (i1_to_i128(site1.x())) * 2;
 
                 if recompute_c_x {
                     let c_x = sqrt_expr_.eval2(&cA, &cB);
@@ -1958,19 +1953,19 @@ where
                     } else {
                         c[0].clone()
                     };
-                    cB[2] = a[0].clone() * &a[0] + &b[0] * &b[0];
+                    cB[2] = &a[0] * &a[0] + &b[0] * &b[0];
                     let lower_x = sqrt_expr_.eval3(&cA, &cB);
                     c_event.set_lower_x_raw((lower_x / denom).fpv());
                 }
             }
             return;
         }
-        c[0] = b[0].clone() * TC::<I1, F1, I2, F2>::i1_to_i128(segm_end1.x)
-            - &a[0] * i1_to_i128(segm_end1.y);
-        c[1] = a[1].clone() * TC::<I1, F1, I2, F2>::i1_to_i128(segm_end2.y)
-            - &b[1] * i1_to_i128(segm_end2.x);
-        let ix: BigInt = a[0].clone() * &c[1] + &a[1] * &c[0];
-        let iy: BigInt = b[0].clone() * &c[1] + &b[1] * &c[0];
+        c[0] =
+            &b[0] * TC::<I1, F1, I2, F2>::i1_to_i128(segm_end1.x) - &a[0] * i1_to_i128(segm_end1.y);
+        c[1] =
+            &a[1] * TC::<I1, F1, I2, F2>::i1_to_i128(segm_end2.y) - &b[1] * i1_to_i128(segm_end2.x);
+        let ix: BigInt = &a[0] * &c[1] + &a[1] * &c[0];
+        let iy: BigInt = &b[0] * &c[1] + &b[1] * &c[0];
         let dx: BigInt = ix.clone() - &orientation * TC::<I1, F1, I2, F2>::i1_to_i128(site1.x());
         let dy: BigInt = iy.clone() - &orientation * TC::<I1, F1, I2, F2>::i1_to_i128(site1.y());
         if dx.is_zero() && dy.is_zero() {
@@ -1982,30 +1977,30 @@ where
         }
 
         let sign: BigInt = BigInt::from(if point_index == 2i32 { 1i32 } else { -1i32 })
-            * if is_neg(&orientation) { one } else { -one };
+            * if is_neg(&orientation) { 1 } else { -1 };
         // todo: remove -1*-1
-        cA[0] = a[1].clone() * -1 * &dx + &b[1] * -1 * &dy;
-        cA[1] = a[0].clone() * -1 * &dx + &b[0] * -1 * &dy;
+        cA[0] = &a[1] * -1 * &dx + &b[1] * -1 * &dy;
+        cA[1] = &a[0] * -1 * &dx + &b[0] * -1 * &dy;
         cA[2] = sign.clone();
         cA[3] = BigInt::zero();
-        cB[0] = a[0].clone() * &a[0] + &b[0] * &b[0];
-        cB[1] = a[1].clone() * &a[1] + &b[1] * &b[1];
-        cB[2] = a[0].clone() * &a[1] + &b[0] * &b[1];
-        cB[3] = (a[0].clone() * &dy - &b[0] * &dx) * (&a[1] * &dy - &b[1] * &dx) * -2;
+        cB[0] = &a[0] * &a[0] + &b[0] * &b[0];
+        cB[1] = &a[1] * &a[1] + &b[1] * &b[1];
+        cB[2] = &a[0] * &a[1] + &b[0] * &b[1];
+        cB[3] = (&a[0] * &dy - &b[0] * &dx) * (&a[1] * &dy - &b[1] * &dx) * -2;
         let temp = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
         let denom = temp * TC::<I1, F1, I2, F2>::bi_to_f2(&orientation);
 
         if recompute_c_y {
-            cA[0] = b[1].clone() * (&dx * &dx + &dy * &dy) - &iy * (&dx * &a[1] + &dy * &b[1]);
-            cA[1] = b[0].clone() * (&dx * &dx + &dy * &dy) - &iy * (&dx * &a[0] + &dy * &b[0]);
+            cA[0] = &b[1] * (&dx * &dx + &dy * &dy) - &iy * (&dx * &a[1] + &dy * &b[1]);
+            cA[1] = &b[0] * (&dx * &dx + &dy * &dy) - &iy * (&dx * &a[0] + &dy * &b[0]);
             cA[2] = iy * &sign;
             let cy = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
             c_event.set_y_raw((cy / denom).fpv());
         }
 
         if recompute_c_x || recompute_lower_x {
-            cA[0] = a[1].clone() * (&dx * &dx + &dy * &dy) - &ix * (&dx * &a[1] + &dy * &b[1]);
-            cA[1] = a[0].clone() * (&dx * &dx + &dy * &dy) - &ix * (&dx * &a[0] + &dy * &b[0]);
+            cA[0] = &a[1] * (&dx * &dx + &dy * &dy) - &ix * (&dx * &a[1] + &dy * &b[1]);
+            cA[1] = &a[0] * (&dx * &dx + &dy * &dy) - &ix * (&dx * &a[0] + &dy * &b[0]);
             cA[2] = ix * &sign;
 
             if recompute_c_x {
