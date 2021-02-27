@@ -149,17 +149,41 @@ where
         key
     }
 
+    /// This is a quick & dirty fix. Re-creating the entire beachline BTreeMap
+    #[allow(dead_code)]
+    fn rebuild_beachline(&mut self) {
+        #[cfg(feature = "console_debug")]
+        println!("remap_beachline()");
+        let mut beachline_tmp = BTreeMap::<BeachLineNodeKey<I, O, BI, BF>, BeachLineIndex>::new();
+        // append does not solve the problem
+        //beachline_tmp.append(&mut self.beach_line_);
+        for i in self.beach_line_.iter() {
+            let _ = beachline_tmp.insert(*i.0, *i.1);
+        }
+        std::mem::swap(&mut self.beach_line_, &mut beachline_tmp);
+        //beachline_tmp.clear();
+    }
+
+    /// removes a beach-line item from the beach-line priority queue
     pub(crate) fn erase(&mut self, beachline_index: BeachLineIndex) -> Result<(), BvError> {
-        //todo is this correct?
         if let Some(node) = self.beach_line_vec.get(beachline_index.0) {
             let node = node.0;
             #[cfg(feature = "console_debug")]
-            println!("erased beachline:{:?}", node);
+            println!("erasing beachline:{:?}", node);
+
             if self.beach_line_.remove(&node).is_none() {
-                println!("Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting");
-                println!("{:?}", node);
+                #[cfg(feature = "console_debug")]
                 self.debug_print_all_dump_and_cmp(&node);
-                return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting".to_string()});
+                // We know the item should be in self.beach_line_ if it is in self.beach_line_vec
+                // as a work-around we recreate the entire self.beach_line_ map
+                self.rebuild_beachline();
+
+                if self.beach_line_.remove(&node).is_none() {
+                    println!("Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting");
+                    println!("{:?}", node);
+                    self.debug_print_all_dump_and_cmp(&node);
+                    return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting".to_string()});
+                }
             }
             //if self.beach_line_.contains_key(&node) {
             //    return Err(BvError::SomeError {
@@ -373,27 +397,48 @@ where
         println!();
     }
 
-    //#[cfg(feature = "console_debug")]
+    #[warn(dead_code)]
     pub(crate) fn debug_print_all_dump_and_cmp(&self, key: &BeachLineNodeKey<I, O, BI, BF>) {
         println!("-----beachline----{}", self.beach_line_.len());
         println!("Looking for {:?} in the beachline", key);
         let found = self.beach_line_.get(key);
-        println!("Found {:?}", found);
+        println!(
+            "Found {:?} cmp1=node.partial_cmp(key).unwrap() cmp2=key.partial_cmp(node).unwrap()",
+            found
+        );
         for (i, (node, _id)) in self.beach_line_.iter().enumerate() {
-            let _cmp = node.cmp(key);
-            print!("#{}: key:{:?}, cmp:{:?}", i, node, _cmp);
-            if _cmp == Ordering::Equal {
+            let cmp1 = node.partial_cmp(key);
+            let cmp2 = key.partial_cmp(node);
+
+            print!(
+                "#{}: key:{:?}, cmp1:{:?}, cmp2:{:?}",
+                i,
+                node,
+                cmp1.unwrap(),
+                cmp2.unwrap()
+            );
+            if cmp1.unwrap() == Ordering::Equal {
                 println!("  <----- THIS IS THE PROBLEM, 'get()' could not find it, but it's here!!")
             } else {
                 println!()
             };
         }
         println!();
-        let mut it1= self.beach_line_.iter().enumerate();
+        let mut it1 = self.beach_line_.iter().enumerate();
         for it2_v in self.beach_line_.iter().enumerate().skip(1) {
             let it1_v = it1.next().unwrap();
-            print!("key(#{}).cmp(key(#{})) == {:?}", it1_v.0, it2_v.0, it1_v.1.0.cmp(it2_v.1.0));
-            println!("\tkey(#{}).cmp(key(#{})) == {:?}", it2_v.0, it1_v.0, it2_v.1.0.cmp(it1_v.1.0));
+            print!(
+                "key(#{}).partial_cmp(key(#{})) == {:?}",
+                it1_v.0,
+                it2_v.0,
+                it1_v.1 .0.partial_cmp(it2_v.1 .0).unwrap()
+            );
+            println!(
+                "\tkey(#{}).partial_cmp(key(#{})) == {:?}",
+                it2_v.0,
+                it1_v.0,
+                it2_v.1 .0.partial_cmp(it1_v.1 .0).unwrap()
+            );
         }
     }
 
@@ -465,6 +510,7 @@ where
     right_site_: VSE::SiteEvent<I, O, BI, BF>,
     node_index_: BeachLineIndex,
 }
+
 impl<I, O, BI, BF> fmt::Debug for BeachLineNodeKey<I, O, BI, BF>
 where
     I: InputType + Neg<Output = I>,
@@ -571,14 +617,16 @@ where
             VP::NodeComparisonPredicate::<I, O, BI, BF>::node_comparison_predicate(self, other);
         if is_less {
             Ordering::Less
-        } else if self.left_site_.point0_ == other.left_site_.point0_
-            && self.left_site_.point1_ == other.left_site_.point1_
-            && self.right_site_.point0_ == other.right_site_.point0_
-            && self.right_site_.point1_ == other.right_site_.point1_
-        {
-            Ordering::Equal
         } else {
-            Ordering::Greater
+            //let is_less_reverse = VP::NodeComparisonPredicate::<I, O, BI, BF>::node_comparison_predicate(other, self);
+            //if !is_less_reverse {
+            // is_less=false && is_less_reverse=false -> must be equal
+
+            if self.left_site_ == other.left_site_ && self.right_site_ == other.right_site_ {
+                Ordering::Equal
+            } else {
+                Ordering::Greater
+            }
         }
     }
 }
