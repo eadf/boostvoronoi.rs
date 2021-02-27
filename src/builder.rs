@@ -645,8 +645,13 @@ where
                 .deactivate(it_first.1.get().and_then(|x| x.get_circle_event_id()));
             //--it_first;
             it_first = {
-                let id = self.beach_line_.get_left_neighbour(it_first.0).unwrap().1;
-                self.beach_line_.get_node(&id)
+                if let Some(id) = self.beach_line_.get_left_neighbour(it_first.0) {
+                    self.beach_line_.get_node(&id.1)
+                } else {
+                    return Err(BvError::SomeError {
+                        txt: "beach_line_::get_left_neighbour could not find anything".to_string(),
+                    });
+                }
             };
 
             let site_l1 = it_first.0.left_site();
