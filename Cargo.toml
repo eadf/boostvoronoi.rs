@@ -13,7 +13,10 @@ keywords = ["voronoi", "sweepline", "geometry"]
 num = "^0.3.1"
 ordered-float = "^2.1.1"
 fnv = "^1.0.7"
-rb_tree = "^0.3.3"
+rb_tree = "^0.3.4"
+#rb_tree = "^0.3.5"
+#rb_tree = {path = "/Users/eadf/Develop/external/rb_tree"}
+
 vec_map = "^0.8.2"
 num-bigint = "^0.3.1"
 num-traits = "^0.2.14"
