@@ -1705,9 +1705,15 @@ where
             let c_y: BigInt = &numer2 * &dif_x[0] - &numer1 * &dif_x[1];
             circle.set_y_raw(bi_to_f2(&c_y) * inv_denom);
         }
-        #[cfg(feature = "console_debug")]{
-            let c=circle.0.get();
-            println!("ppp(x:{:.12}, y:{:.12}, lx:{:.12})", c.x(),c.y(), c.lower_x());
+        #[cfg(feature = "console_debug")]
+        {
+            let c = circle.0.get();
+            println!(
+                "ppp(x:{:.12}, y:{:.12}, lx:{:.12})",
+                c.x(),
+                c.y(),
+                c.lower_x()
+            );
         }
     }
 
@@ -1840,9 +1846,15 @@ where
                 (sqrt_expr_.eval4(&ca, &cb) * half * inv_denom_sqr / segm_len).fpv(),
             );
         }
-        #[cfg(feature = "console_debug")]{
-            let c=c_event.0.get();
-            println!("pps(x:{:.12}, y:{:.12}, lx:{:.12})", c.x(),c.y(), c.lower_x());
+        #[cfg(feature = "console_debug")]
+        {
+            let c = c_event.0.get();
+            println!(
+                "pps(x:{:.12}, y:{:.12}, lx:{:.12})",
+                c.x(),
+                c.y(),
+                c.lower_x()
+            );
         }
     }
 
@@ -2024,9 +2036,15 @@ where
                 c_event.set_lower_x_raw((lower_x / denom).fpv());
             }
         }
-        #[cfg(feature = "console_debug")]{
-            let c=c_event.0.get();
-            println!("pss(x:{:.12}, y:{:.12}, lx:{:.12})", c.x(),c.y(), c.lower_x());
+        #[cfg(feature = "console_debug")]
+        {
+            let c = c_event.0.get();
+            println!(
+                "pss(x:{:.12}, y:{:.12}, lx:{:.12})",
+                c.x(),
+                c.y(),
+                c.lower_x()
+            );
         }
     }
 
@@ -2127,9 +2145,15 @@ where
                 c_event.set_lower_x_raw((lower_x / denom).fpv());
             }
         }
-        #[cfg(feature = "console_debug")]{
-            let c=c_event.0.get();
-            println!("sss(x:{:.12}, y:{:.12}, lx:{:.12})", c.x(),c.y(), c.lower_x());
+        #[cfg(feature = "console_debug")]
+        {
+            let c = c_event.0.get();
+            println!(
+                "sss(x:{:.12}, y:{:.12}, lx:{:.12})",
+                c.x(),
+                c.y(),
+                c.lower_x()
+            );
         }
     }
 }
