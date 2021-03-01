@@ -14,7 +14,6 @@ num = "^0.3.1"
 ordered-float = "^2.1.1"
 fnv = "^1.0.7"
 rb_tree = "^0.3.5"
-
 vec_map = "^0.8.2"
 num-bigint = "^0.3.1"
 num-traits = "^0.2.14"
@@ -31,7 +30,6 @@ path = "example/piston_gui.rs"
 [[bin]]
 name = "main"
 path = "example/main.rs"
-required-features = ["console_debug"]
 
 [dev-dependencies]
 piston = "^0.52.1"
@@ -39,5 +37,5 @@ piston2d-opengl_graphics = "^0.77.0"
 piston2d-graphics = "^0.39.0"
 piston2d-touch_visualizer = "^0.29.0"
 pistoncore-sdl2_window = "^0.67.0"
-geo = "^0.17.0"
+geo = "^0.17.1"
 
