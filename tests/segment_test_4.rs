@@ -66,7 +66,7 @@ fn segment_4_1_intersecting() {
     _output.expect_err("should fail");
 }
 
-//#[ignore]
+#[ignore]
 #[test]
 fn segment_4_1() -> Result<(), BvError> {
     let _output = {
