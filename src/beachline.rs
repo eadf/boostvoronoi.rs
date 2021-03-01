@@ -151,7 +151,7 @@ where
 
     /// This is a quick & dirty fix. Re-creating the entire beachline BTreeMap
     #[allow(dead_code)]
-    fn rebuild_beachline(&mut self) {
+    fn rebuild_beachline_do_not_use(&mut self) {
         #[cfg(feature = "console_debug")]
         println!("remap_beachline()");
         let mut beachline_tmp = BTreeMap::<BeachLineNodeKey<I, O, BI, BF>, BeachLineIndex>::new();
@@ -176,7 +176,7 @@ where
                 self.debug_print_all_dump_and_cmp(&node);
                 // We know the item should be in self.beach_line_ if it is in self.beach_line_vec
                 // as a work-around we recreate the entire self.beach_line_ map
-                self.rebuild_beachline();
+                //self.rebuild_beachline();
 
                 if self.beach_line_.remove(&node).is_none() {
                     println!("Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting");
