@@ -171,19 +171,20 @@ where
             #[cfg(feature = "console_debug")]
             println!("erasing beachline:{:?}", node);
 
+            #[allow(clippy::collapsible_if)]
             if self.beach_line_.remove(&node).is_none() {
-                #[cfg(feature = "console_debug")]
-                self.debug_print_all_dump_and_cmp(&node);
+                //#[cfg(feature = "console_debug")]
+                //self.debug_print_all_dump_and_cmp(&node);
                 // We know the item should be in self.beach_line_ if it is in self.beach_line_vec
                 // as a work-around we recreate the entire self.beach_line_ map
                 //self.rebuild_beachline();
 
-                if self.beach_line_.remove(&node).is_none() {
-                    println!("Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting");
-                    println!("{:?}", node);
-                    self.debug_print_all_dump_and_cmp(&node);
-                    return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting".to_string()});
-                }
+                //if self.beach_line_.remove(&node).is_none() {
+                println!("Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting");
+                println!("{:?}", node);
+                self.debug_print_all_dump_and_cmp(&node);
+                return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting".to_string()});
+                //}
             }
             //if self.beach_line_.contains_key(&node) {
             //    return Err(BvError::SomeError {
