@@ -42,7 +42,7 @@ where
     }
 }
 
-#[ignore]
+//#[ignore]
 #[test]
 fn segment_4_1_intersecting() {
     let _output = {
@@ -90,7 +90,7 @@ fn segment_4_1() -> Result<(), BvError> {
     Ok(())
 }
 
-//#[ignore]
+#[ignore]
 #[test]
 fn vertical_segment_1() -> Result<(), BvError> {
     let points: [[I1; 2]; 0] = [];
