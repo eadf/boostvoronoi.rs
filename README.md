@@ -53,7 +53,7 @@ Edges may become curves when line segments are used as input, see the example co
 - [x] Remove use of vec_map::VecMap where not absolutely needed.
 - [ ] Benchmark and optimize
 - [ ] Example GUI with more features. fltk?
-
+- [ ] Fix the beachline bug found with main.rs example
 
 All credit goes to the original author (Andrii Sydorchuk), except the porting mistakes. They are all mine.
 

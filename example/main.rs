@@ -23,6 +23,7 @@ fn to_segments<T: InputType>(points: &[[T; 4]]) -> Vec<boostvoronoi::Line<T>> {
     points.iter().map(|x| x.into()).collect()
 }
 
+/// This example will fail, something is wrong with the beach-line ordering
 fn main() -> Result<(), BvError> {
     #[allow(unused_variables)]
     let output = {
@@ -41,5 +42,11 @@ fn main() -> Result<(), BvError> {
         vb.with_segments(_s.iter())?;
         vb.construct()?
     };
+    println!("cells:{}", output.cells().len());
+    println!("vertices:{}", output.vertices().len());
+    println!("edges:{}", output.edges().len());
+    for (i,v) in output.vertices().iter().enumerate() {
+       println!("vertex #{} contains a point: ({:?}, {:?})", i, v.get().x(),v.get().y() );
+    }
     Ok(())
 }
