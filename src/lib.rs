@@ -13,6 +13,7 @@ use num::bigint::BigInt;
 use num::ToPrimitive;
 use num::{Float, NumCast, PrimInt, Zero};
 use std::cmp;
+use std::fmt;
 use std::fmt::Display;
 use std::hash::Hash;
 use std::marker::PhantomData;
@@ -39,10 +40,22 @@ pub(crate) fn format_id(value: Option<usize>) -> String {
 }
 
 /// 2d coordinate type - integer only
-#[derive(Copy, Clone, cmp::PartialEq, cmp::Eq, Hash, Debug)]
+#[derive(Copy, Clone, cmp::PartialEq, cmp::Eq, Hash)]
 pub struct Point<T: InputType> {
     pub x: T,
     pub y: T,
+}
+
+impl<T> Debug for Point<T>
+where
+    T: InputType + Display + Hash,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut rv = String::new();
+
+        rv.push_str(format!("({:.12},{:.12})", self.x, self.y,).as_str());
+        write!(f, "{}", rv)
+    }
 }
 
 impl<T: InputType> From<[T; 2]> for Point<T> {
