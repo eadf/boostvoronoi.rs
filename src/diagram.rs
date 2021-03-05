@@ -751,6 +751,7 @@ where
         self.edges_[dest].set(e);
     }
 
+    /// Returns the color field of the edge.
     pub fn edge_get_color(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<ColorType> {
         let _ = edge_id?;
         if let Some(edgecell) = self._edge_get(edge_id) {
@@ -760,6 +761,7 @@ where
         None
     }
 
+    /// Sets the color field with new value
     pub fn edge_set_color(&self, edge_id: Option<VoronoiEdgeIndex>, color: ColorType) {
         if edge_id.is_none() {
             return;
@@ -767,6 +769,18 @@ where
         if let Some(edgecell) = self._edge_get(edge_id) {
             let mut edge = edgecell.get();
             let _ = edge.set_color(color);
+            edgecell.set(edge);
+        }
+    }
+
+    /// OR the previous color field value with this new color value
+    pub fn edge_or_color(&self, edge_id: Option<VoronoiEdgeIndex>, color: ColorType) {
+        if edge_id.is_none() {
+            return;
+        }
+        if let Some(edgecell) = self._edge_get(edge_id) {
+            let mut edge = edgecell.get();
+            let _ = edge.set_color(edge.get_color()|color);
             edgecell.set(edge);
         }
     }
