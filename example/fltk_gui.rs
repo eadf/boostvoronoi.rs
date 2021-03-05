@@ -38,8 +38,9 @@ const WW: i32 = FW + 180;
 bitflags! {
     pub struct EdgeFlag: VD::ColorType {
         const EXTERNAL = 0b00000001;
-        const PRIMARY = 0b00000010;
-        const CURVE = 0b00000100;
+        const PRIMARY  = 0b00000010;
+        const CURVE    = 0b00000100;
+        const INCIDENT = 0b00001000;
     }
 }
 
@@ -51,6 +52,7 @@ bitflags! {
         const VERTICES=       0b0000001000;
         const EDGES=          0b0000010000;
         const SECONDARY =     0b0000100000;
+        const INCIDENT =      0b0001000000;
         const INPUT_POINT =   0b0100000000;
         const INPUT_SEGMENT = 0b1000000000;
         const DRAW_ALL =      0b1111111111;
@@ -152,6 +154,13 @@ fn main() -> Result<(), BvError> {
     secondary_button.set_frame(FrameType::PlasticUpBox);
     secondary_button.set_color(Color::White);
 
+    let mut incident_button = RoundButton::default()
+        .with_size(180, 25)
+        .with_label("Draw incident edges");
+    incident_button.toggle(true);
+    incident_button.set_frame(FrameType::PlasticUpBox);
+    incident_button.set_color(Color::White);
+
     pack.end();
 
     wind.set_color(Color::White);
@@ -179,9 +188,9 @@ fn main() -> Result<(), BvError> {
                       sender,
                       GuiMessage::MenuChoice(Example::Clean),);
 
-    //menu_but.set_callback2(move |s| {
-    //    sender.send(GuiMessage::MenuChoice(s.get_value()));
-    //});
+    incident_button.set_callback2(move |_| {
+        sender.send(GuiMessage::SomeButtonPressed(DrawFlag::INCIDENT));
+    });
     external_button.set_callback2(move |_| {
         sender.send(GuiMessage::SomeButtonPressed(DrawFlag::EXTERNAL));
     });
@@ -304,6 +313,7 @@ fn main() -> Result<(), BvError> {
                         DrawFlag::CURVE => shared_data_bm.draw_flag ^= DrawFlag::CURVE,
                         DrawFlag::PRIMARY => shared_data_bm.draw_flag ^= DrawFlag::PRIMARY,
                         DrawFlag::SECONDARY => shared_data_bm.draw_flag ^= DrawFlag::SECONDARY,
+                        DrawFlag::INCIDENT => shared_data_bm.draw_flag ^= DrawFlag::INCIDENT,
                         DrawFlag::INPUT_POINT => shared_data_bm.draw_flag ^= DrawFlag::INPUT_POINT,
                         DrawFlag::INPUT_SEGMENT => {
                             shared_data_bm.draw_flag ^= DrawFlag::INPUT_SEGMENT
@@ -312,16 +322,17 @@ fn main() -> Result<(), BvError> {
                         DrawFlag::EDGES => shared_data_bm.draw_flag ^= DrawFlag::EDGES,
                         _ => (),
                     }
-                    /*println!(
-                        "EXTERNAL:{}, CURVE:{}, PRIMARY:{}, SECONDARY:{}, INPUT_POINT:{}, INPUT_SEGMENT:{}, VERTICES:{},",
+                    println!(
+                        "EXTERNAL:{}, CURVE:{}, PRIMARY:{}, SECONDARY:{}, INCIDENT:{}, INPUT_POINT:{}, INPUT_SEGMENT:{}, VERTICES:{},",
                         shared_data_bm.draw_flag.contains(DrawFlag::EXTERNAL),
                         shared_data_bm.draw_flag.contains(DrawFlag::CURVE),
                         shared_data_bm.draw_flag.contains(DrawFlag::PRIMARY),
                         shared_data_bm.draw_flag.contains(DrawFlag::SECONDARY),
+                        shared_data_bm.draw_flag.contains(DrawFlag::INCIDENT),
                         shared_data_bm.draw_flag.contains(DrawFlag::INPUT_POINT),
                         shared_data_bm.draw_flag.contains(DrawFlag::INPUT_SEGMENT),
                         shared_data_bm.draw_flag.contains(DrawFlag::VERTICES),
-                    );*/
+                    );
                 }
             }
             shared_data_bm.last_message = Some(msg);
@@ -404,6 +415,11 @@ where
                 self.color_exterior(edge_id);
             }
         }
+
+        for it in self.vd_.vertices().iter() {
+            let edge_id = self.vd_.vertex_get_incident_edge(Some(it.get().get_id()));
+            self.vd_.edge_or_color(edge_id, EdgeFlag::INCIDENT.bits);
+        }
         Result::Ok("".to_string())
     }
 
@@ -450,9 +466,9 @@ where
         {
             return;
         }
-        self.vd_.edge_set_color(edge_id, EdgeFlag::EXTERNAL.bits);
+        self.vd_.edge_or_color(edge_id, EdgeFlag::EXTERNAL.bits);
         self.vd_
-            .edge_set_color(self.vd_.edge_get_twin(edge_id), EdgeFlag::EXTERNAL.bits);
+            .edge_or_color(self.vd_.edge_get_twin(edge_id), EdgeFlag::EXTERNAL.bits);
         let v = self.vd_.edge_get_vertex1(edge_id);
         if v.is_none() || !self.vd_.get_edge(edge_id.unwrap()).get().is_primary() {
             return;
@@ -538,7 +554,7 @@ where
 
         for it in self.vd_.vertex_iter().enumerate() {
             let vt = it.1.get();
-            if (!draw_external) && vt.get_color() == EdgeFlag::EXTERNAL.bits {
+            if (!draw_external) && EdgeFlag::from_bits(vt.get_color()).unwrap().contains(EdgeFlag::EXTERNAL) {
                 continue;
             }
             draw(Self::f1_to_f64(vt.x()), Self::f1_to_f64(vt.y()));
@@ -551,6 +567,7 @@ where
         let draw_primary = config.draw_flag.contains(DrawFlag::PRIMARY);
         let draw_secondary = config.draw_flag.contains(DrawFlag::SECONDARY);
         let draw_curved = config.draw_flag.contains(DrawFlag::CURVE);
+        let draw_incident = config.draw_flag.contains(DrawFlag::INCIDENT);
 
         for it in self.vd_.edges().iter().enumerate() {
             let edge_id = VoronoiEdgeIndex(it.0);
@@ -573,7 +590,13 @@ where
                 if !draw_external {
                     continue;
                 }
-                set_draw_color(Color::Yellow);
+                set_draw_color(Color::Dark1);
+            }
+            if EdgeFlag::from_bits(edge.get_color()).unwrap().contains(EdgeFlag::INCIDENT)  {
+                if !draw_incident {
+                    continue;
+                }
+                set_draw_color(Color::Magenta);
             }
 
             let mut samples = Vec::<[F1; 2]>::new();
