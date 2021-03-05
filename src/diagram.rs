@@ -55,7 +55,7 @@ impl fmt::Debug for VoronoiVertexIndex {
     }
 }
 
-pub(crate) type ColorType = u32;
+pub type ColorType = u32;
 
 /// Represents category of the input source that forms Voronoi cell.
 /// Todo: sort out all of these bits, seems like they overlap in functionality
