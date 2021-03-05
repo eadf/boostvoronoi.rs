@@ -771,10 +771,7 @@ where
     }
 
     fn color_exterior(&self, edge_id: Option<VD::VoronoiEdgeIndex>) {
-        if edge_id.is_none() {
-            return;
-        }
-        if self.vd_.edge_get_color(edge_id).unwrap() == EXTERNAL_COLOR {
+        if edge_id.is_none() || self.vd_.edge_get_color(edge_id).unwrap() == EXTERNAL_COLOR {
             return;
         }
         self.vd_.edge_set_color(edge_id, EXTERNAL_COLOR);
