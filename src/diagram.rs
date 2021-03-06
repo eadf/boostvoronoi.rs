@@ -25,6 +25,8 @@ use std::rc::Rc;
 
 pub type SourceIndex = usize;
 
+///! See <https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_diagram.htm>
+
 /// Typed container for cell indices
 #[derive(Copy, Clone, PartialEq, Eq, Default)]
 pub struct VoronoiCellIndex(pub usize);
@@ -226,6 +228,12 @@ where
     /// Degenerate cells don't have any incident edges.
     pub fn is_degenerate(&self) -> bool {
         self.incident_edge_.is_none()
+    }
+
+    /// returns a random edge defined by this cell.
+    #[inline(always)]
+    pub fn get_incident_edge(&self) -> Option<VoronoiEdgeIndex> {
+        self.incident_edge_
     }
 }
 
