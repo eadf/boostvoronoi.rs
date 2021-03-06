@@ -37,13 +37,14 @@ const WW: i32 = FW + 180;
 
 bitflags! {
     pub struct EdgeFlag: VD::ColorType {
-        const EXTERNAL = 0b00000001;
-        const PRIMARY  = 0b00000010;
-        const CURVE    = 0b00000100;
+        const EXTERNAL     = 0b00000001;
+        const PRIMARY      = 0b00000010;
+        const CURVE        = 0b00000100;
         // The edge belongs to a Cell defined by a segment
-        const CELL_SEGMENT = 0b00010000;
+        const CELL_SEGMENT = 0b00001000;
         // The edge belongs to a Cell defined by a point
-        const CELL_POINT = 0b00100000;
+        const CELL_POINT   = 0b00010000;
+        const INFINITE     = 0b00100000;
     }
 }
 
@@ -63,6 +64,8 @@ bitflags! {
         const CELL_SEGMENT =  0b00100000000;
         /// Edged belonging to cells defined by a point
         const CELL_POINT =    0b01000000000;
+        /// Draw inifinite edges
+        const INFINITE =      0b10000000000;
         const DRAW_ALL =      0b11111111111;
     }
 }
@@ -106,13 +109,6 @@ fn main() -> Result<(), BvError> {
     menu_but.set_frame(FrameType::PlasticUpBox);
     menu_but.set_color(Color::White);
 
-    let mut external_button = RoundButton::default()
-        .with_size(180, 25)
-        .with_label("Draw externals");
-    external_button.toggle(true);
-    external_button.set_frame(FrameType::PlasticUpBox);
-    external_button.set_color(Color::White);
-
     let mut input_points_button = RoundButton::default()
         .with_size(180, 25)
         .with_label("Draw input points");
@@ -126,6 +122,20 @@ fn main() -> Result<(), BvError> {
     input_segments_button.toggle(true);
     input_segments_button.set_frame(FrameType::PlasticUpBox);
     input_segments_button.set_color(Color::White);
+
+    let mut external_button = RoundButton::default()
+        .with_size(180, 25)
+        .with_label("Draw externals");
+    external_button.toggle(true);
+    external_button.set_frame(FrameType::PlasticUpBox);
+    external_button.set_color(Color::White);
+
+    let mut infinite_button = RoundButton::default()
+        .with_size(180, 25)
+        .with_label("Draw infinite edges");
+    infinite_button.toggle(true);
+    infinite_button.set_frame(FrameType::PlasticUpBox);
+    infinite_button.set_color(Color::White);
 
     let mut vertices_button = RoundButton::default()
         .with_size(180, 25)
@@ -181,6 +191,17 @@ fn main() -> Result<(), BvError> {
     wind.set_color(Color::White);
     wind.end();
     wind.show();
+    let offs = Offscreen::new(frame.width(), frame.height()).unwrap();
+    #[cfg(not(target_os = "macos"))]
+    {
+        offs.begin();
+        set_draw_color(Color::White);
+        draw_rectf(0, 0, FW, FH);
+        offs.end();
+    }
+    let offs = Rc::from(RefCell::from(offs));
+    let offs_rc = Rc::clone(&offs);
+
     let shared_data_rc = Rc::new(RefCell::new(SharedData {
         draw_flag: DrawFilterFlag::DRAW_ALL,
         last_message: None,
@@ -211,6 +232,9 @@ fn main() -> Result<(), BvError> {
     });
     external_button.set_callback2(move |_| {
         sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::EXTERNAL));
+    });
+    infinite_button.set_callback2(move |_| {
+        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::INFINITE));
     });
     primary_button.set_callback2(move |_| {
         sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::PRIMARY));
@@ -245,14 +269,29 @@ fn main() -> Result<(), BvError> {
     let shared_data_c = Rc::clone(&shared_data_rc);
     // This is called whenever the window is drawn and redrawn
     wind.draw(move || {
+        offs_rc.borrow_mut().begin();
         let data_b = shared_data_c.borrow();
         set_draw_color(Color::White);
-        draw_rectf(5, 5, FW, FH);
+        draw_rectf(0, 0, FW, FH);
         data_b.visualizer.draw(&data_b);
+        offs_rc.borrow_mut().end();
+
+        if offs_rc.borrow().is_valid() {
+            //println!("********************is valid");
+            offs_rc.borrow().copy(5, 5, FW, FH, 0, 0);
+        } else {
+            //println!("*********************is not valid");
+            let data_b = shared_data_c.borrow();
+            offs_rc.borrow_mut().begin();
+            set_draw_color(Color::Yellow);
+            draw_rectf(5, 5, FW, FH);
+            data_b.visualizer.draw(&data_b);
+            offs_rc.borrow_mut().end();
+        }
     });
 
     let shared_data_c = Rc::clone(&shared_data_rc);
-    wind.handle(move |ev| match ev {
+    wind.handle2(move |_,ev| match ev {
         enums::Event::Released => {
             let event = &app::event_coords();
             //let  ke = &app::event_key();
@@ -284,15 +323,18 @@ fn main() -> Result<(), BvError> {
                     shared_data_bm.last_click = Some(point);
                 }
             } else {
-                println!("mouse at {:?}", event);
-                let mut shared_data_bm = shared_data_c.borrow_mut();
-                shared_data_bm.visualizer.point_data_.push(Point {
-                    x: event_x(),
-                    y: event_y(),
-                });
-                let _ = shared_data_bm.visualizer.build();
-                shared_data_bm.last_click = None;
-                redraw();
+                if event_x() < FW {
+                    println!("mouse at {:?}", event);
+
+                    let mut shared_data_bm = shared_data_c.borrow_mut();
+                    shared_data_bm.visualizer.point_data_.push(Point {
+                        x: event_x(),
+                        y: event_y(),
+                    });
+                    let _ = shared_data_bm.visualizer.build();
+                    shared_data_bm.last_click = None;
+                    redraw();
+                }
             }
             true
         }
@@ -419,6 +461,7 @@ where
             let edge_id = Some(it.get().get_id());
             if !self.vd_.edge_is_finite(edge_id).unwrap() {
                 self.color_exterior(edge_id);
+                self.vd_.edge_or_color(edge_id, EdgeFlag::INFINITE.bits);
             }
         }
 
@@ -484,7 +527,7 @@ where
 
     /// Todo something is wrong here, some external edges will remain unmarked
     fn color_exterior(&self, edge_id: Option<VD::VoronoiEdgeIndex>) {
-        if edge_id.is_none() || self.vd_.edge_get_color(edge_id).unwrap() == EdgeFlag::EXTERNAL.bits
+        if edge_id.is_none() || EdgeFlag::from_bits(self.vd_.edge_get_color(edge_id).unwrap()).unwrap().contains(EdgeFlag::EXTERNAL)
         {
             return;
         }
@@ -510,7 +553,7 @@ where
     fn draw(&self, config: &SharedData) {
         set_line_style(LineStyle::Solid, 1);
         set_draw_color(Color::Black);
-        self.draw_bb();
+        //self.draw_bb();
 
         draw::set_draw_color(Color::Red);
         if config.draw_flag.contains(DrawFilterFlag::INPUT_POINT) {
@@ -591,6 +634,7 @@ where
         let draw_curved = config.draw_flag.contains(DrawFilterFlag::CURVE);
         let draw_cell_segment = config.draw_flag.contains(DrawFilterFlag::CELL_SEGMENT);
         let draw_cell_point = config.draw_flag.contains(DrawFilterFlag::CELL_POINT);
+        let draw_infinite_edges = config.draw_flag.contains(DrawFilterFlag::INFINITE);
 
         for it in self.vd_.edges().iter().enumerate() {
             let edge_id = VoronoiEdgeIndex(it.0);
@@ -609,6 +653,13 @@ where
                 }
                 set_draw_color(Color::Green);
             }
+            if EdgeFlag::from_bits(edge.get_color()).unwrap().contains(EdgeFlag::INFINITE)   {
+                if !draw_infinite_edges {
+                    continue;
+                }
+                set_draw_color(Color::Green);
+            }
+
             if EdgeFlag::from_bits(edge.get_color()).unwrap().contains(EdgeFlag::EXTERNAL)  {
                 if !draw_external {
                     continue;
