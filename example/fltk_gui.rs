@@ -153,7 +153,7 @@ fn main() -> Result<(), BvError> {
 
     let mut curved_button = RoundButton::default()
         .with_size(180, 25)
-        .with_label("Draw curved edges");
+        .with_label("Draw arc edges");
     curved_button.toggle(true);
     curved_button.set_frame(FrameType::PlasticUpBox);
     curved_button.set_color(Color::White);
@@ -552,7 +552,7 @@ where
 
     fn draw(&self, config: &SharedData) {
         set_line_style(LineStyle::Solid, 1);
-        set_draw_color(Color::Black);
+
         //self.draw_bb();
 
         draw::set_draw_color(Color::Red);
@@ -562,15 +562,18 @@ where
         if config.draw_flag.contains(DrawFilterFlag::INPUT_SEGMENT) {
             self.draw_input_segments();
         }
-        draw::set_draw_color(Color::Green);
-        if config.draw_flag.contains(DrawFilterFlag::VERTICES) {
-            self.draw_vertices(&config);
-        }
         if config.draw_flag.contains(DrawFilterFlag::EDGES) {
+            draw::set_draw_color(Color::Green);
             self.draw_edges(&config);
         }
+        if config.draw_flag.contains(DrawFilterFlag::VERTICES) {
+            set_draw_color(Color::Blue);
+            self.draw_vertices(&config);
+        }
+
     }
 
+    #[allow(dead_code)]
     /// Draw bounding box.
     fn draw_bb(&self) {
         let min_x = Self::f1_to_i32(self.bounding_rect.min().x);
@@ -613,7 +616,7 @@ where
     /// Draw voronoi vertices aka circle events.
     fn draw_vertices(&self, config: &SharedData) {
         let draw = |x: f64, y: f64| {
-            draw::draw_circle(x, y, 3.0);
+            draw::draw_circle(x, y, 1.0);
         };
         let draw_external = config.draw_flag.contains(DrawFilterFlag::EXTERNAL);
 
@@ -645,7 +648,7 @@ where
                 if !draw_primary {
                     continue;
                 }
-                set_draw_color(Color::Blue);
+                set_draw_color(Color::Green);
             }
             if edge.is_secondary() {
                 if !draw_secondary {
@@ -664,19 +667,19 @@ where
                 if !draw_external {
                     continue;
                 }
-                set_draw_color(Color::Dark1);
+                set_draw_color(Color::Green);
             }
             if EdgeFlag::from_bits(edge.get_color()).unwrap().contains(EdgeFlag::CELL_POINT)  {
                 if !draw_cell_point {
                     continue;
                 }
-                set_draw_color(Color::Magenta);
+                set_draw_color(Color::Green);
             }
             if EdgeFlag::from_bits(edge.get_color()).unwrap().contains(EdgeFlag::CELL_SEGMENT)  {
                 if !draw_cell_segment {
                     continue;
                 }
-                set_draw_color(Color::Magenta);
+                set_draw_color(Color::Green);
             }
 
             let mut samples = Vec::<[F1; 2]>::new();

@@ -268,15 +268,10 @@ where
         &self,
         position: BeachLineNodeKey<I, O, BI, BF>,
     ) -> Option<(BeachLineNodeKey<I, O, BI, BF>, BeachLineIndex)> {
-        let rv = self
-            .beach_line_
+        self.beach_line_
             .range((Unbounded, Excluded(&position)))
-            .next_back();
-        if let Some(rv) = rv {
-            Some((*rv.0, *rv.1))
-        } else {
-            None
-        }
+            .next_back()
+            .map(|rv| (*rv.0, *rv.1))
     }
 
     /// Returns the left neighbour beach line element
@@ -297,15 +292,10 @@ where
         &self,
         position: BeachLineNodeKey<I, O, BI, BF>,
     ) -> Option<BeachLineNodeKey<I, O, BI, BF>> {
-        let rv = self
-            .beach_line_
+        self.beach_line_
             .range((Excluded(&position), Unbounded))
-            .next();
-        if let Some(rv) = rv {
-            Some(*rv.0)
-        } else {
-            None
-        }
+            .next()
+            .map(|rv| *rv.0)
     }
 
     /// Returns the right neighbour beach line element
@@ -326,12 +316,10 @@ where
         &self,
         key: BeachLineNodeKey<I, O, BI, BF>,
     ) -> Option<BeachLineNodeKey<I, O, BI, BF>> {
-        let rv = self.beach_line_.range((Included(&key), Unbounded)).next();
-        if let Some(rv) = rv {
-            Some(*rv.0)
-        } else {
-            None
-        }
+        self.beach_line_
+            .range((Included(&key), Unbounded))
+            .next()
+            .map(|rv| *rv.0)
     }
 
     /// returns a copy of the last element (key,value)
