@@ -511,7 +511,6 @@ where
     pub fn or_color(&mut self, color: ColorType) -> ColorType {
         self.set_color(self.get_color() | color)
     }
-
 }
 
 pub type CellType<I1, F1> = Rc<Cell<VoronoiCell<I1, F1>>>;

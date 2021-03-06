@@ -11,8 +11,8 @@ use std::ops::Neg;
 use fltk::app::event_key_down;
 use fltk::app::{event_x, event_y, redraw};
 use fltk::button::RoundButton;
-use fltk::menu::MenuButton;
 use fltk::enums::Key;
+use fltk::menu::MenuButton;
 use fltk::*;
 use fltk::{app, draw::*, frame::*};
 
@@ -71,16 +71,16 @@ bitflags! {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum Example{
+pub enum Example {
     Simple,
     Complex,
-    Clean
+    Clean,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub enum GuiMessage {
     FilterButtonPressed(DrawFilterFlag),
-    MenuChoice(Example)
+    MenuChoice(Example),
 }
 
 #[allow(dead_code)]
@@ -211,21 +211,32 @@ fn main() -> Result<(), BvError> {
 
     let (sender, receiver) = app::channel::<GuiMessage>();
 
-    menu_but.add_emit("Simple", Shortcut::None,
-                      menu::MenuFlag::Normal,
-                      sender,
-                      GuiMessage::MenuChoice(Example::Simple),);
-    menu_but.add_emit("Complex", Shortcut::None,
-                      menu::MenuFlag::Normal,
-                      sender,
-                      GuiMessage::MenuChoice(Example::Complex),);
-    menu_but.add_emit("Clean", Shortcut::None,
-                      menu::MenuFlag::Normal,
-                      sender,
-                      GuiMessage::MenuChoice(Example::Clean),);
+    menu_but.add_emit(
+        "Simple",
+        Shortcut::None,
+        menu::MenuFlag::Normal,
+        sender,
+        GuiMessage::MenuChoice(Example::Simple),
+    );
+    menu_but.add_emit(
+        "Complex",
+        Shortcut::None,
+        menu::MenuFlag::Normal,
+        sender,
+        GuiMessage::MenuChoice(Example::Complex),
+    );
+    menu_but.add_emit(
+        "Clean",
+        Shortcut::None,
+        menu::MenuFlag::Normal,
+        sender,
+        GuiMessage::MenuChoice(Example::Clean),
+    );
 
     segment_cell_button.set_callback2(move |_| {
-        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::CELL_SEGMENT));
+        sender.send(GuiMessage::FilterButtonPressed(
+            DrawFilterFlag::CELL_SEGMENT,
+        ));
     });
     point_cell_button.set_callback2(move |_| {
         sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::CELL_POINT));
@@ -246,7 +257,9 @@ fn main() -> Result<(), BvError> {
         sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::INPUT_POINT));
     });
     input_segments_button.set_callback2(move |_| {
-        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::INPUT_SEGMENT));
+        sender.send(GuiMessage::FilterButtonPressed(
+            DrawFilterFlag::INPUT_SEGMENT,
+        ));
     });
     curved_button.set_callback2(move |_| {
         sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::CURVE));
@@ -291,7 +304,7 @@ fn main() -> Result<(), BvError> {
     });
 
     let shared_data_c = Rc::clone(&shared_data_rc);
-    wind.handle2(move |_,ev| match ev {
+    wind.handle2(move |_, ev| match ev {
         enums::Event::Released => {
             let event = &app::event_coords();
             //let  ke = &app::event_key();
@@ -527,7 +540,10 @@ where
 
     /// Todo something is wrong here, some external edges will remain unmarked
     fn color_exterior(&self, edge_id: Option<VD::VoronoiEdgeIndex>) {
-        if edge_id.is_none() || EdgeFlag::from_bits(self.vd_.edge_get_color(edge_id).unwrap()).unwrap().contains(EdgeFlag::EXTERNAL)
+        if edge_id.is_none()
+            || EdgeFlag::from_bits(self.vd_.edge_get_color(edge_id).unwrap())
+                .unwrap()
+                .contains(EdgeFlag::EXTERNAL)
         {
             return;
         }
@@ -570,7 +586,6 @@ where
             set_draw_color(Color::Blue);
             self.draw_vertices(&config);
         }
-
     }
 
     #[allow(dead_code)]
@@ -622,7 +637,11 @@ where
 
         for it in self.vd_.vertex_iter().enumerate() {
             let vt = it.1.get();
-            if (!draw_external) && EdgeFlag::from_bits(vt.get_color()).unwrap().contains(EdgeFlag::EXTERNAL) {
+            if (!draw_external)
+                && EdgeFlag::from_bits(vt.get_color())
+                    .unwrap()
+                    .contains(EdgeFlag::EXTERNAL)
+            {
                 continue;
             }
             draw(Self::f1_to_f64(vt.x()), Self::f1_to_f64(vt.y()));
@@ -656,26 +675,38 @@ where
                 }
                 set_draw_color(Color::Green);
             }
-            if EdgeFlag::from_bits(edge.get_color()).unwrap().contains(EdgeFlag::INFINITE)   {
+            if EdgeFlag::from_bits(edge.get_color())
+                .unwrap()
+                .contains(EdgeFlag::INFINITE)
+            {
                 if !draw_infinite_edges {
                     continue;
                 }
                 set_draw_color(Color::Green);
             }
 
-            if EdgeFlag::from_bits(edge.get_color()).unwrap().contains(EdgeFlag::EXTERNAL)  {
+            if EdgeFlag::from_bits(edge.get_color())
+                .unwrap()
+                .contains(EdgeFlag::EXTERNAL)
+            {
                 if !draw_external {
                     continue;
                 }
                 set_draw_color(Color::Green);
             }
-            if EdgeFlag::from_bits(edge.get_color()).unwrap().contains(EdgeFlag::CELL_POINT)  {
+            if EdgeFlag::from_bits(edge.get_color())
+                .unwrap()
+                .contains(EdgeFlag::CELL_POINT)
+            {
                 if !draw_cell_point {
                     continue;
                 }
                 set_draw_color(Color::Green);
             }
-            if EdgeFlag::from_bits(edge.get_color()).unwrap().contains(EdgeFlag::CELL_SEGMENT)  {
+            if EdgeFlag::from_bits(edge.get_color())
+                .unwrap()
+                .contains(EdgeFlag::CELL_SEGMENT)
+            {
                 if !draw_cell_segment {
                     continue;
                 }
@@ -1230,7 +1261,8 @@ where
         let mut new_segments = match example {
             Example::Simple => to_segments(&_simple_segments),
             Example::Complex => to_segments(&_segments_rust),
-            Example::Clean => { let clean: [[i32; 4]; 0] = [];
+            Example::Clean => {
+                let clean: [[i32; 4]; 0] = [];
                 to_segments(&clean)
             }
         };

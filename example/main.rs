@@ -45,8 +45,13 @@ fn main() -> Result<(), BvError> {
     println!("cells:{}", output.cells().len());
     println!("vertices:{}", output.vertices().len());
     println!("edges:{}", output.edges().len());
-    for (i,v) in output.vertices().iter().enumerate() {
-       println!("vertex #{} contains a point: ({:?}, {:?})", i, v.get().x(),v.get().y() );
+    for (i, v) in output.vertices().iter().enumerate() {
+        println!(
+            "vertex #{} contains a point: ({:?}, {:?})",
+            i,
+            v.get().x(),
+            v.get().y()
+        );
     }
     Ok(())
 }

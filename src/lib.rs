@@ -369,7 +369,7 @@ where
 
     #[inline(always)]
     pub fn f1_to_i32(input: F1) -> i32 {
-        num::cast::<F1,i32>(input).unwrap()
+        num::cast::<F1, i32>(input).unwrap()
     }
 
     #[inline(always)]
