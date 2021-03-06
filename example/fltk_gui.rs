@@ -21,7 +21,6 @@ use geo::prelude::Intersects;
 use ordered_float::OrderedFloat;
 use std::cell::{RefCell, RefMut};
 use std::collections::HashSet;
-use std::marker::PhantomData;
 use std::rc::Rc;
 
 #[macro_use]
@@ -36,13 +35,13 @@ const WH: i32 = 800;
 const WW: i32 = FW + 180;
 
 bitflags! {
-    pub struct EdgeFlag: VD::ColorType {
+    pub struct ColorFlag: VD::ColorType {
         const EXTERNAL     = 0b00000001;
         const PRIMARY      = 0b00000010;
         const CURVE        = 0b00000100;
-        // The edge belongs to a Cell defined by a segment
+        // The edge/vertex belongs to a Cell defined by a segment
         const CELL_SEGMENT = 0b00001000;
-        // The edge belongs to a Cell defined by a point
+        // The edge/vertex belongs to a Cell defined by a point
         const CELL_POINT   = 0b00010000;
         const INFINITE     = 0b00100000;
     }
@@ -51,22 +50,28 @@ bitflags! {
 bitflags! {
     pub struct DrawFilterFlag: u32 {
         /// Edges considered to be outside all closed input geometry
-        const EXTERNAL =      0b00000000001;
-        const PRIMARY =       0b00000000010;
-        const CURVE =         0b00000000100;
-        const VERTICES=       0b00000001000;
+        const EXTERNAL =      0b0000000000001;
+        const PRIMARY =       0b0000000000010;
+        const CURVE =         0b0000000000100;
+        const VERTICES=       0b0000000001000;
         /// All edges
-        const EDGES=          0b00000010000;
-        const SECONDARY =     0b00000100000;
-        const INPUT_POINT =   0b00001000000;
-        const INPUT_SEGMENT = 0b00010000000;
-        /// Edged belonging to cells defined by a segment
-        const CELL_SEGMENT =  0b00100000000;
-        /// Edged belonging to cells defined by a point
-        const CELL_POINT =    0b01000000000;
+        const EDGES=          0b0000000010000;
+        const SECONDARY =     0b0000000100000;
+        /// Input geometry points
+        const INPUT_POINT =   0b0000001000000;
+        /// Input geometry segments
+        const INPUT_SEGMENT = 0b0000010000000;
+        /// Edge belonging to cells defined by a segment
+        const E_CELL_SEGMENT= 0b0000100000000;
+        /// Edge belonging to cells defined by a point
+        const E_CELL_POINT =  0b0001000000000;
+        /// Vertices belonging to cells defined by a segment
+        const V_CELL_SEGMENT= 0b0010000000000;
+        /// Vertices belonging to cells defined by a point
+        const V_CELL_POINT =  0b0100000000000;
         /// Draw inifinite edges
-        const INFINITE =      0b10000000000;
-        const DRAW_ALL =      0b11111111111;
+        const INFINITE =      0b1000000000000;
+        const DRAW_ALL =      0b1111111111111;
     }
 }
 
@@ -79,7 +84,7 @@ pub enum Example {
 
 #[derive(Debug, Clone, Copy)]
 pub enum GuiMessage {
-    FilterButtonPressed(DrawFilterFlag),
+    Filter(DrawFilterFlag),
     MenuChoice(Example),
 }
 
@@ -87,7 +92,7 @@ pub enum GuiMessage {
 struct SharedData {
     draw_flag: DrawFilterFlag,
     last_message: Option<GuiMessage>,
-    visualizer: VorVisualizer<i32, f32, i64, f64>,
+    visualizer: VoronoiVisualizer<i32, f32, i64, f64>,
     last_click: Option<Point<i32>>,
 }
 
@@ -107,84 +112,84 @@ fn main() -> Result<(), BvError> {
 
     let mut menu_but = MenuButton::default().with_size(170, 25).with_label("Menu");
     menu_but.set_frame(FrameType::PlasticUpBox);
-    menu_but.set_color(Color::White);
 
     let mut input_points_button = RoundButton::default()
         .with_size(180, 25)
-        .with_label("Draw input points");
+        .with_label("input points");
     input_points_button.toggle(true);
     input_points_button.set_frame(FrameType::PlasticUpBox);
-    input_points_button.set_color(Color::White);
 
     let mut input_segments_button = RoundButton::default()
         .with_size(180, 25)
-        .with_label("Draw input segments");
+        .with_label("input segments");
     input_segments_button.toggle(true);
     input_segments_button.set_frame(FrameType::PlasticUpBox);
-    input_segments_button.set_color(Color::White);
 
     let mut external_button = RoundButton::default()
         .with_size(180, 25)
-        .with_label("Draw externals");
+        .with_label("externals");
     external_button.toggle(true);
     external_button.set_frame(FrameType::PlasticUpBox);
-    external_button.set_color(Color::White);
 
     let mut infinite_button = RoundButton::default()
         .with_size(180, 25)
-        .with_label("Draw infinite edges");
+        .with_label("infinite edges");
     infinite_button.toggle(true);
     infinite_button.set_frame(FrameType::PlasticUpBox);
-    infinite_button.set_color(Color::White);
 
     let mut vertices_button = RoundButton::default()
         .with_size(180, 25)
-        .with_label("Draw vertices");
+        .with_label("vertices");
     vertices_button.toggle(true);
     vertices_button.set_frame(FrameType::PlasticUpBox);
-    vertices_button.set_color(Color::White);
 
     let mut edges_button = RoundButton::default()
         .with_size(180, 25)
-        .with_label("Draw edges");
+        .with_label("edges");
     edges_button.toggle(true);
     edges_button.set_frame(FrameType::PlasticUpBox);
-    edges_button.set_color(Color::White);
 
     let mut curved_button = RoundButton::default()
         .with_size(180, 25)
-        .with_label("Draw arc edges");
+        .with_label("arc edges");
     curved_button.toggle(true);
     curved_button.set_frame(FrameType::PlasticUpBox);
-    curved_button.set_color(Color::White);
 
     let mut primary_button = RoundButton::default()
         .with_size(180, 25)
-        .with_label("Draw primary edges");
+        .with_label("primary edges");
     primary_button.toggle(true);
     primary_button.set_frame(FrameType::PlasticUpBox);
-    primary_button.set_color(Color::White);
 
     let mut secondary_button = RoundButton::default()
         .with_size(180, 25)
-        .with_label("Draw secondary edges");
+        .with_label("secondary edges");
     secondary_button.toggle(true);
     secondary_button.set_frame(FrameType::PlasticUpBox);
-    secondary_button.set_color(Color::White);
 
-    let mut segment_cell_button = RoundButton::default()
+    let mut e_segment_cell_button = RoundButton::default()
         .with_size(180, 25)
-        .with_label("Draw cell segment edges");
-    segment_cell_button.toggle(true);
-    segment_cell_button.set_frame(FrameType::PlasticUpBox);
-    segment_cell_button.set_color(Color::White);
+        .with_label("cell segment edges");
+    e_segment_cell_button.toggle(true);
+    e_segment_cell_button.set_frame(FrameType::PlasticUpBox);
 
-    let mut point_cell_button = RoundButton::default()
+    let mut e_point_cell_button = RoundButton::default()
         .with_size(180, 25)
-        .with_label("Draw cell point edges");
-    point_cell_button.toggle(true);
-    point_cell_button.set_frame(FrameType::PlasticUpBox);
-    point_cell_button.set_color(Color::White);
+        .with_label("cell point edges");
+    e_point_cell_button.toggle(true);
+    e_point_cell_button.set_frame(FrameType::PlasticUpBox);
+
+    let mut v_segment_cell_button = RoundButton::default()
+        .with_size(180, 25)
+        .with_label("cell segment vertices");
+    v_segment_cell_button.toggle(true);
+    v_segment_cell_button.set_frame(FrameType::PlasticUpBox);
+
+    let mut v_point_cell_button = RoundButton::default()
+        .with_size(180, 25)
+        .with_label("cell point vertices");
+    v_point_cell_button.toggle(true);
+    v_point_cell_button.set_frame(FrameType::PlasticUpBox);
 
     pack.end();
 
@@ -205,7 +210,7 @@ fn main() -> Result<(), BvError> {
     let shared_data_rc = Rc::new(RefCell::new(SharedData {
         draw_flag: DrawFilterFlag::DRAW_ALL,
         last_message: None,
-        visualizer: VorVisualizer::default(),
+        visualizer: VoronoiVisualizer::default(),
         last_click: None,
     }));
 
@@ -233,43 +238,19 @@ fn main() -> Result<(), BvError> {
         GuiMessage::MenuChoice(Example::Clean),
     );
 
-    segment_cell_button.set_callback2(move |_| {
-        sender.send(GuiMessage::FilterButtonPressed(
-            DrawFilterFlag::CELL_SEGMENT,
-        ));
-    });
-    point_cell_button.set_callback2(move |_| {
-        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::CELL_POINT));
-    });
-    external_button.set_callback2(move |_| {
-        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::EXTERNAL));
-    });
-    infinite_button.set_callback2(move |_| {
-        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::INFINITE));
-    });
-    primary_button.set_callback2(move |_| {
-        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::PRIMARY));
-    });
-    secondary_button.set_callback2(move |_| {
-        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::SECONDARY));
-    });
-    input_points_button.set_callback2(move |_| {
-        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::INPUT_POINT));
-    });
-    input_segments_button.set_callback2(move |_| {
-        sender.send(GuiMessage::FilterButtonPressed(
-            DrawFilterFlag::INPUT_SEGMENT,
-        ));
-    });
-    curved_button.set_callback2(move |_| {
-        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::CURVE));
-    });
-    vertices_button.set_callback2(move |_| {
-        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::VERTICES));
-    });
-    edges_button.set_callback2(move |_| {
-        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::EDGES));
-    });
+    e_segment_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::E_CELL_SEGMENT));
+    e_point_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::E_CELL_POINT));
+    v_segment_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::V_CELL_SEGMENT));
+    v_point_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::V_CELL_POINT));
+    external_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::EXTERNAL));
+    infinite_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::INFINITE));
+    primary_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::PRIMARY));
+    secondary_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::SECONDARY));
+    input_points_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::INPUT_POINT));
+    input_segments_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::INPUT_SEGMENT));
+    curved_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::CURVE));
+    vertices_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::VERTICES));
+    edges_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::EDGES));
 
     {
         // initialize visualizer
@@ -282,6 +263,7 @@ fn main() -> Result<(), BvError> {
     let shared_data_c = Rc::clone(&shared_data_rc);
     // This is called whenever the window is drawn and redrawn
     wind.draw(move || {
+        // todo, move the actual drawing away from draw() function, only keep the offscreen blit.
         offs_rc.borrow_mut().begin();
         let data_b = shared_data_c.borrow();
         set_draw_color(Color::White);
@@ -290,10 +272,9 @@ fn main() -> Result<(), BvError> {
         offs_rc.borrow_mut().end();
 
         if offs_rc.borrow().is_valid() {
-            //println!("********************is valid");
             offs_rc.borrow().copy(5, 5, FW, FH, 0, 0);
         } else {
-            //println!("*********************is not valid");
+            // this will almost never be called
             let data_b = shared_data_c.borrow();
             offs_rc.borrow_mut().begin();
             set_draw_color(Color::Yellow);
@@ -304,7 +285,7 @@ fn main() -> Result<(), BvError> {
     });
 
     let shared_data_c = Rc::clone(&shared_data_rc);
-    wind.handle2(move |_, ev| match ev {
+    wind.handle(move |ev| match ev {
         enums::Event::Released => {
             let event = &app::event_coords();
             //let  ke = &app::event_key();
@@ -380,7 +361,7 @@ fn main() -> Result<(), BvError> {
                     let _ = shared_data_bm.visualizer.build();
                     redraw();
                 }
-                GuiMessage::FilterButtonPressed(flag) => {
+                GuiMessage::Filter(flag) => {
                     shared_data_bm.draw_flag ^= flag;
 
                     /*println!(
@@ -403,7 +384,8 @@ fn main() -> Result<(), BvError> {
     Ok(())
 }
 
-pub struct VorVisualizer<I1, F1, I2, F2>
+/// struct to help deal with the voronoi diagram input and output
+pub struct VoronoiVisualizer<I1, F1, I2, F2>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
@@ -415,11 +397,9 @@ where
     point_data_: Vec<boostvoronoi::Point<I1>>,
     segment_data_: Vec<boostvoronoi::Line<I1>>,
     pub previous_points: HashSet<boostvoronoi::Point<i32>>,
-    #[doc(hidden)]
-    _pdo: PhantomData<F1>,
 }
 
-impl<I1, F1, I2, F2> VorVisualizer<I1, F1, I2, F2>
+impl<I1, F1, I2, F2> VoronoiVisualizer<I1, F1, I2, F2>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
@@ -443,7 +423,6 @@ where
             point_data_: Vec::<boostvoronoi::Point<I1>>::new(),
             segment_data_: Vec::<boostvoronoi::Line<I1>>::new(),
             previous_points: HashSet::new(),
-            _pdo: PhantomData,
         }
     }
 
@@ -474,25 +453,34 @@ where
             let edge_id = Some(it.get().get_id());
             if !self.vd_.edge_is_finite(edge_id).unwrap() {
                 self.color_exterior(edge_id);
-                self.vd_.edge_or_color(edge_id, EdgeFlag::INFINITE.bits);
+                self.vd_.edge_or_color(edge_id, ColorFlag::INFINITE.bits);
             }
         }
 
-        // Color edges based upon how their cell is created, by a segment or a point
+        // Color edges and vertices based upon how their cell is created, by a segment or a point
         for it in self.vd_.cells().iter() {
             let is_segment = it.get().contains_segment();
-            let edge_id = it.get().get_incident_edge();
-            if let Some(edge_id) = edge_id {
+            let edge_id_o = it.get().get_incident_edge();
+            if let Some(edge_id) = edge_id_o {
                 let flag = if is_segment {
-                    EdgeFlag::CELL_SEGMENT.bits
+                    ColorFlag::CELL_SEGMENT.bits
                 } else {
-                    EdgeFlag::CELL_POINT.bits
+                    ColorFlag::CELL_POINT.bits
                 };
-                self.vd_.edge_or_color(Some(edge_id), flag);
+                self.vd_.edge_or_color(edge_id_o, flag);
+                self.vd_
+                    .vertex_or_color(self.vd_.edge_get_vertex0(edge_id_o), flag);
+                self.vd_
+                    .vertex_or_color(self.vd_.edge_get_vertex1(edge_id_o), flag);
 
                 let mut another_edge = self.vd_.get_edge(edge_id).get().next();
-                while another_edge.is_some() && another_edge.unwrap() != edge_id {
+                while another_edge.is_some() && another_edge != edge_id_o {
                     self.vd_.edge_or_color(another_edge, flag);
+                    self.vd_
+                        .vertex_or_color(self.vd_.edge_get_vertex0(another_edge), flag);
+                    self.vd_
+                        .vertex_or_color(self.vd_.edge_get_vertex1(another_edge), flag);
+
                     another_edge = self.vd_.get_edge(another_edge.unwrap()).get().next();
                 }
             }
@@ -541,20 +529,20 @@ where
     /// Todo something is wrong here, some external edges will remain unmarked
     fn color_exterior(&self, edge_id: Option<VD::VoronoiEdgeIndex>) {
         if edge_id.is_none()
-            || EdgeFlag::from_bits(self.vd_.edge_get_color(edge_id).unwrap())
+            || ColorFlag::from_bits(self.vd_.edge_get_color(edge_id).unwrap())
                 .unwrap()
-                .contains(EdgeFlag::EXTERNAL)
+                .contains(ColorFlag::EXTERNAL)
         {
             return;
         }
-        self.vd_.edge_or_color(edge_id, EdgeFlag::EXTERNAL.bits);
+        self.vd_.edge_or_color(edge_id, ColorFlag::EXTERNAL.bits);
         self.vd_
-            .edge_or_color(self.vd_.edge_get_twin(edge_id), EdgeFlag::EXTERNAL.bits);
+            .edge_or_color(self.vd_.edge_get_twin(edge_id), ColorFlag::EXTERNAL.bits);
         let v = self.vd_.edge_get_vertex1(edge_id);
         if v.is_none() || !self.vd_.get_edge(edge_id.unwrap()).get().is_primary() {
             return;
         }
-        self.vd_.vertex_set_color(v, EdgeFlag::EXTERNAL.bits);
+        self.vd_.vertex_set_color(v, ColorFlag::EXTERNAL.bits);
         let mut e = self.vd_.vertex_get_incident_edge(v);
         let v_incident_edge = e;
         while e.is_some() {
@@ -634,17 +622,34 @@ where
             draw::draw_circle(x, y, 1.0);
         };
         let draw_external = config.draw_flag.contains(DrawFilterFlag::EXTERNAL);
+        let draw_cell_points = config.draw_flag.contains(DrawFilterFlag::V_CELL_POINT);
+        let draw_cell_segment = config.draw_flag.contains(DrawFilterFlag::V_CELL_SEGMENT);
 
         for it in self.vd_.vertex_iter().enumerate() {
-            let vt = it.1.get();
+            let vertex = it.1.get();
             if (!draw_external)
-                && EdgeFlag::from_bits(vt.get_color())
+                && ColorFlag::from_bits(vertex.get_color())
                     .unwrap()
-                    .contains(EdgeFlag::EXTERNAL)
+                    .contains(ColorFlag::EXTERNAL)
             {
                 continue;
             }
-            draw(Self::f1_to_f64(vt.x()), Self::f1_to_f64(vt.y()));
+            if (!draw_cell_points)
+                && ColorFlag::from_bits(vertex.get_color())
+                    .unwrap()
+                    .contains(ColorFlag::CELL_POINT)
+            {
+                continue;
+            }
+            if (!draw_cell_segment)
+                && ColorFlag::from_bits(vertex.get_color())
+                    .unwrap()
+                    .contains(ColorFlag::CELL_SEGMENT)
+            {
+                continue;
+            }
+
+            draw(Self::f1_to_f64(vertex.x()), Self::f1_to_f64(vertex.y()));
         }
     }
 
@@ -654,63 +659,51 @@ where
         let draw_primary = config.draw_flag.contains(DrawFilterFlag::PRIMARY);
         let draw_secondary = config.draw_flag.contains(DrawFilterFlag::SECONDARY);
         let draw_curved = config.draw_flag.contains(DrawFilterFlag::CURVE);
-        let draw_cell_segment = config.draw_flag.contains(DrawFilterFlag::CELL_SEGMENT);
-        let draw_cell_point = config.draw_flag.contains(DrawFilterFlag::CELL_POINT);
+        let draw_cell_segment = config.draw_flag.contains(DrawFilterFlag::E_CELL_SEGMENT);
+        let draw_cell_point = config.draw_flag.contains(DrawFilterFlag::E_CELL_POINT);
         let draw_infinite_edges = config.draw_flag.contains(DrawFilterFlag::INFINITE);
+
+        set_draw_color(Color::Green);
 
         for it in self.vd_.edges().iter().enumerate() {
             let edge_id = VoronoiEdgeIndex(it.0);
             let edge = it.1.get();
 
-            #[allow(unused_assignments)]
-            if edge.is_primary() {
-                if !draw_primary {
-                    continue;
-                }
-                set_draw_color(Color::Green);
+            //#[allow(unused_assignments)]
+            if (!draw_primary) && edge.is_primary() {
+                continue;
             }
-            if edge.is_secondary() {
-                if !draw_secondary {
-                    continue;
-                }
-                set_draw_color(Color::Green);
+            if edge.is_secondary() && (!draw_secondary) {
+                continue;
             }
-            if EdgeFlag::from_bits(edge.get_color())
-                .unwrap()
-                .contains(EdgeFlag::INFINITE)
+            if (!draw_infinite_edges)
+                && ColorFlag::from_bits(edge.get_color())
+                    .unwrap()
+                    .contains(ColorFlag::INFINITE)
             {
-                if !draw_infinite_edges {
-                    continue;
-                }
-                set_draw_color(Color::Green);
+                continue;
             }
 
-            if EdgeFlag::from_bits(edge.get_color())
-                .unwrap()
-                .contains(EdgeFlag::EXTERNAL)
+            if (!draw_external)
+                && ColorFlag::from_bits(edge.get_color())
+                    .unwrap()
+                    .contains(ColorFlag::EXTERNAL)
             {
-                if !draw_external {
-                    continue;
-                }
-                set_draw_color(Color::Green);
+                continue;
             }
-            if EdgeFlag::from_bits(edge.get_color())
-                .unwrap()
-                .contains(EdgeFlag::CELL_POINT)
+            if (!draw_cell_point)
+                && ColorFlag::from_bits(edge.get_color())
+                    .unwrap()
+                    .contains(ColorFlag::CELL_POINT)
             {
-                if !draw_cell_point {
-                    continue;
-                }
-                set_draw_color(Color::Green);
+                continue;
             }
-            if EdgeFlag::from_bits(edge.get_color())
-                .unwrap()
-                .contains(EdgeFlag::CELL_SEGMENT)
+            if (!draw_cell_segment)
+                && ColorFlag::from_bits(edge.get_color())
+                    .unwrap()
+                    .contains(ColorFlag::CELL_SEGMENT)
             {
-                if !draw_cell_segment {
-                    continue;
-                }
-                set_draw_color(Color::Green);
+                continue;
             }
 
             let mut samples = Vec::<[F1; 2]>::new();
