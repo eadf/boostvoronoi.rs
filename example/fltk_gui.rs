@@ -40,22 +40,30 @@ bitflags! {
         const EXTERNAL = 0b00000001;
         const PRIMARY  = 0b00000010;
         const CURVE    = 0b00000100;
-        const INCIDENT = 0b00001000;
+        // The edge belongs to a Cell defined by a segment
+        const CELL_SEGMENT = 0b00010000;
+        // The edge belongs to a Cell defined by a point
+        const CELL_POINT = 0b00100000;
     }
 }
 
 bitflags! {
-    pub struct DrawFlag: u32 {
-        const EXTERNAL =      0b0000000001;
-        const PRIMARY =       0b0000000010;
-        const CURVE =         0b0000000100;
-        const VERTICES=       0b0000001000;
-        const EDGES=          0b0000010000;
-        const SECONDARY =     0b0000100000;
-        const INCIDENT =      0b0001000000;
-        const INPUT_POINT =   0b0100000000;
-        const INPUT_SEGMENT = 0b1000000000;
-        const DRAW_ALL =      0b1111111111;
+    pub struct DrawFilterFlag: u32 {
+        /// Edges considered to be outside all closed input geometry
+        const EXTERNAL =      0b00000000001;
+        const PRIMARY =       0b00000000010;
+        const CURVE =         0b00000000100;
+        const VERTICES=       0b00000001000;
+        /// All edges
+        const EDGES=          0b00000010000;
+        const SECONDARY =     0b00000100000;
+        const INPUT_POINT =   0b00001000000;
+        const INPUT_SEGMENT = 0b00010000000;
+        /// Edged belonging to cells defined by a segment
+        const CELL_SEGMENT =  0b00100000000;
+        /// Edged belonging to cells defined by a point
+        const CELL_POINT =    0b01000000000;
+        const DRAW_ALL =      0b11111111111;
     }
 }
 
@@ -68,13 +76,13 @@ pub enum Example{
 
 #[derive(Debug, Clone, Copy)]
 pub enum GuiMessage {
-    SomeButtonPressed(DrawFlag),
+    FilterButtonPressed(DrawFilterFlag),
     MenuChoice(Example)
 }
 
 #[allow(dead_code)]
 struct SharedData {
-    draw_flag: DrawFlag,
+    draw_flag: DrawFilterFlag,
     last_message: Option<GuiMessage>,
     visualizer: VorVisualizer<i32, f32, i64, f64>,
     last_click: Option<Point<i32>>,
@@ -154,12 +162,19 @@ fn main() -> Result<(), BvError> {
     secondary_button.set_frame(FrameType::PlasticUpBox);
     secondary_button.set_color(Color::White);
 
-    let mut incident_button = RoundButton::default()
+    let mut segment_cell_button = RoundButton::default()
         .with_size(180, 25)
-        .with_label("Draw incident edges");
-    incident_button.toggle(true);
-    incident_button.set_frame(FrameType::PlasticUpBox);
-    incident_button.set_color(Color::White);
+        .with_label("Draw cell segment edges");
+    segment_cell_button.toggle(true);
+    segment_cell_button.set_frame(FrameType::PlasticUpBox);
+    segment_cell_button.set_color(Color::White);
+
+    let mut point_cell_button = RoundButton::default()
+        .with_size(180, 25)
+        .with_label("Draw cell point edges");
+    point_cell_button.toggle(true);
+    point_cell_button.set_frame(FrameType::PlasticUpBox);
+    point_cell_button.set_color(Color::White);
 
     pack.end();
 
@@ -167,7 +182,7 @@ fn main() -> Result<(), BvError> {
     wind.end();
     wind.show();
     let shared_data_rc = Rc::new(RefCell::new(SharedData {
-        draw_flag: DrawFlag::DRAW_ALL,
+        draw_flag: DrawFilterFlag::DRAW_ALL,
         last_message: None,
         visualizer: VorVisualizer::default(),
         last_click: None,
@@ -188,32 +203,35 @@ fn main() -> Result<(), BvError> {
                       sender,
                       GuiMessage::MenuChoice(Example::Clean),);
 
-    incident_button.set_callback2(move |_| {
-        sender.send(GuiMessage::SomeButtonPressed(DrawFlag::INCIDENT));
+    segment_cell_button.set_callback2(move |_| {
+        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::CELL_SEGMENT));
+    });
+    point_cell_button.set_callback2(move |_| {
+        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::CELL_POINT));
     });
     external_button.set_callback2(move |_| {
-        sender.send(GuiMessage::SomeButtonPressed(DrawFlag::EXTERNAL));
+        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::EXTERNAL));
     });
     primary_button.set_callback2(move |_| {
-        sender.send(GuiMessage::SomeButtonPressed(DrawFlag::PRIMARY));
+        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::PRIMARY));
     });
     secondary_button.set_callback2(move |_| {
-        sender.send(GuiMessage::SomeButtonPressed(DrawFlag::SECONDARY));
+        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::SECONDARY));
     });
     input_points_button.set_callback2(move |_| {
-        sender.send(GuiMessage::SomeButtonPressed(DrawFlag::INPUT_POINT));
+        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::INPUT_POINT));
     });
     input_segments_button.set_callback2(move |_| {
-        sender.send(GuiMessage::SomeButtonPressed(DrawFlag::INPUT_SEGMENT));
+        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::INPUT_SEGMENT));
     });
     curved_button.set_callback2(move |_| {
-        sender.send(GuiMessage::SomeButtonPressed(DrawFlag::CURVE));
+        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::CURVE));
     });
     vertices_button.set_callback2(move |_| {
-        sender.send(GuiMessage::SomeButtonPressed(DrawFlag::VERTICES));
+        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::VERTICES));
     });
     edges_button.set_callback2(move |_| {
-        sender.send(GuiMessage::SomeButtonPressed(DrawFlag::EDGES));
+        sender.send(GuiMessage::FilterButtonPressed(DrawFilterFlag::EDGES));
     });
 
     {
@@ -307,32 +325,20 @@ fn main() -> Result<(), BvError> {
                     let _ = shared_data_bm.visualizer.build();
                     redraw();
                 }
-                GuiMessage::SomeButtonPressed(flag) => {
-                    match flag {
-                        DrawFlag::EXTERNAL => shared_data_bm.draw_flag ^= DrawFlag::EXTERNAL,
-                        DrawFlag::CURVE => shared_data_bm.draw_flag ^= DrawFlag::CURVE,
-                        DrawFlag::PRIMARY => shared_data_bm.draw_flag ^= DrawFlag::PRIMARY,
-                        DrawFlag::SECONDARY => shared_data_bm.draw_flag ^= DrawFlag::SECONDARY,
-                        DrawFlag::INCIDENT => shared_data_bm.draw_flag ^= DrawFlag::INCIDENT,
-                        DrawFlag::INPUT_POINT => shared_data_bm.draw_flag ^= DrawFlag::INPUT_POINT,
-                        DrawFlag::INPUT_SEGMENT => {
-                            shared_data_bm.draw_flag ^= DrawFlag::INPUT_SEGMENT
-                        }
-                        DrawFlag::VERTICES => shared_data_bm.draw_flag ^= DrawFlag::VERTICES,
-                        DrawFlag::EDGES => shared_data_bm.draw_flag ^= DrawFlag::EDGES,
-                        _ => (),
-                    }
-                    println!(
+                GuiMessage::FilterButtonPressed(flag) => {
+                    shared_data_bm.draw_flag ^= flag;
+
+                    /*println!(
                         "EXTERNAL:{}, CURVE:{}, PRIMARY:{}, SECONDARY:{}, INCIDENT:{}, INPUT_POINT:{}, INPUT_SEGMENT:{}, VERTICES:{},",
-                        shared_data_bm.draw_flag.contains(DrawFlag::EXTERNAL),
-                        shared_data_bm.draw_flag.contains(DrawFlag::CURVE),
-                        shared_data_bm.draw_flag.contains(DrawFlag::PRIMARY),
-                        shared_data_bm.draw_flag.contains(DrawFlag::SECONDARY),
-                        shared_data_bm.draw_flag.contains(DrawFlag::INCIDENT),
-                        shared_data_bm.draw_flag.contains(DrawFlag::INPUT_POINT),
-                        shared_data_bm.draw_flag.contains(DrawFlag::INPUT_SEGMENT),
-                        shared_data_bm.draw_flag.contains(DrawFlag::VERTICES),
-                    );
+                        shared_data_bm.draw_flag.contains(DrawFilterFlag::EXTERNAL),
+                        shared_data_bm.draw_flag.contains(DrawFilterFlag::CURVE),
+                        shared_data_bm.draw_flag.contains(DrawFilterFlag::PRIMARY),
+                        shared_data_bm.draw_flag.contains(DrawFilterFlag::SECONDARY),
+                        shared_data_bm.draw_flag.contains(DrawFilterFlag::INCIDENT),
+                        shared_data_bm.draw_flag.contains(DrawFilterFlag::INPUT_POINT),
+                        shared_data_bm.draw_flag.contains(DrawFilterFlag::INPUT_SEGMENT),
+                        shared_data_bm.draw_flag.contains(DrawFilterFlag::VERTICES),
+                    );*/
                 }
             }
             shared_data_bm.last_message = Some(msg);
@@ -416,10 +422,26 @@ where
             }
         }
 
-        for it in self.vd_.vertices().iter() {
-            let edge_id = self.vd_.vertex_get_incident_edge(Some(it.get().get_id()));
-            self.vd_.edge_or_color(edge_id, EdgeFlag::INCIDENT.bits);
+        // Color edges based upon how their cell is created, by a segment or a point
+        for it in self.vd_.cells().iter() {
+            let is_segment = it.get().contains_segment();
+            let edge_id = it.get().get_incident_edge();
+            if let Some(edge_id) = edge_id {
+                let flag = if is_segment {
+                    EdgeFlag::CELL_SEGMENT.bits
+                } else {
+                    EdgeFlag::CELL_POINT.bits
+                };
+                self.vd_.edge_or_color(Some(edge_id), flag);
+
+                let mut another_edge = self.vd_.get_edge(edge_id).get().next();
+                while another_edge.is_some() && another_edge.unwrap() != edge_id {
+                    self.vd_.edge_or_color(another_edge, flag);
+                    another_edge = self.vd_.get_edge(another_edge.unwrap()).get().next();
+                }
+            }
         }
+
         Result::Ok("".to_string())
     }
 
@@ -491,17 +513,17 @@ where
         self.draw_bb();
 
         draw::set_draw_color(Color::Red);
-        if config.draw_flag.contains(DrawFlag::INPUT_POINT) {
+        if config.draw_flag.contains(DrawFilterFlag::INPUT_POINT) {
             self.draw_input_points();
         }
-        if config.draw_flag.contains(DrawFlag::INPUT_SEGMENT) {
+        if config.draw_flag.contains(DrawFilterFlag::INPUT_SEGMENT) {
             self.draw_input_segments();
         }
         draw::set_draw_color(Color::Green);
-        if config.draw_flag.contains(DrawFlag::VERTICES) {
+        if config.draw_flag.contains(DrawFilterFlag::VERTICES) {
             self.draw_vertices(&config);
         }
-        if config.draw_flag.contains(DrawFlag::EDGES) {
+        if config.draw_flag.contains(DrawFilterFlag::EDGES) {
             self.draw_edges(&config);
         }
     }
@@ -550,7 +572,7 @@ where
         let draw = |x: f64, y: f64| {
             draw::draw_circle(x, y, 3.0);
         };
-        let draw_external = config.draw_flag.contains(DrawFlag::EXTERNAL);
+        let draw_external = config.draw_flag.contains(DrawFilterFlag::EXTERNAL);
 
         for it in self.vd_.vertex_iter().enumerate() {
             let vt = it.1.get();
@@ -563,11 +585,12 @@ where
 
     /// Draw voronoi edges.
     fn draw_edges(&self, config: &SharedData) {
-        let draw_external = config.draw_flag.contains(DrawFlag::EXTERNAL);
-        let draw_primary = config.draw_flag.contains(DrawFlag::PRIMARY);
-        let draw_secondary = config.draw_flag.contains(DrawFlag::SECONDARY);
-        let draw_curved = config.draw_flag.contains(DrawFlag::CURVE);
-        let draw_incident = config.draw_flag.contains(DrawFlag::INCIDENT);
+        let draw_external = config.draw_flag.contains(DrawFilterFlag::EXTERNAL);
+        let draw_primary = config.draw_flag.contains(DrawFilterFlag::PRIMARY);
+        let draw_secondary = config.draw_flag.contains(DrawFilterFlag::SECONDARY);
+        let draw_curved = config.draw_flag.contains(DrawFilterFlag::CURVE);
+        let draw_cell_segment = config.draw_flag.contains(DrawFilterFlag::CELL_SEGMENT);
+        let draw_cell_point = config.draw_flag.contains(DrawFilterFlag::CELL_POINT);
 
         for it in self.vd_.edges().iter().enumerate() {
             let edge_id = VoronoiEdgeIndex(it.0);
@@ -592,8 +615,14 @@ where
                 }
                 set_draw_color(Color::Dark1);
             }
-            if EdgeFlag::from_bits(edge.get_color()).unwrap().contains(EdgeFlag::INCIDENT)  {
-                if !draw_incident {
+            if EdgeFlag::from_bits(edge.get_color()).unwrap().contains(EdgeFlag::CELL_POINT)  {
+                if !draw_cell_point {
+                    continue;
+                }
+                set_draw_color(Color::Magenta);
+            }
+            if EdgeFlag::from_bits(edge.get_color()).unwrap().contains(EdgeFlag::CELL_SEGMENT)  {
+                if !draw_cell_segment {
                     continue;
                 }
                 set_draw_color(Color::Magenta);
