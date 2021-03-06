@@ -22,11 +22,6 @@ thiserror = "^1.0.24"
 [features]
 console_debug = []
 
-#This will be removed by next release
-[[example]]
-name = "piston_gui"
-path = "example/piston_gui.rs"
-
 [[example]]
 name = "fltk_gui"
 path = "example/fltk_gui.rs"
@@ -37,11 +32,6 @@ name = "main"
 path = "example/main.rs"
 
 [dev-dependencies]
-piston = "^0.52.1"
-piston2d-opengl_graphics = "^0.77.0"
-piston2d-graphics = "^0.39.0"
-piston2d-touch_visualizer = "^0.29.0"
-pistoncore-sdl2_window = "^0.67.0"
 geo = "^0.17.1"
 fltk = "^0.15.6"
 bitflags = "1.2.1"
