@@ -9,12 +9,12 @@
 
 // Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
 
-use super::beachline as VB;
-use super::circleevent as VC;
+use super::beach_line as VB;
+use super::circle_event as VC;
 use super::diagram as VD;
-use super::endpoint as VEP;
+use super::end_point as VEP;
 use super::predicate as VP;
-use super::siteevent as VSE;
+use super::site_event as VSE;
 use super::BvError;
 
 use super::{Line, Point};
@@ -22,7 +22,7 @@ use std::collections::BinaryHeap;
 use std::ops::Neg;
 
 use super::{BigFloatType, BigIntType, InputType, OutputType};
-use crate::beachline::BeachLineNodeData;
+use crate::beach_line::BeachLineNodeData;
 
 mod tests;
 
@@ -168,7 +168,7 @@ where
             {
                 println!("################################################");
                 println!(
-                    "loop:{} circle_events_:{} num_vertices:{} beachline:{} debug_site_counter:{} debug_circle_counter:{}",
+                    "loop:{} circle_events_:{} num_vertices:{} beach_line:{} debug_site_counter:{} debug_circle_counter:{}",
                     i,self.circle_events_.len(),
                     output.num_vertices(),
                     self.beach_line_.len().0,
@@ -678,7 +678,7 @@ where
     }
 
     /// Insert new nodes into the beach line. Update the output.
-    /// Todo: should the site events be references and only copied when inserted in beachline?
+    /// Todo: should the site events be references and only copied when inserted in beach_line?
     fn insert_new_arc(
         &mut self,
         site_arc1: VSE::SiteEvent<I1, F1, I2, F2>,

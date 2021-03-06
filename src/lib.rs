@@ -19,15 +19,15 @@ use std::hash::Hash;
 use std::marker::PhantomData;
 use std::ops::Neg;
 
-mod beachline;
+mod beach_line;
 pub mod builder;
-mod circleevent;
+mod circle_event;
 mod ctypes;
 pub mod diagram;
-mod endpoint;
+mod end_point;
 pub mod predicate;
 mod robust_fpt;
-pub mod siteevent;
+pub mod site_event;
 pub mod visual_utils;
 
 /// Debug utility function, formats an id string

@@ -9,7 +9,7 @@
 
 // Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
 
-use super::beachline as VB;
+use super::beach_line as VB;
 use super::predicate as VP;
 use super::InputType;
 use super::Point;

@@ -11,11 +11,11 @@
 
 mod tests;
 
-use super::beachline as VB;
-use super::circleevent as VC;
+use super::beach_line as VB;
+use super::circle_event as VC;
 use super::ctypes::UlpComparison;
 use super::robust_fpt as VR;
-use super::siteevent as VSE;
+use super::site_event as VSE;
 use super::Point;
 use super::TypeCheckF as TCF;
 use super::TypeCheckI as TCI;

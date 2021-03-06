@@ -9,9 +9,9 @@
 
 // Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
 
-use super::circleevent as VC;
+use super::circle_event as VC;
 use super::ctypes as CT;
-use super::siteevent as VSE;
+use super::site_event as VSE;
 use super::TypeConverter as TCC;
 
 pub use super::{BigFloatType, BigIntType, InputType, OutputType};

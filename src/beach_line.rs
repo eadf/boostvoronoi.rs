@@ -11,10 +11,10 @@
 
 mod tests;
 
-use super::circleevent as VC;
+use super::circle_event as VC;
 use super::diagram as VD;
 use super::predicate as VP;
-use super::siteevent as VSE;
+use super::site_event as VSE;
 
 use super::{BigFloatType, BigIntType, InputType, OutputType};
 use crate::BvError;
@@ -136,20 +136,20 @@ where
         if _prev_value.is_some() {
             println!("+++++++++++++++++++++++++++++++++++++++++");
             println!(
-                "inserted beachline but it collided id:{:?}",
+                "inserted beach_line but it collided id:{:?}",
                 _prev_value.unwrap()
             );
             println!("with {:?}", _prev_value.unwrap());
         }
         let _ = self.next_free_.increment();
         #[cfg(feature = "console_debug")]
-        print!("inserted beachline:");
+        print!("inserted beach_line:");
         #[cfg(feature = "console_debug")]
         self.debug_print_all_compat_node(&key, _ce);
         key
     }
 
-    /// This is a quick & dirty fix. Re-creating the entire beachline BTreeMap
+    /// This is a quick & dirty fix. Re-creating the entire beach_line BTreeMap
     #[allow(dead_code)]
     fn rebuild_beachline_do_not_use(&mut self) {
         #[cfg(feature = "console_debug")]
@@ -169,7 +169,7 @@ where
         if let Some(node) = self.beach_line_vec.get(beachline_index.0) {
             let node = node.0;
             #[cfg(feature = "console_debug")]
-            println!("erasing beachline:{:?}", node);
+            println!("erasing beach_line:{:?}", node);
 
             #[allow(clippy::collapsible_if)]
             if self.beach_line_.remove(&node).is_none() {
@@ -180,10 +180,10 @@ where
                 //self.rebuild_beachline();
 
                 //if self.beach_line_.remove(&node).is_none() {
-                println!("Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting");
+                println!("Tried to remove a non-existent beach_line, this error can occur if the input data is self-intersecting");
                 println!("{:?}", node);
                 self.debug_print_all_dump_and_cmp(&node);
-                return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting".to_string()});
+                return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beach_line, this error can occur if the input data is self-intersecting".to_string()});
                 //}
             }
             //if self.beach_line_.contains_key(&node) {
@@ -193,7 +193,7 @@ where
             //}
             let _ = self.beach_line_vec.remove(beachline_index.0);
         } else {
-            return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beachline, this error can occur if the input data is self-intersecting".to_string()});
+            return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beach_line, this error can occur if the input data is self-intersecting".to_string()});
         }
         Ok(())
     }
@@ -352,10 +352,10 @@ where
     #[allow(dead_code)]
     pub(crate) fn debug_print_all(&self) {
         println!();
-        println!("beachline.len()={}", self.beach_line_.len());
+        println!("beach_line.len()={}", self.beach_line_.len());
         for (i, (node, id)) in self.beach_line_.iter().enumerate() {
             print!(
-                "beachline{} L:{:?},R:{:?}, id={:?}",
+                "beach_line{} L:{:?},R:{:?}, id={:?}",
                 i,
                 &node.left_site(),
                 &node.right_site(),
@@ -378,7 +378,7 @@ where
 
     #[cfg(feature = "console_debug")]
     pub(crate) fn debug_print_all_compat(&self, ce: &VC::CircleEventQueue<BF>) {
-        println!("-----beachline----{}", self.beach_line_.len());
+        println!("-----beach_line----{}", self.beach_line_.len());
         for (i, (node, _id)) in self.beach_line_.iter().enumerate() {
             print!("#{}:", i);
             self.debug_print_all_compat_node(&node, ce);
@@ -388,8 +388,8 @@ where
 
     #[warn(dead_code)]
     pub(crate) fn debug_print_all_dump_and_cmp(&self, key: &BeachLineNodeKey<I, O, BI, BF>) {
-        println!("-----beachline----{}", self.beach_line_.len());
-        println!("Looking for {:?} in the beachline", key);
+        println!("-----beach_line----{}", self.beach_line_.len());
+        println!("Looking for {:?} in the beach_line", key);
         let found = self.beach_line_.get(key);
         println!(
             "Found {:?} cmp1=node.partial_cmp(key).unwrap() cmp2=key.partial_cmp(node).unwrap()",
