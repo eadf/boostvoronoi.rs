@@ -1,6 +1,6 @@
 [package]
 name = "boostvoronoi"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["eadf"]
 edition = "2018"
 description = "Boost voronoi ported to 100% rust"
@@ -10,18 +10,19 @@ license = "BSL-1.0"
 keywords = ["voronoi", "sweepline", "geometry"]
 
 [dependencies]
-num = "^0.3.1"
+num = ">=0.3.1,<0.5.0"
 ordered-float = "^2.1.1"
 fnv = "^1.0.7"
 rb_tree = "^0.3.5"
 vec_map = "^0.8.2"
-num-bigint = "^0.3.1"
+num-bigint = ">=0.3.1,<0.5.0"
 num-traits = "^0.2.14"
 thiserror = "^1.0.24"
 
 [features]
 console_debug = []
 
+#This will be removed by next release
 [[example]]
 name = "piston_gui"
 path = "example/piston_gui.rs"

@@ -2,7 +2,7 @@
 [![Documentation](https://docs.rs/boostvoronoi/badge.svg)](https://docs.rs/boostvoronoi)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Clippy/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Clippy/badge.svg)
-[![dependency status](https://deps.rs/crate/boostvoronoi/0.4.1/status.svg)](https://deps.rs/crate/boostvoronoi/0.4.1)
+[![dependency status](https://deps.rs/crate/boostvoronoi/0.4.2/status.svg)](https://deps.rs/crate/boostvoronoi/0.4.2)
 
 # Segmented Voronoi for Rust
 [Boost 1.75.0 polygon::voronoi](https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_main.htm) ported to 100% rust.
@@ -12,11 +12,14 @@ Code still in development, not ready for any purpose.
 
 ![Rusty voronoi](img.png)
 
-Quick example:
+Gui example:
 ```fish
 set -x LIBRARY_PATH /opt/local/lib/ #or wherever you store your SDL
-cargo run --example piston_gui
+cargo run --example fltk_gui
 ```
+Mouse click to place new points. Press and hold 'l' + mouse click to add single line. 
+\
+Press and hold 's' + mouse click to add strings of lines.
 
 API example:
 ```rust
@@ -52,7 +55,7 @@ Edges may become curves when line segments are used as input, see the example co
 - [ ] Add many more test cases for voronoi_robust_ftp.rs, specially for ulp
 - [x] Remove use of vec_map::VecMap where not absolutely needed.
 - [ ] Benchmark and optimize
-- [ ] Example GUI with more features. fltk?
+- [x] Example GUI with more features. fltk?
 - [ ] Fix the beachline bug found with main.rs example
 
 All credit goes to the original author (Andrii Sydorchuk), except the porting mistakes. They are all mine.
