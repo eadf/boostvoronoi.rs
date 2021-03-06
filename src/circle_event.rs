@@ -10,8 +10,6 @@
 // Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
 
 use super::beach_line as VB;
-//use super::voronoi_diagram as VD;
-//use super::predicate as VP;
 
 use super::OutputType;
 use fnv::FnvHashSet;

@@ -337,6 +337,13 @@ where
         self.color_ |= color << ColorBits::BITS_SHIFT.0;
         self.color_
     }
+
+    /// or_color sets the custom vertex info together with the previous value. (not the internal bits)
+    /// This is a Cell operation, remember to set() the entire cell
+    #[inline(always)]
+    pub fn or_color(&mut self, color: ColorType) -> ColorType {
+        self.set_color(self.get_color() | color)
+    }
 }
 
 /// Half-edge data structure. Represents Voronoi edge.
@@ -694,6 +701,18 @@ where
     pub fn vertex_get(&self, vertex_id: Option<VoronoiVertexIndex>) -> Option<&VertexType<I1, F1>> {
         let _ = vertex_id?;
         self.vertices_.get(vertex_id.unwrap().0)
+    }
+
+    /// OR the previous color field value with this new color value
+    pub fn vertex_or_color(&self, vertex_id: Option<VoronoiVertexIndex>, color: ColorType) {
+        if vertex_id.is_none() {
+            return;
+        }
+        if let Some(vertexcell) = self.vertex_get(vertex_id) {
+            let mut vertex = vertexcell.get();
+            let _ = vertex.or_color(color);
+            vertexcell.set(vertex);
+        }
     }
 
     /// Overwrites the content of dest with the content of source.
