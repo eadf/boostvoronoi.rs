@@ -75,7 +75,7 @@ impl ColorBits {
     pub(crate) const INITIAL_SEGMENT: Self = ColorBits(0x8);
     pub(crate) const REVERSE_SEGMENT: Self = ColorBits(0x9);
 
-    pub(crate) const BITMASK: Self = ColorBits(0x1F);
+    pub(crate) const BITMASK: Self = ColorBits(0x1F); // 0b1_11111111
 
     pub(crate) const GEOMETRY_SHIFT: Self = ColorBits(0x3);
     pub(crate) const GEOMETRY_CATEGORY_POINT: Self = ColorBits(0x0);
@@ -491,16 +491,27 @@ where
     }
 
     /// get_color returns the custom edge info. (not the internal bits)
+    #[inline(always)]
     pub fn get_color(&self) -> ColorType {
         self.color_ >> ColorBits::BITS_SHIFT.0
     }
 
     /// set_color sets the custom edge info. (not the internal bits)
+    /// This is a Cell operation, remember to set() the entire cell
+    #[inline(always)]
     pub fn set_color(&mut self, color: ColorType) -> ColorType {
         self.color_ &= ColorBits::BITMASK.0;
         self.color_ |= color << ColorBits::BITS_SHIFT.0;
         self.color_
     }
+
+    /// or_color sets the custom edge info together with the previous value. (not the internal bits)
+    /// This is a Cell operation, remember to set() the entire cell
+    #[inline(always)]
+    pub fn or_color(&mut self, color: ColorType) -> ColorType {
+        self.set_color(self.get_color() | color)
+    }
+
 }
 
 pub type CellType<I1, F1> = Rc<Cell<VoronoiCell<I1, F1>>>;
@@ -788,7 +799,7 @@ where
         }
         if let Some(edgecell) = self._edge_get(edge_id) {
             let mut edge = edgecell.get();
-            let _ = edge.set_color(edge.get_color()|color);
+            let _ = edge.or_color(color);
             edgecell.set(edge);
         }
     }
