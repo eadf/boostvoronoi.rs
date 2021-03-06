@@ -14,12 +14,11 @@ Code still in development, not ready for any purpose.
 
 Gui example:
 ```fish
-set -x LIBRARY_PATH /opt/local/lib/ #or wherever you store your SDL
 cargo run --example fltk_gui
 ```
-Mouse click to place new points. Press and hold 'l' + mouse click to add single line. 
+Mouse click to place new points. Press and hold 'L' + mouse click to add single line. 
 \
-Press and hold 's' + mouse click to add strings of lines.
+Press and hold 'S' + mouse click to add strings of lines.
 
 API example:
 ```rust
