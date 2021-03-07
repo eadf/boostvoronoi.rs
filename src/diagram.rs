@@ -715,6 +715,16 @@ where
         }
     }
 
+    /// Returns the color field of the vertex.
+    pub fn vertex_get_color(&self, vertex_id: Option<VoronoiVertexIndex>) -> Option<ColorType> {
+        let _ = vertex_id?;
+        if let Some(vertexcell) = self.vertex_get(vertex_id) {
+            let vertex = vertexcell.get();
+            return Some(vertex.get_color());
+        }
+        None
+    }
+
     /// Overwrites the content of dest with the content of source.
     /// edge_id is compensated accordingly
     fn _vertex_copy(&self, dest: usize, source: usize) {
