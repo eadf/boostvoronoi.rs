@@ -96,6 +96,16 @@ struct SharedData {
     last_click: Option<Point<i32>>,
 }
 
+///! This example intends to visualize the half edge output of the voronoi algorithm
+///!
+///! As an experiment I added (semi-useful) filters for :
+///!    cell segment edges = edges only belonging to cells defined by segments
+///!    cell point edges = edges only belonging to cells defined by points
+///!    cell segment vertices = vertices only belonging to cells defined by segments
+///!    cell point vertices = vertices only belonging to cells defined by points
+///!
+///! Read all about the half edge data structure here:
+///! <https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_diagram.htm>
 fn main() -> Result<(), BvError> {
     let app = app::App::default();
     let mut wind = window::Window::default()
@@ -527,6 +537,7 @@ where
     }
 
     /// Todo something is wrong here, some external edges will remain unmarked
+    /// some secondary internal edges are marked too.
     fn color_exterior(&self, edge_id: Option<VD::VoronoiEdgeIndex>) {
         if edge_id.is_none()
             || ColorFlag::from_bits(self.vd_.edge_get_color(edge_id).unwrap())

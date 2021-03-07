@@ -18,7 +18,7 @@ vec_map = "^0.8.2"
 num-bigint = ">=0.3.1,<0.5.0"
 num-traits = "^0.2.14"
 thiserror = "^1.0.24"
-bitflags = "1.2.1"
+bitflags = "^1.2.1"
 
 [features]
 console_debug = []
