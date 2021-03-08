@@ -12,7 +12,6 @@
 use super::beach_line as VB;
 
 use super::OutputType;
-use fnv::FnvHashSet;
 use ordered_float::OrderedFloat;
 use rb_tree::RBTree;
 use std::cell::Cell;
@@ -301,7 +300,7 @@ where
     c_: RBTree<CircleEventType<F2>>,
     c_list_: VecMap<CircleEventType<F2>>,
     c_list_next_free_index_: CircleEventIndexType,
-    inactive_circle_ids_: FnvHashSet<usize>, // Circle events turned inactive
+    inactive_circle_ids_: num_bigint::BigUint, // Circle events turned inactive
 }
 
 impl<F2: OutputType + Neg<Output = F2>> Default for CircleEventQueue<F2> {
@@ -310,7 +309,7 @@ impl<F2: OutputType + Neg<Output = F2>> Default for CircleEventQueue<F2> {
             c_: RBTree::new(),
             c_list_: VecMap::new(),
             c_list_next_free_index_: 0,
-            inactive_circle_ids_: FnvHashSet::default(),
+            inactive_circle_ids_: num_bigint::BigUint::default(),
         }
     }
 }
@@ -373,7 +372,7 @@ where
         if let Some(circle) = self.c_.pop() {
             if let Some(circle_id) = circle.0.get().index_ {
                 let _ = self.c_list_.remove(circle_id);
-                let _ = self.inactive_circle_ids_.insert(circle_id);
+                let _ = self.inactive_circle_ids_.set_bit(circle_id as u64, true);
             } else {
                 panic!("This should not have happened")
             }
@@ -387,7 +386,7 @@ where
     pub(crate) fn clear(&mut self) {
         self.c_.clear();
         self.c_list_.clear();
-        self.inactive_circle_ids_.clear();
+        self.inactive_circle_ids_ = num_bigint::BigUint::default()
     }
 
     /// Take ownership of the circle event,
@@ -412,13 +411,13 @@ where
     }
 
     pub(crate) fn is_active(&self, circle_event_id: CircleEventIndexType) -> bool {
-        !self.inactive_circle_ids_.contains(&circle_event_id)
+        !self.inactive_circle_ids_.bit(circle_event_id as u64)
     }
 
     pub(crate) fn deactivate(&mut self, circle_event_id: Option<CircleEventIndexType>) {
         #[cfg(not(feature = "console_debug"))]
         if let Some(circle_event_id) = circle_event_id {
-            let _ = self.inactive_circle_ids_.insert(circle_event_id);
+            let _ = self.inactive_circle_ids_.set_bit(circle_event_id as u64, true);
         }
         #[cfg(feature = "console_debug")]
         if let Some(circle_event_id) = circle_event_id {
