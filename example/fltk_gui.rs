@@ -79,6 +79,7 @@ bitflags! {
 pub enum Example {
     Simple,
     Complex,
+    Atest,
     Clean,
 }
 
@@ -246,6 +247,13 @@ fn main() -> Result<(), BvError> {
         menu::MenuFlag::Normal,
         sender,
         GuiMessage::MenuChoice(Example::Clean),
+    );
+    menu_but.add_emit(
+        "A Test",
+        Shortcut::None,
+        menu::MenuFlag::Normal,
+        sender,
+        GuiMessage::MenuChoice(Example::Atest),
     );
 
     e_segment_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::E_CELL_SEGMENT));
@@ -906,6 +914,13 @@ where
             [400, 200, 200, 200],
             [529, 242, 367, 107],
         ];
+        let _test_segments: [[i32; 4]; 5] = [
+            [0, 0, 100, 0],
+            [100, 0, 100, 100],
+            [100, 100, 0, 100],
+            [0, 100, 0, 0],
+            [40, 50, 60, 50],
+        ];
         let _segments_rust: [[i32; 4]; 352] = [
             [402, 20, 395, 20],
             [408, 23, 402, 20],
@@ -1265,6 +1280,7 @@ where
         let mut new_segments = match example {
             Example::Simple => to_segments(&_simple_segments),
             Example::Complex => to_segments(&_segments_rust),
+            Example::Atest => to_segments(&_test_segments),
             Example::Clean => {
                 let clean: [[i32; 4]; 0] = [];
                 to_segments(&clean)
