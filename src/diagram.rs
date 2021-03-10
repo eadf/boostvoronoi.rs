@@ -1518,12 +1518,17 @@ where
         }
     }
 
-    pub fn debug_print_all(&self) {
+    /// prints cells and vertices to the console
+    /// edges will be printed if the 'edge_filter' returns true for that edge id.
+    pub fn debug_print_all<F>(&self, edge_filter: F)
+    where
+        F: Fn(usize) -> bool,
+    {
         println!();
         println!("output:");
         for (i, c) in self.cells_.iter().enumerate() {
             let cc = c.get();
-            print!("cell{} {:?} ", i, &cc);
+            print!("cell#{} {:?} ", i, &cc);
             if cc.contains_point() {
                 println!("point");
             } else if cc.contains_segment() {
@@ -1538,7 +1543,24 @@ where
         }
         for (i, v) in self.vertices_.iter().enumerate() {
             assert_eq!(i, v.get().id_.0);
-            println!("vertex{} {:?}", i, &v.get());
+
+            let edges1: Vec<usize> = self
+                .edge_rot_next_iterator(v.get().get_incident_edge())
+                .map(|x| x.0)
+                .filter(|x| edge_filter(*x))
+                .collect();
+            let edges2: Vec<usize> = self
+                .edge_rot_next_iterator(v.get().get_incident_edge())
+                .map(|x| self.edge_get_twin(Some(x)))
+                .flatten()
+                .map(|x| x.0)
+                .filter(|x| edge_filter(*x))
+                .collect();
+            //if !(edges1.is_empty() && edges2.is_empty()) {
+            print!("vertex#{} {:?}", i, &v.get());
+            print!(" outgoing edges:{:?}", edges1);
+            println!(" incoming edges:{:?}", edges2);
+            //}
         }
     }
 
