@@ -1022,8 +1022,8 @@ where
     pub fn edge_rot_prev_iterator(
         &self,
         edge_id: Option<VoronoiEdgeIndex>,
-    ) -> EdgeRotNextIterator<I1, F1, I2, F2> {
-        EdgeRotNextIterator::new(self, edge_id)
+    ) -> EdgeRotPrevIterator<I1, F1, I2, F2> {
+        EdgeRotPrevIterator::new(self, edge_id)
     }
 
     #[inline]
