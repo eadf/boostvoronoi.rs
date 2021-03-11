@@ -15,7 +15,7 @@ ordered-float = "^2.1.1"
 fnv = "^1.0.7"
 rb_tree = "^0.3.5"
 vec_map = "^0.8.2"
-yabf = {version="^0.0.2",default-features=false}
+yabf = {version="^0.0.3",default-features=false}
 num-traits = "^0.2.14"
 thiserror = "^1.0.24"
 bitflags = "^1.2.1"
