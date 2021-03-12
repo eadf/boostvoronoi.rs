@@ -1,7 +1,8 @@
 use boostvoronoi::builder as VB;
 use boostvoronoi::diagram as VD;
-use boostvoronoi::{BvError, InputType};
+use boostvoronoi::{BvError};
 use boostvoronoi::{Line, Point};
+use boostvoronoi::builder::{to_points, to_segments};
 
 type I1 = i32;
 type F1 = f64;
@@ -15,14 +16,6 @@ fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
     assert!(F1::abs(y1 - y2) < delta, "{} != {}", y1, y2);
 
     (F1::abs(x1 - x2) < delta) && (F1::abs(y1 - y2) < delta)
-}
-
-fn to_points<T: InputType>(points: &[[T; 2]]) -> Vec<boostvoronoi::Point<T>> {
-    points.iter().map(|x| x.into()).collect()
-}
-
-fn to_segments<T: InputType>(points: &[[T; 4]]) -> Vec<boostvoronoi::Line<T>> {
-    points.iter().map(|x| x.into()).collect()
 }
 
 fn retrieve_point<T>(
@@ -57,7 +50,7 @@ fn segment_4_1_intersecting() {
             [572, 96, 363, 51],
             [147, 103, 96, 170],
         ];
-        let segments = to_segments(&segments);
+        let segments = VB::to_segments(&segments);
 
         let mut vb = VB::Builder::<I1, F1, I2, F2>::new();
         vb.with_segments(segments.iter()).expect("should not fail");
@@ -81,7 +74,7 @@ fn segment_4_1() -> Result<(), BvError> {
             [572, 96, 363, 51],
             [147, 103, 96, 170],
         ];
-        let segments = to_segments(&segments);
+        let segments = VB::to_segments(&segments);
 
         let mut vb = VB::Builder::<I1, F1, I2, F2>::new();
         vb.with_segments(segments.iter())?;

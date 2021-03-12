@@ -1,6 +1,5 @@
-use boostvoronoi::builder::Builder;
-use boostvoronoi::Line;
-use boostvoronoi::{BvError, InputType};
+use boostvoronoi::builder::{to_segments, Builder};
+use boostvoronoi::{BvError};
 
 type I1 = i64;
 type F1 = f64;
@@ -14,10 +13,6 @@ fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
     assert!(F1::abs(y1 - y2) < delta, "{} != {}", y1, y2);
 
     (F1::abs(x1 - x2) < delta) && (F1::abs(y1 - y2) < delta)
-}
-
-fn to_segments<T: InputType>(points: &[[T; 4]]) -> Vec<Line<T>> {
-    points.iter().map(|x| x.into()).collect()
 }
 
 //#[ignore]

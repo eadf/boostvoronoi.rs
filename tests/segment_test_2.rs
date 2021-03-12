@@ -1,4 +1,4 @@
-use boostvoronoi::builder::Builder;
+use boostvoronoi::builder as VB;
 use boostvoronoi::{BvError, InputType};
 
 type I1 = i32;
@@ -13,14 +13,6 @@ fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
     assert!(F1::abs(y1 - y2) < delta, "{} != {}", y1, y2);
 
     (F1::abs(x1 - x2) < delta) && (F1::abs(y1 - y2) < delta)
-}
-
-fn to_points<T: InputType>(points: &[[T; 2]]) -> Vec<boostvoronoi::Point<T>> {
-    points.iter().map(|x| x.into()).collect()
-}
-
-fn to_segments<T: InputType>(points: &[[T; 4]]) -> Vec<boostvoronoi::Line<T>> {
-    points.iter().map(|x| x.into()).collect()
 }
 
 //#[ignore]
@@ -38,10 +30,10 @@ fn two_segments_9() -> Result<(), BvError> {
         ];
         //let s = segments.iter().map(|x|x.into()).collect();
 
-        let _v = to_points::<I1>(&points);
-        let _s = to_segments::<I1>(&segments);
+        let _v = VB::to_points::<I1>(&points);
+        let _s = VB::to_segments::<I1>(&segments);
 
-        let mut vb = Builder::<I1, F1, I2, F2>::new();
+        let mut vb = VB::Builder::<I1, F1, I2, F2>::new();
         vb.with_vertices(_v.iter()).expect("two_segments_9");
         vb.with_segments(_s.iter()).expect("two_segments_9");
         vb.construct().expect("two_segments_9")

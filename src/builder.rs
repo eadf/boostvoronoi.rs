@@ -795,3 +795,13 @@ where
         println!("#site_events={}", self.site_events_.len());
     }
 }
+
+/// helper function: converts a slice of [[integer,integer]] into input data for the Builder.
+pub fn to_points<T: InputType>(points: &[[T; 2]]) -> Vec<Point<T>> {
+    points.iter().map(|x| x.into()).collect()
+}
+
+/// helper function: converts a slice of [[integer,integer,integer,integer]] into input data for the Builder.
+pub fn to_segments<T: InputType>(points: &[[T; 4]]) -> Vec<Line<T>> {
+    points.iter().map(|x| x.into()).collect()
+}
