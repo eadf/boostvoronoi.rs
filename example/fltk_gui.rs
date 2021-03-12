@@ -20,7 +20,6 @@ use fltk::group::Pack;
 use geo::prelude::Intersects;
 use ordered_float::OrderedFloat;
 use std::cell::{RefCell, RefMut};
-use std::collections::HashSet;
 use std::rc::Rc;
 
 #[macro_use]
@@ -356,7 +355,7 @@ fn main() -> Result<(), BvError> {
                 shared_data_bm.last_click = None;
                 shared_data_bm.visualizer.segment_data_.clear();
                 shared_data_bm.visualizer.point_data_.clear();
-                shared_data_bm.visualizer.vd_.clear();
+                shared_data_bm.visualizer.diagram.clear();
                 redraw();
             }
             false
@@ -411,10 +410,9 @@ where
     F2: BigFloatType + Neg<Output = F2>,
 {
     bounding_rect: geo::Rect<F1>,
-    vd_: VD::VoronoiDiagram<I1, F1, I2, F2>,
+    diagram: VD::VoronoiDiagram<I1, F1, I2, F2>,
     point_data_: Vec<boostvoronoi::Point<I1>>,
     segment_data_: Vec<boostvoronoi::Line<I1>>,
-    pub previous_points: HashSet<boostvoronoi::Point<i32>>,
 }
 
 impl<I1, F1, I2, F2> VoronoiVisualizer<I1, F1, I2, F2>
@@ -436,11 +434,10 @@ where
                     y: F1::from(0).unwrap(),
                 },
             ),
-            vd_: VD::VoronoiDiagram::<I1, F1, I2, F2>::new(0),
+            diagram: VD::VoronoiDiagram::<I1, F1, I2, F2>::new(0),
 
             point_data_: Vec::<boostvoronoi::Point<I1>>::new(),
             segment_data_: Vec::<boostvoronoi::Line<I1>>::new(),
-            previous_points: HashSet::new(),
         }
     }
 
@@ -448,12 +445,12 @@ where
         println!(
             "Running voronoi with this input (in case of a crash, copy&paste and make a test case)"
         );
-        print!("  let points:[[I1;2];{}]=[", self.point_data_.len());
+        print!("  let points:[[i32;2];{}]=[", self.point_data_.len());
         for p in self.point_data_.iter() {
             print!("[{},{}],", p.x, p.y)
         }
         println!("];");
-        print!("  let segments:[[I1;4];{}]=[", self.segment_data_.len());
+        print!("  let segments:[[i32;4];{}]=[", self.segment_data_.len());
         for s in self.segment_data_.iter() {
             print!("[{},{},{},{}],", s.start.x, s.start.y, s.end.x, s.end.y)
         }
@@ -464,19 +461,20 @@ where
         vb.with_segments(self.segment_data_.iter())?;
 
         // Construct voronoi diagram.
-        self.vd_ = vb.construct()?;
+        self.diagram = vb.construct()?;
 
         // Color exterior edges.
-        for it in self.vd_.edges().iter() {
+        for it in self.diagram.edges().iter() {
             let edge_id = Some(it.get().get_id());
-            if !self.vd_.edge_is_finite(edge_id).unwrap() {
+            if !self.diagram.edge_is_finite(edge_id).unwrap() {
                 self.color_exterior(edge_id);
-                self.vd_.edge_or_color(edge_id, ColorFlag::INFINITE.bits);
+                self.diagram
+                    .edge_or_color(edge_id, ColorFlag::INFINITE.bits);
             }
         }
 
         // Color edges and vertices based upon how their cell is created, by a segment or a point
-        for it in self.vd_.cells().iter() {
+        for it in self.diagram.cells().iter() {
             let is_segment = it.get().contains_segment();
             let edge_id_o = it.get().get_incident_edge();
             if let Some(edge_id) = edge_id_o {
@@ -485,21 +483,21 @@ where
                 } else {
                     ColorFlag::CELL_POINT.bits
                 };
-                self.vd_.edge_or_color(edge_id_o, flag);
-                self.vd_
-                    .vertex_or_color(self.vd_.edge_get_vertex0(edge_id_o), flag);
-                self.vd_
-                    .vertex_or_color(self.vd_.edge_get_vertex1(edge_id_o), flag);
+                self.diagram.edge_or_color(edge_id_o, flag);
+                self.diagram
+                    .vertex_or_color(self.diagram.edge_get_vertex0(edge_id_o), flag);
+                self.diagram
+                    .vertex_or_color(self.diagram.edge_get_vertex1(edge_id_o), flag);
 
-                let mut another_edge = self.vd_.get_edge(edge_id).get().next();
+                let mut another_edge = self.diagram.get_edge(edge_id).get().next();
                 while another_edge.is_some() && another_edge != edge_id_o {
-                    self.vd_.edge_or_color(another_edge, flag);
-                    self.vd_
-                        .vertex_or_color(self.vd_.edge_get_vertex0(another_edge), flag);
-                    self.vd_
-                        .vertex_or_color(self.vd_.edge_get_vertex1(another_edge), flag);
+                    self.diagram.edge_or_color(another_edge, flag);
+                    self.diagram
+                        .vertex_or_color(self.diagram.edge_get_vertex0(another_edge), flag);
+                    self.diagram
+                        .vertex_or_color(self.diagram.edge_get_vertex1(another_edge), flag);
 
-                    another_edge = self.vd_.get_edge(another_edge.unwrap()).get().next();
+                    another_edge = self.diagram.get_edge(another_edge.unwrap()).get().next();
                 }
             }
         }
@@ -548,28 +546,31 @@ where
     /// some secondary internal edges are marked too.
     fn color_exterior(&self, edge_id: Option<VD::VoronoiEdgeIndex>) {
         if edge_id.is_none()
-            || ColorFlag::from_bits(self.vd_.edge_get_color(edge_id).unwrap())
+            || ColorFlag::from_bits(self.diagram.edge_get_color(edge_id).unwrap())
                 .unwrap()
                 .contains(ColorFlag::EXTERNAL)
         {
+            // This edge has already been colored, break recursion
             return;
         }
-        self.vd_.edge_or_color(edge_id, ColorFlag::EXTERNAL.bits);
-        self.vd_
-            .edge_or_color(self.vd_.edge_get_twin(edge_id), ColorFlag::EXTERNAL.bits);
-        let v = self.vd_.edge_get_vertex1(edge_id);
-        if v.is_none() || !self.vd_.get_edge(edge_id.unwrap()).get().is_primary() {
+        // Color this and the twin edge as EXTERNAL
+        self.diagram
+            .edge_or_color(edge_id, ColorFlag::EXTERNAL.bits);
+        self.diagram.edge_or_color(
+            self.diagram.edge_get_twin(edge_id),
+            ColorFlag::EXTERNAL.bits,
+        );
+        let v = self.diagram.edge_get_vertex1(edge_id);
+        if v.is_none() || !self.diagram.get_edge(edge_id.unwrap()).get().is_primary() {
+            // stop if this edge does not have a vertex1 (e.g is infinite)
+            // or if this edge isn't a primary edge.
             return;
         }
-        self.vd_.vertex_set_color(v, ColorFlag::EXTERNAL.bits);
-        let mut e = self.vd_.vertex_get_incident_edge(v);
-        let v_incident_edge = e;
-        while e.is_some() {
-            self.color_exterior(e);
-            e = self.vd_.edge_rot_next(e);
-            if e == v_incident_edge {
-                break;
-            }
+        self.diagram.vertex_set_color(v, ColorFlag::EXTERNAL.bits);
+        let incident_edge = self.diagram.vertex_get_incident_edge(v);
+        for e in self.diagram.edge_rot_next_iterator(incident_edge) {
+            // mark all surrounding edges as EXTERNAL, but only recurse on primary edges
+            self.color_exterior(Some(e));
         }
     }
 
@@ -644,7 +645,7 @@ where
         let draw_cell_points = config.draw_flag.contains(DrawFilterFlag::V_CELL_POINT);
         let draw_cell_segment = config.draw_flag.contains(DrawFilterFlag::V_CELL_SEGMENT);
 
-        for it in self.vd_.vertex_iter().enumerate() {
+        for it in self.diagram.vertex_iter().enumerate() {
             let vertex = it.1.get();
             if (!draw_external)
                 && ColorFlag::from_bits(vertex.get_color())
@@ -683,10 +684,19 @@ where
         let draw_infinite_edges = config.draw_flag.contains(DrawFilterFlag::INFINITE);
 
         set_draw_color(Color::Green);
+        let mut already_drawn = yabf::Yabf::default();
 
-        for it in self.vd_.edges().iter().enumerate() {
+        for it in self.diagram.edges().iter().enumerate() {
             let edge_id = VoronoiEdgeIndex(it.0);
             let edge = it.1.get();
+            if already_drawn.bit(edge_id.0) {
+                // already done this or, rather - it's twin
+                continue;
+            }
+            already_drawn.set_bit(edge_id.0, true);
+            if let Some(twin) = self.diagram.edge_get_twin(Some(edge_id)) {
+                already_drawn.set_bit(twin.0, true);
+            }
 
             //#[allow(unused_assignments)]
             if (!draw_primary) && edge.is_primary() {
@@ -726,14 +736,14 @@ where
             }
 
             let mut samples = Vec::<[F1; 2]>::new();
-            if !self.vd_.edge_is_finite(Some(edge_id)).unwrap() {
+            if !self.diagram.edge_is_finite(Some(edge_id)).unwrap() {
                 self.clip_infinite_edge(edge_id, &mut samples);
             } else {
-                let vertex0 = self.vd_.vertex_get(edge.vertex0()).unwrap().get();
+                let vertex0 = self.diagram.vertex_get(edge.vertex0()).unwrap().get();
 
                 samples.push([vertex0.x(), vertex0.y()]);
-                let vertex1 = self.vd_.edge_get_vertex1(Some(edge_id));
-                let vertex1 = self.vd_.vertex_get(vertex1).unwrap().get();
+                let vertex1 = self.diagram.edge_get_vertex1(Some(edge_id));
+                let vertex1 = self.diagram.vertex_get(vertex1).unwrap().get();
 
                 samples.push([vertex1.x(), vertex1.y()]);
                 if edge.is_curved() {
@@ -755,17 +765,17 @@ where
     }
 
     fn clip_infinite_edge(&self, edge_id: VD::VoronoiEdgeIndex, clipped_edge: &mut Vec<[F1; 2]>) {
-        let edge = self.vd_.get_edge(edge_id);
+        let edge = self.diagram.get_edge(edge_id);
         //const cell_type& cell1 = *edge.cell();
-        let cell1_id = self.vd_.edge_get_cell(Some(edge_id)).unwrap();
-        let cell1 = self.vd_.get_cell(cell1_id).get();
+        let cell1_id = self.diagram.edge_get_cell(Some(edge_id)).unwrap();
+        let cell1 = self.diagram.get_cell(cell1_id).get();
         //const cell_type& cell2 = *edge.twin()->cell();
         let cell2_id = self
-            .vd_
+            .diagram
             .edge_get_twin(Some(edge_id))
-            .and_then(|e| self.vd_.edge_get_cell(Some(e)))
+            .and_then(|e| self.diagram.edge_get_cell(Some(e)))
             .unwrap();
-        let cell2 = self.vd_.get_cell(cell2_id).get();
+        let cell2 = self.diagram.get_cell(cell2_id).get();
 
         let mut origin: geo::Coordinate<F1> = geo::Coordinate {
             x: F1::default(),
@@ -811,14 +821,14 @@ where
         if vertex0.is_none() {
             clipped_edge.push([origin.x - direction.x * koef, origin.y - direction.y * koef]);
         } else {
-            let vertex0 = self.vd_.vertex_get(vertex0).unwrap().get();
+            let vertex0 = self.diagram.vertex_get(vertex0).unwrap().get();
             clipped_edge.push([vertex0.x(), vertex0.y()]);
         }
-        let vertex1 = self.vd_.edge_get_vertex1(Some(edge_id));
+        let vertex1 = self.diagram.edge_get_vertex1(Some(edge_id));
         if vertex1.is_none() {
             clipped_edge.push([origin.x + direction.x * koef, origin.y + direction.y * koef]);
         } else {
-            let vertex1 = self.vd_.vertex_get(vertex1).unwrap().get();
+            let vertex1 = self.diagram.vertex_get(vertex1).unwrap().get();
             clipped_edge.push([vertex1.x(), vertex1.y()]);
         }
     }
@@ -828,10 +838,10 @@ where
         let max_dist =
             Self::f32_to_f1(1E-3) * (self.bounding_rect.max().x - self.bounding_rect.min().x);
 
-        let cell_id = self.vd_.edge_get_cell(Some(edge_id)).unwrap();
-        let cell = self.vd_.get_cell(cell_id).get();
-        let twin_id = self.vd_.edge_get_twin(Some(edge_id)).unwrap();
-        let twin_cell_id = self.vd_.edge_get_cell(Some(twin_id)).unwrap();
+        let cell_id = self.diagram.edge_get_cell(Some(edge_id)).unwrap();
+        let cell = self.diagram.get_cell(cell_id).get();
+        let twin_id = self.diagram.edge_get_twin(Some(edge_id)).unwrap();
+        let twin_cell_id = self.diagram.edge_get_cell(Some(twin_id)).unwrap();
 
         let point = if cell.contains_point() {
             self.retrieve_point(cell_id)
@@ -852,7 +862,7 @@ where
     }
 
     fn retrieve_point(&self, cell_id: VD::VoronoiCellIndex) -> boostvoronoi::Point<I1> {
-        let (index, cat) = self.vd_.get_cell(cell_id).get().source_index_2();
+        let (index, cat) = self.diagram.get_cell(cell_id).get().source_index_2();
         match cat {
             VD::SourceCategory::SinglePoint => self.point_data_[index],
             VD::SourceCategory::SegmentStart => {
@@ -865,7 +875,7 @@ where
     }
 
     fn retrieve_segment(&self, cell_id: VD::VoronoiCellIndex) -> &boostvoronoi::Line<I1> {
-        let cell = self.vd_.get_cell(cell_id).get();
+        let cell = self.diagram.get_cell(cell_id).get();
         let index = cell.source_index() - self.point_data_.len();
         &self.segment_data_[index]
     }
@@ -873,7 +883,7 @@ where
     fn read_data(&mut self, example: Example) {
         self.segment_data_.clear();
         self.point_data_.clear();
-        self.vd_.clear();
+        self.diagram.clear();
 
         let i32_to_i1 = |x| I1::from(x).unwrap();
 
@@ -881,8 +891,8 @@ where
             let mut rv = Vec::new();
             for p in points.iter() {
                 rv.push(boostvoronoi::Point {
-                    x: i32_to_i1(p[0]),
-                    y: i32_to_i1(p[1]),
+                    x: i32_to_i1(p[0]), // + i32_to_i1(100),
+                    y: i32_to_i1(p[1]), // + i32_to_i1(100),
                 });
             }
             rv
@@ -893,12 +903,12 @@ where
             for p in segments_.iter() {
                 let line = boostvoronoi::Line::<I1>::new(
                     boostvoronoi::Point {
-                        x: i32_to_i1(p[0]),
-                        y: i32_to_i1(p[1]),
+                        x: i32_to_i1(p[0]), // + i32_to_i1(100),
+                        y: i32_to_i1(p[1]), // + i32_to_i1(100),
                     },
                     boostvoronoi::Point {
-                        x: i32_to_i1(p[2]),
-                        y: i32_to_i1(p[3]),
+                        x: i32_to_i1(p[2]), // + i32_to_i1(100),
+                        y: i32_to_i1(p[3]), // + i32_to_i1(100),
                     },
                 );
                 rv.push(line);
@@ -908,18 +918,18 @@ where
 
         let points: [[i32; 2]; 0] = [];
         let _simple_segments: [[i32; 4]; 5] = [
-            [200, 200, 200, 400],
-            [200, 400, 400, 400],
-            [400, 400, 400, 200],
-            [400, 200, 200, 200],
-            [529, 242, 367, 107],
+            [300, 300, 300, 500],
+            [300, 500, 500, 500],
+            [500, 500, 500, 300],
+            [500, 300, 300, 300],
+            [629, 342, 467, 207],
         ];
         let _test_segments: [[i32; 4]; 5] = [
-            [0, 0, 100, 0],
-            [100, 0, 100, 100],
-            [100, 100, 0, 100],
-            [0, 100, 0, 0],
-            [40, 50, 60, 50],
+            [100, 100, 200, 100],
+            [200, 100, 200, 200],
+            [200, 200, 100, 200],
+            [100, 200, 100, 100],
+            [140, 150, 160, 150],
         ];
         let _segments_rust: [[i32; 4]; 352] = [
             [402, 20, 395, 20],
