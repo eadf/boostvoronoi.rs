@@ -9,15 +9,11 @@ type F2 = f64;
 
 #[cfg(test)]
 fn bench_1(c: &mut Criterion) {
-    #[cfg(feature = "impl_smallvec")]
-    println!("running bench with Smallvec");
-    #[cfg(not(feature = "impl_smallvec"))]
-    println!("running bench with std::vec::Vec");
 
-    c.bench_function("bench1", |b| {
+    c.bench_function("bench_1", |b| {
         b.iter({
             || {
-                let (output, _v, _s) = {
+                let (_output, _v, _s) = {
                     let points: [[I1; 2]; 45] = [
                         [303, 108],
                         [180, 257],
@@ -123,9 +119,9 @@ fn bench_1(c: &mut Criterion) {
                     let _s = to_segments::<I1>(&segments);
 
                     let mut vb = Builder::<I1, F1, I2, F2>::new();
-                    vb.with_vertices(_v.iter()).expect("large_segment_1");
-                    vb.with_segments(_s.iter()).expect("large_segment_1");
-                    (vb.construct().expect("large_segment_1"), _v, _s)
+                    vb.with_vertices(_v.iter()).expect("bench_1");
+                    vb.with_segments(_s.iter()).expect("bench_1");
+                    (vb.construct().expect("bench_1"), _v, _s)
                 };
             }
         })
