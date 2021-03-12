@@ -1,5 +1,5 @@
 use boostvoronoi::builder as VB;
-use boostvoronoi::{BvError, InputType};
+use boostvoronoi::BvError;
 
 type I1 = i32;
 //type F1 = f32;
