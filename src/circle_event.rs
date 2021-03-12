@@ -417,9 +417,7 @@ where
     pub(crate) fn deactivate(&mut self, circle_event_id: Option<CircleEventIndexType>) {
         #[cfg(not(feature = "console_debug"))]
         if let Some(circle_event_id) = circle_event_id {
-            let _ = self
-                .inactive_circle_ids_
-                .set_bit(circle_event_id, true);
+            let _ = self.inactive_circle_ids_.set_bit(circle_event_id, true);
         }
         #[cfg(feature = "console_debug")]
         if let Some(circle_event_id) = circle_event_id {
