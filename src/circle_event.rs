@@ -421,13 +421,13 @@ where
         }
         #[cfg(feature = "console_debug")]
         if let Some(circle_event_id) = circle_event_id {
-            if !self.inactive_circle_ids_.contains(&circle_event_id) {
+            if !self.inactive_circle_ids_.bit(circle_event_id) {
                 if self.c_list_.contains_key(circle_event_id) {
                     println!("deactivate {:?}", self.c_list_[circle_event_id]);
                 } else {
                     println!("circle {} not present", circle_event_id);
                 }
-                let _ = self.inactive_circle_ids_.insert(circle_event_id);
+                let _ = self.inactive_circle_ids_.set_bit(circle_event_id, true);
             }
         }
     }
