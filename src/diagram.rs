@@ -12,7 +12,8 @@
 use super::circle_event as VC;
 use super::ctypes as CT;
 use super::site_event as VSE;
-use super::TypeConverter as TCC;
+use super::visual_utils as VU;
+use super::TypeConverter4 as TC4;
 
 pub use super::{BigFloatType, BigIntType, InputType, OutputType};
 use num::NumCast;
@@ -714,12 +715,24 @@ where
         self.edges_.clear();
     }
 
+    /// Returns a reference to all of the cells
     pub fn cells(&self) -> &Vec<CellType<I1, F1>> {
         &self.cells_
     }
 
+    /// Returns a reference to all of the vertices
     pub fn vertices(&self) -> &Vec<VertexType<I1, F1>> {
         &self.vertices_
+    }
+
+    /// Returns an aabb large enough to contain all the vertices
+    pub fn vertices_get_aabb(&self) -> VU::Aabb2<I1, F1> {
+        let mut rv = VU::Aabb2::<I1, F1>::default();
+        for v in self.vertices_.iter() {
+            let v = v.get();
+            rv.update_vertex(v.x(), v.y());
+        }
+        rv
     }
 
     pub fn edges(&self) -> &Vec<EdgeType<I1, F1, I2, F2>> {
@@ -732,6 +745,22 @@ where
 
     pub fn get_edge(&self, edge: VoronoiEdgeIndex) -> EdgeType<I1, F1, I2, F2> {
         self.edges_.get(edge.0).unwrap().clone()
+    }
+
+    /// Return the edge represented as an straight line
+    /// if the edge does not exists or if it lacks v0 or v1; None will be returned.
+    /// TODO: this looks like an into() candidate
+    pub fn edge_as_line(&self, edge: Option<VoronoiEdgeIndex>) -> Option<[F1; 4]> {
+        let v0 = self.vertex_get(self.edge_get_vertex0(edge));
+        let v1 = self.vertex_get(self.edge_get_vertex1(edge));
+        if let Some(v0) = v0 {
+            if let Some(v1) = v1 {
+                let v0 = v0.get();
+                let v1 = v1.get();
+                return Some([v0.x(), v0.y(), v1.x(), v1.y()]);
+            }
+        }
+        None
     }
 
     pub fn cell_iter(&self) -> core::slice::Iter<CellType<I1, F1>> {
@@ -1314,8 +1343,8 @@ where
 
         // Add a new Voronoi vertex.
         let new_vertex_id = self._vertex_new_2(
-            TCC::<I1, F1, I2, F2>::f2_to_f1(circle.raw_x()),
-            TCC::<I1, F1, I2, F2>::f2_to_f1(circle.raw_y()),
+            TC4::<I1, F1, I2, F2>::f2_to_f1(circle.raw_x()),
+            TC4::<I1, F1, I2, F2>::f2_to_f1(circle.raw_y()),
         );
 
         // Update vertex pointers of the old edges.

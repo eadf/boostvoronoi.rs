@@ -342,25 +342,21 @@ where
 }
 
 #[derive(Default)]
-pub struct TypeConverter<I1, F1, I2, F2>
+pub struct TypeConverter2<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: InputType + Neg<Output = I2>,
-    F2: OutputType + Neg<Output = F2>,
 {
+    #[doc(hidden)]
     _pdo: PhantomData<F1>,
+    #[doc(hidden)]
     _pdi: PhantomData<I1>,
-    _pdbi: PhantomData<I2>,
-    _pdbf: PhantomData<F2>,
 }
 
-impl<I1, F1, I2, F2> TypeConverter<I1, F1, I2, F2>
+impl<I1, F1> TypeConverter2<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: InputType + Neg<Output = I2>,
-    F2: OutputType + Neg<Output = F2>,
 {
     #[inline(always)]
     pub fn i1_to_f1(input: I1) -> F1 {
@@ -370,11 +366,6 @@ where
     #[inline(always)]
     pub fn f1_to_i32(input: F1) -> i32 {
         num::cast::<F1, i32>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn i1_to_f2(input: I1) -> F2 {
-        num::cast::<I1, F2>(input).unwrap()
     }
 
     // todo! is there no way to solve this more efficiently?
@@ -387,6 +378,67 @@ where
     #[inline(always)]
     pub fn i1_to_i128(input: I1) -> i128 {
         num::cast::<I1, i128>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn f1_to_i1(input: F1) -> I1 {
+        num::cast::<F1, I1>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn f1_to_f64(input: F1) -> f64 {
+        num::cast::<F1, f64>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn i32_to_i1(input: i32) -> I1 {
+        num::cast::<i32, I1>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn i32_to_f1(input: i32) -> F1 {
+        num::cast::<i32, F1>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn i1_to_i32(input: I1) -> i32 {
+        num::cast::<I1, i32>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn i1_to_f64(input: I1) -> f64 {
+        NumCast::from(input).unwrap()
+    }
+}
+
+#[derive(Default)]
+pub struct TypeConverter4<I1, F1, I2, F2>
+where
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: InputType + Neg<Output = I2>,
+    F2: OutputType + Neg<Output = F2>,
+{
+    #[doc(hidden)]
+    _pdo: PhantomData<F1>,
+    #[doc(hidden)]
+    _pdi: PhantomData<I1>,
+    #[doc(hidden)]
+    _pdbi: PhantomData<I2>,
+    #[doc(hidden)]
+    _pdbf: PhantomData<F2>,
+}
+
+impl<I1, F1, I2, F2> TypeConverter4<I1, F1, I2, F2>
+where
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: InputType + Neg<Output = I2>,
+    F2: OutputType + Neg<Output = F2>,
+{
+    #[inline(always)]
+    pub fn i1_to_f2(input: I1) -> F2 {
+        num::cast::<I1, F2>(input).unwrap()
     }
 
     // todo! is there no way to solve this more efficiently?
@@ -425,18 +477,8 @@ where
     }
 
     #[inline(always)]
-    pub fn f1_to_f64(input: F1) -> f64 {
-        num::cast::<F1, f64>(input).unwrap()
-    }
-
-    #[inline(always)]
     pub fn f2_to_f64(input: F2) -> f64 {
         num::cast::<F2, f64>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn f1_to_i1(input: F1) -> I1 {
-        num::cast::<F1, I1>(input).unwrap()
     }
 
     #[inline(always)]
@@ -452,21 +494,6 @@ where
     #[inline(always)]
     pub fn f32_to_f2(input: f32) -> F2 {
         num::cast::<f32, F2>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn i32_to_i1(input: i32) -> I1 {
-        num::cast::<i32, I1>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn i1_to_i32(input: I1) -> i32 {
-        num::cast::<I1, i32>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn i1_to_f64(input: I1) -> f64 {
-        NumCast::from(input).unwrap()
     }
 
     #[inline(always)]

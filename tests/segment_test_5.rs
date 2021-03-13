@@ -1,5 +1,5 @@
 use boostvoronoi::builder::{to_segments, Builder};
-use boostvoronoi::{BvError};
+use boostvoronoi::BvError;
 
 type I1 = i64;
 type F1 = f64;

@@ -1,8 +1,8 @@
 use boostvoronoi::builder as VB;
-use boostvoronoi::diagram as VD;
-use boostvoronoi::{BvError};
-use boostvoronoi::{Line, Point};
 use boostvoronoi::builder::{to_points, to_segments};
+use boostvoronoi::diagram as VD;
+use boostvoronoi::BvError;
+use boostvoronoi::{Line, Point};
 
 type I1 = i32;
 type F1 = f64;
@@ -93,8 +93,8 @@ fn vertical_segment_1() -> Result<(), BvError> {
         [147, 103, 96, 170],
     ];
 
-    let _v = to_points::<I1>(&points);
-    let _s = to_segments::<I1>(&segments);
+    let _v = to_points::<I1, I1>(&points);
+    let _s = to_segments::<I1, I1>(&segments);
 
     let mut vb = VB::Builder::<I1, F1, I2, F2>::new();
     vb.with_vertices(_v.iter())?;

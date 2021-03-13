@@ -1,10 +1,10 @@
 use boostvoronoi::diagram as VD;
 use boostvoronoi::diagram::VoronoiEdgeIndex;
-use boostvoronoi::visual_utils as VV;
+use boostvoronoi::visual_utils as VU;
 use boostvoronoi::BvError;
-use boostvoronoi::TypeConverter;
 use boostvoronoi::{builder as VB, Line, Point};
 use boostvoronoi::{BigFloatType, BigIntType, InputType, OutputType};
+use boostvoronoi::{TypeConverter2, TypeConverter4};
 
 use std::ops::Neg;
 
@@ -49,28 +49,30 @@ bitflags! {
 bitflags! {
     pub struct DrawFilterFlag: u32 {
         /// Edges considered to be outside all closed input geometry
-        const EXTERNAL =      0b0000000000001;
-        const PRIMARY =       0b0000000000010;
-        const CURVE =         0b0000000000100;
-        const VERTICES=       0b0000000001000;
+        const EXTERNAL =      0b00000000000001;
+        const PRIMARY =       0b00000000000010;
+        const CURVE =         0b00000000000100;
+        const VERTICES=       0b00000000001000;
         /// All edges
-        const EDGES=          0b0000000010000;
-        const SECONDARY =     0b0000000100000;
+        const EDGES=          0b00000000010000;
+        const SECONDARY =     0b00000000100000;
         /// Input geometry points
-        const INPUT_POINT =   0b0000001000000;
+        const INPUT_POINT =   0b00000001000000;
         /// Input geometry segments
-        const INPUT_SEGMENT = 0b0000010000000;
+        const INPUT_SEGMENT = 0b00000010000000;
         /// Edge belonging to cells defined by a segment
-        const E_CELL_SEGMENT= 0b0000100000000;
+        const E_CELL_SEGMENT= 0b00000100000000;
         /// Edge belonging to cells defined by a point
-        const E_CELL_POINT =  0b0001000000000;
+        const E_CELL_POINT =  0b00001000000000;
         /// Vertices belonging to cells defined by a segment
-        const V_CELL_SEGMENT= 0b0010000000000;
+        const V_CELL_SEGMENT= 0b00010000000000;
         /// Vertices belonging to cells defined by a point
-        const V_CELL_POINT =  0b0100000000000;
-        /// Draw inifinite edges
-        const INFINITE =      0b1000000000000;
-        const DRAW_ALL =      0b1111111111111;
+        const V_CELL_POINT =  0b00100000000000;
+        /// Draw infinite edges
+        const INFINITE =      0b01000000000000;
+        /// Draw curves as straight lines
+        const CURVE_LINE =    0b10000000000000;
+        const DRAW_ALL =      0b11111111111111;
     }
 }
 
@@ -111,7 +113,7 @@ fn main() -> Result<(), BvError> {
     let mut wind = window::Window::default()
         .with_size(WW, WH)
         .center_screen()
-        .with_label("Boost voronoi example");
+        .with_label("Boost voronoi ported to Rust");
 
     let mut frame = Frame::new(5, 5, FW, FH, "");
     frame.set_color(Color::Black);
@@ -164,6 +166,12 @@ fn main() -> Result<(), BvError> {
         .with_label("arc edges");
     curved_button.toggle(true);
     curved_button.set_frame(FrameType::PlasticUpBox);
+
+    let mut curved_as_lines_button = RoundButton::default()
+        .with_size(180, 25)
+        .with_label("arc as lines");
+    curved_as_lines_button.toggle(false);
+    curved_as_lines_button.set_frame(FrameType::PlasticUpBox);
 
     let mut primary_button = RoundButton::default()
         .with_size(180, 25)
@@ -218,7 +226,8 @@ fn main() -> Result<(), BvError> {
     let offs_rc = Rc::clone(&offs);
 
     let shared_data_rc = Rc::new(RefCell::new(SharedData {
-        draw_flag: DrawFilterFlag::DRAW_ALL,
+        // draw all except 'curve as straight line' as default
+        draw_flag: DrawFilterFlag::DRAW_ALL ^ DrawFilterFlag::CURVE_LINE,
         last_message: None,
         visualizer: VoronoiVisualizer::default(),
         last_click: None,
@@ -268,6 +277,7 @@ fn main() -> Result<(), BvError> {
     curved_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::CURVE));
     vertices_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::VERTICES));
     edges_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::EDGES));
+    curved_as_lines_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::CURVE_LINE));
 
     {
         // initialize visualizer
@@ -275,6 +285,7 @@ fn main() -> Result<(), BvError> {
         let mut shared_data_bm = cl.borrow_mut();
         shared_data_bm.visualizer.read_data(Example::Simple);
         let _ = shared_data_bm.visualizer.build();
+        shared_data_bm.visualizer.recalulate_affine()?;
     }
 
     let shared_data_c = Rc::clone(&shared_data_rc);
@@ -285,7 +296,7 @@ fn main() -> Result<(), BvError> {
         let data_b = shared_data_c.borrow();
         set_draw_color(Color::White);
         draw_rectf(0, 0, FW, FH);
-        data_b.visualizer.draw(&data_b);
+        let _ = data_b.visualizer.draw(&data_b);
         offs_rc.borrow_mut().end();
 
         if offs_rc.borrow().is_valid() {
@@ -296,22 +307,68 @@ fn main() -> Result<(), BvError> {
             offs_rc.borrow_mut().begin();
             set_draw_color(Color::Yellow);
             draw_rectf(5, 5, FW, FH);
-            data_b.visualizer.draw(&data_b);
+            let _ = data_b.visualizer.draw(&data_b);
             offs_rc.borrow_mut().end();
         }
     });
 
     let shared_data_c = Rc::clone(&shared_data_rc);
+    let mut mouse_drag: Option<(i32, i32)> = None;
+
     wind.handle(move |ev| match ev {
+        enums::Event::MouseWheel => {
+            let mut shared_data_bm = shared_data_c.borrow_mut();
+            let event_dy = app::event_dy();
+            let reverse_middle = shared_data_bm
+                .visualizer
+                .affine
+                .reverse_transform((FW / 2) as f32, (FH / 2) as f32);
+
+            if event_dy != 0 {
+                shared_data_bm.visualizer.affine.scale *= 1.01_f32.powf(event_dy as f32);
+            }
+            let new_middle = shared_data_bm
+                .visualizer
+                .affine
+                .transform(reverse_middle[0] as f32, reverse_middle[1] as f32);
+            // When zooming we want the center of screen remain at the same relative position.
+            shared_data_bm.visualizer.affine.to_offset[0] += ((FW / 2) as f32) - new_middle[0];
+            shared_data_bm.visualizer.affine.to_offset[1] += ((FH / 2) as f32) - new_middle[1];
+
+            //println!("mouse wheel at dy:{:?} scale:{:?}", event_dy, shared_data_bm.visualizer.affine.scale);
+            redraw();
+            true
+        }
+        enums::Event::Drag => {
+            let event = &app::event_coords();
+            if mouse_drag.is_none() {
+                mouse_drag = Some(*event);
+            } else {
+                let md = mouse_drag.unwrap();
+                let mut shared_data_bm = shared_data_c.borrow_mut();
+                shared_data_bm.visualizer.affine.to_offset[0] += (event.0 - md.0) as f32;
+                shared_data_bm.visualizer.affine.to_offset[1] += (event.1 - md.1) as f32;
+                mouse_drag = Some(*event);
+                redraw();
+            }
+            true
+        }
         enums::Event::Released => {
             let event = &app::event_coords();
             //let  ke = &app::event_key();
-            if event_key_down(Key::from_char('L')) || event_key_down(Key::from_char('S')) {
-                println!("LorS mouse at {:?}", event);
+            if mouse_drag.is_some() {
+                mouse_drag = None;
+            } else if event_key_down(Key::from_char('L')) || event_key_down(Key::from_char('S')) {
                 let mut shared_data_bm = shared_data_c.borrow_mut();
                 let point = Point {
-                    x: event_x(),
-                    y: event_y(),
+                    x: shared_data_bm
+                        .visualizer
+                        .affine
+                        .reverse_transform_x(event_x() as f32),
+                    y: shared_data_bm
+                        .visualizer
+                        .affine
+                        .reverse_transform_y(event_y() as f32),
                 };
                 if let Some(last_point) = shared_data_bm.last_click {
                     let line = Line {
@@ -323,6 +380,7 @@ fn main() -> Result<(), BvError> {
                         shared_data_bm.visualizer.segment_data_.push(line);
 
                         let _ = shared_data_bm.visualizer.build();
+
                         if event_key_down(Key::from_char('L')) {
                             shared_data_bm.last_click = None;
                         } else {
@@ -336,13 +394,20 @@ fn main() -> Result<(), BvError> {
             } else {
                 if event_x() < FW {
                     println!("mouse at {:?}", event);
-
                     let mut shared_data_bm = shared_data_c.borrow_mut();
-                    shared_data_bm.visualizer.point_data_.push(Point {
-                        x: event_x(),
-                        y: event_y(),
-                    });
+                    {
+                        let x = shared_data_bm
+                            .visualizer
+                            .affine
+                            .reverse_transform_x(event_x() as f32);
+                        let y = shared_data_bm
+                            .visualizer
+                            .affine
+                            .reverse_transform_y(event_y() as f32);
+                        shared_data_bm.visualizer.point_data_.push(Point { x, y });
+                    }
                     let _ = shared_data_bm.visualizer.build();
+
                     shared_data_bm.last_click = None;
                     redraw();
                 }
@@ -376,22 +441,11 @@ fn main() -> Result<(), BvError> {
                 GuiMessage::MenuChoice(v) => {
                     shared_data_bm.visualizer.read_data(v);
                     let _ = shared_data_bm.visualizer.build();
+                    let _ = shared_data_bm.visualizer.recalulate_affine();
                     redraw();
                 }
                 GuiMessage::Filter(flag) => {
                     shared_data_bm.draw_flag ^= flag;
-
-                    /*println!(
-                        "EXTERNAL:{}, CURVE:{}, PRIMARY:{}, SECONDARY:{}, INCIDENT:{}, INPUT_POINT:{}, INPUT_SEGMENT:{}, VERTICES:{},",
-                        shared_data_bm.draw_flag.contains(DrawFilterFlag::EXTERNAL),
-                        shared_data_bm.draw_flag.contains(DrawFilterFlag::CURVE),
-                        shared_data_bm.draw_flag.contains(DrawFilterFlag::PRIMARY),
-                        shared_data_bm.draw_flag.contains(DrawFilterFlag::SECONDARY),
-                        shared_data_bm.draw_flag.contains(DrawFilterFlag::INCIDENT),
-                        shared_data_bm.draw_flag.contains(DrawFilterFlag::INPUT_POINT),
-                        shared_data_bm.draw_flag.contains(DrawFilterFlag::INPUT_SEGMENT),
-                        shared_data_bm.draw_flag.contains(DrawFilterFlag::VERTICES),
-                    );*/
                 }
             }
             shared_data_bm.last_message = Some(msg);
@@ -409,10 +463,13 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
-    bounding_rect: geo::Rect<F1>,
+    bounding_rect: VU::Aabb2<I1, F1>,
     diagram: VD::VoronoiDiagram<I1, F1, I2, F2>,
+    vertex_aabb: VU::Aabb2<I1, F1>,
+
     point_data_: Vec<boostvoronoi::Point<I1>>,
     segment_data_: Vec<boostvoronoi::Line<I1>>,
+    affine: VU::SimpleAffine<I1, F1>,
 }
 
 impl<I1, F1, I2, F2> VoronoiVisualizer<I1, F1, I2, F2>
@@ -424,21 +481,20 @@ where
 {
     pub fn default() -> Self {
         Self {
-            bounding_rect: geo::Rect::<F1>::new(
-                geo::Coordinate {
-                    x: F1::from(FH).unwrap(),
-                    y: F1::from(FW).unwrap(),
-                },
-                geo::Coordinate {
-                    x: F1::from(0).unwrap(),
-                    y: F1::from(0).unwrap(),
-                },
-            ),
+            bounding_rect: VU::Aabb2::<I1, F1>::new_from_i32(0, 0, FW, FH),
             diagram: VD::VoronoiDiagram::<I1, F1, I2, F2>::new(0),
-
+            vertex_aabb: VU::Aabb2::<I1, F1>::default(),
             point_data_: Vec::<boostvoronoi::Point<I1>>::new(),
             segment_data_: Vec::<boostvoronoi::Line<I1>>::new(),
+            affine: VU::SimpleAffine::default(),
         }
+    }
+
+    /// recalculates the affine transformation, this should not be done every time
+    /// the diagram is re-calculated or the screen will move around when adding new edges and points.
+    pub fn recalulate_affine(&mut self) -> Result<(), BvError> {
+        self.affine = VU::SimpleAffine::new(&self.vertex_aabb, &self.bounding_rect)?;
+        Ok(())
     }
 
     pub fn build(&mut self) -> Result<String, BvError> {
@@ -462,6 +518,7 @@ where
 
         // Construct voronoi diagram.
         self.diagram = vb.construct()?;
+        self.vertex_aabb = self.diagram.vertices_get_aabb();
 
         // Color exterior edges.
         for it in self.diagram.edges().iter() {
@@ -574,35 +631,34 @@ where
         }
     }
 
-    fn draw(&self, config: &SharedData) {
+    fn draw(&self, config: &SharedData) -> Result<(), BvError> {
         set_line_style(LineStyle::Solid, 1);
-
-        //self.draw_bb();
 
         draw::set_draw_color(Color::Red);
         if config.draw_flag.contains(DrawFilterFlag::INPUT_POINT) {
-            self.draw_input_points();
+            self.draw_input_points(&self.affine);
         }
         if config.draw_flag.contains(DrawFilterFlag::INPUT_SEGMENT) {
-            self.draw_input_segments();
+            self.draw_input_segments(&self.affine);
         }
         if config.draw_flag.contains(DrawFilterFlag::EDGES) {
             draw::set_draw_color(Color::Green);
-            self.draw_edges(&config);
+            self.draw_edges(&config, &self.affine);
         }
         if config.draw_flag.contains(DrawFilterFlag::VERTICES) {
             set_draw_color(Color::Blue);
-            self.draw_vertices(&config);
+            self.draw_vertices(&config, &self.affine);
         }
+        Ok(())
     }
 
     #[allow(dead_code)]
     /// Draw bounding box.
     fn draw_bb(&self) {
-        let min_x = Self::f1_to_i32(self.bounding_rect.min().x);
-        let max_x = Self::f1_to_i32(self.bounding_rect.max().x);
-        let min_y = Self::f1_to_i32(self.bounding_rect.min().y);
-        let max_y = Self::f1_to_i32(self.bounding_rect.max().y);
+        let min_x = Self::f1_to_i32(self.bounding_rect.get_low().unwrap()[0]);
+        let max_x = Self::f1_to_i32(self.bounding_rect.get_high().unwrap()[0]);
+        let min_y = Self::f1_to_i32(self.bounding_rect.get_low().unwrap()[1]);
+        let max_y = Self::f1_to_i32(self.bounding_rect.get_high().unwrap()[1]);
 
         draw::draw_line(min_x, min_y, max_x, min_y);
         draw::draw_line(min_x, max_y, max_x, max_y);
@@ -611,33 +667,37 @@ where
     }
 
     /// Draw input points and endpoints of the input segments.
-    fn draw_input_points(&self) {
-        let draw = |point: &geo::Coordinate<f64>| {
-            draw::draw_circle(point.x, point.y, 2.0);
+    fn draw_input_points(&self, affine: &VU::SimpleAffine<I1, F1>) {
+        let draw = |point: [F1; 2]| {
+            draw::draw_circle(Self::f1_to_f64(point[0]), Self::f1_to_f64(point[1]), 2.0);
         };
 
         for i in self.point_data_.iter() {
-            draw(&Self::coord_i1_to_f64(&i));
+            draw(affine.transform_p(&i));
         }
+
         for i in self.segment_data_.iter() {
-            let lp = Self::coord_i1_to_f64(&i.start);
-            draw(&lp);
-            let hp = Self::coord_i1_to_f64(&i.end);
-            draw(&hp);
+            draw(affine.transform_p(&i.start));
+            draw(affine.transform_p(&i.end));
         }
     }
 
     /// Draw input segments.
-    fn draw_input_segments(&self) {
+    fn draw_input_segments(&self, affine: &VU::SimpleAffine<I1, F1>) {
         for i in self.segment_data_.iter() {
-            let sp = Self::coord_i1_to_i32(&i.start);
-            let ep = Self::coord_i1_to_i32(&i.end);
-            draw::draw_line(sp.x, sp.y, ep.x, ep.y);
+            let sp = affine.transform_p(&i.start);
+            let ep = affine.transform_p(&i.end);
+            draw::draw_line(
+                Self::f1_to_i32(sp[0]),
+                Self::f1_to_i32(sp[1]),
+                Self::f1_to_i32(ep[0]),
+                Self::f1_to_i32(ep[1]),
+            );
         }
     }
 
     /// Draw voronoi vertices aka circle events.
-    fn draw_vertices(&self, config: &SharedData) {
+    fn draw_vertices(&self, config: &SharedData, affine: &VU::SimpleAffine<I1, F1>) {
         let draw = |x: f64, y: f64| {
             draw::draw_circle(x, y, 1.0);
         };
@@ -669,16 +729,20 @@ where
                 continue;
             }
 
-            draw(Self::f1_to_f64(vertex.x()), Self::f1_to_f64(vertex.y()));
+            draw(
+                Self::f1_to_f64(affine.transform_x(vertex.x())),
+                Self::f1_to_f64(affine.transform_y(vertex.y())),
+            );
         }
     }
 
     /// Draw voronoi edges.
-    fn draw_edges(&self, config: &SharedData) {
+    fn draw_edges(&self, config: &SharedData, affine: &VU::SimpleAffine<I1, F1>) {
         let draw_external = config.draw_flag.contains(DrawFilterFlag::EXTERNAL);
         let draw_primary = config.draw_flag.contains(DrawFilterFlag::PRIMARY);
         let draw_secondary = config.draw_flag.contains(DrawFilterFlag::SECONDARY);
         let draw_curved = config.draw_flag.contains(DrawFilterFlag::CURVE);
+        let draw_curved_as_line = config.draw_flag.contains(DrawFilterFlag::CURVE_LINE);
         let draw_cell_segment = config.draw_flag.contains(DrawFilterFlag::E_CELL_SEGMENT);
         let draw_cell_point = config.draw_flag.contains(DrawFilterFlag::E_CELL_POINT);
         let draw_infinite_edges = config.draw_flag.contains(DrawFilterFlag::INFINITE);
@@ -737,18 +801,27 @@ where
 
             let mut samples = Vec::<[F1; 2]>::new();
             if !self.diagram.edge_is_finite(Some(edge_id)).unwrap() {
-                self.clip_infinite_edge(edge_id, &mut samples);
+                self.clip_infinite_edge(&affine, edge_id, &mut samples);
             } else {
                 let vertex0 = self.diagram.vertex_get(edge.vertex0()).unwrap().get();
 
-                samples.push([vertex0.x(), vertex0.y()]);
+                samples.push(affine.transform(vertex0.x(), vertex0.y()));
                 let vertex1 = self.diagram.edge_get_vertex1(Some(edge_id));
                 let vertex1 = self.diagram.vertex_get(vertex1).unwrap().get();
 
-                samples.push([vertex1.x(), vertex1.y()]);
+                samples.push(affine.transform(vertex1.x(), vertex1.y()));
                 if edge.is_curved() {
+                    if draw_curved_as_line {
+                        for i in 0..samples.len() - 1 {
+                            let x1 = Self::f1_to_i32(samples[i][0]);
+                            let y1 = Self::f1_to_i32(samples[i][1]);
+                            let x2 = Self::f1_to_i32(samples[i + 1][0]);
+                            let y2 = Self::f1_to_i32(samples[i + 1][1]);
+                            draw::draw_line(x1, y1, x2, y2);
+                        }
+                    }
                     if draw_curved {
-                        self.sample_curved_edge(VoronoiEdgeIndex(it.0), &mut samples);
+                        self.sample_curved_edge(&affine, VoronoiEdgeIndex(it.0), &mut samples);
                     } else {
                         continue;
                     }
@@ -764,7 +837,12 @@ where
         }
     }
 
-    fn clip_infinite_edge(&self, edge_id: VD::VoronoiEdgeIndex, clipped_edge: &mut Vec<[F1; 2]>) {
+    fn clip_infinite_edge(
+        &self,
+        affine: &VU::SimpleAffine<I1, F1>,
+        edge_id: VD::VoronoiEdgeIndex,
+        clipped_edge: &mut Vec<[F1; 2]>,
+    ) {
         let edge = self.diagram.get_edge(edge_id);
         //const cell_type& cell1 = *edge.cell();
         let cell1_id = self.diagram.edge_get_cell(Some(edge_id)).unwrap();
@@ -777,66 +855,79 @@ where
             .unwrap();
         let cell2 = self.diagram.get_cell(cell2_id).get();
 
-        let mut origin: geo::Coordinate<F1> = geo::Coordinate {
-            x: F1::default(),
-            y: F1::default(),
-        };
-        let mut direction: geo::Coordinate<F1> = geo::Coordinate {
-            x: F1::default(),
-            y: F1::default(),
-        };
+        let mut origin = [F1::default(), F1::default()];
+        let mut direction = [F1::default(), F1::default()];
         // Infinite edges could not be created by two segment sites.
         if cell1.contains_point() && cell2.contains_point() {
-            let p1 = Self::coord_i1_to_f1(&self.retrieve_point(cell1_id));
-            let p2 = Self::coord_i1_to_f1(&self.retrieve_point(cell2_id));
-            origin.x = (p1.x + p2.x) * Self::f32_to_f1(0.5);
-            origin.y = (p1.y + p2.y) * Self::f32_to_f1(0.5);
-            direction.x = p1.y - p2.y;
-            direction.y = p2.x - p1.x;
+            let p1 = affine.transform_p(&self.retrieve_point(cell1_id));
+            let p2 = affine.transform_p(&self.retrieve_point(cell2_id));
+            origin[0] = (p1[0] + p2[0]) * Self::f32_to_f1(0.5);
+            origin[1] = (p1[1] + p2[1]) * Self::f32_to_f1(0.5);
+            direction[0] = p1[1] - p2[1];
+            direction[1] = p2[0] - p1[0];
         } else {
             origin = if cell1.contains_segment() {
-                Self::coord_i1_to_f1(&self.retrieve_point(cell2_id))
+                affine.transform_p(&self.retrieve_point(cell2_id))
             } else {
-                Self::coord_i1_to_f1(&self.retrieve_point(cell1_id))
+                affine.transform_p(&self.retrieve_point(cell1_id))
             };
             let segment = if cell1.contains_segment() {
                 self.retrieve_segment(cell1_id)
             } else {
                 self.retrieve_segment(cell2_id)
             };
-            let dx = Self::i1_to_f1(segment.end.x - segment.start.x);
-            let dy = Self::i1_to_f1(segment.end.y - segment.start.y);
-            if (Self::coord_i1_to_f1(&segment.start) == origin) ^ cell1.contains_point() {
-                direction.x = dy;
-                direction.y = -dx;
+            let dx = affine.transform_ix(segment.end.x) - affine.transform_ix(segment.start.x);
+            let dy = affine.transform_iy(segment.end.y) - affine.transform_iy(segment.start.y);
+            if (affine.transform_p(&segment.start) == origin) ^ cell1.contains_point() {
+                direction[0] = dy;
+                direction[1] = -dx;
             } else {
-                direction.x = -dy;
-                direction.y = dx;
+                direction[0] = -dy;
+                direction[1] = dx;
             }
         }
-        let side = self.bounding_rect.max().x - self.bounding_rect.min().x;
-        let koef = side / Self::max_f1(direction.x.abs(), direction.y.abs());
+        let side =
+            self.bounding_rect.get_high().unwrap()[0] - self.bounding_rect.get_low().unwrap()[0];
+        let koef = side / Self::max_f1(direction[0].abs(), direction[1].abs());
 
         let vertex0 = edge.get().vertex0();
         if vertex0.is_none() {
-            clipped_edge.push([origin.x - direction.x * koef, origin.y - direction.y * koef]);
+            clipped_edge.push([
+                origin[0] - direction[0] * koef,
+                origin[1] - direction[1] * koef,
+            ]);
         } else {
             let vertex0 = self.diagram.vertex_get(vertex0).unwrap().get();
-            clipped_edge.push([vertex0.x(), vertex0.y()]);
+            clipped_edge.push([
+                affine.transform_x(vertex0.x()),
+                affine.transform_y(vertex0.y()),
+            ]);
         }
         let vertex1 = self.diagram.edge_get_vertex1(Some(edge_id));
         if vertex1.is_none() {
-            clipped_edge.push([origin.x + direction.x * koef, origin.y + direction.y * koef]);
+            clipped_edge.push([
+                origin[0] + direction[0] * koef,
+                origin[1] + direction[1] * koef,
+            ]);
         } else {
             let vertex1 = self.diagram.vertex_get(vertex1).unwrap().get();
-            clipped_edge.push([vertex1.x(), vertex1.y()]);
+            clipped_edge.push([
+                affine.transform_x(vertex1.x()),
+                affine.transform_y(vertex1.y()),
+            ]);
         }
     }
 
     /// Important: sampled_edge should contain both edge endpoints initially.
-    fn sample_curved_edge(&self, edge_id: VD::VoronoiEdgeIndex, sampled_edge: &mut Vec<[F1; 2]>) {
-        let max_dist =
-            Self::f32_to_f1(1E-3) * (self.bounding_rect.max().x - self.bounding_rect.min().x);
+    fn sample_curved_edge(
+        &self,
+        affine: &VU::SimpleAffine<I1, F1>,
+        edge_id: VD::VoronoiEdgeIndex,
+        sampled_edge: &mut Vec<[F1; 2]>,
+    ) {
+        let max_dist = Self::f32_to_f1(1E-3)
+            * (self.bounding_rect.get_high().unwrap()[0]
+                - self.bounding_rect.get_low().unwrap()[0]);
 
         let cell_id = self.diagram.edge_get_cell(Some(edge_id)).unwrap();
         let cell = self.diagram.get_cell(cell_id).get();
@@ -853,10 +944,11 @@ where
         } else {
             self.retrieve_segment(cell_id)
         };
-        VV::VoronoiVisualUtils::<I1, F1, I2, F2>::discretize(
+        VU::VoronoiVisualUtils::<I1, F1, I2, F2>::discretize(
             &point,
             segment,
             max_dist,
+            affine,
             sampled_edge,
         );
     }
@@ -898,7 +990,7 @@ where
             rv
         };
 
-        let to_segments = |segments_: &[[i32; 4]]| {
+        let _to_segments = |segments_: &[[i32; 4]]| {
             let mut rv = Vec::new();
             for p in segments_.iter() {
                 let line = boostvoronoi::Line::<I1>::new(
@@ -924,13 +1016,21 @@ where
             [500, 300, 300, 300],
             [629, 342, 467, 207],
         ];
-        let _test_segments: [[i32; 4]; 5] = [
-            [100, 100, 200, 100],
-            [200, 100, 200, 200],
-            [200, 200, 100, 200],
-            [100, 200, 100, 100],
-            [140, 150, 160, 150],
+        let _test_segments: [[i32; 4]; 12] = [
+            [-39092, 94519, -91873, 73333],
+            [-91873, 73333, -119937, -42834],
+            [-119937, -42834, -155353, -59623],
+            [-155353, -59623, -250514, -39563],
+            [-250514, -39563, -296960, -94300],
+            [-296960, -94300, 144469, -94698],
+            [144469, -94698, 289762, -122601],
+            [289762, -122601, 296960, -115045],
+            [296960, -115045, 210691, 117441],
+            [210691, 117441, 113416, 122601],
+            [113416, 122601, 73916, 119690],
+            [73916, 119690, -39092, 94519],
         ];
+
         let _segments_rust: [[i32; 4]; 352] = [
             [402, 20, 395, 20],
             [408, 23, 402, 20],
@@ -1288,12 +1388,12 @@ where
         // Preparing Input Geometries.
         self.point_data_.append(&mut to_points(&points));
         let mut new_segments = match example {
-            Example::Simple => to_segments(&_simple_segments),
-            Example::Complex => to_segments(&_segments_rust),
-            Example::Atest => to_segments(&_test_segments),
+            Example::Simple => VB::to_segments::<i32, I1>(&_simple_segments),
+            Example::Complex => VB::to_segments::<i32, I1>(&_segments_rust),
+            Example::Atest => VB::to_segments::<i32, I1>(&_test_segments), //, 1.0 / 1024.0, 350, 350),
             Example::Clean => {
                 let clean: [[i32; 4]; 0] = [];
-                to_segments(&clean)
+                VB::to_segments_t::<I1>(&clean, 1.0, 0, 0)
             }
         };
         for s in new_segments.iter() {
@@ -1315,27 +1415,6 @@ where
         geo::Line::<f64>::new(ps, pe)
     }
 
-    fn coord_i1_to_f1(value: &boostvoronoi::Point<I1>) -> geo::Coordinate<F1> {
-        geo::Coordinate {
-            x: Self::i1_to_f1(value.x),
-            y: Self::i1_to_f1(value.y),
-        }
-    }
-
-    fn coord_i1_to_i32(value: &boostvoronoi::Point<I1>) -> geo::Coordinate<i32> {
-        geo::Coordinate {
-            x: Self::i1_to_i32(value.x),
-            y: Self::i1_to_i32(value.y),
-        }
-    }
-
-    fn coord_i1_to_f64(value: &boostvoronoi::Point<I1>) -> geo::Coordinate<f64> {
-        geo::Coordinate {
-            x: Self::i1_to_f64(value.x),
-            y: Self::i1_to_f64(value.y),
-        }
-    }
-
     #[inline(always)]
     fn max_f1(a: F1, b: F1) -> F1 {
         OrderedFloat(a).max(OrderedFloat(b)).into_inner()
@@ -1343,31 +1422,31 @@ where
 
     #[inline(always)]
     pub fn i1_to_f1(value: I1) -> F1 {
-        TypeConverter::<I1, F1, I2, F2>::i1_to_f1(value)
+        TypeConverter2::<I1, F1>::i1_to_f1(value)
     }
     #[inline(always)]
     pub fn f1_to_i32(value: F1) -> i32 {
-        TypeConverter::<I1, F1, I2, F2>::f1_to_i32(value)
+        TypeConverter2::<I1, F1>::f1_to_i32(value)
     }
 
     #[inline(always)]
     pub fn f32_to_f1(value: f32) -> F1 {
-        TypeConverter::<I1, F1, I2, F2>::f32_to_f1(value)
+        TypeConverter4::<I1, F1, I2, F2>::f32_to_f1(value)
     }
 
     #[inline(always)]
     pub fn f1_to_i1(value: F1) -> I1 {
-        TypeConverter::<I1, F1, I2, F2>::f1_to_i1(value)
+        TypeConverter2::<I1, F1>::f1_to_i1(value)
     }
 
     #[inline(always)]
     pub fn i1_to_f64(value: I1) -> f64 {
-        TypeConverter::<I1, F1, I2, F2>::i1_to_f64(value)
+        TypeConverter2::<I1, F1>::i1_to_f64(value)
     }
 
     #[inline(always)]
     pub fn i1_to_i32(value: I1) -> i32 {
-        TypeConverter::<I1, F1, I2, F2>::i1_to_i32(value)
+        TypeConverter2::<I1, F1>::i1_to_i32(value)
     }
 
     #[inline(always)]

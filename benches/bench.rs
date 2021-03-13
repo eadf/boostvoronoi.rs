@@ -9,7 +9,6 @@ type F2 = f64;
 
 #[cfg(test)]
 fn bench_1(c: &mut Criterion) {
-
     c.bench_function("bench_1", |b| {
         b.iter({
             || {

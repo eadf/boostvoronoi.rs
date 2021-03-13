@@ -139,8 +139,8 @@ fn large_segment_1() -> Result<(), BvError> {
             [617, 342, 675, 292],
         ];
 
-        let _v = to_points::<I1>(&points);
-        let _s = to_segments::<I1>(&segments);
+        let _v = to_points::<I1, I1>(&points);
+        let _s = to_segments::<I1, I1>(&segments);
 
         let mut vb = Builder::<I1, F1, I2, F2>::new();
         vb.with_vertices(_v.iter()).expect("large_segment_1");

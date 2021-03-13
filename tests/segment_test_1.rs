@@ -1465,8 +1465,8 @@ fn two_segments_5() -> Result<(), BvError> {
         let points: [[I; 2]; 4] = [[582, 779], [683, 1329], [741, 1155], [1239, 1102]];
         let segments: [[I; 4]; 2] = [[1394, 1470, 982, 1594], [1047, 1427, 1155, 1228]];
 
-        let _v = VB::to_points::<I>(&points);
-        let _s = VB::to_segments::<I>(&segments);
+        let _v = VB::to_points::<I, I>(&points);
+        let _s = VB::to_segments::<I, I>(&segments);
 
         let mut vb = VB::Builder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter())?;
@@ -1583,8 +1583,8 @@ fn two_segments_6() -> Result<(), BvError> {
         let points: [[I; 2]; 0] = [];
         let segments: [[I; 4]; 2] = [[442, 215, 438, 355], [129, 559, 141, 60]];
 
-        let _v = VB::to_points::<I>(&points);
-        let _s = VB::to_segments::<I>(&segments);
+        let _v = VB::to_points::<I, I>(&points);
+        let _s = VB::to_segments::<I, I>(&segments);
 
         let mut vb = VB::Builder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter())?;
@@ -1938,8 +1938,8 @@ fn two_segments_7() -> Result<(), BvError> {
         let points: [[I; 2]; 0] = [];
         let segments: [[I; 4]; 2] = [[498, 224, 475, 335], [250, 507, 60, 77]];
 
-        let _v = VB::to_points::<I>(&points);
-        let _s = VB::to_segments::<I>(&segments);
+        let _v = VB::to_points::<I, I>(&points);
+        let _s = VB::to_segments::<I, I>(&segments);
 
         let mut vb = VB::Builder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter())?;
@@ -2299,8 +2299,8 @@ fn two_segments_8() -> Result<(), BvError> {
             [200 + c, c, c, c],
         ];
 
-        let _v = VB::to_points::<I>(&points);
-        let _s = VB::to_segments::<I>(&segments);
+        let _v = VB::to_points::<I, I>(&points);
+        let _s = VB::to_segments::<I, I>(&segments);
 
         let mut vb = VB::Builder::<I, O, DI, DF>::new();
         vb.with_vertices(_v.iter())?;

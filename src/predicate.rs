@@ -19,8 +19,8 @@ use super::site_event as VSE;
 use super::Point;
 use super::TypeCheckF as TCF;
 use super::TypeCheckI as TCI;
-use super::TypeConverter as TCC;
-use super::TypeConverter as TC;
+use super::TypeConverter2 as TC2;
+use super::TypeConverter4 as TC4;
 use super::{BigFloatType, BigIntType, InputType, OutputType};
 use num::{BigInt, Float, NumCast, PrimInt, Zero};
 use std::cmp;
@@ -80,7 +80,7 @@ where
     /// with epsilon relative error equal to 1EPS.
     #[inline(always)]
     pub(crate) fn robust_cross_product(a1_: I1, b1_: I1, a2_: I1, b2_: I1) -> F2 {
-        let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
+        let i1_to_i2 = TC4::<I1, F1, I2, F2>::i1_to_i2;
 
         let a1: I2 = i1_to_i2(a1_);
         let b1: I2 = i1_to_i2(b1_);
@@ -237,7 +237,7 @@ where
     }
 
     fn eval_3(point1: &Point<I1>, point2: &Point<I1>, point3: &Point<I1>) -> Orientation {
-        let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
+        let i1_to_i2 = TC4::<I1, F1, I2, F2>::i1_to_i2;
         let dx1: I2 = i1_to_i2(point1.x) - i1_to_i2(point2.x);
         let dx2: I2 = i1_to_i2(point2.x) - i1_to_i2(point3.x);
         let dy1: I2 = i1_to_i2(point1.y) - i1_to_i2(point2.y);
@@ -365,8 +365,8 @@ where
         lhs: &VSE::SiteEvent<I1, F1, I2, F2>,
         rhs: &VC::CircleEvent<F2>,
     ) -> bool {
-        let lhs = TC::<I1, F1, I2, F2>::i1_to_f64(lhs.x0());
-        let rhs = TC::<I1, F1, I2, F2>::f2_to_f64(rhs.lower_x().into_inner());
+        let lhs = TC2::<I1, F1>::i1_to_f64(lhs.x0());
+        let rhs = TC4::<I1, F1, I2, F2>::f2_to_f64(rhs.lower_x().into_inner());
         let ulps = Predicates::<I1, F1, I2, F2>::ulps();
         let rv = UlpComparison::ulp_comparison(lhs, rhs, ulps) == cmp::Ordering::Less;
         #[cfg(feature = "console_debug")]
@@ -458,7 +458,7 @@ where
     ) -> bool {
         let left_point = left_site.point0();
         let right_point = right_site.point0();
-        let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
+        let i1_to_i2 = TC4::<I1, F1, I2, F2>::i1_to_i2;
         //dbg!(&left_site, &right_site, &new_point);
         //dbg!(left_point.x, left_point.y);
         //dbg!(right_point.x, right_point.y);
@@ -524,27 +524,29 @@ where
     }
 
     fn find_distance_to_point_arc(site: &VSE::SiteEvent<I1, F1, I2, F2>, point: &Point<I1>) -> F2 {
-        let dx = TC::<I1, F1, I2, F2>::i1_to_f2(site.x()) - TC::<I1, F1, I2, F2>::i1_to_f2(point.x);
-        let dy = TC::<I1, F1, I2, F2>::i1_to_f2(site.y()) - TC::<I1, F1, I2, F2>::i1_to_f2(point.y);
+        let dx =
+            TC4::<I1, F1, I2, F2>::i1_to_f2(site.x()) - TC4::<I1, F1, I2, F2>::i1_to_f2(point.x);
+        let dy =
+            TC4::<I1, F1, I2, F2>::i1_to_f2(site.y()) - TC4::<I1, F1, I2, F2>::i1_to_f2(point.y);
         // The relative error is at most 3EPS.
-        (dx * dx + dy * dy) / (dx * TC::<I1, F1, I2, F2>::f32_to_f2(2.0))
+        (dx * dx + dy * dy) / (dx * TC4::<I1, F1, I2, F2>::f32_to_f2(2.0))
     }
 
     fn find_distance_to_segment_arc(
         site: &VSE::SiteEvent<I1, F1, I2, F2>,
         point: &Point<I1>,
     ) -> F2 {
-        let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
+        let i1_to_i2 = TC4::<I1, F1, I2, F2>::i1_to_i2;
+        let i1_to_f2 = TC4::<I1, F1, I2, F2>::i1_to_f2;
+
         if Predicates::<I1, F1, I2, F2>::is_vertical_1(site) {
-            (TC::<I1, F1, I2, F2>::i1_to_f2(site.x()) - TC::<I1, F1, I2, F2>::i1_to_f2(point.x))
+            (TC4::<I1, F1, I2, F2>::i1_to_f2(site.x()) - TC4::<I1, F1, I2, F2>::i1_to_f2(point.x))
                 * TCF::<F2>::half()
         } else {
             let segment0: &Point<I1> = site.point0();
             let segment1: &Point<I1> = site.point1();
-            let a1: F2 = TC::<I1, F1, I2, F2>::i1_to_f2(segment1.x)
-                - TC::<I1, F1, I2, F2>::i1_to_f2(segment0.x);
-            let b1: F2 = TC::<I1, F1, I2, F2>::i1_to_f2(segment1.y)
-                - TC::<I1, F1, I2, F2>::i1_to_f2(segment0.y);
+            let a1: F2 = i1_to_f2(segment1.x) - i1_to_f2(segment0.x);
+            let b1: F2 = i1_to_f2(segment1.y) - i1_to_f2(segment0.y);
             let mut k: F2 = (a1 * a1 + b1 * b1).sqrt();
             // Avoid subtraction while computing k.
             #[allow(clippy::suspicious_operation_groupings)]
@@ -569,9 +571,9 @@ where
         new_point: &Point<I1>,
         reverse_order: bool,
     ) -> KPredicateResult {
-        let i1_to_f2 = TC::<I1, F1, I2, F2>::i1_to_f2;
-        let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
-        let f2_to_f64 = TC::<I1, F1, I2, F2>::f2_to_f64;
+        let i1_to_f2 = TC4::<I1, F1, I2, F2>::i1_to_f2;
+        let i1_to_i2 = TC4::<I1, F1, I2, F2>::i1_to_i2;
+        let f2_to_f64 = TC4::<I1, F1, I2, F2>::f2_to_f64;
 
         let site_point: &Point<I1> = left_site.point0();
         let segment_start: &Point<I1> = right_site.point0();
@@ -916,8 +918,8 @@ where
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
         c_event: &VC::CircleEventType<F2>,
     ) {
-        let i1_to_f2 = TC::<I1, F1, I2, F2>::i1_to_f2;
-        let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
+        let i1_to_f2 = TC4::<I1, F1, I2, F2>::i1_to_f2;
+        let i1_to_i2 = TC4::<I1, F1, I2, F2>::i1_to_i2;
 
         let dif_x1 = i1_to_f2(site1.x()) - i1_to_f2(site2.x());
         let dif_x2 = i1_to_f2(site2.x()) - i1_to_f2(site3.x());
@@ -965,8 +967,7 @@ where
             c_y.dif().fpv() * inv_orientation.fpv(),
             lower_x.dif().fpv() * inv_orientation.fpv(),
         );
-        //let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(VoronoiPredicates::<I1, F1, I2, F2>::ulps());
-        let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(ULPS);
+        let ulps = TC4::<I1, F1, I2, F2>::u64_to_f2(ULPS);
         let recompute_c_x = c_x.dif().ulp() > ulps;
         let recompute_c_y = c_y.dif().ulp() > ulps;
         let recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -990,8 +991,8 @@ where
         segment_index: usize,
         c_event: &VC::CircleEventType<F2>,
     ) {
-        let i1_to_f2 = TC::<I1, F1, I2, F2>::i1_to_f2;
-        let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
+        let i1_to_f2 = TC4::<I1, F1, I2, F2>::i1_to_f2;
+        let i1_to_i2 = TC4::<I1, F1, I2, F2>::i1_to_i2;
 
         let half = num::cast::<f32, F2>(0.5f32).unwrap();
         let one = num::cast::<f32, F2>(1.0f32).unwrap();
@@ -1056,22 +1057,14 @@ where
         }
         let mut c_x = VR::RobustDif::<F2>::default();
         let mut c_y = VR::RobustDif::<F2>::default();
-        c_x += VR::RobustFpt::<F2>::new_1(
-            half * (TC::<I1, F1, I2, F2>::i1_to_f2(site1.x())
-                + TC::<I1, F1, I2, F2>::i1_to_f2(site2.x())),
-        );
+        c_x += VR::RobustFpt::<F2>::new_1(half * (i1_to_f2(site1.x()) + i1_to_f2(site2.x())));
         c_x += VR::RobustFpt::<F2>::new_1(vec_x) * t;
-        c_y += VR::RobustFpt::<F2>::new_1(
-            half * (TC::<I1, F1, I2, F2>::i1_to_f2(site1.y())
-                + TC::<I1, F1, I2, F2>::i1_to_f2(site2.y())),
-        );
+        c_y += VR::RobustFpt::<F2>::new_1(half * (i1_to_f2(site1.y()) + i1_to_f2(site2.y())));
         c_y += VR::RobustFpt::<F2>::new_1(vec_y) * t;
         let mut r = VR::RobustDif::<F2>::default();
         let mut lower_x = VR::RobustDif::<F2>::new_from(c_x);
-        r -= VR::RobustFpt::<F2>::new_1(line_a)
-            * VR::RobustFpt::<F2>::new_1(TC::<I1, F1, I2, F2>::i1_to_f2(site3.x0()));
-        r -= VR::RobustFpt::<F2>::new_1(line_b)
-            * VR::RobustFpt::<F2>::new_1(TC::<I1, F1, I2, F2>::i1_to_f2(site3.y0()));
+        r -= VR::RobustFpt::<F2>::new_1(line_a) * VR::RobustFpt::<F2>::new_1(i1_to_f2(site3.x0()));
+        r -= VR::RobustFpt::<F2>::new_1(line_b) * VR::RobustFpt::<F2>::new_1(i1_to_f2(site3.y0()));
         r += c_x * VR::RobustFpt::<F2>::new_1(line_a);
         r += c_y * VR::RobustFpt::<F2>::new_1(line_b);
 
@@ -1086,7 +1079,7 @@ where
             c_eventc.set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
             c_event.0.set(c_eventc);
         }
-        let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(Predicates::<I1, F1, I2, F2>::ulps());
+        let ulps = TC4::<I1, F1, I2, F2>::u64_to_f2(Predicates::<I1, F1, I2, F2>::ulps());
         let recompute_c_x = c_x.dif().ulp() > ulps;
         let recompute_c_y = c_y.dif().ulp() > ulps;
         let recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1120,8 +1113,8 @@ where
         point_index: i32,
         c_event: &VC::CircleEventType<F2>,
     ) {
-        let i1_to_f2 = TC::<I1, F1, I2, F2>::i1_to_f2;
-        let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
+        let i1_to_f2 = TC4::<I1, F1, I2, F2>::i1_to_f2;
+        let i1_to_i2 = TC4::<I1, F1, I2, F2>::i1_to_i2;
 
         let half = num::cast::<f32, F2>(0.5f32).unwrap();
         let one = num::cast::<f32, F2>(1.0f32).unwrap();
@@ -1206,7 +1199,7 @@ where
             } else {
                 lower_x += VR::RobustFpt::<F2>::new_1(half) * c / a.sqrt();
             }
-            let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(Predicates::<I1, F1, I2, F2>::ulps());
+            let ulps = TC4::<I1, F1, I2, F2>::u64_to_f2(Predicates::<I1, F1, I2, F2>::ulps());
             recompute_c_x = c_x.dif().ulp() > ulps;
             recompute_c_y = c_y.dif().ulp() > ulps;
             recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1325,7 +1318,7 @@ where
             } else {
                 lower_x += t * orientation;
             }
-            let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(Predicates::<I1, F1, I2, F2>::ulps());
+            let ulps = TC4::<I1, F1, I2, F2>::u64_to_f2(Predicates::<I1, F1, I2, F2>::ulps());
             recompute_c_x = c_x.dif().ulp() > ulps;
             recompute_c_y = c_y.dif().ulp() > ulps;
             recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1352,8 +1345,8 @@ where
         site3: &VSE::SiteEvent<I1, F1, I2, F2>,
         c_event: &VC::CircleEventType<F2>,
     ) {
-        let i1_to_f2 = TC::<I1, F1, I2, F2>::i1_to_f2;
-        let i1_to_i2 = TC::<I1, F1, I2, F2>::i1_to_i2;
+        let i1_to_f2 = TC4::<I1, F1, I2, F2>::i1_to_f2;
+        let i1_to_i2 = TC4::<I1, F1, I2, F2>::i1_to_i2;
 
         let one = num::cast::<f32, F2>(1.0f32).unwrap();
 
@@ -1459,7 +1452,7 @@ where
         let c_y_dif = VR::RobustFpt::<F2>::copy_from(&c_y.dif()) / denom_dif;
         let lower_x_dif = VR::RobustFpt::<F2>::copy_from(&lower_x.dif()) / denom_dif;
 
-        let ulps = TCC::<I1, F1, I2, F2>::u64_to_f2(Predicates::<I1, F1, I2, F2>::ulps());
+        let ulps = TC4::<I1, F1, I2, F2>::u64_to_f2(Predicates::<I1, F1, I2, F2>::ulps());
         let recompute_c_x = c_x_dif.ulp() > ulps;
         let recompute_c_y = c_y_dif.ulp() > ulps;
         let recompute_lower_x = lower_x_dif.ulp() > ulps;
@@ -1507,8 +1500,8 @@ where
         c: &VC::CircleEventType<F2>,
         s: &VSE::SiteEvent<I1, F1, I2, F2>,
     ) -> bool {
-        let i1_to_f64 = TC::<I1, F1, I2, F2>::i1_to_f64;
-        let f2_to_f64 = TC::<I1, F1, I2, F2>::f2_to_f64;
+        let i1_to_f64 = TC2::<I1, F1>::i1_to_f64;
+        let f2_to_f64 = TC4::<I1, F1, I2, F2>::f2_to_f64;
 
         if !s.is_segment() || !Predicates::<I1, F1, I2, F2>::is_vertical_1(s) {
             return false;
@@ -1635,9 +1628,9 @@ where
         recompute_c_y: bool,
         recompute_lower_x: bool,
     ) {
-        let bi_to_f2 = TC::<I1, F1, I2, F2>::bi_to_f2;
-        let i1_to_bi = TC::<I1, F1, I2, F2>::i1_to_bi;
-        let i1_to_i128 = TC::<I1, F1, I2, F2>::i1_to_i128;
+        let bi_to_f2 = TC4::<I1, F1, I2, F2>::bi_to_f2;
+        let i1_to_bi = TC2::<I1, F1>::i1_to_bi;
+        let i1_to_i128 = TC2::<I1, F1>::i1_to_i128;
 
         let half: F2 = num::cast::<f32, F2>(0.5f32).unwrap();
 
@@ -1729,9 +1722,10 @@ where
         recompute_c_y: bool,
         recompute_lower_x: bool,
     ) {
-        let bi_to_f2 = TC::<I1, F1, I2, F2>::bi_to_f2;
-        let i1_to_bi = TC::<I1, F1, I2, F2>::i1_to_bi;
-        let i1_to_i128 = TC::<I1, F1, I2, F2>::i1_to_i128;
+        let bi_to_f2 = TC4::<I1, F1, I2, F2>::bi_to_f2;
+        let i1_to_bi = TC2::<I1, F1>::i1_to_bi;
+        let i1_to_i128 = TC2::<I1, F1>::i1_to_i128;
+        let i2_to_f2 = TC4::<I1, F1, I2, F2>::i2_to_f2;
 
         let sqrt_expr_ = VR::robust_sqrt_expr::<F2>::new();
         let quarter: F2 = num::cast::<f64, F2>(1f64 / 4.0f64).unwrap();
@@ -1781,8 +1775,7 @@ where
             ca[1] = denom.clone() * &sum_ab * 2 + &numer * &teta;
             cb[1] = BigInt::from(1);
             ca[2] = denom.clone() * &sum_y * 2 + &numer * &vec_y;
-            let inv_denom: F2 =
-                TC::<I1, F1, I2, F2>::i2_to_f2(one) / TC::<I1, F1, I2, F2>::bi_to_f2(&denom);
+            let inv_denom: F2 = i2_to_f2(one) / bi_to_f2(&denom);
             if recompute_c_x {
                 c_event.set_x_raw(quarter * bi_to_f2(&ca[0]) * inv_denom);
             }
@@ -1799,8 +1792,7 @@ where
             return;
         }
         let det: BigInt = (&teta * &teta + &denom * &denom) * &a * &b * 4;
-        let mut inv_denom_sqr: F2 =
-            TC::<I1, F1, I2, F2>::i2_to_f2(one) / TC::<I1, F1, I2, F2>::bi_to_f2(&denom);
+        let mut inv_denom_sqr: F2 = i2_to_f2(one) / bi_to_f2(&denom);
         inv_denom_sqr = inv_denom_sqr * inv_denom_sqr;
 
         if recompute_c_x || recompute_lower_x {
@@ -1839,8 +1831,7 @@ where
             cb[2] = BigInt::from(1);
             ca[3] = if segment_index == 2 { -teta } else { teta };
             cb[3] = det;
-            let segm_len =
-                VR::RobustFpt::<F2>::new_1(TC::<I1, F1, I2, F2>::bi_to_f2(&segm_len)).sqrt();
+            let segm_len = VR::RobustFpt::<F2>::new_1(bi_to_f2(&segm_len)).sqrt();
 
             c_event.set_lower_x_raw(
                 (sqrt_expr_.eval4(&ca, &cb) * half * inv_denom_sqr / segm_len).fpv(),
@@ -1871,8 +1862,9 @@ where
         recompute_c_y: bool,
         recompute_lower_x: bool,
     ) {
-        let i1_to_i128 = TC::<I1, F1, I2, F2>::i1_to_i128;
-        let bi_to_f2 = TC::<I1, F1, I2, F2>::bi_to_f2;
+        let i1_to_i128 = TC2::<I1, F1>::i1_to_i128;
+        let i1_to_bi = TC2::<I1, F1>::i1_to_bi;
+        let bi_to_f2 = TC4::<I1, F1, I2, F2>::bi_to_f2;
         let mut sqrt_expr_ = VR::robust_sqrt_expr::<F2>::new();
 
         let mut c: [BigInt; 2] = [BigInt::zero(), BigInt::zero()];
@@ -1894,17 +1886,13 @@ where
         let segm_start2 = site3.point0();
         let segm_end2 = site3.point1();
         let a: [BigInt; 2] = [
-            TC::<I1, F1, I2, F2>::i1_to_bi(segm_end1.x)
-                - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.x),
-            TC::<I1, F1, I2, F2>::i1_to_bi(segm_end2.x)
-                - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.x),
+            i1_to_bi(segm_end1.x) - i1_to_bi(segm_start1.x),
+            i1_to_bi(segm_end2.x) - i1_to_bi(segm_start2.x),
         ];
 
         let b: [BigInt; 2] = [
-            TC::<I1, F1, I2, F2>::i1_to_bi(segm_end1.y)
-                - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.y),
-            TC::<I1, F1, I2, F2>::i1_to_bi(segm_end2.y)
-                - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.y),
+            i1_to_bi(segm_end1.y) - i1_to_bi(segm_start1.y),
+            i1_to_bi(segm_end2.y) - i1_to_bi(segm_start2.y),
         ];
         let orientation: BigInt = &a[1] * &b[0] - &a[0] * &b[1];
         if orientation.is_zero() {
@@ -1914,40 +1902,23 @@ where
                 let denom: BigInt = denomp1 + denomp2;
                 bi_to_f2(&denom)
             };
-            c[0] = &b[0]
-                * (TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.x)
-                    - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.x))
-                - &a[0]
-                    * (TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.y)
-                        - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.y));
-            let dx: BigInt = &a[0]
-                * (TC::<I1, F1, I2, F2>::i1_to_bi(site1.y())
-                    - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.y))
-                - &b[0]
-                    * (TC::<I1, F1, I2, F2>::i1_to_bi(site1.x())
-                        - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.x));
-            let dy: BigInt = &b[0]
-                * (TC::<I1, F1, I2, F2>::i1_to_bi(site1.x())
-                    - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.x))
-                - &a[0]
-                    * (TC::<I1, F1, I2, F2>::i1_to_bi(site1.y())
-                        - TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.y));
+            c[0] = &b[0] * (i1_to_bi(segm_start2.x) - i1_to_bi(segm_start1.x))
+                - &a[0] * (i1_to_bi(segm_start2.y) - i1_to_bi(segm_start1.y));
+            let dx: BigInt = &a[0] * (i1_to_bi(site1.y()) - i1_to_bi(segm_start1.y))
+                - &b[0] * (i1_to_bi(site1.x()) - i1_to_bi(segm_start1.x));
+            let dy: BigInt = &b[0] * (i1_to_bi(site1.x()) - i1_to_bi(segm_start2.x))
+                - &a[0] * (i1_to_bi(site1.y()) - i1_to_bi(segm_start2.y));
             cB[0] = dx * &dy;
             cB[1] = BigInt::from(1);
 
             if recompute_c_y {
                 cA[0] = &b[0] * if point_index == 2i32 { 2i32 } else { -2i32 };
-                cA[1] = &a[0]
-                    * &a[0]
-                    * (TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.y)
-                        + TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.y))
+                cA[1] = &a[0] * &a[0] * (i1_to_bi(segm_start1.y) + i1_to_bi(segm_start2.y))
                     - &a[0]
                         * &b[0]
-                        * (TC::<I1, F1, I2, F2>::i1_to_bi(segm_start1.x)
-                            + TC::<I1, F1, I2, F2>::i1_to_bi(segm_start2.x)
-                            - TC::<I1, F1, I2, F2>::i1_to_bi(site1.x()))
+                        * (i1_to_bi(segm_start1.x) + i1_to_bi(segm_start2.x) - i1_to_bi(site1.x()))
                         * 2
-                    + &b[0] * &b[0] * (TC::<I1, F1, I2, F2>::i1_to_bi(site1.y())) * 2;
+                    + &b[0] * &b[0] * (i1_to_bi(site1.y())) * 2;
                 let c_y = sqrt_expr_.eval2(&cA, &cB);
                 c_event.set_y_raw((c_y / denom).fpv());
             }
@@ -1980,18 +1951,16 @@ where
             }
             return;
         }
-        c[0] =
-            &b[0] * TC::<I1, F1, I2, F2>::i1_to_i128(segm_end1.x) - &a[0] * i1_to_i128(segm_end1.y);
-        c[1] =
-            &a[1] * TC::<I1, F1, I2, F2>::i1_to_i128(segm_end2.y) - &b[1] * i1_to_i128(segm_end2.x);
+        c[0] = &b[0] * i1_to_i128(segm_end1.x) - &a[0] * i1_to_i128(segm_end1.y);
+        c[1] = &a[1] * i1_to_i128(segm_end2.y) - &b[1] * i1_to_i128(segm_end2.x);
         let ix: BigInt = &a[0] * &c[1] + &a[1] * &c[0];
         let iy: BigInt = &b[0] * &c[1] + &b[1] * &c[0];
-        let dx: BigInt = ix.clone() - &orientation * TC::<I1, F1, I2, F2>::i1_to_i128(site1.x());
-        let dy: BigInt = iy.clone() - &orientation * TC::<I1, F1, I2, F2>::i1_to_i128(site1.y());
+        let dx: BigInt = ix.clone() - &orientation * i1_to_i128(site1.x());
+        let dy: BigInt = iy.clone() - &orientation * i1_to_i128(site1.y());
         if dx.is_zero() && dy.is_zero() {
-            let denom: F2 = TC::<I1, F1, I2, F2>::bi_to_f2(&orientation);
-            let c_x: F2 = TC::<I1, F1, I2, F2>::bi_to_f2(&ix) / denom;
-            let c_y: F2 = TC::<I1, F1, I2, F2>::bi_to_f2(&iy) / denom;
+            let denom: F2 = bi_to_f2(&orientation);
+            let c_x: F2 = bi_to_f2(&ix) / denom;
+            let c_y: F2 = bi_to_f2(&iy) / denom;
             c_event.set_3_raw(c_x, c_y, c_x);
             return;
         }
@@ -2008,7 +1977,7 @@ where
         cB[2] = &a[0] * &a[1] + &b[0] * &b[1];
         cB[3] = (&a[0] * &dy - &b[0] * &dx) * (&a[1] * &dy - &b[1] * &dx) * -2;
         let temp = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
-        let denom = temp * TC::<I1, F1, I2, F2>::bi_to_f2(&orientation);
+        let denom = temp * bi_to_f2(&orientation);
 
         if recompute_c_y {
             cA[0] = &b[1] * (&dx * &dx + &dy * &dy) - &iy * (&dx * &a[1] + &dy * &b[1]);
@@ -2061,8 +2030,8 @@ where
         recompute_c_y: bool,
         recompute_lower_x: bool,
     ) {
-        let i1_to_bi = TC::<I1, F1, I2, F2>::i1_to_bi;
-        let i1_to_i128 = TC::<I1, F1, I2, F2>::i1_to_i128;
+        let i1_to_bi = TC2::<I1, F1>::i1_to_bi;
+        let i1_to_i128 = TC2::<I1, F1>::i1_to_i128;
         let sqrt_expr_ = VR::robust_sqrt_expr::<F2>::new();
 
         let mut cA: [BigInt; 4] = [

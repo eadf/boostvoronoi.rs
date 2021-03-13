@@ -797,11 +797,65 @@ where
 }
 
 /// helper function: converts a slice of [[integer,integer]] into input data for the Builder.
-pub fn to_points<T: InputType>(points: &[[T; 2]]) -> Vec<Point<T>> {
-    points.iter().map(|x| x.into()).collect()
+pub fn to_points<T1: InputType, T2: InputType>(points: &[[T1; 2]]) -> Vec<Point<T2>> {
+    points
+        .iter()
+        .map(|x| {
+            [
+                num::cast::<T1, T2>(x[0]).unwrap(),
+                num::cast::<T1, T2>(x[1]).unwrap(),
+            ]
+            .into()
+        })
+        .collect()
 }
 
 /// helper function: converts a slice of [[integer,integer,integer,integer]] into input data for the Builder.
-pub fn to_segments<T: InputType>(points: &[[T; 4]]) -> Vec<Line<T>> {
-    points.iter().map(|x| x.into()).collect()
+pub fn to_segments<T1: InputType, T2: InputType>(segments: &[[T1; 4]]) -> Vec<Line<T2>> {
+    segments
+        .iter()
+        .map(|x| {
+            [
+                num::cast::<T1, T2>(x[0]).unwrap(),
+                num::cast::<T1, T2>(x[1]).unwrap(),
+                num::cast::<T1, T2>(x[2]).unwrap(),
+                num::cast::<T1, T2>(x[3]).unwrap(),
+            ]
+            .into()
+        })
+        .collect()
+}
+
+/// helper function: converts a slice of [[integer,integer,integer,integer]] into input data for the Builder.
+pub fn to_segments_t<T: InputType>(
+    points: &[[i32; 4]],
+    scale: f32,
+    dx: i32,
+    dy: i32,
+) -> Vec<Line<T>> {
+    let fx = |x: i32| {
+        num::cast::<i32, T>(
+            num::cast::<f32, i32>(num::cast::<i32, f32>(x).unwrap() * scale).unwrap() + dx,
+        )
+        .unwrap()
+    };
+    let fy = |y: i32| {
+        num::cast::<i32, T>(
+            num::cast::<f32, i32>(num::cast::<i32, f32>(y).unwrap() * scale).unwrap() + dy,
+        )
+        .unwrap()
+    };
+    points
+        .iter()
+        .map(|x| Line {
+            start: Point {
+                x: fx(x[0]),
+                y: fy(x[1]),
+            },
+            end: Point {
+                x: fx(x[2]),
+                y: fy(x[3]),
+            },
+        })
+        .collect()
 }
