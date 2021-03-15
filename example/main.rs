@@ -1,6 +1,6 @@
 use boostvoronoi::builder as VB;
 use boostvoronoi::BvError;
-use boostvoronoi::InputType;
+//use boostvoronoi::InputType;
 
 type I1 = i64;
 type F1 = f64;
@@ -15,14 +15,6 @@ fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
     (F1::abs(x1 - x2) < delta) && (F1::abs(y1 - y2) < delta)
 }
 
-fn to_points<T: InputType>(points: &[[T; 2]]) -> Vec<boostvoronoi::Point<T>> {
-    points.iter().map(|x| x.into()).collect()
-}
-
-fn to_segments<T: InputType>(points: &[[T; 4]]) -> Vec<boostvoronoi::Line<T>> {
-    points.iter().map(|x| x.into()).collect()
-}
-
 /// This example will fail, something is wrong with the beach-line ordering
 fn main() -> Result<(), BvError> {
     #[allow(unused_variables)]
@@ -34,24 +26,28 @@ fn main() -> Result<(), BvError> {
             [147, 103, 96, 170],
         ];
 
-        let _v = to_points::<I1>(&points);
-        let _s = to_segments::<I1>(&segments);
+        let _v = VB::to_points::<I1, I1>(&points);
+        let _s = VB::to_segments::<I1, I1>(&segments);
 
         let mut vb = VB::Builder::<I1, F1, I2, F2>::new();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
         vb.construct()?
     };
+
+    println!();
+    for (i, v) in output.vertices().iter().enumerate() {
+        println!(
+            "vertex #{} contains a point: ({:.12}, {:.12}) ie:{:?}",
+            i,
+            v.get().x(),
+            v.get().y(),
+            v.get().get_incident_edge().unwrap().0
+        );
+    }
+
     println!("cells:{}", output.cells().len());
     println!("vertices:{}", output.vertices().len());
     println!("edges:{}", output.edges().len());
-    for (i, v) in output.vertices().iter().enumerate() {
-        println!(
-            "vertex #{} contains a point: ({:?}, {:?})",
-            i,
-            v.get().x(),
-            v.get().y()
-        );
-    }
     Ok(())
 }

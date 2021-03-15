@@ -71,24 +71,24 @@ pub type BeachLineNodeDataType = Rc<Cell<Option<BeachLineNodeData>>>;
 
 /// Container for BeachLineNodeKey and BeachLineNodeDataType.
 /// Has a priority queue and indexed list for BeachLineNodeKey.
-pub struct Beachline<I, O, BI, BF>
+pub struct BeachLine<I1, F1, I2, F2>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
-    pub(crate) beach_line_: BTreeMap<BeachLineNodeKey<I, O, BI, BF>, BeachLineIndex>,
+    pub(crate) beach_line_: BTreeMap<BeachLineNodeKey<I1, F1, I2, F2>, BeachLineIndex>,
     pub(crate) next_free_: BeachLineIndex,
-    pub(crate) beach_line_vec: VecMap<(BeachLineNodeKey<I, O, BI, BF>, BeachLineNodeDataType)>,
+    pub(crate) beach_line_vec: VecMap<(BeachLineNodeKey<I1, F1, I2, F2>, BeachLineNodeDataType)>,
 }
 
-impl<I, O, BI, BF> Beachline<I, O, BI, BF>
+impl<I1, F1, I2, F2> BeachLine<I1, F1, I2, F2>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
     pub fn default() -> Self {
         Self {
@@ -107,9 +107,9 @@ where
     #[cfg(not(feature = "console_debug"))]
     pub(crate) fn insert(
         &mut self,
-        mut key: BeachLineNodeKey<I, O, BI, BF>,
+        mut key: BeachLineNodeKey<I1, F1, I2, F2>,
         data: Option<BeachLineNodeData>,
-    ) -> BeachLineNodeKey<I, O, BI, BF> {
+    ) -> BeachLineNodeKey<I1, F1, I2, F2> {
         key.node_index_ = self.next_free_;
 
         let node = Rc::new(Cell::new(data));
@@ -124,10 +124,10 @@ where
     #[cfg(feature = "console_debug")]
     pub(crate) fn insert(
         &mut self,
-        mut key: BeachLineNodeKey<I, O, BI, BF>,
+        mut key: BeachLineNodeKey<I1, F1, I2, F2>,
         data: Option<BeachLineNodeData>,
-        _ce: &VC::CircleEventQueue<BF>,
-    ) -> BeachLineNodeKey<I, O, BI, BF> {
+        _ce: &VC::CircleEventQueue<F2>,
+    ) -> BeachLineNodeKey<I1, F1, I2, F2> {
         key.node_index_ = self.next_free_;
 
         let node = Rc::new(Cell::new(data));
@@ -151,10 +151,11 @@ where
 
     /// This is a quick & dirty fix. Re-creating the entire beach_line BTreeMap
     #[allow(dead_code)]
-    fn rebuild_beachline_do_not_use(&mut self) {
+    #[deprecated(since = "0.5.0")]
+    fn rebuild_beach_line_do_not_use(&mut self) {
         #[cfg(feature = "console_debug")]
         println!("remap_beachline()");
-        let mut beachline_tmp = BTreeMap::<BeachLineNodeKey<I, O, BI, BF>, BeachLineIndex>::new();
+        let mut beachline_tmp = BTreeMap::<BeachLineNodeKey<I1, F1, I2, F2>, BeachLineIndex>::new();
         // append does not solve the problem
         //beachline_tmp.append(&mut self.beach_line_);
         for i in self.beach_line_.iter() {
@@ -168,8 +169,8 @@ where
     pub(crate) fn erase(&mut self, beachline_index: BeachLineIndex) -> Result<(), BvError> {
         if let Some(node) = self.beach_line_vec.get(beachline_index.0) {
             let node = node.0;
-            #[cfg(feature = "console_debug")]
-            println!("erasing beach_line:{:?}", node);
+            //#[cfg(feature = "console_debug")]
+            //println!("erasing beach_line:{:?}", node);
 
             #[allow(clippy::collapsible_if)]
             if self.beach_line_.remove(&node).is_none() {
@@ -207,7 +208,7 @@ where
     /// same as right_it == beach_line_.begin() in c++
     pub(crate) fn is_at_beginning(
         &self,
-        right_it: &Option<BeachLineNodeKey<I, O, BI, BF>>,
+        right_it: &Option<BeachLineNodeKey<I1, F1, I2, F2>>,
     ) -> bool {
         // when right_it is None the 'iterator' has passed end
         if right_it.is_none() {
@@ -226,10 +227,11 @@ where
     }
 
     /// mapping: BeachLineNodeIndexType->(BeachLineNodeKey,BeachLineNodeDataType)
+    /// TODO: add Result<>
     pub(crate) fn get_node(
         &self,
         beachline_index: &BeachLineIndex,
-    ) -> (BeachLineNodeKey<I, O, BI, BF>, BeachLineNodeDataType) {
+    ) -> (BeachLineNodeKey<I1, F1, I2, F2>, BeachLineNodeDataType) {
         if !self.beach_line_vec.contains_key(beachline_index.0) {
             panic!("tried to retrieve a beach line node that doesn't exist");
         }
@@ -241,33 +243,39 @@ where
     pub(crate) fn get_node_key(
         &self,
         beachline_index: BeachLineIndex,
-    ) -> BeachLineNodeKey<I, O, BI, BF> {
+    ) -> BeachLineNodeKey<I1, F1, I2, F2> {
         self.beach_line_vec[beachline_index.0].0
     }
 
     /// swaps the 'before' key for the 'after' key
     /// It does this by removing key/value from the map and re-inserting the new values
+    #[allow(clippy::type_complexity)]
     pub fn replace_key(
         &mut self,
-        before: BeachLineNodeKey<I, O, BI, BF>,
-        after: BeachLineNodeKey<I, O, BI, BF>,
-    ) -> (BeachLineNodeKey<I, O, BI, BF>, BeachLineNodeDataType) {
-        let idx = *self.beach_line_.get(&before).unwrap();
-        let _ = self.beach_line_.remove(&before);
-        let _ = self.beach_line_.insert(after, idx);
+        before: BeachLineNodeKey<I1, F1, I2, F2>,
+        after: BeachLineNodeKey<I1, F1, I2, F2>,
+    ) -> Result<(BeachLineNodeKey<I1, F1, I2, F2>, BeachLineNodeDataType), BvError> {
+        if let Some(idx) = self.beach_line_.get(&before).copied() {
+            //let idx = *idx;
+            let _ = self.beach_line_.remove(&before);
+            let _ = self.beach_line_.insert(after, idx);
 
-        let item = self.beach_line_vec.remove(idx.0).unwrap().1;
-        let _rv = self.beach_line_vec.insert(idx.0, (after, item));
-        // todo! why doesn't _rv contain the return value we need?
-        self.get_node(&idx)
+            let item = self.beach_line_vec.remove(idx.0).unwrap().1;
+            let _ = self.beach_line_vec.insert(idx.0, (after, item));
+            Ok(self.get_node(&idx))
+        } else {
+            Err(BvError::BeachLineError {
+                txt: "Could not find the beach-line key to replace".to_string(),
+            })
+        }
     }
 
     /// Returns the left neighbour beach line element
     /// Returns None if no association data is found
     pub(crate) fn get_left_neighbour(
         &self,
-        position: BeachLineNodeKey<I, O, BI, BF>,
-    ) -> Option<(BeachLineNodeKey<I, O, BI, BF>, BeachLineIndex)> {
+        position: BeachLineNodeKey<I1, F1, I2, F2>,
+    ) -> Option<(BeachLineNodeKey<I1, F1, I2, F2>, BeachLineIndex)> {
         self.beach_line_
             .range((Unbounded, Excluded(&position)))
             .next_back()
@@ -280,7 +288,7 @@ where
     pub(crate) fn get_left_neighbour_by_id(
         &self,
         position: BeachLineIndex,
-    ) -> Option<(BeachLineNodeKey<I, O, BI, BF>, BeachLineIndex)> {
+    ) -> Option<(BeachLineNodeKey<I1, F1, I2, F2>, BeachLineIndex)> {
         self.beach_line_vec
             .get(position.0)
             .and_then(|x| self.get_left_neighbour(x.0))
@@ -290,8 +298,8 @@ where
     /// Returns None if no association data is found
     pub fn get_right_neighbour(
         &self,
-        position: BeachLineNodeKey<I, O, BI, BF>,
-    ) -> Option<BeachLineNodeKey<I, O, BI, BF>> {
+        position: BeachLineNodeKey<I1, F1, I2, F2>,
+    ) -> Option<BeachLineNodeKey<I1, F1, I2, F2>> {
         self.beach_line_
             .range((Excluded(&position), Unbounded))
             .next()
@@ -303,7 +311,7 @@ where
     pub(crate) fn get_right_neighbour_by_id(
         &self,
         position: BeachLineIndex,
-    ) -> Option<BeachLineNodeKey<I, O, BI, BF>> {
+    ) -> Option<BeachLineNodeKey<I1, F1, I2, F2>> {
         self.beach_line_vec
             .get(position.0)
             .and_then(|x| self.get_right_neighbour(x.0))
@@ -314,8 +322,8 @@ where
     /// Returns None if no  data is found
     pub fn lower_bound(
         &self,
-        key: BeachLineNodeKey<I, O, BI, BF>,
-    ) -> Option<BeachLineNodeKey<I, O, BI, BF>> {
+        key: BeachLineNodeKey<I1, F1, I2, F2>,
+    ) -> Option<BeachLineNodeKey<I1, F1, I2, F2>> {
         self.beach_line_
             .range((Included(&key), Unbounded))
             .next()
@@ -323,28 +331,28 @@ where
     }
 
     /// returns a copy of the last element (key,value)
-    pub(crate) fn peek_last(&self) -> Option<(BeachLineNodeKey<I, O, BI, BF>, BeachLineIndex)> {
+    pub(crate) fn peek_last(&self) -> Option<(BeachLineNodeKey<I1, F1, I2, F2>, BeachLineIndex)> {
         self.beach_line_
-            .range((Unbounded::<BeachLineNodeKey<I, O, BI, BF>>, Unbounded))
+            .range((Unbounded::<BeachLineNodeKey<I1, F1, I2, F2>>, Unbounded))
             .next_back()
             .map(|x| (*x.0, *x.1))
     }
 
     /// returns a copy of the first element (key,value)
-    pub(crate) fn peek_first(&self) -> Option<(BeachLineNodeKey<I, O, BI, BF>, BeachLineIndex)> {
+    pub(crate) fn peek_first(&self) -> Option<(BeachLineNodeKey<I1, F1, I2, F2>, BeachLineIndex)> {
         self.beach_line_
-            .range((Unbounded::<BeachLineNodeKey<I, O, BI, BF>>, Unbounded))
+            .range((Unbounded::<BeachLineNodeKey<I1, F1, I2, F2>>, Unbounded))
             .next()
             .map(|x| (*x.0, *x.1))
     }
 
     #[allow(dead_code)]
     #[cfg(feature = "console_debug")]
-    pub(crate) fn debug_cmp_all(&self, key: BeachLineNodeKey<I, O, BI, BF>) {
+    pub(crate) fn debug_cmp_all(&self, key: BeachLineNodeKey<I1, F1, I2, F2>) {
         for (i, v) in self.beach_line_.iter().enumerate() {
             print!("#{}:", i);
             let _rv =
-                VP::NodeComparisonPredicate::<I, O, BI, BF>::node_comparison_predicate(v.0, &key);
+                VP::NodeComparisonPredicate::<I1, F1, I2, F2>::node_comparison_predicate(v.0, &key);
         }
     }
 
@@ -355,12 +363,14 @@ where
         println!("beach_line.len()={}", self.beach_line_.len());
         for (i, (node, id)) in self.beach_line_.iter().enumerate() {
             print!(
-                "beach_line{} L:{:?},R:{:?}, id={:?}",
+                "beach_line{} L:{:?},R:{:?}",
                 i,
                 &node.left_site(),
-                &node.right_site(),
-                id
+                &node.right_site()
             );
+
+            #[cfg(not(feature = "cpp_compat_debug"))]
+            print!(", id={:?}", id);
             if let Some(data) = self.get_node(id).1.get() {
                 if let Some(circle_event) = data.circle_event_ {
                     print!(" -> CircleEvent:{}", circle_event);
@@ -377,7 +387,7 @@ where
     }
 
     #[cfg(feature = "console_debug")]
-    pub(crate) fn debug_print_all_compat(&self, ce: &VC::CircleEventQueue<BF>) {
+    pub(crate) fn debug_print_all_compat(&self, ce: &VC::CircleEventQueue<F2>) {
         println!("-----beach_line----{}", self.beach_line_.len());
         for (i, (node, _id)) in self.beach_line_.iter().enumerate() {
             print!("#{}:", i);
@@ -387,7 +397,7 @@ where
     }
 
     #[warn(dead_code)]
-    pub(crate) fn debug_print_all_dump_and_cmp(&self, key: &BeachLineNodeKey<I, O, BI, BF>) {
+    pub(crate) fn debug_print_all_dump_and_cmp(&self, key: &BeachLineNodeKey<I1, F1, I2, F2>) {
         println!("-----beach_line----{}", self.beach_line_.len());
         println!("Looking for {:?} in the beach_line", key);
         let found = self.beach_line_.get(key);
@@ -431,11 +441,31 @@ where
         }
     }
 
+    #[allow(dead_code)]
+    pub(crate) fn debug_print_all_cmp(&self) {
+        let mut it1 = self.beach_line_.iter().enumerate();
+        for it2_v in self.beach_line_.iter().enumerate().skip(1) {
+            let it1_v = it1.next().unwrap();
+            print!(
+                "key(#{}).partial_cmp(key(#{})) == {:?}",
+                it1_v.0,
+                it2_v.0,
+                it1_v.1 .0.partial_cmp(it2_v.1 .0).unwrap()
+            );
+            println!(
+                "\tkey(#{}).partial_cmp(key(#{})) == {:?}",
+                it2_v.0,
+                it1_v.0,
+                it2_v.1 .0.partial_cmp(it1_v.1 .0).unwrap()
+            );
+        }
+    }
+
     #[cfg(feature = "console_debug")]
     pub(crate) fn debug_print_all_compat_node(
         &self,
-        node: &BeachLineNodeKey<I, O, BI, BF>,
-        ce: &VC::CircleEventQueue<BF>,
+        node: &BeachLineNodeKey<I1, F1, I2, F2>,
+        ce: &VC::CircleEventQueue<F2>,
     ) {
         let id = &node.get_index();
         print!("L:{:?},R:{:?}", &node.left_site(), &node.right_site(),);
@@ -452,16 +482,18 @@ where
         } else {
             print!(" Temporary bisector");
         }
-        println!(" id={}", id);
+        #[cfg(not(feature = "cpp_compat_debug"))]
+        print!(" id={}", id);
+        println!();
     }
 }
 
-impl<I, O, BI, BF> fmt::Debug for Beachline<I, O, BI, BF>
+impl<I1, F1, I2, F2> fmt::Debug for BeachLine<I1, F1, I2, F2>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
@@ -488,50 +520,44 @@ where
 /// The one site is considered to be newer than the other one if it was
 /// processed by the algorithm later (has greater index).
 #[derive(Copy, Clone)]
-pub struct BeachLineNodeKey<I, O, BI, BF>
+pub struct BeachLineNodeKey<I1, F1, I2, F2>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
-    left_site_: VSE::SiteEvent<I, O, BI, BF>,
-    right_site_: VSE::SiteEvent<I, O, BI, BF>,
+    left_site_: VSE::SiteEvent<I1, F1, I2, F2>,
+    right_site_: VSE::SiteEvent<I1, F1, I2, F2>,
     node_index_: BeachLineIndex,
 }
 
-impl<I, O, BI, BF> fmt::Debug for BeachLineNodeKey<I, O, BI, BF>
+impl<I1, F1, I2, F2> fmt::Debug for BeachLineNodeKey<I1, F1, I2, F2>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
-        rv.push_str(
-            format!(
-                "L:{:?},R:{:?}, id={:?}",
-                &self.left_site(),
-                &self.right_site(),
-                self.node_index_.0
-            )
-            .as_str(),
-        );
+        rv.push_str(format!("L:{:?},R:{:?}", &self.left_site(), &self.right_site()).as_str());
+        #[cfg(not(feature = "cpp_compat_debug"))]
+        rv.push_str(format!(", id={:?}", self.node_index_.0).as_str());
         write!(f, "{}", rv)
     }
 }
 
-impl<I, O, BI, BF> BeachLineNodeKey<I, O, BI, BF>
+impl<I1, F1, I2, F2> BeachLineNodeKey<I1, F1, I2, F2>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
     // Constructs degenerate bisector, used to search an arc that is above
     // the given site. The input to the constructor is the new site point.
-    pub fn new_1(new_site: VSE::SiteEvent<I, O, BI, BF>) -> Self {
+    pub fn new_1(new_site: VSE::SiteEvent<I1, F1, I2, F2>) -> Self {
         Self {
             left_site_: new_site,
             right_site_: new_site,
@@ -542,8 +568,8 @@ where
     // Constructs a new bisector. The input to the constructor is the two
     // sites that create the bisector. The order of sites is important.
     pub fn new_2(
-        left_site: VSE::SiteEvent<I, O, BI, BF>,
-        right_site: VSE::SiteEvent<I, O, BI, BF>,
+        left_site: VSE::SiteEvent<I1, F1, I2, F2>,
+        right_site: VSE::SiteEvent<I1, F1, I2, F2>,
     ) -> Self {
         Self {
             left_site_: left_site,
@@ -552,28 +578,28 @@ where
         }
     }
 
-    pub(crate) fn left_site_m(&mut self) -> &mut VSE::SiteEvent<I, O, BI, BF> {
+    pub(crate) fn left_site_m(&mut self) -> &mut VSE::SiteEvent<I1, F1, I2, F2> {
         &mut self.left_site_
     }
 
-    pub fn left_site(&self) -> &VSE::SiteEvent<I, O, BI, BF> {
+    pub fn left_site(&self) -> &VSE::SiteEvent<I1, F1, I2, F2> {
         &self.left_site_
     }
 
     #[allow(dead_code)]
-    pub(crate) fn set_left_site(&mut self, site: &VSE::SiteEvent<I, O, BI, BF>) {
+    pub(crate) fn set_left_site(&mut self, site: &VSE::SiteEvent<I1, F1, I2, F2>) {
         self.left_site_ = *site;
     }
 
-    pub(crate) fn right_site_m(&mut self) -> &mut VSE::SiteEvent<I, O, BI, BF> {
+    pub(crate) fn right_site_m(&mut self) -> &mut VSE::SiteEvent<I1, F1, I2, F2> {
         &mut self.right_site_
     }
 
-    pub fn right_site(&self) -> &VSE::SiteEvent<I, O, BI, BF> {
+    pub fn right_site(&self) -> &VSE::SiteEvent<I1, F1, I2, F2> {
         &self.right_site_
     }
 
-    pub(crate) fn set_right_site(&mut self, site: &VSE::SiteEvent<I, O, BI, BF>) {
+    pub(crate) fn set_right_site(&mut self, site: &VSE::SiteEvent<I1, F1, I2, F2>) {
         self.right_site_ = *site; // Copy
     }
 
@@ -582,28 +608,28 @@ where
     }
 }
 
-impl<I, O, BI, BF> PartialOrd for BeachLineNodeKey<I, O, BI, BF>
+impl<I1, F1, I2, F2> PartialOrd for BeachLineNodeKey<I1, F1, I2, F2>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<I, O, BI, BF> Ord for BeachLineNodeKey<I, O, BI, BF>
+impl<I1, F1, I2, F2> Ord for BeachLineNodeKey<I1, F1, I2, F2>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
     fn cmp(&self, other: &Self) -> Ordering {
         let is_less =
-            VP::NodeComparisonPredicate::<I, O, BI, BF>::node_comparison_predicate(self, other);
+            VP::NodeComparisonPredicate::<I1, F1, I2, F2>::node_comparison_predicate(self, other);
         if is_less {
             Ordering::Less
         } else {
@@ -620,33 +646,33 @@ where
     }
 }
 
-impl<I, O, BI, BF> PartialEq for BeachLineNodeKey<I, O, BI, BF>
+impl<I1, F1, I2, F2> PartialEq for BeachLineNodeKey<I1, F1, I2, F2>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
     fn eq(&self, other: &Self) -> bool {
         self.left_site_ == other.left_site_ && self.right_site_ == other.right_site_
     }
 }
 
-impl<I, O, BI, BF> Eq for BeachLineNodeKey<I, O, BI, BF>
+impl<I1, F1, I2, F2> Eq for BeachLineNodeKey<I1, F1, I2, F2>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
 }
 
-impl<I, O, BI, BF> Hash for BeachLineNodeKey<I, O, BI, BF>
+impl<I1, F1, I2, F2> Hash for BeachLineNodeKey<I1, F1, I2, F2>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+    I2: BigIntType + Neg<Output = I2>,
+    F2: BigFloatType + Neg<Output = F2>,
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.left_site_.hash(state);

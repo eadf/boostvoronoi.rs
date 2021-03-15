@@ -26,7 +26,8 @@ mod ctypes;
 pub mod diagram;
 mod end_point;
 pub mod predicate;
-mod robust_fpt;
+// only made pub because of the documentation tests
+pub mod robust_fpt;
 pub mod site_event;
 pub mod visual_utils;
 
@@ -140,6 +141,8 @@ where
 
 #[derive(thiserror::Error, Debug)]
 pub enum BvError {
+    #[error("error: Some error with the beach-line")]
+    BeachLineError { txt: String },
     #[error("error: given value for the radius is less than 0.0.")]
     RadiusLessThanZero,
     #[error("error: vertices should be added before segments")]

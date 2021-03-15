@@ -58,7 +58,7 @@ where
     pub(crate) site_events_: Vec<VSE::SiteEvent<I1, F1, I2, F2>>,
     circle_events_: VC::CircleEventQueue<F2>,
     end_points_: BinaryHeap<VEP::EndPointPair<I1>>,
-    pub(crate) beach_line_: VB::Beachline<I1, F1, I2, F2>,
+    pub(crate) beach_line_: VB::BeachLine<I1, F1, I2, F2>,
     index_: usize,
     #[cfg(feature = "console_debug")]
     debug_circle_counter: isize, // Just for debugging purposes
@@ -79,7 +79,7 @@ where
         Self {
             /// key by SiteEventIndexType
             site_events_: Vec::new(),
-            beach_line_: VB::Beachline::default(),
+            beach_line_: VB::BeachLine::default(),
             index_: 0,
             end_points_: BinaryHeap::new(),
             circle_events_: VC::CircleEventQueue::<F2>::default(),
@@ -361,8 +361,9 @@ where
             // Get next site event to process.
             let site_event = self.site_events_.get(*site_event_iterator_).unwrap();
             #[cfg(feature = "console_debug")]
-            println!("processing site:{}", site_event); //dbg!(&site_event);
-
+            {
+                println!("processing site:{}", site_event); //dbg!(&site_event);
+            }
             // Move site iterator.
             let mut last_index = *site_event_iterator_ + 1;
 
@@ -375,8 +376,22 @@ where
                     let b_it = self.end_points_.peek().unwrap();
                     let b_it = b_it.second;
                     let _ = self.end_points_.pop();
-
+                    #[cfg(feature = "console_debug")]
+                    {
+                        self.beach_line_
+                            .debug_print_all_compat(&self.circle_events_);
+                        print!("erasing beach_line:");
+                        self.beach_line_.debug_print_all_compat_node(
+                            &self.beach_line_.get_node(&b_it).0,
+                            &self.circle_events_,
+                        );
+                    }
                     self.beach_line_.erase(b_it)?;
+                    #[cfg(feature = "console_debug")]
+                    {
+                        self.beach_line_
+                            .debug_print_all_compat(&self.circle_events_);
+                    }
                 }
             } else {
                 let mut last = self.site_events_.get(last_index);
@@ -548,8 +563,9 @@ where
         let e = self.circle_events_.top().unwrap();
         let circle_event = e.0.get();
         #[cfg(feature = "console_debug")]
-        println!("processing:CE{:?}", circle_event);
-
+        {
+            println!("processing:CE{:?}", circle_event);
+        }
         if !self
             .circle_events_
             .is_active(circle_event.get_index().unwrap())
@@ -614,8 +630,29 @@ where
                 tmp.set_right_site(&site3);
                 tmp
             };
-            self.beach_line_
-                .replace_key(it_first_key_before, it_first_key_after)
+
+            #[cfg(feature = "console_debug")]
+            {
+                self.beach_line_
+                    .debug_print_all_compat(&self.circle_events_);
+                print!("replace key ");
+                self.beach_line_
+                    .debug_print_all_compat_node(&it_first_key_before, &self.circle_events_);
+                print!("b4:   ");
+                self.beach_line_
+                    .debug_print_all_compat_node(&it_first_key_before, &self.circle_events_);
+            }
+            let rv = self
+                .beach_line_
+                .replace_key(it_first_key_before, it_first_key_after)?;
+            #[cfg(feature = "console_debug")]
+            {
+                self.beach_line_
+                    .debug_print_all_compat(&self.circle_events_);
+                self.beach_line_.debug_print_all_cmp();
+                println!();
+            }
+            rv
         };
 
         // Insert the new bisector into the beach line.
@@ -631,8 +668,20 @@ where
             };
             it_first.1.set(data);
         }
+        #[cfg(feature = "console_debug")]
+        {
+            self.beach_line_
+                .debug_print_all_compat(&self.circle_events_);
+            print!("erasing beach_line:");
+            self.beach_line_
+                .debug_print_all_compat_node(&it_last.0, &self.circle_events_);
+        }
         // Remove the (B, C) bisector node from the beach line.
         self.beach_line_.erase(it_last.0.get_index())?;
+        #[cfg(feature = "console_debug")]
+        self.beach_line_
+            .debug_print_all_compat(&self.circle_events_);
+
         let it_last = (it_first.0, it_first.0.get_index());
 
         // Pop the topmost circle event from the event queue.

@@ -267,6 +267,7 @@ impl<I1> PointComparisonPredicate<I1>
 where
     I1: InputType + Neg<Output = I1>,
 {
+    /// returns true if lhs.x < rhs.x, if lhs.x==rhs.x it returns lhs.y < rhs.y
     pub(crate) fn point_comparison_predicate(lhs: &Point<I1>, rhs: &Point<I1>) -> bool {
         if lhs.x == rhs.x {
             lhs.y < rhs.y
@@ -371,7 +372,7 @@ where
         let rv = UlpComparison::ulp_comparison(lhs, rhs, ulps) == cmp::Ordering::Less;
         #[cfg(feature = "console_debug")]
         println!(
-            "event_comparison_predicate_bif lhs:{} rhs:{} -> {}",
+            "event_comparison_predicate_bif lhs:{:.12} rhs:{:.12} -> {}",
             lhs, rhs, rv
         );
         rv
@@ -668,13 +669,34 @@ where
     I2: InputType + Neg<Output = I2>,
     F2: OutputType + Neg<Output = F2>,
 {
+    #[inline]
+    pub fn node_comparison_predicate(
+        node1: &VB::BeachLineNodeKey<I1, F1, I2, F2>,
+        node2: &VB::BeachLineNodeKey<I1, F1, I2, F2>,
+    ) -> bool {
+        let rv = Self::node_comparison_predicate_real(node1, node2);
+        /*
+        let site1: &VSE::SiteEvent<I1, F1, I2, F2> =
+            NodeComparisonPredicate::<I1, F1, I2, F2>::get_comparison_site(node1);
+        let site2: &VSE::SiteEvent<I1, F1, I2, F2> =
+            NodeComparisonPredicate::<I1, F1, I2, F2>::get_comparison_site(node2);
+        let point1: &Point<I1> =
+            NodeComparisonPredicate::<I1, F1, I2, F2>::get_comparison_point(site1);
+        let point2: &Point<I1> =
+            NodeComparisonPredicate::<I1, F1, I2, F2>::get_comparison_point(site2);
+        println!("node_comparison_predicate({}:{:?}, {}:{:?})=={}",
+                 site1.sorted_index(), point1, site2.sorted_index(), point2, if rv {"true"} else {"false"});
+        */
+        rv
+    }
+
     /// Compares nodes in the balanced binary search tree. Nodes are
     /// compared based on the y coordinates of the arcs intersection points.
     /// Nodes with less y coordinate of the intersection point go first.
     /// Comparison is only called during the new site events processing.
     /// That's why one of the nodes will always lie on the sweepline and may
     /// be represented as a straight horizontal line.
-    pub fn node_comparison_predicate(
+    pub fn node_comparison_predicate_real(
         node1: &VB::BeachLineNodeKey<I1, F1, I2, F2>,
         node2: &VB::BeachLineNodeKey<I1, F1, I2, F2>,
     ) -> bool {
@@ -708,7 +730,15 @@ where
             match site1.sorted_index().cmp(&site2.sorted_index()) {
                 cmp::Ordering::Equal => {
                     // Both nodes are new (inserted during same site event processing).
-                    Self::get_comparison_y(&node1, true) < Self::get_comparison_y(&node2, true)
+                    let y1 = Self::get_comparison_y(&node1, true);
+                    let y2 = Self::get_comparison_y(&node2, true);
+                    if y1 == y2 {
+                        // This is something not found in the C++ version
+                        // Todo: check if this fix is needed after +is_positive() issue is fixed
+                        node1.get_index().0 < node2.get_index().0
+                    } else {
+                        y1 < y2
+                    }
                 }
                 cmp::Ordering::Less => {
                     let y1 = Self::get_comparison_y(&node1, false);
@@ -1722,6 +1752,21 @@ where
         recompute_c_y: bool,
         recompute_lower_x: bool,
     ) {
+        #[cfg(feature = "console_debug")]
+        {
+            print!(
+                "->pps site1:{:?} site2:{:?} site3:{:?}",
+                site1, site2, site3
+            );
+            print!(
+                " segment_index:{} recompute_c_x:{} ",
+                segment_index, recompute_c_x
+            );
+            println!(
+                "recompute_c_y:{} recompute_lower_x:{}",
+                recompute_c_y, recompute_lower_x
+            );
+        }
         let bi_to_f2 = TC4::<I1, F1, I2, F2>::bi_to_f2;
         let i1_to_bi = TC2::<I1, F1>::i1_to_bi;
         let i1_to_i128 = TC2::<I1, F1>::i1_to_i128;
@@ -1766,7 +1811,10 @@ where
         dif1 = i1_to_bi(site2.x()) - i1_to_i128(site3.x1());
         let b = line_a * dif1 - line_b * dif0;
         let sum_ab = &a + &b;
-
+        #[cfg(feature = "console_debug")]
+        {
+            println!("a:{} b:{} denom:{}", a, b, denom);
+        }
         if denom.is_zero() {
             let numer: BigInt = &teta * &teta - &sum_ab * &sum_ab;
             denom = &teta * &sum_ab;
@@ -1794,7 +1842,10 @@ where
         let det: BigInt = (&teta * &teta + &denom * &denom) * &a * &b * 4;
         let mut inv_denom_sqr: F2 = i2_to_f2(one) / bi_to_f2(&denom);
         inv_denom_sqr = inv_denom_sqr * inv_denom_sqr;
-
+        #[cfg(feature = "console_debug")]
+        {
+            println!("det:{} inv_denom_sqr:{:.12}", det, inv_denom_sqr);
+        }
         if recompute_c_x || recompute_lower_x {
             ca[0] = sum_x * &denom * &denom + &teta * &sum_ab * &vec_x;
             cb[0] = BigInt::from(1);
@@ -1832,16 +1883,30 @@ where
             ca[3] = if segment_index == 2 { -teta } else { teta };
             cb[3] = det;
             let segm_len = VR::RobustFpt::<F2>::new_1(bi_to_f2(&segm_len)).sqrt();
-
-            c_event.set_lower_x_raw(
-                (sqrt_expr_.eval4(&ca, &cb) * half * inv_denom_sqr / segm_len).fpv(),
-            );
+            #[cfg(feature = "console_debug")]
+            {
+                println!(" ca[0]:{}", ca[0]);
+                println!(" ca[1]:{}", ca[1]);
+                println!(" ca[2]:{}", ca[2]);
+                println!(" ca[3]:{}", ca[3]);
+                println!(" cb[0]:{}", cb[0]);
+                println!(" cb[1]:{}", cb[1]);
+                println!(" cb[2]:{}", cb[2]);
+                println!(" cb[3]:{}", cb[3]);
+                println!(" segm_len:{:.12}", segm_len.fpv());
+            }
+            let eval4 = sqrt_expr_.eval4(&ca, &cb);
+            #[cfg(feature = "console_debug")]
+            {
+                println!("eval4:{:.12}", eval4.fpv());
+            }
+            c_event.set_lower_x_raw((eval4 * half * inv_denom_sqr / segm_len).fpv());
         }
         #[cfg(feature = "console_debug")]
         {
             let c = c_event.0.get();
             println!(
-                "pps(x:{:.12}, y:{:.12}, lx:{:.12})",
+                "<-pps(x:{:.12}, y:{:.12}, lx:{:.12})",
                 c.x(),
                 c.y(),
                 c.lower_x()
@@ -1894,7 +1959,19 @@ where
             i1_to_bi(segm_end1.y) - i1_to_bi(segm_start1.y),
             i1_to_bi(segm_end2.y) - i1_to_bi(segm_start2.y),
         ];
+        #[cfg(feature = "console_debug")]
+        {
+            println!("->pss");
+            println!(" a[0]={}", a[0]);
+            println!(" a[1]={}", a[1]);
+            println!(" b[0]={}", b[0]);
+            println!(" b[1]={}", b[1]);
+        }
         let orientation: BigInt = &a[1] * &b[0] - &a[0] * &b[1];
+        #[cfg(feature = "console_debug")]
+        {
+            println!(" orientation={}", orientation);
+        }
         if orientation.is_zero() {
             let denom = {
                 let denomp1 = &a[0] * &a[0];
@@ -1957,6 +2034,13 @@ where
         let iy: BigInt = &b[0] * &c[1] + &b[1] * &c[0];
         let dx: BigInt = ix.clone() - &orientation * i1_to_i128(site1.x());
         let dy: BigInt = iy.clone() - &orientation * i1_to_i128(site1.y());
+        #[cfg(feature = "console_debug")]
+        {
+            println!(" ix={}", ix);
+            println!(" iy={}", iy);
+            println!(" dx={}", dx);
+            println!(" dy={}", dy);
+        }
         if dx.is_zero() && dy.is_zero() {
             let denom: F2 = bi_to_f2(&orientation);
             let c_x: F2 = bi_to_f2(&ix) / denom;
@@ -1965,13 +2049,26 @@ where
             return;
         }
 
-        let sign: BigInt = BigInt::from(if point_index == 2i32 { 1i32 } else { -1i32 })
+        let sign: BigInt = BigInt::from(if point_index == 2 { 1 } else { -1 })
             * if is_neg(&orientation) { 1 } else { -1 };
         // todo: remove -1*-1
-        cA[0] = &a[1] * -1 * &dx + &b[1] * -1 * &dy;
-        cA[1] = &a[0] * -1 * &dx + &b[0] * -1 * &dy;
+        #[cfg(feature = "console_debug")]
+        {
+            println!(" cA[0]={}", (&a[1] * -1 * &dx));
+            println!(" cA[0]={}", (&b[1] * -1 * &dy));
+        }
+        cA[0] = (&a[1] * -1 * &dx) + (&b[1] * -1 * &dy);
+        cA[1] = (&a[0] * -1 * &dx) + (&b[0] * -1 * &dy);
         cA[2] = sign.clone();
         cA[3] = BigInt::zero();
+
+        #[cfg(feature = "console_debug")]
+        {
+            println!(" cA[0]={}", cA[0]);
+            println!(" cA[1]={}", cA[1]);
+            println!(" cA[2]={}", cA[2]);
+            println!(" cA[3]={}", cA[3]);
+        }
         cB[0] = &a[0] * &a[0] + &b[0] * &b[0];
         cB[1] = &a[1] * &a[1] + &b[1] * &b[1];
         cB[2] = &a[0] * &a[1] + &b[0] * &b[1];
@@ -2013,6 +2110,10 @@ where
                 c.x(),
                 c.y(),
                 c.lower_x()
+            );
+            println!(
+                "recompute_c_x:{}, recompute_c_y:{}, recompute_lower_x:{}",
+                recompute_c_x, recompute_c_y, recompute_lower_x
             );
         }
     }
