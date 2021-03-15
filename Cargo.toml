@@ -19,9 +19,11 @@ yabf = {version="^0.0.3",default-features=false}
 num-traits = "^0.2.14"
 thiserror = "^1.0.24"
 bitflags = "^1.2.1"
+libm = "^0.2.1"
 
 [features]
 console_debug = []
+cpp_compat_debug = []
 
 [[example]]
 name = "fltk_gui"
@@ -36,6 +38,7 @@ path = "example/main.rs"
 geo = "^0.17.1"
 fltk = "^0.15.6"
 criterion = "^0.3.4"
+approx = "^0.4.0"
 
 [[bench]]
 name = "bench"
