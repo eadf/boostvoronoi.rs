@@ -51,9 +51,7 @@ mod robustdif_tests;
 mod robustfpt_tests;
 
 use super::OutputType;
-use core::fmt::Debug;
 use num::{BigInt, Float, NumCast, ToPrimitive, Zero};
-//use num_traits;
 use ordered_float::OrderedFloat;
 use std::fmt;
 use std::marker::PhantomData;
@@ -62,7 +60,7 @@ use std::ops;
 /// Rounding error is at most 1 EPS.
 pub const ROUNDING_ERROR: u8 = 1;
 
-#[derive(Copy, Clone, Debug, Default)]
+#[derive(Copy, Clone, fmt::Debug, Default)]
 pub struct RobustFpt<F: OutputType + ops::Neg<Output = F>> {
     fpv_: F,
     re_: OrderedFloat<F>,
@@ -292,23 +290,6 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::Neg for RobustFpt<F> {
         }
     }
 }
-/*
-// todo!() figure out how to do this for real
-impl<F: OutputType + ops::Neg<Output = F>> num::ToPrimitive for RobustFpt<F> {
-    fn to_i64(&self) -> Option<i64> {
-        None
-    }
-
-    fn to_u64(&self) -> Option<u64> {
-        None
-    }
-}*/
-/*
-impl<F: OutputType + ops::Neg<Output = F>> NumCast for RobustFpt<F> {
-    fn from<T: num::ToPrimitive>(n: T) -> Option<Self> {
-        None
-    }
-}*/
 
 /// robust_dif consists of two not negative values: value1 and value2.
 /// The resulting expression is equal to the value1 - value2.
@@ -316,7 +297,7 @@ impl<F: OutputType + ops::Neg<Output = F>> NumCast for RobustFpt<F> {
 /// and subtraction of a negative value is equivalent to the addition to
 /// value1. The structure implicitly avoids difference computation.
 
-#[derive(Copy, Clone, Debug, Default)]
+#[derive(Copy, Clone, fmt::Debug, Default)]
 pub struct RobustDif<F: OutputType + ops::Neg<Output = F>> {
     positive_sum_: RobustFpt<F>,
     negative_sum_: RobustFpt<F>,
@@ -629,15 +610,16 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::DivAssign<RobustFpt<F>> for Robu
 /// sum(i = 1 .. n)(A[i] * sqrt(B[i])), 1 <= n <= 4.
 #[allow(non_camel_case_types)]
 pub struct robust_sqrt_expr<
-    _fpt: NumCast + Float + fmt::Display + Default + Debug + ops::Neg<Output = _fpt>,
+    _fpt: NumCast + Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>,
 > {
     #[doc(hidden)]
     _pdf: PhantomData<_fpt>,
 }
 
 #[allow(non_camel_case_types)]
-impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<Output = _fpt>>
-    robust_sqrt_expr<_fpt>
+impl<
+        _fpt: Clone + NumCast + Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>,
+    > robust_sqrt_expr<_fpt>
 {
     pub fn new() -> Self {
         Self { _pdf: PhantomData }
@@ -663,7 +645,9 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
         let ra = self.eval1(a, b);
         let rb = self.eval1(&a[1..], &b[1..]);
 
-        if (!ra.is_sign_negative() && !rb.is_sign_negative())
+        if ra.is_zero()
+            || rb.is_zero()
+            || (!ra.is_sign_negative() && !rb.is_sign_negative())
             || (!ra.is_sign_positive() && !rb.is_sign_positive())
         {
             return ra + rb;
@@ -678,7 +662,9 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
     pub fn eval3(&self, a: &[BigInt], b: &[BigInt]) -> RobustFpt<_fpt> {
         let ra = self.eval2(a, b);
         let rb = self.eval1(&a[2..], &b[2..]);
-        if (!ra.is_sign_negative() && !rb.is_sign_negative())
+        if ra.is_zero()
+            || rb.is_zero()
+            || (!ra.is_sign_negative() && !rb.is_sign_negative())
             || (!ra.is_sign_positive() && !rb.is_sign_positive())
         {
             return ra + rb;
@@ -701,7 +687,10 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
     pub fn eval4(&self, a: &[BigInt], b: &[BigInt]) -> RobustFpt<_fpt> {
         let ra = self.eval2(a, b);
         let rb = self.eval2(&a[2..], &b[2..]);
-        if (!ra.is_sign_negative() && !rb.is_sign_negative())
+
+        if ra.is_zero()
+            || rb.is_zero()
+            || (!ra.is_sign_negative() && !rb.is_sign_negative())
             || (!ra.is_sign_positive() && !rb.is_sign_positive())
         {
             return ra + rb;
@@ -709,6 +698,7 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
         let mut ta = [BigInt::zero(), BigInt::zero(), BigInt::zero()];
         let mut tb = [BigInt::zero(), BigInt::zero(), BigInt::zero()];
 
+        // todo remove all these clone()
         ta[0] = a[0].clone() * &a[0] * &b[0] + &a[1] * &a[1] * &b[1]
             - &a[2] * &a[2] * &b[2]
             - &a[3] * &a[3] * &b[3];
@@ -730,7 +720,9 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
 
         let lh = self.eval2(A, B);
         let rh = self.eval2(&A[2..], &B[2..]);
-        if (!lh.is_sign_negative() && !rh.is_sign_negative())
+        if lh.is_zero()
+            || rh.is_zero()
+            || (!lh.is_sign_negative() && !rh.is_sign_negative())
             || (!lh.is_sign_positive() && !rh.is_sign_positive())
         {
             return lh + rh;
@@ -748,6 +740,18 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
     ///           A[2] * sqrt(B[3] * (sqrt(B[0] * B[1]) + B[2])).
     #[allow(non_snake_case)]
     pub fn sqrt_expr_evaluator_pss4(&mut self, A: &[BigInt], B: &[BigInt]) -> RobustFpt<_fpt> {
+        #[cfg(feature = "console_debug")]
+        {
+            println!("->sqrt_expr_evaluator_pss4");
+            println!(" A[0]={}", A[0]);
+            println!(" A[1]={}", A[1]);
+            println!(" A[2]={}", A[2]);
+            println!(" A[3]={}", A[3]);
+            println!(" B[0]={}", B[0]);
+            println!(" B[1]={}", B[1]);
+            println!(" B[2]={}", B[2]);
+            println!(" B[3]={}", B[3]);
+        }
         let mut cA: [BigInt; 4] = [
             BigInt::zero(),
             BigInt::zero(),
@@ -767,9 +771,19 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
             cA[1] = B[2].clone();
             cB[1] = BigInt::from(1);
             let rh = self.eval1(&A[2..], &B[3..]) * self.eval2(&cA, &cB).sqrt();
-            if (!lh.is_sign_negative() && !rh.is_sign_negative())
+            if lh.is_zero()
+                || rh.is_zero()
+                || (!lh.is_sign_negative() && !rh.is_sign_negative())
                 || (!lh.is_sign_positive() && !rh.is_sign_positive())
             {
+                #[cfg(feature = "console_debug")]
+                {
+                    println!(
+                        "sqrt_expr_evaluator_pss4 1\nlh:{}\nrh:{}",
+                        lh.fpv(),
+                        rh.fpv()
+                    );
+                }
                 return lh + rh;
             }
             cA[0] = A[0].clone() * &A[0] * &B[0] + &A[1] * &A[1] * &B[1]
@@ -778,6 +792,16 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
             cA[1] = A[0].clone() * &A[1] * 2 - &A[2] * &A[2] * &B[3];
             cB[1] = B[0].clone() * &B[1];
             let numer = self.eval2(&cA, &cB);
+            #[cfg(feature = "console_debug")]
+            {
+                println!(
+                    "sqrt_expr_evaluator_pss4 2\nnumerator:{}\nlh:{}\nrh:{}",
+                    numer.fpv(),
+                    lh.fpv(),
+                    rh.fpv()
+                );
+            }
+
             return numer / (lh - rh);
         }
         cA[0] = BigInt::from(1);
@@ -792,9 +816,42 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
         cA[2] = A[3].clone();
         cB[2] = BigInt::from(1);
         let lh = self.eval3(&cA, &cB);
-        if (!lh.is_sign_negative() && !rh.is_sign_negative())
+        #[cfg(feature = "console_debug")]
+        {
+            println!(
+                "sqrt_expr_evaluator_pss4 ->3\nlh:{}\nrh:{}",
+                lh.fpv(),
+                rh.fpv()
+            );
+            println!(
+                "lh.is_neg():{} lh.is_pos():{}",
+                lh.is_sign_negative(),
+                lh.is_sign_positive()
+            );
+            println!(
+                "rh.is_neg():{} rh.is_pos():{}",
+                rh.is_sign_negative(),
+                rh.is_sign_positive()
+            );
+            println!(
+                "lh.is_zero():{} rh.is_zero():{}",
+                lh.is_zero(),
+                rh.is_zero()
+            );
+        }
+        if lh.is_zero()
+            || rh.is_zero()
+            || (!lh.is_sign_negative() && !rh.is_sign_negative())
             || (!lh.is_sign_positive() && !rh.is_sign_positive())
         {
+            #[cfg(feature = "console_debug")]
+            {
+                println!(
+                    "sqrt_expr_evaluator_pss4 3\nlh:{}\nrh:{}",
+                    lh.fpv(),
+                    rh.fpv()
+                );
+            }
             return lh + rh;
         }
         cA[0] = A[3].clone() * &A[0] * 2;
@@ -803,7 +860,448 @@ impl<_fpt: Clone + NumCast + Float + fmt::Display + Default + Debug + ops::Neg<O
             - &A[2] * &A[2] * &B[2] * &B[3];
         cA[3] = A[0].clone() * &A[1] * 2 - &A[2] * &A[2] * &B[3];
         cB[3] = B[0].clone() * &B[1];
-        let numerator = self.sqrt_expr_evaluator_pss3(&cA, &cB);
-        numerator / (lh - rh)
+        let numer = self.sqrt_expr_evaluator_pss3(&cA, &cB);
+        #[cfg(feature = "console_debug")]
+        {
+            println!(
+                "sqrt_expr_evaluator_pss4 4\nnumerator:{}\nlh:{}\nrh:{}",
+                numer.fpv(),
+                lh.fpv(),
+                rh.fpv()
+            );
+        }
+
+        numer / (lh - rh)
+    }
+}
+
+/// Floating point type wrapper. Allows to extend exponent boundaries to the
+/// integer type range. This class does not handle division by zero, subnormal
+/// numbers or NaNs.
+/// Ported from the class extended_exponent_fpt in voronoi_ctypes.hpp
+#[derive(Copy, Clone)]
+pub struct ExtendedExponentFpt<F>
+where
+    F: NumCast + Float + fmt::Display + Copy + fmt::Debug + ops::Neg<Output = F>,
+{
+    val_: F,
+    exp_: i32,
+}
+const MAX_SIGNIFICANT_EXP_DIF_F64: i32 = 54;
+
+#[allow(dead_code)]
+impl ExtendedExponentFpt<f64> {
+    #[inline]
+    pub fn new(v: f64) -> Self {
+        let rv = libm::frexp(v);
+        Self {
+            val_: rv.0,
+            exp_: rv.1,
+        }
+    }
+
+    #[inline]
+    pub fn new2(val: f64, exp: i32) -> Self {
+        Self {
+            val_: val,
+            exp_: exp,
+        }
+    }
+
+    /// Is positive method.
+    /// IMPORTANT!!!!! in c++ boost voronoi implementation zero values can't be positive.
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    ///
+    /// let aa:f64 = 0_f64;
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// assert_eq!(a.is_pos(), false);
+    ///
+    /// let aa:f64 = -0_f64;
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// assert_eq!(a.is_pos(), false);
+    ///
+    /// let aa:f64 = f64::MIN_POSITIVE;
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// assert_eq!(a.is_pos(), aa.is_sign_positive());
+    /// ```
+    #[inline]
+    pub fn is_pos(&self) -> bool {
+        return self.val_ > 0.0;
+    }
+
+    /// Is negative method.
+    /// IMPORTANT!!!!! in c++ boost voronoi implementation zero values can't be negative.
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    ///
+    /// println!("is_neg()");
+    /// let aa:f64 = 0_f64;
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// assert_eq!(a.is_neg(), aa.is_sign_negative());
+    ///
+    /// let aa:f64 = -0_f64;
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// assert_eq!(a.is_neg(), false);
+    /// ```
+    #[inline]
+    pub fn is_neg(&self) -> bool {
+        return self.val_ < 0.0;
+    }
+
+    /// Is zero method.
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    /// # use num_traits::identities::Zero;
+    ///
+    /// let aa:f64 = 0_f64;
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// assert_eq!(a.is_zero(), aa.is_zero());
+    ///
+    /// let aa:f64 = -0_f64;
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// assert_eq!(a.is_zero(), aa.is_zero());
+    ///
+    /// let aa:f64 = f64::MIN_POSITIVE;
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// assert_eq!(a.is_zero(), aa.is_zero());
+    ///
+    /// let aa:f64 = -f64::MIN_POSITIVE;
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// assert_eq!(a.is_zero(), aa.is_zero());
+    /// ```
+    #[inline]
+    pub fn is_zero(&self) -> bool {
+        return self.val_ == 0.0;
+    }
+
+    /// Square root method.
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    ///
+    /// let aa:f64 = f64::MAX;
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// approx::assert_ulps_eq!(a.d(), aa);
+    /// let a = a.sqrt();
+    /// approx::assert_ulps_eq!(a.d(), aa.sqrt());
+    /// ```
+    pub fn sqrt(&self) -> Self {
+        let mut val = self.val_;
+        let mut exp = self.exp_;
+        if (exp & 1) != 0 {
+            val *= 2.0;
+            exp -= 1;
+        }
+        Self::new2(val.sqrt(), exp >> 1)
+    }
+
+    /// A to-float operation.
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    ///
+    /// let aa:f64 = 1000000000.0;
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// approx::assert_ulps_eq!(a.d(), aa);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(-aa);
+    /// approx::assert_ulps_eq!(a.d(), -aa);
+    /// ```
+    pub fn d(&self) -> f64 {
+        libm::ldexp(self.val_, self.exp_)
+    }
+}
+
+impl ops::Neg for ExtendedExponentFpt<f64> {
+    type Output = Self;
+
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    ///
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
+    ///
+    /// approx::assert_ulps_eq!(a.d(), 1_f64);
+    /// let c = -a;
+    /// approx::assert_ulps_eq!(c.d(), -1_f64);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1000000000.0);
+    /// approx::assert_ulps_eq!(a.d(), 1000000000_f64);
+    /// let c = -a;
+    /// approx::assert_ulps_eq!(c.d(), -1000000000_f64);
+    /// ```
+    fn neg(self) -> Self {
+        Self {
+            val_: -self.val_,
+            exp_: self.exp_,
+        }
+    }
+}
+
+impl ops::Add for ExtendedExponentFpt<f64> {
+    type Output = Self;
+
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    ///
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2.0);
+    ///
+    /// approx::assert_ulps_eq!(a.d(), 1_f64);
+    /// approx::assert_ulps_eq!(b.d(), 2_f64);
+    /// let c = a + b;
+    /// approx::assert_ulps_eq!(c.d(), 3_f64);
+    /// let c = c + b;
+    /// approx::assert_ulps_eq!(c.d(), 5_f64);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1000000000.0);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2000000000.0);
+    /// approx::assert_ulps_eq!(a.d(), 1000000000_f64);
+    /// approx::assert_ulps_eq!(b.d(), 2000000000_f64);
+    /// let c = a + b;
+    /// approx::assert_ulps_eq!(c.d(), 3000000000_f64);
+    /// ```
+    fn add(self, that: Self) -> Self {
+        if self.val_ == 0.0 || that.exp_ > self.exp_ + MAX_SIGNIFICANT_EXP_DIF_F64 {
+            return that;
+        }
+        if that.val_ == 0.0 || self.exp_ > that.exp_ + MAX_SIGNIFICANT_EXP_DIF_F64 {
+            return self;
+        }
+        if self.exp_ >= that.exp_ {
+            let exp_dif = self.exp_ - that.exp_;
+            let val = libm::ldexp(self.val_, exp_dif) + that.val_;
+            Self::new2(val, that.exp_)
+        } else {
+            let exp_dif = that.exp_ - self.exp_;
+            let val = libm::ldexp(that.val_, exp_dif) + self.val_;
+            Self::new2(val, self.exp_)
+        }
+    }
+}
+
+impl ops::Sub for ExtendedExponentFpt<f64> {
+    type Output = Self;
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    ///
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(-2.0);
+    ///
+    /// approx::assert_ulps_eq!(a.d(), 1_f64);
+    /// approx::assert_ulps_eq!(b.d(), -2_f64);
+    /// let c = a - b;
+    /// approx::assert_ulps_eq!(c.d(), 3_f64);
+    /// let c = c - b;
+    /// approx::assert_ulps_eq!(c.d(), 5_f64);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1000000000.0);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(-3000000000.0);
+    /// approx::assert_ulps_eq!(a.d(), 1000000000_f64);
+    /// approx::assert_ulps_eq!(b.d(), -3000000000_f64);
+    /// let c = a - b;
+    /// approx::assert_ulps_eq!(c.d(), 1000000000_f64-(-3000000000.0));
+    /// ```
+    fn sub(self, that: Self) -> Self {
+        if self.val_ == 0.0 || that.exp_ > self.exp_ + MAX_SIGNIFICANT_EXP_DIF_F64 {
+            return Self::new2(-that.val_, that.exp_);
+        }
+        if that.val_ == 0.0 || self.exp_ > that.exp_ + MAX_SIGNIFICANT_EXP_DIF_F64 {
+            return self;
+        }
+        if self.exp_ >= that.exp_ {
+            let exp_dif = self.exp_ - that.exp_;
+            let val = libm::ldexp(self.val_, exp_dif) - that.val_;
+            Self::new2(val, that.exp_)
+        } else {
+            let exp_dif = that.exp_ - self.exp_;
+            let val = libm::ldexp(-that.val_, exp_dif) + self.val_;
+            Self::new2(val, self.exp_)
+        }
+    }
+}
+
+impl ops::Mul for ExtendedExponentFpt<f64> {
+    type Output = Self;
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    ///
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2.0);
+    ///
+    /// approx::assert_ulps_eq!(a.d(), 1_f64);
+    /// approx::assert_ulps_eq!(b.d(), 2_f64);
+    /// let c = a * b;
+    /// approx::assert_ulps_eq!(c.d(), 2_f64);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1000000000.0);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2000000000.0);
+    /// approx::assert_ulps_eq!(a.d(), 1000000000_f64);
+    /// approx::assert_ulps_eq!(b.d(), 2000000000_f64);
+    /// let c = a * b;
+    /// approx::assert_ulps_eq!(c.d(), 1000000000_f64*2000000000_f64);
+    /// ```
+    fn mul(self, that: Self) -> Self {
+        let val = self.val_ * that.val_;
+        let exp = self.exp_ + that.exp_;
+        Self::new2(val, exp)
+    }
+}
+
+impl ops::Div for ExtendedExponentFpt<f64> {
+    type Output = Self;
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    ///
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2.0);
+    ///
+    /// approx::assert_ulps_eq!(a.d(), 1_f64);
+    /// approx::assert_ulps_eq!(b.d(), 2_f64);
+    /// let c = a / b;
+    /// approx::assert_ulps_eq!(c.d(), 1.0/2.0);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(2000000000_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(-2000000000_f64);
+    /// approx::assert_ulps_eq!(a.d(),  2000000000_f64);
+    /// approx::assert_ulps_eq!(b.d(), -2000000000_f64);
+    /// let c = a / b;
+    /// approx::assert_ulps_eq!(c.d(), -1f64);
+    /// ```
+    fn div(self, that: Self) -> Self {
+        let val = self.val_ / that.val_;
+        let exp = self.exp_ - that.exp_;
+        Self::new2(val, exp)
+    }
+}
+
+impl ops::AddAssign for ExtendedExponentFpt<f64> {
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    ///
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2.0);
+    ///
+    /// approx::assert_ulps_eq!(a.d(), 1_f64);
+    /// approx::assert_ulps_eq!(b.d(), 2_f64);
+    /// a += b;
+    /// approx::assert_ulps_eq!(a.d(), 3_f64);
+    /// a += b;
+    /// approx::assert_ulps_eq!(a.d(), 5_f64);
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(1000000000.0);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2000000000.0);
+    /// approx::assert_ulps_eq!(a.d(), 1000000000_f64);
+    /// approx::assert_ulps_eq!(b.d(), 2000000000_f64);
+    /// a += b;
+    /// approx::assert_ulps_eq!(a.d(), 3000000000_f64);
+    /// ```
+    fn add_assign(&mut self, that: Self) {
+        if self.val_ == 0.0 || that.exp_ > self.exp_ + MAX_SIGNIFICANT_EXP_DIF_F64 {
+            self.val_ = that.val_;
+            self.exp_ = that.exp_;
+        }
+        if that.val_ == 0.0 || self.exp_ > that.exp_ + MAX_SIGNIFICANT_EXP_DIF_F64 {
+            // do nothing
+            return;
+        }
+        if self.exp_ >= that.exp_ {
+            let exp_dif = self.exp_ - that.exp_;
+            let val = libm::ldexp(self.val_, exp_dif) + that.val_;
+            self.val_ = val;
+            self.exp_ = that.exp_;
+        } else {
+            let exp_dif = that.exp_ - self.exp_;
+            let val = libm::ldexp(that.val_, exp_dif) + self.val_;
+            self.val_ = val;
+            //self.exp_ = self.exp;
+        }
+    }
+}
+
+impl ops::SubAssign for ExtendedExponentFpt<f64> {
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    ///
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(-2.0);
+    ///
+    /// approx::assert_ulps_eq!(a.d(), 1_f64);
+    /// approx::assert_ulps_eq!(b.d(), -2_f64);
+    /// a -= b;
+    /// approx::assert_ulps_eq!(a.d(), 3_f64);
+    /// a -= b;
+    /// approx::assert_ulps_eq!(a.d(), 5_f64);
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(1000000000.0);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(-3000000000.0);
+    /// approx::assert_ulps_eq!(a.d(), 1000000000_f64);
+    /// approx::assert_ulps_eq!(b.d(), -3000000000_f64);
+    /// a -= b;
+    /// approx::assert_ulps_eq!(a.d(), 1000000000_f64-(-3000000000.0));
+    /// ```
+    fn sub_assign(&mut self, that: Self) {
+        if self.val_ == 0.0 || that.exp_ > self.exp_ + MAX_SIGNIFICANT_EXP_DIF_F64 {
+            self.val_ = -that.val_;
+            self.exp_ = that.exp_;
+        }
+        if that.val_ == 0.0 || self.exp_ > that.exp_ + MAX_SIGNIFICANT_EXP_DIF_F64 {
+            return;
+        }
+        if self.exp_ >= that.exp_ {
+            let exp_dif = self.exp_ - that.exp_;
+            let val = libm::ldexp(self.val_, exp_dif) - that.val_;
+            self.val_ = val;
+            self.exp_ = that.exp_;
+        } else {
+            let exp_dif = that.exp_ - self.exp_;
+            let val = libm::ldexp(-that.val_, exp_dif) + self.val_;
+            self.val_ = val;
+            //self.exp_ = self.exp_;
+        }
+    }
+}
+
+impl ops::MulAssign for ExtendedExponentFpt<f64> {
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    ///
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2.0);
+    ///
+    /// approx::assert_ulps_eq!(a.d(), 1_f64);
+    /// approx::assert_ulps_eq!(b.d(), 2_f64);
+    /// a *= b;
+    /// approx::assert_ulps_eq!(a.d(), 2_f64);
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(1000000000.0);
+    /// let     b = robust_fpt::ExtendedExponentFpt::<f64>::new(2000000000.0);
+    /// approx::assert_ulps_eq!(a.d(), 1000000000_f64);
+    /// approx::assert_ulps_eq!(b.d(), 2000000000_f64);
+    /// a *= b;
+    /// approx::assert_ulps_eq!(a.d(), 1000000000_f64*2000000000_f64);
+    /// ```
+    fn mul_assign(&mut self, that: Self) {
+        self.val_ *= that.val_;
+        self.exp_ += that.exp_;
+    }
+}
+
+impl ops::DivAssign for ExtendedExponentFpt<f64> {
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    ///
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2.0);
+    ///
+    /// approx::assert_ulps_eq!(a.d(), 1_f64);
+    /// approx::assert_ulps_eq!(b.d(), 2_f64);
+    /// a /= b;
+    /// approx::assert_ulps_eq!(a.d(), 1.0/2.0);
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(2000000000_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(-2000000000_f64);
+    /// approx::assert_ulps_eq!(a.d(),  2000000000_f64);
+    /// approx::assert_ulps_eq!(b.d(), -2000000000_f64);
+    /// a /= b;
+    /// approx::assert_ulps_eq!(a.d(), -1f64);
+    /// ```
+    fn div_assign(&mut self, that: Self) {
+        self.val_ /= that.val_;
+        self.exp_ -= that.exp_;
+    }
+}
+
+impl fmt::Debug for ExtendedExponentFpt<f64> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}^{}", self.val_, self.exp_)
     }
 }
