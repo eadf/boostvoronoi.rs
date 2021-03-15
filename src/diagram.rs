@@ -776,7 +776,7 @@ where
     }
 
     /// push a new cell on the output. Nothing but id and source category is initialized
-    fn _make_new_cell_with_catagory(
+    fn _make_new_cell_with_category(
         &mut self,
         cell_id: VoronoiCellIndex, // same as sorted_index
         initial_index: SourceIndex,
@@ -831,7 +831,7 @@ where
     }
 
     pub(crate) fn _process_single_site(&mut self, site: &VSE::SiteEvent<I1, F1, I2, F2>) {
-        let _ = self._make_new_cell_with_catagory(
+        let _ = self._make_new_cell_with_category(
             VoronoiCellIndex(site.sorted_index()),
             site.initial_index(),
             site.source_category(),
@@ -1279,7 +1279,7 @@ where
 
         // Add the initial cell during the first edge insertion.
         if self.cells_.is_empty() {
-            let _ = self._make_new_cell_with_catagory(
+            let _ = self._make_new_cell_with_category(
                 VoronoiCellIndex(site1_index),
                 site1.initial_index(),
                 site1.source_category(),
@@ -1288,7 +1288,7 @@ where
 
         // The second site represents a new site during site event
         // processing. Add a new cell to the cell records.
-        let _ = self._make_new_cell_with_catagory(
+        let _ = self._make_new_cell_with_category(
             VoronoiCellIndex(site2_index),
             site2.initial_index(),
             site2.source_category(),
@@ -1384,6 +1384,8 @@ where
         (new_edge1_id, new_edge2_id)
     }
 
+    /// Make sure the diagram is consistent. Removes degenerate edges, connects incident
+    /// edges etc. etc
     pub(crate) fn _build(&mut self) {
         // Remove degenerate edges.
         if !self.edges_.is_empty() {
