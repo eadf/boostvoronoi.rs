@@ -2096,9 +2096,8 @@ where
             }
 
             if recompute_lower_x {
-                cA[3] = orientation
-                    * (&dx * &dx + &dy * &dy)
-                    * (if temp.is_neg() { -1 } else { 1 });
+                cA[3] =
+                    orientation * (&dx * &dx + &dy * &dy) * (if temp.is_neg() { -1 } else { 1 });
                 let lower_x = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA, &cB);
                 c_event.set_lower_x_raw((lower_x / denom).fpv());
             }

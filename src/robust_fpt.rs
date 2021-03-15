@@ -709,10 +709,10 @@ impl<
         let mut ta = [BigInt::zero(), BigInt::zero()];
         let mut tb = [BigInt::zero(), BigInt::zero()];
 
-        ta[0] = a[0].clone() * &a[0] * &b[0] + &a[1] * &a[1] * &b[1] - &a[2] * &a[2] * &b[2];
+        ta[0] = &a[0] * &a[0] * &b[0] + &a[1] * &a[1] * &b[1] - &a[2] * &a[2] * &b[2];
         tb[0] = BigInt::from(1);
-        ta[1] = a[0].clone() * &a[1] * 2;
-        tb[1] = b[0].clone() * &b[1];
+        ta[1] = &a[0] * &a[1] * 2;
+        tb[1] = &b[0] * &b[1];
 
         let nom = self.eval2(&ta[..], &tb[..]);
         nom / (ra - rb)
@@ -736,14 +736,14 @@ impl<
         let mut tb = [BigInt::zero(), BigInt::zero(), BigInt::zero()];
 
         // todo remove all these clone()
-        ta[0] = a[0].clone() * &a[0] * &b[0] + &a[1] * &a[1] * &b[1]
+        ta[0] = &a[0] * &a[0] * &b[0] + &a[1] * &a[1] * &b[1]
             - &a[2] * &a[2] * &b[2]
             - &a[3] * &a[3] * &b[3];
         tb[0] = BigInt::from(1);
-        ta[1] = a[0].clone() * &a[1] * 2;
-        tb[1] = b[0].clone() * &b[1];
-        ta[2] = a[2].clone() * &a[3] * -2;
-        tb[2] = b[2].clone() * &b[3];
+        ta[1] = &a[0] * &a[1] * 2;
+        tb[1] = &b[0] * &b[1];
+        ta[2] = &a[2] * &a[3] * -2;
+        tb[2] = &b[2] * &b[3];
         self.eval3(&ta, &tb) / (ra - rb)
     }
 
@@ -764,11 +764,11 @@ impl<
         {
             return lh + rh;
         }
-        cA[0] = A[0].clone() * &A[0] * &B[0] + &A[1] * &A[1] * &B[1]
+        cA[0] = &A[0] * &A[0] * &B[0] + &A[1] * &A[1] * &B[1]
             - &A[2] * &A[2]
             - &A[3] * &A[3] * &B[0] * &B[1];
         cB[0] = BigInt::from(1);
-        cA[1] = (A[0].clone() * &A[1] - &A[2] * &A[3]) * 2;
+        cA[1] = (&A[0] * &A[1] - &A[2] * &A[3]) * 2;
         cB[1] = B[3].clone();
         self.eval2(&cA, &cB) / (lh - rh)
     }
@@ -804,7 +804,7 @@ impl<
         if A[3] == BigInt::zero() {
             let lh = self.eval2(A, B);
             cA[0] = BigInt::from(1);
-            cB[0] = B[0].clone() * &B[1];
+            cB[0] = &B[0] * &B[1];
             cA[1] = B[2].clone();
             cB[1] = BigInt::from(1);
             let rh = self.eval1(&A[2..], &B[3..]) * self.eval2(&cA, &cB).sqrt();
@@ -823,11 +823,10 @@ impl<
                 }
                 return lh + rh;
             }
-            cA[0] = A[0].clone() * &A[0] * &B[0] + &A[1] * &A[1] * &B[1]
-                - &A[2] * &A[2] * &B[3] * &B[2];
+            cA[0] = &A[0] * &A[0] * &B[0] + &A[1] * &A[1] * &B[1] - &A[2] * &A[2] * &B[3] * &B[2];
             cB[0] = BigInt::from(1);
-            cA[1] = A[0].clone() * &A[1] * 2 - &A[2] * &A[2] * &B[3];
-            cB[1] = B[0].clone() * &B[1];
+            cA[1] = &A[0] * &A[1] * 2 - &A[2] * &A[2] * &B[3];
+            cB[1] = &B[0] * &B[1];
             let numer = self.eval2(&cA, &cB);
             #[cfg(feature = "console_debug")]
             {
@@ -842,7 +841,7 @@ impl<
             return numer / (lh - rh);
         }
         cA[0] = BigInt::from(1);
-        cB[0] = B[0].clone() * &B[1];
+        cB[0] = &B[0] * &B[1];
         cA[1] = B[2].clone();
         cB[1] = BigInt::from(1);
         let rh = self.eval1(&A[2..], &B[3..]) * (self.eval2(&cA, &cB).sqrt());
@@ -860,16 +859,8 @@ impl<
                 lh.fpv(),
                 rh.fpv()
             );
-            println!(
-                "lh.is_neg():{} lh.is_pos():{}",
-                lh.is_neg(),
-                lh.is_pos()
-            );
-            println!(
-                "rh.is_neg():{} rh.is_pos():{}",
-                rh.is_neg(),
-                rh.is_pos()
-            );
+            println!("lh.is_neg():{} lh.is_pos():{}", lh.is_neg(), lh.is_pos());
+            println!("rh.is_neg():{} rh.is_pos():{}", rh.is_neg(), rh.is_pos());
             println!(
                 "lh.is_zero():{} rh.is_zero():{}",
                 lh.is_zero(),
@@ -891,12 +882,12 @@ impl<
             }
             return lh + rh;
         }
-        cA[0] = A[3].clone() * &A[0] * 2;
-        cA[1] = A[3].clone() * &A[1] * 2;
-        cA[2] = A[0].clone() * &A[0] * &B[0] + &A[1] * &A[1] * &B[1] + &A[3] * &A[3]
+        cA[0] = &A[3] * &A[0] * 2;
+        cA[1] = &A[3] * &A[1] * 2;
+        cA[2] = &A[0] * &A[0] * &B[0] + &A[1] * &A[1] * &B[1] + &A[3] * &A[3]
             - &A[2] * &A[2] * &B[2] * &B[3];
-        cA[3] = A[0].clone() * &A[1] * 2 - &A[2] * &A[2] * &B[3];
-        cB[3] = B[0].clone() * &B[1];
+        cA[3] = &A[0] * &A[1] * 2 - &A[2] * &A[2] * &B[3];
+        cB[3] = &B[0] * &B[1];
         let numer = self.sqrt_expr_evaluator_pss3(&cA, &cB);
         #[cfg(feature = "console_debug")]
         {
