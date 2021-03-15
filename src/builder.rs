@@ -623,6 +623,7 @@ where
         };
 
         // Change the (A, B) bisector node to the (A, C) bisector node.
+        #[allow(clippy::let_and_return)]
         let mut it_first = {
             let it_first_key_before = it_first.0;
             let it_first_key_after = {
@@ -876,23 +877,19 @@ pub fn to_segments<T1: InputType, T2: InputType>(segments: &[[T1; 4]]) -> Vec<Li
 }
 
 /// helper function: converts a slice of [[integer,integer,integer,integer]] into input data for the Builder.
-pub fn to_segments_t<T: InputType>(
-    points: &[[i32; 4]],
-    scale: f32,
-    dx: i32,
-    dy: i32,
-) -> Vec<Line<T>> {
-    let fx = |x: i32| {
-        num::cast::<i32, T>(
-            num::cast::<f32, i32>(num::cast::<i32, f32>(x).unwrap() * scale).unwrap() + dx,
-        )
-        .unwrap()
+pub fn to_segments_offset<T1: InputType, T2: InputType>(
+    points: &[[T1; 4]],
+    scale: f64,
+    dx: i64,
+    dy: i64,
+) -> Vec<Line<T2>> {
+    let fx = |x: T1| {
+        num::cast::<f64, T2>(num::cast::<T1, f64>(x).unwrap() * scale).unwrap()
+            + num::cast::<i64, T2>(dx).unwrap()
     };
-    let fy = |y: i32| {
-        num::cast::<i32, T>(
-            num::cast::<f32, i32>(num::cast::<i32, f32>(y).unwrap() * scale).unwrap() + dy,
-        )
-        .unwrap()
+    let fy = |y: T1| {
+        num::cast::<f64, T2>(num::cast::<T1, f64>(y).unwrap() * scale).unwrap()
+            + num::cast::<i64, T2>(dy).unwrap()
     };
     points
         .iter()

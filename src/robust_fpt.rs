@@ -619,12 +619,18 @@ pub struct robust_sqrt_expr<
 #[allow(non_camel_case_types)]
 impl<
         _fpt: Clone + NumCast + Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>,
-    > robust_sqrt_expr<_fpt>
+    > Default for robust_sqrt_expr<_fpt>
 {
-    pub fn new() -> Self {
+    fn default() -> Self {
         Self { _pdf: PhantomData }
     }
+}
 
+#[allow(non_camel_case_types)]
+impl<
+        _fpt: Clone + NumCast + Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>,
+    > robust_sqrt_expr<_fpt>
+{
     #[inline(always)]
     fn i_to_f(that: &BigInt) -> RobustFpt<_fpt> {
         let that = that.to_f64().unwrap();
@@ -927,7 +933,7 @@ impl ExtendedExponentFpt<f64> {
     /// ```
     #[inline]
     pub fn is_pos(&self) -> bool {
-        return self.val_ > 0.0;
+        self.val_ > 0.0
     }
 
     /// Is negative method.
@@ -946,7 +952,7 @@ impl ExtendedExponentFpt<f64> {
     /// ```
     #[inline]
     pub fn is_neg(&self) -> bool {
-        return self.val_ < 0.0;
+        self.val_ < 0.0
     }
 
     /// Is zero method.
@@ -972,7 +978,7 @@ impl ExtendedExponentFpt<f64> {
     /// ```
     #[inline]
     pub fn is_zero(&self) -> bool {
-        return self.val_ == 0.0;
+        self.val_ == 0.0
     }
 
     /// Square root method.

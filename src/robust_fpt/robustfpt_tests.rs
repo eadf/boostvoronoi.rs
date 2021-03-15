@@ -145,7 +145,7 @@ fn sqrt_1() {
 #[test]
 fn sqrt_2() {
     type F1 = f32;
-    let sqrte = VR::robust_sqrt_expr::<F1>::new();
+    let sqrte = VR::robust_sqrt_expr::<F1>::default();
 
     let mut ca: [BigInt; 5] = [
         BigInt::zero(),
@@ -176,7 +176,7 @@ fn sqrt_2() {
 #[test]
 fn sqrt_3() {
     type F1 = f32;
-    let sqrte = VR::robust_sqrt_expr::<F1>::new();
+    let sqrte = VR::robust_sqrt_expr::<F1>::default();
 
     let mut ca: [BigInt; 5] = [
         BigInt::zero(),
@@ -210,7 +210,7 @@ fn sqrt_3() {
 fn sqrt_4() {
     type F1 = f32;
 
-    let sqrte = VR::robust_sqrt_expr::<F1>::new();
+    let sqrte = VR::robust_sqrt_expr::<F1>::default();
 
     let mut ca: [BigInt; 5] = [
         BigInt::zero(),
@@ -245,7 +245,7 @@ fn sqrt_4() {
 #[test]
 fn sqrt_5() {
     type F2 = f64;
-    let sqrte = VR::robust_sqrt_expr::<F2>::new();
+    let sqrte = VR::robust_sqrt_expr::<F2>::default();
 
     let ca: [BigInt; 5] = [
         BigInt::from(3),
@@ -276,7 +276,7 @@ fn sqrt_5() {
 #[test]
 fn sqrt_6() {
     type F2 = f64;
-    let sqrte = VR::robust_sqrt_expr::<F2>::new();
+    let sqrte = VR::robust_sqrt_expr::<F2>::default();
 
     let ca: [BigInt; 5] = [
         BigInt::from(20205600),
@@ -300,7 +300,7 @@ fn sqrt_6() {
 #[test]
 fn sqrt_7() {
     type F2 = f64;
-    let sqrte = VR::robust_sqrt_expr::<F2>::new();
+    let sqrte = VR::robust_sqrt_expr::<F2>::default();
 
     let ca: [BigInt; 5] = [
         BigInt::from(74125000i64),

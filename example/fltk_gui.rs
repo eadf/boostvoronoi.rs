@@ -1394,7 +1394,7 @@ where
             Example::Atest => VB::to_segments::<i32, I1>(&_test_segments), //, 1.0 / 1024.0, 350, 350),
             Example::Clean => {
                 let clean: [[i32; 4]; 0] = [];
-                VB::to_segments_t::<I1>(&clean, 1.0, 0, 0)
+                VB::to_segments::<i32, I1>(&clean)
             }
         };
         for s in new_segments.iter() {

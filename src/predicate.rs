@@ -674,7 +674,8 @@ where
         node1: &VB::BeachLineNodeKey<I1, F1, I2, F2>,
         node2: &VB::BeachLineNodeKey<I1, F1, I2, F2>,
     ) -> bool {
-        let rv = Self::node_comparison_predicate_real(node1, node2);
+        //let rv =
+        Self::node_comparison_predicate_real(node1, node2)
         /*
         let site1: &VSE::SiteEvent<I1, F1, I2, F2> =
             NodeComparisonPredicate::<I1, F1, I2, F2>::get_comparison_site(node1);
@@ -687,7 +688,7 @@ where
         println!("node_comparison_predicate({}:{:?}, {}:{:?})=={}",
                  site1.sorted_index(), point1, site2.sorted_index(), point2, if rv {"true"} else {"false"});
         */
-        rv
+        //rv
     }
 
     /// Compares nodes in the balanced binary search tree. Nodes are
@@ -1772,7 +1773,7 @@ where
         let i1_to_i128 = TC2::<I1, F1>::i1_to_i128;
         let i2_to_f2 = TC4::<I1, F1, I2, F2>::i2_to_f2;
 
-        let sqrt_expr_ = VR::robust_sqrt_expr::<F2>::new();
+        let sqrt_expr_ = VR::robust_sqrt_expr::<F2>::default();
         let quarter: F2 = num::cast::<f64, F2>(1f64 / 4.0f64).unwrap();
         let half: F2 = num::cast::<f64, F2>(1f64 / 2.0f64).unwrap();
         let one: I2 = num::cast::<i8, I2>(1i8).unwrap();
@@ -1930,7 +1931,7 @@ where
         let i1_to_i128 = TC2::<I1, F1>::i1_to_i128;
         let i1_to_bi = TC2::<I1, F1>::i1_to_bi;
         let bi_to_f2 = TC4::<I1, F1, I2, F2>::bi_to_f2;
-        let mut sqrt_expr_ = VR::robust_sqrt_expr::<F2>::new();
+        let mut sqrt_expr_ = VR::robust_sqrt_expr::<F2>::default();
 
         let mut c: [BigInt; 2] = [BigInt::zero(), BigInt::zero()];
         let mut cA: [BigInt; 4] = [
@@ -2133,7 +2134,7 @@ where
     ) {
         let i1_to_bi = TC2::<I1, F1>::i1_to_bi;
         let i1_to_i128 = TC2::<I1, F1>::i1_to_i128;
-        let sqrt_expr_ = VR::robust_sqrt_expr::<F2>::new();
+        let sqrt_expr_ = VR::robust_sqrt_expr::<F2>::default();
 
         let mut cA: [BigInt; 4] = [
             BigInt::zero(),

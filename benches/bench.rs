@@ -114,8 +114,8 @@ fn bench_1(c: &mut Criterion) {
                         [617, 342, 675, 292],
                     ];
 
-                    let _v = to_points::<I1>(&points);
-                    let _s = to_segments::<I1>(&segments);
+                    let _v = to_points::<I1, I1>(&points);
+                    let _s = to_segments::<I1, I1>(&segments);
 
                     let mut vb = Builder::<I1, F1, I2, F2>::new();
                     vb.with_vertices(_v.iter()).expect("bench_1");
