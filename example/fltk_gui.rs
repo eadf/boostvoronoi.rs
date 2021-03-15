@@ -317,12 +317,13 @@ fn main() -> Result<(), BvError> {
 
     wind.handle(move |ev| match ev {
         enums::Event::MouseWheel => {
+            let event = &app::event_coords();
             let mut shared_data_bm = shared_data_c.borrow_mut();
             let event_dy = app::event_dy();
             let reverse_middle = shared_data_bm
                 .visualizer
                 .affine
-                .reverse_transform((FW / 2) as f32, (FH / 2) as f32);
+                .reverse_transform(event.0 as f32, event.1 as f32);
 
             if event_dy != 0 {
                 shared_data_bm.visualizer.affine.scale *= 1.01_f32.powf(event_dy as f32);
@@ -332,8 +333,8 @@ fn main() -> Result<(), BvError> {
                 .affine
                 .transform(reverse_middle[0] as f32, reverse_middle[1] as f32);
             // When zooming we want the center of screen remain at the same relative position.
-            shared_data_bm.visualizer.affine.to_offset[0] += ((FW / 2) as f32) - new_middle[0];
-            shared_data_bm.visualizer.affine.to_offset[1] += ((FH / 2) as f32) - new_middle[1];
+            shared_data_bm.visualizer.affine.to_offset[0] += (event.0 as f32) - new_middle[0];
+            shared_data_bm.visualizer.affine.to_offset[1] += (event.1 as f32) - new_middle[1];
 
             //println!("mouse wheel at dy:{:?} scale:{:?}", event_dy, shared_data_bm.visualizer.affine.scale);
             redraw();
