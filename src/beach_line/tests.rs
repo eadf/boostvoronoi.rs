@@ -6,7 +6,7 @@ use super::super::predicate as VP;
 use super::super::site_event as VSE;
 use super::super::BvError;
 use super::super::{Line, Point};
-use super::{BeachLineIndex, BeachLineNodeData, BeachLineNodeKey, Beachline};
+use super::{BeachLine, BeachLineIndex, BeachLineNodeData, BeachLineNodeKey};
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::ops::Bound::{Excluded, Included, Unbounded};

@@ -80,6 +80,11 @@ fn segment_4_1() -> Result<(), BvError> {
         vb.with_segments(segments.iter())?;
         vb.construct()?
     };
+    for v in _output.vertices().iter() {
+        let v = v.get();
+        assert!(!v.x().is_nan());
+        assert!(!v.y().is_nan());
+    }
     Ok(())
 }
 
@@ -100,6 +105,12 @@ fn vertical_segment_1() -> Result<(), BvError> {
     vb.with_vertices(_v.iter())?;
     vb.with_segments(_s.iter())?;
     let output = vb.construct()?;
+
+    for v in output.vertices().iter() {
+        let v = v.get();
+        assert!(!v.x().is_nan());
+        assert!(!v.y().is_nan());
+    }
 
     assert_eq!(output.cells().len(), 9);
     let cell = output.cells()[0].get();
@@ -209,5 +220,33 @@ fn vertical_segment_1() -> Result<(), BvError> {
     let v = output.vertices()[9].get();
     assert!(almost_equal(v.x(), 2427.4071661, v.y(), -1080.0162866));
     assert_eq!(v.get_incident_edge().unwrap().0,35);*/
+    Ok(())
+}
+
+//#[ignore]
+#[test]
+/// This used to give NaN coordinates in some vertexes
+fn segment_4_2() -> Result<(), BvError> {
+    let _output = {
+        let segments: [[I1; 4]; 7] = [
+            [-19546, 47259, -45936, 36666],
+            [-45936, 36666, -59968, -21417],
+            [-59968, -21417, -125257, -19781],
+            [-125257, -19781, -148480, -47150],
+            [-148480, -47150, 148480, -57522],
+            [148480, -57522, 105345, 58720],
+            [105345, 58720, -19546, 47259],
+        ];
+        let segments = VB::to_segments(&segments);
+
+        let mut vb = VB::Builder::<I1, F1, I2, F2>::new();
+        vb.with_segments(segments.iter())?;
+        vb.construct()?
+    };
+    for v in _output.vertices().iter() {
+        let v = v.get();
+        assert!(!v.x().is_nan());
+        assert!(!v.y().is_nan());
+    }
     Ok(())
 }
