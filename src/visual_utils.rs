@@ -175,7 +175,7 @@ where
 }
 
 /// A simple 2d AABB
-/// If min_max is none the data has not been assigned yet.
+/// If min_max is none no data has not been assigned.
 #[derive(PartialEq, Eq, Clone, fmt::Debug)]
 pub struct Aabb2<I1, F1>
 where
@@ -282,14 +282,22 @@ where
     }
 }
 
+/// This is a simple affine transformation object.
+/// Inadvertently it also serves as a type converter F1<->I1<->i32
+/// It can pan and zoom but not rotate.
 #[derive(PartialEq, Clone, fmt::Debug)]
 pub struct SimpleAffine<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
 {
+    /// The offsets used to center the 'source' coordinate system. Typically the input geometry
+    /// in this case.
     to_center: [F1; 2],
+    /// A zoom scale
     pub scale: F1,
+    /// The offsets needed to center coordinates of interest on the 'dest' coordinate system.
+    /// i.e. the screen coordinate system.
     pub to_offset: [F1; 2],
     #[doc(hidden)]
     _pdi: PhantomData<I1>,
