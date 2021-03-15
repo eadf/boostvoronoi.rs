@@ -111,14 +111,45 @@ impl<F: OutputType + ops::Neg<Output = F>> RobustFpt<F> {
         self
     }
 
+    /// Is positive method.
+    /// IMPORTANT!!!!! in c++ boost voronoi implementation zero values can't be positive.
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    /// println!("is_pos()");
+    /// let aa:f64 = 0_f64;
+    /// let a = robust_fpt::RobustFpt::<f64>::new_1(aa);
+    /// assert_eq!(a.is_pos(), false);
+    ///
+    /// let aa:f64 = -0_f64;
+    /// let a = robust_fpt::RobustFpt::<f64>::new_1(aa);
+    /// assert_eq!(a.is_pos(), false);
+    ///
+    /// let aa:f64 = f64::MIN_POSITIVE;
+    /// let a = robust_fpt::RobustFpt::<f64>::new_1(aa);
+    /// assert_eq!(a.is_pos(), aa.is_sign_positive());
+    /// ```
     #[inline(always)]
-    pub fn is_sign_positive(&self) -> bool {
-        self.fpv_.is_sign_positive()
+    pub fn is_pos(&self) -> bool {
+        self.fpv_ > F::zero()
     }
 
+    /// Is negative method.
+    /// IMPORTANT!!!!! in c++ boost voronoi implementation zero values can't be negative.
+    /// ```
+    /// # use boostvoronoi::robust_fpt;
+    ///
+    /// println!("is_neg()");
+    /// let aa:f64 = 0_f64;
+    /// let a = robust_fpt::RobustFpt::<f64>::new_1(aa);
+    /// assert_eq!(a.is_neg(), aa.is_sign_negative());
+    ///
+    /// let aa:f64 = -0_f64;
+    /// let a = robust_fpt::RobustFpt::<f64>::new_1(aa);
+    /// assert_eq!(a.is_neg(), false);
+    /// ```
     #[inline(always)]
-    pub fn is_sign_negative(&self) -> bool {
-        self.fpv_.is_sign_negative()
+    pub fn is_neg(&self) -> bool {
+        self.fpv_ < F::zero()
     }
 
     #[inline(always)]
@@ -418,7 +449,7 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::AddAssign<RobustDif<F>> for Robu
 
 impl<F: OutputType + ops::Neg<Output = F>> ops::AddAssign<RobustFpt<F>> for RobustDif<F> {
     fn add_assign(&mut self, _rhs: RobustFpt<F>) {
-        if _rhs.is_sign_positive() {
+        if _rhs.is_pos() {
             self.positive_sum_ += _rhs;
         } else {
             self.negative_sum_ -= _rhs;
@@ -474,7 +505,7 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::SubAssign<RobustDif<F>> for Robu
 impl<F: OutputType + ops::Neg<Output = F>> ops::SubAssign<RobustFpt<F>> for RobustDif<F> {
     fn sub_assign(&mut self, _rhs: RobustFpt<F>) {
         //dbg!(&self, &_rhs);
-        if _rhs.is_sign_positive() {
+        if _rhs.is_pos() {
             self.negative_sum_ += _rhs;
         } else {
             self.positive_sum_ -= _rhs;
@@ -541,7 +572,7 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::Mul<RobustFpt<F>> for RobustDif<
     type Output = RobustDif<F>;
 
     fn mul(self, mut _rhs: RobustFpt<F>) -> Self {
-        if _rhs.is_sign_negative() {
+        if _rhs.is_neg() {
             _rhs = -_rhs;
             Self {
                 positive_sum_: self.negative_sum_ * _rhs,
@@ -569,7 +600,7 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::MulAssign<F> for RobustDif<F> {
 
 impl<F: OutputType + ops::Neg<Output = F>> ops::MulAssign<RobustFpt<F>> for RobustDif<F> {
     fn mul_assign(&mut self, mut _rhs: RobustFpt<F>) {
-        if _rhs.is_sign_negative() {
+        if _rhs.is_neg() {
             _rhs = -_rhs;
             self.swap();
         }
@@ -653,8 +684,8 @@ impl<
 
         if ra.is_zero()
             || rb.is_zero()
-            || (!ra.is_sign_negative() && !rb.is_sign_negative())
-            || (!ra.is_sign_positive() && !rb.is_sign_positive())
+            || (!ra.is_neg() && !rb.is_neg())
+            || (!ra.is_pos() && !rb.is_pos())
         {
             return ra + rb;
         }
@@ -670,8 +701,8 @@ impl<
         let rb = self.eval1(&a[2..], &b[2..]);
         if ra.is_zero()
             || rb.is_zero()
-            || (!ra.is_sign_negative() && !rb.is_sign_negative())
-            || (!ra.is_sign_positive() && !rb.is_sign_positive())
+            || (!ra.is_neg() && !rb.is_neg())
+            || (!ra.is_pos() && !rb.is_pos())
         {
             return ra + rb;
         }
@@ -696,8 +727,8 @@ impl<
 
         if ra.is_zero()
             || rb.is_zero()
-            || (!ra.is_sign_negative() && !rb.is_sign_negative())
-            || (!ra.is_sign_positive() && !rb.is_sign_positive())
+            || (!ra.is_neg() && !rb.is_neg())
+            || (!ra.is_pos() && !rb.is_pos())
         {
             return ra + rb;
         }
@@ -728,8 +759,8 @@ impl<
         let rh = self.eval2(&A[2..], &B[2..]);
         if lh.is_zero()
             || rh.is_zero()
-            || (!lh.is_sign_negative() && !rh.is_sign_negative())
-            || (!lh.is_sign_positive() && !rh.is_sign_positive())
+            || (!lh.is_neg() && !rh.is_neg())
+            || (!lh.is_pos() && !rh.is_pos())
         {
             return lh + rh;
         }
@@ -779,8 +810,8 @@ impl<
             let rh = self.eval1(&A[2..], &B[3..]) * self.eval2(&cA, &cB).sqrt();
             if lh.is_zero()
                 || rh.is_zero()
-                || (!lh.is_sign_negative() && !rh.is_sign_negative())
-                || (!lh.is_sign_positive() && !rh.is_sign_positive())
+                || (!lh.is_neg() && !rh.is_neg())
+                || (!lh.is_pos() && !rh.is_pos())
             {
                 #[cfg(feature = "console_debug")]
                 {
@@ -831,13 +862,13 @@ impl<
             );
             println!(
                 "lh.is_neg():{} lh.is_pos():{}",
-                lh.is_sign_negative(),
-                lh.is_sign_positive()
+                lh.is_neg(),
+                lh.is_pos()
             );
             println!(
                 "rh.is_neg():{} rh.is_pos():{}",
-                rh.is_sign_negative(),
-                rh.is_sign_positive()
+                rh.is_neg(),
+                rh.is_pos()
             );
             println!(
                 "lh.is_zero():{} rh.is_zero():{}",
@@ -847,8 +878,8 @@ impl<
         }
         if lh.is_zero()
             || rh.is_zero()
-            || (!lh.is_sign_negative() && !rh.is_sign_negative())
-            || (!lh.is_sign_positive() && !rh.is_sign_positive())
+            || (!lh.is_neg() && !rh.is_neg())
+            || (!lh.is_pos() && !rh.is_pos())
         {
             #[cfg(feature = "console_debug")]
             {
@@ -941,7 +972,6 @@ impl ExtendedExponentFpt<f64> {
     /// ```
     /// # use boostvoronoi::robust_fpt;
     ///
-    /// println!("is_neg()");
     /// let aa:f64 = 0_f64;
     /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
     /// assert_eq!(a.is_neg(), aa.is_sign_negative());

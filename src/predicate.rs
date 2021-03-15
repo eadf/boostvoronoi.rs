@@ -1225,7 +1225,7 @@ where
             );
             c_y += VR::RobustFpt::<F2>::new_1(b1) * t;
             let mut lower_x = VR::RobustDif::<F2>::new_from(c_x);
-            if c.is_sign_negative() {
+            if c.is_neg() {
                 lower_x -= VR::RobustFpt::<F2>::new_1(half) * c / a.sqrt();
             } else {
                 lower_x += VR::RobustFpt::<F2>::new_1(half) * c / a.sqrt();
@@ -1247,7 +1247,7 @@ where
                 ),
                 one,
             );
-            if a.is_sign_positive() {
+            if a.is_pos() {
                 a += sqr_sum1 * sqr_sum2;
             } else {
                 a = (orientation * orientation) / (sqr_sum1 * sqr_sum2 - a);
@@ -1344,7 +1344,7 @@ where
                 t = -t;
             }
             let mut lower_x = VR::RobustDif::<F2>::new_from(c_x);
-            if orientation.is_sign_negative() {
+            if orientation.is_neg() {
                 lower_x -= t * orientation;
             } else {
                 lower_x += t * orientation;
@@ -2098,7 +2098,7 @@ where
             if recompute_lower_x {
                 cA[3] = orientation
                     * (&dx * &dx + &dy * &dy)
-                    * (if temp.is_sign_negative() { -1 } else { 1 });
+                    * (if temp.is_neg() { -1 } else { 1 });
                 let lower_x = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA, &cB);
                 c_event.set_lower_x_raw((lower_x / denom).fpv());
             }
