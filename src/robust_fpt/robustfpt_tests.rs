@@ -169,7 +169,7 @@ fn sqrt_2() {
 
     let a = sqrte.eval1(&ca[..], &cb[..]);
 
-    assert_eq!(a.fpv(), 2.0 * 3.0, "a.fpv fail");
+    assert_eq!(a.d(), 2.0 * 3.0, "a.fpv fail");
     //assert_eq!(a.re(), 4.0, "a.re fail");
 }
 
@@ -202,7 +202,7 @@ fn sqrt_3() {
 
     let a = sqrte.eval2(&ca[..], &cb[..]);
 
-    assert_eq!(a.fpv(), 3.0 * 4.0 + 2.0 * 5.0, "a.fpv fail");
+    assert_eq!(a.d(), 3.0 * 4.0 + 2.0 * 5.0, "a.fpv fail");
     //assert_eq!(a.re(), 7.0, "a.re fail");
 }
 
@@ -238,7 +238,7 @@ fn sqrt_4() {
 
     let a = sqrte.eval3(&ca[..], &cb[..]);
 
-    assert_eq!(a.fpv(), 3.0 * 4.0 + 2.0 * 5.0 + 7.0 * 7.0, "a.fpv fail");
+    assert_eq!(a.d(), 3.0 * 4.0 + 2.0 * 5.0 + 7.0 * 7.0, "a.fpv fail");
     //assert_eq!(a.re(), 7.0, "a.re fail");
 }
 
@@ -267,7 +267,7 @@ fn sqrt_5() {
     let a = sqrte.eval4(&ca[..], &cb[..]);
 
     assert_eq!(
-        a.fpv(),
+        a.d(),
         3.0 * 4.0 + 2.0 * 5.0 + 7.0 * 7.0 + 8.0 * 8.0,
         "a.fpv fail"
     );
@@ -294,7 +294,7 @@ fn sqrt_6() {
     ];
 
     let a = sqrte.eval4(&ca[..], &cb[..]);
-    assert_eq!(a.fpv().floor(), 2085350584.0.floor(), "a.fpv fail");
+    assert_eq!(a.d().floor(), 2085350584.0.floor(), "a.fpv fail");
 }
 
 #[test]
@@ -318,5 +318,5 @@ fn sqrt_7() {
     ];
 
     let a = sqrte.eval4(&ca[..], &cb[..]);
-    assert_eq!(a.fpv().floor(), 3537324513.0.floor(), "a.fpv fail");
+    assert_eq!(a.d().floor(), 3537324513.0.floor(), "a.fpv fail");
 }

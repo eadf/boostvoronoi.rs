@@ -14,7 +14,7 @@ mod tests;
 use super::beach_line as VB;
 use super::circle_event as VC;
 use super::ctypes::UlpComparison;
-use super::robust_fpt as VR;
+use super::robust_fpt as RF;
 use super::site_event as VSE;
 use super::Point;
 use super::TypeCheckF as TCF;
@@ -962,7 +962,7 @@ where
             i1_to_i2(site1.y()) - i1_to_i2(site2.y()),
             i1_to_i2(site2.y()) - i1_to_i2(site3.y()),
         );
-        let inv_orientation: VR::RobustFpt<F2> = VR::RobustFpt::<F2>::new_2(
+        let inv_orientation: RF::RobustFpt<F2> = RF::RobustFpt::<F2>::new_2(
             num::cast::<f32, F2>(0.5f32).unwrap() / orientation,
             num::cast::<f32, F2>(2.0f32).unwrap(),
         );
@@ -972,19 +972,19 @@ where
         let sum_y2: F2 = i1_to_f2(site2.y()) + i1_to_f2(site3.y());
         let dif_x3: F2 = i1_to_f2(site1.x()) - i1_to_f2(site3.x());
         let dif_y3: F2 = i1_to_f2(site1.y()) - i1_to_f2(site3.y());
-        let mut c_x = VR::RobustDif::<F2>::new();
-        let mut c_y = VR::RobustDif::<F2>::new();
+        let mut c_x = RF::RobustDif::<F2>::new();
+        let mut c_y = RF::RobustDif::<F2>::new();
         let error = num::cast::<f32, F2>(2.0f32).unwrap();
-        c_x += VR::RobustFpt::<F2>::new_2(dif_x1 * sum_x1 * dif_y2, error);
-        c_x += VR::RobustFpt::<F2>::new_2(dif_y1 * sum_y1 * dif_y2, error);
-        c_x -= VR::RobustFpt::<F2>::new_2(dif_x2 * sum_x2 * dif_y1, error);
-        c_x -= VR::RobustFpt::<F2>::new_2(dif_y2 * sum_y2 * dif_y1, error);
-        c_y += VR::RobustFpt::<F2>::new_2(dif_x2 * sum_x2 * dif_x1, error);
-        c_y += VR::RobustFpt::<F2>::new_2(dif_y2 * sum_y2 * dif_x1, error);
-        c_y -= VR::RobustFpt::<F2>::new_2(dif_x1 * sum_x1 * dif_x2, error);
-        c_y -= VR::RobustFpt::<F2>::new_2(dif_y1 * sum_y1 * dif_x2, error);
-        let mut lower_x = VR::RobustDif::<F2>::new_from(c_x);
-        lower_x -= VR::RobustFpt::<F2>::new_2(
+        c_x += RF::RobustFpt::<F2>::new_2(dif_x1 * sum_x1 * dif_y2, error);
+        c_x += RF::RobustFpt::<F2>::new_2(dif_y1 * sum_y1 * dif_y2, error);
+        c_x -= RF::RobustFpt::<F2>::new_2(dif_x2 * sum_x2 * dif_y1, error);
+        c_x -= RF::RobustFpt::<F2>::new_2(dif_y2 * sum_y2 * dif_y1, error);
+        c_y += RF::RobustFpt::<F2>::new_2(dif_x2 * sum_x2 * dif_x1, error);
+        c_y += RF::RobustFpt::<F2>::new_2(dif_y2 * sum_y2 * dif_x1, error);
+        c_y -= RF::RobustFpt::<F2>::new_2(dif_x1 * sum_x1 * dif_x2, error);
+        c_y -= RF::RobustFpt::<F2>::new_2(dif_y1 * sum_y1 * dif_x2, error);
+        let mut lower_x = RF::RobustDif::<F2>::new_from(c_x);
+        lower_x -= RF::RobustFpt::<F2>::new_2(
             ((dif_x1 * dif_x1 + dif_y1 * dif_y1)
                 * (dif_x2 * dif_x2 + dif_y2 * dif_y2)
                 * (dif_x3 * dif_x3 + dif_y3 * dif_y3))
@@ -1035,7 +1035,7 @@ where
         let line_b = i1_to_f2(site3.x0()) - i1_to_f2(site3.x1());
         let vec_x = i1_to_f2(site2.y()) - i1_to_f2(site1.y());
         let vec_y = i1_to_f2(site1.x()) - i1_to_f2(site2.x());
-        let teta = VR::RobustFpt::<F2>::new_2(
+        let teta = RF::RobustFpt::<F2>::new_2(
             Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(site3.y1()) - i1_to_i2(site3.y0()),
                 i1_to_i2(site3.x0()) - i1_to_i2(site3.x1()),
@@ -1044,7 +1044,7 @@ where
             ),
             one,
         );
-        let A = VR::RobustFpt::<F2>::new_2(
+        let A = RF::RobustFpt::<F2>::new_2(
             Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(site3.y0()) - i1_to_i2(site3.y1()),
                 i1_to_i2(site3.x0()) - i1_to_i2(site3.x1()),
@@ -1053,7 +1053,7 @@ where
             ),
             one,
         );
-        let B = VR::RobustFpt::<F2>::new_2(
+        let B = RF::RobustFpt::<F2>::new_2(
             Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(site3.y0()) - i1_to_i2(site3.y1()),
                 i1_to_i2(site3.x0()) - i1_to_i2(site3.x1()),
@@ -1062,7 +1062,7 @@ where
             ),
             one,
         );
-        let denom = VR::RobustFpt::<F2>::new_2(
+        let denom = RF::RobustFpt::<F2>::new_2(
             Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(site1.y()) - i1_to_i2(site2.y()),
                 i1_to_i2(site1.x()) - i1_to_i2(site2.x()),
@@ -1072,11 +1072,11 @@ where
             one,
         );
         let inv_segm_len =
-            VR::RobustFpt::<F2>::new_2(one / (line_a * line_a + line_b * line_b).sqrt(), three);
-        let mut t = VR::RobustFpt::<F2>::default();
+            RF::RobustFpt::<F2>::new_2(one / (line_a * line_a + line_b * line_b).sqrt(), three);
+        let mut t = RF::RobustFpt::<F2>::default();
         if OrientationTest::<I1, F1, I2, F2>::eval_f(denom.fpv()) == Orientation::COLLINEAR {
-            t += teta / (VR::RobustFpt::<F2>::new_1(eight) * A);
-            t -= A / (VR::RobustFpt::<F2>::new_1(two) * teta);
+            t += teta / (RF::RobustFpt::<F2>::new_1(eight) * A);
+            t -= A / (RF::RobustFpt::<F2>::new_1(two) * teta);
         } else {
             let det = ((teta * teta + denom * denom) * A * B).sqrt();
             if segment_index == 2 {
@@ -1084,20 +1084,20 @@ where
             } else {
                 t += det / (denom * denom);
             }
-            t += teta * (A + B) / (VR::RobustFpt::<F2>::new_1(two) * denom * denom);
+            t += teta * (A + B) / (RF::RobustFpt::<F2>::new_1(two) * denom * denom);
         }
-        let mut c_x = VR::RobustDif::<F2>::default();
-        let mut c_y = VR::RobustDif::<F2>::default();
-        c_x += VR::RobustFpt::<F2>::new_1(half * (i1_to_f2(site1.x()) + i1_to_f2(site2.x())));
-        c_x += VR::RobustFpt::<F2>::new_1(vec_x) * t;
-        c_y += VR::RobustFpt::<F2>::new_1(half * (i1_to_f2(site1.y()) + i1_to_f2(site2.y())));
-        c_y += VR::RobustFpt::<F2>::new_1(vec_y) * t;
-        let mut r = VR::RobustDif::<F2>::default();
-        let mut lower_x = VR::RobustDif::<F2>::new_from(c_x);
-        r -= VR::RobustFpt::<F2>::new_1(line_a) * VR::RobustFpt::<F2>::new_1(i1_to_f2(site3.x0()));
-        r -= VR::RobustFpt::<F2>::new_1(line_b) * VR::RobustFpt::<F2>::new_1(i1_to_f2(site3.y0()));
-        r += c_x * VR::RobustFpt::<F2>::new_1(line_a);
-        r += c_y * VR::RobustFpt::<F2>::new_1(line_b);
+        let mut c_x = RF::RobustDif::<F2>::default();
+        let mut c_y = RF::RobustDif::<F2>::default();
+        c_x += RF::RobustFpt::<F2>::new_1(half * (i1_to_f2(site1.x()) + i1_to_f2(site2.x())));
+        c_x += RF::RobustFpt::<F2>::new_1(vec_x) * t;
+        c_y += RF::RobustFpt::<F2>::new_1(half * (i1_to_f2(site1.y()) + i1_to_f2(site2.y())));
+        c_y += RF::RobustFpt::<F2>::new_1(vec_y) * t;
+        let mut r = RF::RobustDif::<F2>::default();
+        let mut lower_x = RF::RobustDif::<F2>::new_from(c_x);
+        r -= RF::RobustFpt::<F2>::new_1(line_a) * RF::RobustFpt::<F2>::new_1(i1_to_f2(site3.x0()));
+        r -= RF::RobustFpt::<F2>::new_1(line_b) * RF::RobustFpt::<F2>::new_1(i1_to_f2(site3.y0()));
+        r += c_x * RF::RobustFpt::<F2>::new_1(line_a);
+        r += c_y * RF::RobustFpt::<F2>::new_1(line_b);
 
         if r.positive().fpv() < r.negative().fpv() {
             r = -r;
@@ -1162,7 +1162,7 @@ where
         let mut recompute_c_y = false;
         let mut recompute_lower_x = false;
 
-        let orientation = VR::RobustFpt::<F2>::new_2(
+        let orientation = RF::RobustFpt::<F2>::new_2(
             Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(segm_end1.y) - i1_to_i2(segm_start1.y),
                 i1_to_i2(segm_end1.x) - i1_to_i2(segm_start1.x),
@@ -1172,8 +1172,8 @@ where
             one,
         );
         if OrientationTest::<I1, F1, I2, F2>::eval_f(orientation.fpv()) == Orientation::COLLINEAR {
-            let a = VR::RobustFpt::<F2>::new_2(a1 * a1 + b1 * b1, two);
-            let c = VR::RobustFpt::<F2>::new_2(
+            let a = RF::RobustFpt::<F2>::new_2(a1 * a1 + b1 * b1, two);
+            let c = RF::RobustFpt::<F2>::new_2(
                 Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                     i1_to_i2(segm_end1.y) - i1_to_i2(segm_start1.y),
                     i1_to_i2(segm_end1.x) - i1_to_i2(segm_start1.x),
@@ -1182,7 +1182,7 @@ where
                 ),
                 one,
             );
-            let det = VR::RobustFpt::<F2>::new_2(
+            let det = RF::RobustFpt::<F2>::new_2(
                 Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                     i1_to_i2(segm_end1.x) - i1_to_i2(segm_start1.x),
                     i1_to_i2(segm_end1.y) - i1_to_i2(segm_start1.y),
@@ -1196,14 +1196,14 @@ where
                 ),
                 num::cast::<f32, F2>(3.0f32).unwrap(),
             );
-            let mut t = VR::RobustFpt::<F2>::default();
-            t -= VR::RobustFpt::<F2>::new_1(a1)
-                * VR::RobustFpt::<F2>::new_1(
+            let mut t = RF::RobustFpt::<F2>::default();
+            t -= RF::RobustFpt::<F2>::new_1(a1)
+                * RF::RobustFpt::<F2>::new_1(
                     (i1_to_f2(segm_start1.x) + i1_to_f2(segm_start2.x)) * half
                         - i1_to_f2(site1.x()),
                 );
-            t -= VR::RobustFpt::<F2>::new_1(b1)
-                * VR::RobustFpt::<F2>::new_1(
+            t -= RF::RobustFpt::<F2>::new_1(b1)
+                * RF::RobustFpt::<F2>::new_1(
                     (i1_to_f2(segm_start1.y) + i1_to_f2(segm_start2.y)) * half
                         - i1_to_f2(site1.y()),
                 );
@@ -1213,22 +1213,22 @@ where
                 t -= det.sqrt();
             }
             t /= a;
-            let mut c_x = VR::RobustDif::<F2>::default();
-            let mut c_y = VR::RobustDif::<F2>::default();
+            let mut c_x = RF::RobustDif::<F2>::default();
+            let mut c_y = RF::RobustDif::<F2>::default();
 
-            c_x += VR::RobustFpt::<F2>::new_1(
+            c_x += RF::RobustFpt::<F2>::new_1(
                 half * (i1_to_f2(segm_start1.x) + i1_to_f2(segm_start2.x)),
             );
-            c_x += VR::RobustFpt::<F2>::new_1(a1) * t;
-            c_y += VR::RobustFpt::<F2>::new_1(
+            c_x += RF::RobustFpt::<F2>::new_1(a1) * t;
+            c_y += RF::RobustFpt::<F2>::new_1(
                 half * (i1_to_f2(segm_start1.y) + i1_to_f2(segm_start2.y)),
             );
-            c_y += VR::RobustFpt::<F2>::new_1(b1) * t;
-            let mut lower_x = VR::RobustDif::<F2>::new_from(c_x);
+            c_y += RF::RobustFpt::<F2>::new_1(b1) * t;
+            let mut lower_x = RF::RobustDif::<F2>::new_from(c_x);
             if c.is_neg() {
-                lower_x -= VR::RobustFpt::<F2>::new_1(half) * c / a.sqrt();
+                lower_x -= RF::RobustFpt::<F2>::new_1(half) * c / a.sqrt();
             } else {
-                lower_x += VR::RobustFpt::<F2>::new_1(half) * c / a.sqrt();
+                lower_x += RF::RobustFpt::<F2>::new_1(half) * c / a.sqrt();
             }
             let ulps = TC4::<I1, F1, I2, F2>::u64_to_f2(Predicates::<I1, F1, I2, F2>::ulps());
             recompute_c_x = c_x.dif().ulp() > ulps;
@@ -1236,9 +1236,9 @@ where
             recompute_lower_x = lower_x.dif().ulp() > ulps;
             c_event.set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
         } else {
-            let sqr_sum1 = VR::RobustFpt::<F2>::new_2((a1 * a1 + b1 * b1).sqrt(), two);
-            let sqr_sum2 = VR::RobustFpt::<F2>::new_2((a2 * a2 + b2 * b2).sqrt(), two);
-            let mut a = VR::RobustFpt::<F2>::new_2(
+            let sqr_sum1 = RF::RobustFpt::<F2>::new_2((a1 * a1 + b1 * b1).sqrt(), two);
+            let sqr_sum2 = RF::RobustFpt::<F2>::new_2((a2 * a2 + b2 * b2).sqrt(), two);
+            let mut a = RF::RobustFpt::<F2>::new_2(
                 Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                     i1_to_i2(segm_end1.x) - i1_to_i2(segm_start1.x),
                     i1_to_i2(segm_end1.y) - i1_to_i2(segm_start1.y),
@@ -1252,7 +1252,7 @@ where
             } else {
                 a = (orientation * orientation) / (sqr_sum1 * sqr_sum2 - a);
             }
-            let or1 = VR::RobustFpt::<F2>::new_2(
+            let or1 = RF::RobustFpt::<F2>::new_2(
                 Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                     i1_to_i2(segm_end1.y) - i1_to_i2(segm_start1.y),
                     i1_to_i2(segm_end1.x) - i1_to_i2(segm_start1.x),
@@ -1261,7 +1261,7 @@ where
                 ),
                 one,
             );
-            let or2 = VR::RobustFpt::<F2>::new_2(
+            let or2 = RF::RobustFpt::<F2>::new_2(
                 Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                     i1_to_i2(segm_end2.x) - i1_to_i2(segm_start2.x),
                     i1_to_i2(segm_end2.y) - i1_to_i2(segm_start2.y),
@@ -1270,8 +1270,8 @@ where
                 ),
                 one,
             );
-            let det = VR::RobustFpt::<F2>::new_1(two) * a * or1 * or2;
-            let c1 = VR::RobustFpt::<F2>::new_2(
+            let det = RF::RobustFpt::<F2>::new_1(two) * a * or1 * or2;
+            let c1 = RF::RobustFpt::<F2>::new_2(
                 Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                     i1_to_i2(segm_end1.y) - i1_to_i2(segm_start1.y),
                     i1_to_i2(segm_end1.x) - i1_to_i2(segm_start1.x),
@@ -1280,7 +1280,7 @@ where
                 ),
                 one,
             );
-            let c2 = VR::RobustFpt::<F2>::new_2(
+            let c2 = RF::RobustFpt::<F2>::new_2(
                 Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                     i1_to_i2(segm_end2.x) - i1_to_i2(segm_start2.x),
                     i1_to_i2(segm_end2.y) - i1_to_i2(segm_start2.y),
@@ -1289,23 +1289,23 @@ where
                 ),
                 one,
             );
-            let inv_orientation = VR::RobustFpt::<F2>::new_1(one) / orientation;
-            let mut t = VR::RobustDif::<F2>::default();
-            let mut b = VR::RobustDif::<F2>::default();
-            let mut ix = VR::RobustDif::<F2>::default();
-            let mut iy = VR::RobustDif::<F2>::default();
+            let inv_orientation = RF::RobustFpt::<F2>::new_1(one) / orientation;
+            let mut t = RF::RobustDif::<F2>::default();
+            let mut b = RF::RobustDif::<F2>::default();
+            let mut ix = RF::RobustDif::<F2>::default();
+            let mut iy = RF::RobustDif::<F2>::default();
 
-            ix += VR::RobustFpt::<F2>::new_1(a2) * c1 * inv_orientation;
-            ix += VR::RobustFpt::<F2>::new_1(a1) * c2 * inv_orientation;
-            iy += VR::RobustFpt::<F2>::new_1(b1) * c2 * inv_orientation;
-            iy += VR::RobustFpt::<F2>::new_1(b2) * c1 * inv_orientation;
+            ix += RF::RobustFpt::<F2>::new_1(a2) * c1 * inv_orientation;
+            ix += RF::RobustFpt::<F2>::new_1(a1) * c2 * inv_orientation;
+            iy += RF::RobustFpt::<F2>::new_1(b1) * c2 * inv_orientation;
+            iy += RF::RobustFpt::<F2>::new_1(b2) * c1 * inv_orientation;
 
-            b += ix * (VR::RobustFpt::<F2>::new_1(a1) * sqr_sum2);
-            b += ix * (VR::RobustFpt::<F2>::new_1(a2) * sqr_sum1);
-            b += iy * (VR::RobustFpt::<F2>::new_1(b1) * sqr_sum2);
-            b += iy * (VR::RobustFpt::<F2>::new_1(b2) * sqr_sum1);
+            b += ix * (RF::RobustFpt::<F2>::new_1(a1) * sqr_sum2);
+            b += ix * (RF::RobustFpt::<F2>::new_1(a2) * sqr_sum1);
+            b += iy * (RF::RobustFpt::<F2>::new_1(b1) * sqr_sum2);
+            b += iy * (RF::RobustFpt::<F2>::new_1(b2) * sqr_sum1);
             b -= sqr_sum1
-                * VR::RobustFpt::<F2>::new_2(
+                * RF::RobustFpt::<F2>::new_2(
                     Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                         i1_to_i2(segm_end2.x) - i1_to_i2(segm_start2.x),
                         i1_to_i2(segm_end2.y) - i1_to_i2(segm_start2.y),
@@ -1315,7 +1315,7 @@ where
                     one,
                 );
             b -= sqr_sum2
-                * VR::RobustFpt::<F2>::new_2(
+                * RF::RobustFpt::<F2>::new_2(
                     Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                         i1_to_i2(segm_end1.x) - i1_to_i2(segm_start1.x),
                         i1_to_i2(segm_end1.y) - i1_to_i2(segm_start1.y),
@@ -1333,17 +1333,17 @@ where
 
             t /= (a * a);
 
-            let mut c_x = VR::RobustDif::<F2>::new_from(ix);
-            let mut c_y = VR::RobustDif::<F2>::new_from(iy);
+            let mut c_x = RF::RobustDif::<F2>::new_from(ix);
+            let mut c_y = RF::RobustDif::<F2>::new_from(iy);
 
-            c_x += t * (VR::RobustFpt::<F2>::new_1(a1) * sqr_sum2);
-            c_x += t * (VR::RobustFpt::<F2>::new_1(a2) * sqr_sum1);
-            c_y += t * (VR::RobustFpt::<F2>::new_1(b1) * sqr_sum2);
-            c_y += t * (VR::RobustFpt::<F2>::new_1(b2) * sqr_sum1);
+            c_x += t * (RF::RobustFpt::<F2>::new_1(a1) * sqr_sum2);
+            c_x += t * (RF::RobustFpt::<F2>::new_1(a2) * sqr_sum1);
+            c_y += t * (RF::RobustFpt::<F2>::new_1(b1) * sqr_sum2);
+            c_y += t * (RF::RobustFpt::<F2>::new_1(b2) * sqr_sum1);
             if t.positive().fpv() < t.negative().fpv() {
                 t = -t;
             }
-            let mut lower_x = VR::RobustDif::<F2>::new_from(c_x);
+            let mut lower_x = RF::RobustDif::<F2>::new_from(c_x);
             if orientation.is_neg() {
                 lower_x -= t * orientation;
             } else {
@@ -1381,9 +1381,9 @@ where
 
         let one = num::cast::<f32, F2>(1.0f32).unwrap();
 
-        let a1 = VR::RobustFpt::<F2>::new_1(i1_to_f2(site1.x1()) - i1_to_f2(site1.x0()));
-        let b1 = VR::RobustFpt::<F2>::new_1(i1_to_f2(site1.y1()) - i1_to_f2(site1.y0()));
-        let c1 = VR::RobustFpt::<F2>::new_2(
+        let a1 = RF::RobustFpt::<F2>::new_1(i1_to_f2(site1.x1()) - i1_to_f2(site1.x0()));
+        let b1 = RF::RobustFpt::<F2>::new_1(i1_to_f2(site1.y1()) - i1_to_f2(site1.y0()));
+        let c1 = RF::RobustFpt::<F2>::new_2(
             Predicates::<I1, F1, I2, F2>::robust_cross_product(
                 site1.x0(),
                 site1.y0(),
@@ -1393,9 +1393,9 @@ where
             one,
         );
 
-        let a2 = VR::RobustFpt::<F2>::new_1(i1_to_f2(site2.x1()) - i1_to_f2(site2.x0()));
-        let b2 = VR::RobustFpt::<F2>::new_1(i1_to_f2(site2.y1()) - i1_to_f2(site2.y0()));
-        let c2 = VR::RobustFpt::<F2>::new_2(
+        let a2 = RF::RobustFpt::<F2>::new_1(i1_to_f2(site2.x1()) - i1_to_f2(site2.x0()));
+        let b2 = RF::RobustFpt::<F2>::new_1(i1_to_f2(site2.y1()) - i1_to_f2(site2.y0()));
+        let c2 = RF::RobustFpt::<F2>::new_2(
             Predicates::<I1, F1, I2, F2>::robust_cross_product(
                 site2.x0(),
                 site2.y0(),
@@ -1405,9 +1405,9 @@ where
             one,
         );
 
-        let a3 = VR::RobustFpt::<F2>::new_1(i1_to_f2(site3.x1()) - i1_to_f2(site3.x0()));
-        let b3 = VR::RobustFpt::<F2>::new_1(i1_to_f2(site3.y1()) - i1_to_f2(site3.y0()));
-        let c3 = VR::RobustFpt::<F2>::new_2(
+        let a3 = RF::RobustFpt::<F2>::new_1(i1_to_f2(site3.x1()) - i1_to_f2(site3.x0()));
+        let b3 = RF::RobustFpt::<F2>::new_1(i1_to_f2(site3.y1()) - i1_to_f2(site3.y0()));
+        let c3 = RF::RobustFpt::<F2>::new_2(
             Predicates::<I1, F1, I2, F2>::robust_cross_product(
                 site3.x0(),
                 site3.y0(),
@@ -1420,7 +1420,7 @@ where
         let len1 = (a1 * a1 + b1 * b1).sqrt();
         let len2 = (a2 * a2 + b2 * b2).sqrt();
         let len3 = (a3 * a3 + b3 * b3).sqrt();
-        let cross_12 = VR::RobustFpt::<F2>::new_2(
+        let cross_12 = RF::RobustFpt::<F2>::new_2(
             Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(site1.x1()) - i1_to_i2(site1.x0()),
                 i1_to_i2(site1.y1()) - i1_to_i2(site1.y0()),
@@ -1429,7 +1429,7 @@ where
             ),
             one,
         );
-        let cross_23 = VR::RobustFpt::<F2>::new_2(
+        let cross_23 = RF::RobustFpt::<F2>::new_2(
             Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(site2.x1()) - i1_to_i2(site2.x0()),
                 i1_to_i2(site2.y1()) - i1_to_i2(site2.y0()),
@@ -1438,7 +1438,7 @@ where
             ),
             one,
         );
-        let cross_31 = VR::RobustFpt::<F2>::new_2(
+        let cross_31 = RF::RobustFpt::<F2>::new_2(
             Predicates::<I1, F1, I2, F2>::robust_cross_product_2i(
                 i1_to_i2(site3.x1()) - i1_to_i2(site3.x0()),
                 i1_to_i2(site3.y1()) - i1_to_i2(site3.y0()),
@@ -1449,18 +1449,18 @@ where
         );
 
         // denom = cross_12 * len3 + cross_23 * len1 + cross_31 * len2.
-        let mut denom = VR::RobustDif::<F2>::new();
+        let mut denom = RF::RobustDif::<F2>::new();
         denom += cross_12 * len3;
         denom += cross_23 * len1;
         denom += cross_31 * len2;
 
         // denom * r = (b2 * c_x - a2 * c_y - c2 * denom) / len2.
-        let mut r = VR::RobustDif::<F2>::new();
+        let mut r = RF::RobustDif::<F2>::new();
         r -= cross_12 * c3;
         r -= cross_23 * c1;
         r -= cross_31 * c2;
 
-        let mut c_x = VR::RobustDif::<F2>::new();
+        let mut c_x = RF::RobustDif::<F2>::new();
         c_x += a1 * c2 * len3;
         c_x -= a2 * c1 * len3;
         c_x += a2 * c3 * len1;
@@ -1468,7 +1468,7 @@ where
         c_x += a3 * c1 * len2;
         c_x -= a1 * c3 * len2;
 
-        let mut c_y = VR::RobustDif::<F2>::new();
+        let mut c_y = RF::RobustDif::<F2>::new();
         c_y += b1 * c2 * len3;
         c_y -= b2 * c1 * len3;
         c_y += b2 * c3 * len1;
@@ -1478,10 +1478,10 @@ where
 
         let lower_x = c_x + r;
 
-        let denom_dif = VR::RobustFpt::<F2>::copy_from(&denom.dif());
-        let c_x_dif = VR::RobustFpt::<F2>::copy_from(&c_x.dif()) / denom_dif;
-        let c_y_dif = VR::RobustFpt::<F2>::copy_from(&c_y.dif()) / denom_dif;
-        let lower_x_dif = VR::RobustFpt::<F2>::copy_from(&lower_x.dif()) / denom_dif;
+        let denom_dif = RF::RobustFpt::<F2>::copy_from(&denom.dif());
+        let c_x_dif = RF::RobustFpt::<F2>::copy_from(&c_x.dif()) / denom_dif;
+        let c_y_dif = RF::RobustFpt::<F2>::copy_from(&c_y.dif()) / denom_dif;
+        let lower_x_dif = RF::RobustFpt::<F2>::copy_from(&lower_x.dif()) / denom_dif;
 
         let ulps = TC4::<I1, F1, I2, F2>::u64_to_f2(Predicates::<I1, F1, I2, F2>::ulps());
         let recompute_c_x = c_x_dif.ulp() > ulps;
@@ -1659,11 +1659,11 @@ where
         recompute_c_y: bool,
         recompute_lower_x: bool,
     ) {
-        let bi_to_f2 = TC4::<I1, F1, I2, F2>::bi_to_f2;
+        let bi_to_f2 = TC4::<I1, F1, I2, F2>::bi_to_ext;
         let i1_to_bi = TC2::<I1, F1>::i1_to_bi;
         let i1_to_i128 = TC2::<I1, F1>::i1_to_i128;
 
-        let half: F2 = num::cast::<f32, F2>(0.5f32).unwrap();
+        let half = RF::ExtendedExponentFpt::<f64>::new(0.5);
 
         let dif_x = [
             i1_to_bi(site1.x()) - i1_to_i128(site2.x()),
@@ -1686,7 +1686,7 @@ where
             i1_to_bi(site2.y()) + i1_to_i128(site3.y()),
         ];
 
-        let inv_denom: F2 = {
+        let inv_denom = {
             let tmp = &dif_x[0] * &dif_y[1] - &dif_x[1] * &dif_y[0];
             half / bi_to_f2(&tmp)
         };
@@ -1695,39 +1695,39 @@ where
 
         if recompute_c_x || recompute_lower_x {
             let c_x: BigInt = &numer1 * &dif_y[1] - &numer2 * &dif_y[0];
-            circle.set_x_raw(bi_to_f2(&c_x) * inv_denom);
+            circle.set_x_ext(bi_to_f2(&c_x) * inv_denom);
 
             if recompute_lower_x {
                 // Evaluate radius of the circle.
                 let sqr_r: BigInt = (&dif_x[0] * &dif_x[0] + &dif_y[0] * &dif_y[0])
                     * (&dif_x[1] * &dif_x[1] + &dif_y[1] * &dif_y[1])
                     * (&dif_x[2] * &dif_x[2] + &dif_y[2] * &dif_y[2]);
-                let r: F2 = bi_to_f2(&sqr_r).sqrt();
+                let r = bi_to_f2(&sqr_r).sqrt();
 
                 // If c_x >= 0 then lower_x = c_x + r,
                 // else lower_x = (c_x * c_x - r * r) / (c_x - r).
                 // To guarantee epsilon relative error.
 
                 // this value will be invalid after call to set_lower_x()
-                let tmp_circle_x: F2 = *circle.0.get().x();
+                let tmp_circle_x = circle.0.get().x_as_ext();
 
-                if !tmp_circle_x.is_sign_negative() {
-                    if !inv_denom.is_sign_negative() {
-                        circle.set_lower_x_raw(tmp_circle_x + r * inv_denom);
+                if !tmp_circle_x.is_neg() {
+                    if !inv_denom.is_neg() {
+                        circle.set_lower_x_ext(tmp_circle_x + r * inv_denom);
                     } else {
-                        circle.set_lower_x_raw(tmp_circle_x - r * inv_denom);
+                        circle.set_lower_x_ext(tmp_circle_x - r * inv_denom);
                     }
                 } else {
                     let numer: BigInt = &c_x * &c_x - &sqr_r;
-                    let lower_x: F2 = bi_to_f2(&numer) * inv_denom / (bi_to_f2(&c_x) + r);
-                    circle.set_lower_x_raw(lower_x);
+                    let lower_x = bi_to_f2(&numer) * inv_denom / (bi_to_f2(&c_x) + r);
+                    circle.set_lower_x_ext(lower_x);
                 }
             }
         }
 
         if recompute_c_y {
             let c_y: BigInt = &numer2 * &dif_x[0] - &numer1 * &dif_x[1];
-            circle.set_y_raw(bi_to_f2(&c_y) * inv_denom);
+            circle.set_y_ext(bi_to_f2(&c_y) * inv_denom);
         }
         #[cfg(feature = "console_debug")]
         {
@@ -1753,6 +1753,11 @@ where
         recompute_c_y: bool,
         recompute_lower_x: bool,
     ) {
+        // these should all be constants, but rust can't handle it
+        let quarter = RF::ExtendedExponentFpt::<f64>::new(1f64);
+        let half = RF::ExtendedExponentFpt::<f64>::new(1f64 / 2.0f64);
+        let one = RF::ExtendedExponentFpt::<f64>::new(1f64);
+
         #[cfg(feature = "console_debug")]
         {
             print!(
@@ -1768,15 +1773,11 @@ where
                 recompute_c_y, recompute_lower_x
             );
         }
-        let bi_to_f2 = TC4::<I1, F1, I2, F2>::bi_to_f2;
+        let bi_to_ext = TC4::<I1, F1, I2, F2>::bi_to_ext;
         let i1_to_bi = TC2::<I1, F1>::i1_to_bi;
         let i1_to_i128 = TC2::<I1, F1>::i1_to_i128;
-        let i2_to_f2 = TC4::<I1, F1, I2, F2>::i2_to_f2;
 
-        let sqrt_expr_ = VR::robust_sqrt_expr::<F2>::default();
-        let quarter: F2 = num::cast::<f64, F2>(1f64 / 4.0f64).unwrap();
-        let half: F2 = num::cast::<f64, F2>(1f64 / 2.0f64).unwrap();
-        let one: I2 = num::cast::<i8, I2>(1i8).unwrap();
+        let sqrt_expr_ = RF::robust_sqrt_expr::<F2>::default();
         let neg_one = -1i32;
 
         // Todo: is 5 the correct size?
@@ -1824,28 +1825,27 @@ where
             ca[1] = denom.clone() * &sum_ab * 2 + &numer * &teta;
             cb[1] = BigInt::from(1);
             ca[2] = denom.clone() * &sum_y * 2 + &numer * &vec_y;
-            let inv_denom: F2 = i2_to_f2(one) / bi_to_f2(&denom);
+            let inv_denom = one / bi_to_ext(&denom);
             if recompute_c_x {
-                c_event.set_x_raw(quarter * bi_to_f2(&ca[0]) * inv_denom);
+                c_event.set_x_ext(quarter * bi_to_ext(&ca[0]) * inv_denom);
             }
             if recompute_c_y {
-                c_event.set_y_raw(quarter * bi_to_f2(&ca[2]) * inv_denom);
+                c_event.set_y_ext(quarter * bi_to_ext(&ca[2]) * inv_denom);
             }
             if recompute_lower_x {
-                c_event.set_lower_x_raw(
-                    (sqrt_expr_.eval2(&ca, &cb) * quarter * inv_denom
-                        / (bi_to_f2(&segm_len).sqrt()))
-                    .fpv(),
+                c_event.set_lower_x_ext(
+                    sqrt_expr_.eval2(&ca, &cb) * quarter * inv_denom
+                        / (bi_to_ext(&segm_len).sqrt()),
                 );
             }
             return;
         }
         let det: BigInt = (&teta * &teta + &denom * &denom) * &a * &b * 4;
-        let mut inv_denom_sqr: F2 = i2_to_f2(one) / bi_to_f2(&denom);
+        let mut inv_denom_sqr = one / bi_to_ext(&denom);
         inv_denom_sqr = inv_denom_sqr * inv_denom_sqr;
         #[cfg(feature = "console_debug")]
         {
-            println!("det:{} inv_denom_sqr:{:.12}", det, inv_denom_sqr);
+            println!("det:{} inv_denom_sqr:{:.12}", det, inv_denom_sqr.d());
         }
         if recompute_c_x || recompute_lower_x {
             ca[0] = sum_x * &denom * &denom + &teta * &sum_ab * &vec_x;
@@ -1857,7 +1857,7 @@ where
             };
             cb[1] = det.clone();
             if recompute_c_x {
-                c_event.set_x_raw((sqrt_expr_.eval2(&ca, &cb) * half * inv_denom_sqr).fpv());
+                c_event.set_x_ext(sqrt_expr_.eval2(&ca, &cb) * half * inv_denom_sqr);
             }
         }
 
@@ -1871,8 +1871,7 @@ where
             };
             cb[3] = det.clone();
             if recompute_c_y {
-                c_event
-                    .set_y_raw((sqrt_expr_.eval2(&ca[2..], &cb[2..]) * half * inv_denom_sqr).fpv());
+                c_event.set_y_ext(sqrt_expr_.eval2(&ca[2..], &cb[2..]) * half * inv_denom_sqr);
             }
         }
 
@@ -1883,7 +1882,7 @@ where
             cb[2] = BigInt::from(1);
             ca[3] = if segment_index == 2 { -teta } else { teta };
             cb[3] = det;
-            let segm_len = VR::RobustFpt::<F2>::new_1(bi_to_f2(&segm_len)).sqrt();
+            let segm_len = bi_to_ext(&segm_len).sqrt();
             #[cfg(feature = "console_debug")]
             {
                 println!(" ca[0]:{}", ca[0]);
@@ -1894,14 +1893,14 @@ where
                 println!(" cb[1]:{}", cb[1]);
                 println!(" cb[2]:{}", cb[2]);
                 println!(" cb[3]:{}", cb[3]);
-                println!(" segm_len:{:.12}", segm_len.fpv());
+                println!(" segm_len:{:.12}", segm_len.d());
             }
             let eval4 = sqrt_expr_.eval4(&ca, &cb);
             #[cfg(feature = "console_debug")]
             {
-                println!("eval4:{:.12}", eval4.fpv());
+                println!("eval4:{:.12}", eval4.d());
             }
-            c_event.set_lower_x_raw((eval4 * half * inv_denom_sqr / segm_len).fpv());
+            c_event.set_lower_x_ext(eval4 * half * inv_denom_sqr / segm_len);
         }
         #[cfg(feature = "console_debug")]
         {
@@ -1930,8 +1929,8 @@ where
     ) {
         let i1_to_i128 = TC2::<I1, F1>::i1_to_i128;
         let i1_to_bi = TC2::<I1, F1>::i1_to_bi;
-        let bi_to_f2 = TC4::<I1, F1, I2, F2>::bi_to_f2;
-        let mut sqrt_expr_ = VR::robust_sqrt_expr::<F2>::default();
+        let bi_to_f2 = TC4::<I1, F1, I2, F2>::bi_to_ext;
+        let mut sqrt_expr_ = RF::robust_sqrt_expr::<F2>::default();
 
         let mut c: [BigInt; 2] = [BigInt::zero(), BigInt::zero()];
         let mut cA: [BigInt; 4] = [
@@ -1962,7 +1961,7 @@ where
         ];
         #[cfg(feature = "console_debug")]
         {
-            println!("->pss");
+            println!("->ExactCircleFormationFunctor:pss");
             println!(" a[0]={}", a[0]);
             println!(" a[1]={}", a[1]);
             println!(" b[0]={}", b[0]);
@@ -1998,7 +1997,7 @@ where
                         * 2
                     + &b[0] * &b[0] * (i1_to_bi(site1.y())) * 2;
                 let c_y = sqrt_expr_.eval2(&cA, &cB);
-                c_event.set_y_raw((c_y / denom).fpv());
+                c_event.set_y_ext(c_y / denom);
             }
 
             if recompute_c_x || recompute_lower_x {
@@ -2013,7 +2012,7 @@ where
 
                 if recompute_c_x {
                     let c_x = sqrt_expr_.eval2(&cA, &cB);
-                    c_event.set_x_raw((c_x / denom).fpv());
+                    c_event.set_x_ext(c_x / denom);
                 }
 
                 if recompute_lower_x {
@@ -2024,7 +2023,7 @@ where
                     };
                     cB[2] = &a[0] * &a[0] + &b[0] * &b[0];
                     let lower_x = sqrt_expr_.eval3(&cA, &cB);
-                    c_event.set_lower_x_raw((lower_x / denom).fpv());
+                    c_event.set_lower_x_ext(lower_x / denom);
                 }
             }
             return;
@@ -2043,10 +2042,10 @@ where
             println!(" dy={}", dy);
         }
         if dx.is_zero() && dy.is_zero() {
-            let denom: F2 = bi_to_f2(&orientation);
-            let c_x: F2 = bi_to_f2(&ix) / denom;
-            let c_y: F2 = bi_to_f2(&iy) / denom;
-            c_event.set_3_raw(c_x, c_y, c_x);
+            let denom = bi_to_f2(&orientation);
+            let c_x = bi_to_f2(&ix) / denom;
+            let c_y = bi_to_f2(&iy) / denom;
+            c_event.set_3_ext(c_x, c_y, c_x);
             return;
         }
 
@@ -2055,8 +2054,10 @@ where
         // todo: remove -1*-1
         #[cfg(feature = "console_debug")]
         {
-            println!(" cA[0]={}", (&a[1] * -1 * &dx));
-            println!(" cA[0]={}", (&b[1] * -1 * &dy));
+            println!(" a[1]={}", &a[1]);
+            println!(" b[1]={}", &b[1]);
+            println!(" cA[0]={}", (&a[1] * BigInt::from(-1) * &dx));
+            println!(" cA[1]={}", (&b[1] * BigInt::from(-1) * &dy));
         }
         cA[0] = (&a[1] * -1 * &dx) + (&b[1] * -1 * &dy);
         cA[1] = (&a[0] * -1 * &dx) + (&b[0] * -1 * &dy);
@@ -2082,7 +2083,7 @@ where
             cA[1] = &b[0] * (&dx * &dx + &dy * &dy) - &iy * (&dx * &a[0] + &dy * &b[0]);
             cA[2] = iy * &sign;
             let cy = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
-            c_event.set_y_raw((cy / denom).fpv());
+            c_event.set_y_ext(cy / denom);
         }
 
         if recompute_c_x || recompute_lower_x {
@@ -2092,14 +2093,14 @@ where
 
             if recompute_c_x {
                 let cx = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA, &cB);
-                c_event.set_x_raw((cx / denom).fpv());
+                c_event.set_x_ext(cx / denom);
             }
 
             if recompute_lower_x {
                 cA[3] =
                     orientation * (&dx * &dx + &dy * &dy) * (if temp.is_neg() { -1 } else { 1 });
                 let lower_x = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA, &cB);
-                c_event.set_lower_x_raw((lower_x / denom).fpv());
+                c_event.set_lower_x_ext(lower_x / denom);
             }
         }
         #[cfg(feature = "console_debug")]
@@ -2133,7 +2134,7 @@ where
     ) {
         let i1_to_bi = TC2::<I1, F1>::i1_to_bi;
         let i1_to_i128 = TC2::<I1, F1>::i1_to_i128;
-        let sqrt_expr_ = VR::robust_sqrt_expr::<F2>::default();
+        let sqrt_expr_ = RF::robust_sqrt_expr::<F2>::default();
 
         let mut cA: [BigInt; 4] = [
             BigInt::zero(),
@@ -2190,7 +2191,7 @@ where
                 cA[i] = &b[j] * &c[k] - &b[k] * &c[j];
             }
             let c_y = sqrt_expr_.eval3(&cA, &cB);
-            c_event.set_y_raw((c_y / denom).fpv());
+            c_event.set_y_ext(c_y / denom);
         }
 
         if recompute_c_x || recompute_lower_x {
@@ -2206,13 +2207,13 @@ where
 
             if recompute_c_x {
                 let c_x = sqrt_expr_.eval3(&cA, &cB);
-                c_event.set_x_raw((c_x / denom).fpv());
+                c_event.set_x_ext(c_x / denom);
             }
 
             if recompute_lower_x {
                 cB[3] = BigInt::from(1);
                 let lower_x = sqrt_expr_.eval4(&cA, &cB);
-                c_event.set_lower_x_raw((lower_x / denom).fpv());
+                c_event.set_lower_x_ext(lower_x / denom);
             }
         }
         #[cfg(feature = "console_debug")]

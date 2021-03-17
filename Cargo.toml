@@ -20,6 +20,7 @@ num-traits = "^0.2.14"
 thiserror = "^1.0.24"
 bitflags = "^1.2.1"
 libm = "^0.2.1"
+smallvec = "^1.6.1"
 
 [features]
 console_debug = []

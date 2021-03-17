@@ -444,7 +444,7 @@ where
         num::cast::<I1, F2>(input).unwrap()
     }
 
-    // todo! is there no way to solve this more efficiently?
+    // todo! is there no way to convert this directly?
     #[inline(always)]
     pub fn i2_to_bi(input: I2) -> BigInt {
         let stupid_generics = num::cast::<I2, i128>(input).unwrap();
@@ -462,11 +462,8 @@ where
     }
 
     #[inline(always)]
-    pub fn bi_to_f2(input: &BigInt) -> F2 {
-        // why can't I1 just use num::cast::<BigInt, F2> ???
-        //let rv = num::cast::<BigInt, F2>(input).unwrap();
-        let stupid_generics = input.to_f64().unwrap();
-        num::cast::<f64, F2>(stupid_generics).unwrap()
+    pub fn bi_to_ext(input: &BigInt) -> robust_fpt::ExtendedExponentFpt<f64> {
+        robust_fpt::ExtendedExponentFpt::<f64>::new(input.to_f64().unwrap())
     }
 
     #[inline(always)]
@@ -497,6 +494,11 @@ where
     #[inline(always)]
     pub fn f32_to_f2(input: f32) -> F2 {
         num::cast::<f32, F2>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn f64_to_f2(input: f64) -> F2 {
+        num::cast::<f64, F2>(input).unwrap()
     }
 
     #[inline(always)]
