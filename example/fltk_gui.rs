@@ -285,7 +285,7 @@ fn main() -> Result<(), BvError> {
         let mut shared_data_bm = cl.borrow_mut();
         shared_data_bm.visualizer.read_data(Example::Simple);
         let _ = shared_data_bm.visualizer.build();
-        shared_data_bm.visualizer.recalulate_affine()?;
+        shared_data_bm.visualizer.re_calculate_affine()?;
     }
 
     let shared_data_c = Rc::clone(&shared_data_rc);
@@ -442,7 +442,7 @@ fn main() -> Result<(), BvError> {
                 GuiMessage::MenuChoice(v) => {
                     shared_data_bm.visualizer.read_data(v);
                     let _ = shared_data_bm.visualizer.build();
-                    let _ = shared_data_bm.visualizer.recalulate_affine();
+                    let _ = shared_data_bm.visualizer.re_calculate_affine();
                     redraw();
                 }
                 GuiMessage::Filter(flag) => {
@@ -493,7 +493,7 @@ where
 
     /// recalculates the affine transformation, this should not be done every time
     /// the diagram is re-calculated or the screen will move around when adding new edges and points.
-    pub fn recalulate_affine(&mut self) -> Result<(), BvError> {
+    pub fn re_calculate_affine(&mut self) -> Result<(), BvError> {
         self.affine = VU::SimpleAffine::new(&self.vertex_aabb, &self.bounding_rect)?;
         Ok(())
     }
@@ -1017,19 +1017,27 @@ where
             [500, 300, 300, 300],
             [629, 342, 467, 207],
         ];
-        let _test_segments: [[i32; 4]; 12] = [
-            [61580, -50720, 56712, -55735],
-            [56712, -55735, -148074, -55735],
-            [-148074, -55735, -148480, 39809],
-            [-148480, 39809, -65636, 40871],
-            [-65636, 40871, -65636, 17536],
-            [-65636, 17536, 14319, 17536],
-            [14319, 17536, 33598, 22174],
-            [33598, 22174, 42095, 33233],
-            [42095, 33233, 40371, 46433],
-            [40371, 46433, 140722, 55735],
-            [140722, 55735, 148480, 38812],
-            [148480, 38812, 61580, -50720],
+
+        let _test_segments: [[i32; 4]; 19] = [
+            [67035, 16168, -51301, 122269],
+            [-51301, 122269, -50598, 120727],
+            [-50598, 120727, -56132, 110391],
+            [-56132, 110391, -102080, 102917],
+            [-102080, 102917, -112508, 94666],
+            [-112508, 94666, -110974, 81469],
+            [-110974, 81469, -83788, 43709],
+            [-83788, 43709, -87201, 32462],
+            [-87201, 32462, -130792, 16168],
+            [-130792, 16168, -139396, 6040],
+            [-139396, 6040, -135315, -6597],
+            [-135315, -6597, -101213, -38399],
+            [-101213, -38399, -102342, -49954],
+            [-102342, -49954, -142015, -74507],
+            [-142015, -74507, -148480, -86107],
+            [-148480, -86107, -142015, -97715],
+            [-142015, -97715, -102342, -122269],
+            [-102342, -122269, 148479, -56855],
+            [148479, -56855, 67035, 16168],
         ];
 
         let _segments_rust: [[i32; 4]; 352] = [

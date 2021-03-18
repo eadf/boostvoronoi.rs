@@ -546,7 +546,7 @@ where
 
         rv.push_str(
             format!(
-                "(id:{} cell:{} v0:{} tw:{} nxt:{} prv:{} col:{})",
+                "id:{} cell:{} v0:{} t:{} n:{} p:{} c:{}",
                 self.id.0,
                 super::format_id(self.cell_.map(|c| c.0)),
                 super::format_id(self.vertex_.map(|v| v.0)),
@@ -1599,7 +1599,7 @@ where
         println!("edges:{}", self.edges_.len());
         for (i, e) in self.edges_.iter().enumerate() {
             let e = e.get();
-            println!("edge{} {:?}", e.id.0, &e);
+            println!("Edge:#{}=>{:?}", e.id.0, &e);
             assert_eq!(i, e.id.0);
         }
     }
