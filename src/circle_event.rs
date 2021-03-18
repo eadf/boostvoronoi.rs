@@ -163,21 +163,21 @@ impl<F2: OutputType + Neg<Output = F2>> CircleEventC<F2> {
     }
 
     /// sets the x coordinates inside the Cell.
-    pub(crate) fn set_x_ext(&self, x: RF::ExtendedExponentFpt<f64>) {
+    pub(crate) fn set_x_xf(&self, x: RF::ExtendedExponentFpt<f64>) {
         let mut selfc = self.0.get();
         let _ = selfc.set_x_raw(num::cast::<f64, F2>(x.d()).unwrap());
         self.0.set(selfc);
     }
 
     /// sets the y coordinate inside the Cell.
-    pub(crate) fn set_y_ext(&self, y: RF::ExtendedExponentFpt<f64>) {
+    pub(crate) fn set_y_xf(&self, y: RF::ExtendedExponentFpt<f64>) {
         let mut selfc = self.0.get();
         let _ = selfc.set_raw_y(num::cast::<f64, F2>(y.d()).unwrap());
         self.0.set(selfc);
     }
 
     /// sets the y coordinate inside the Cell.
-    pub(crate) fn set_lower_x_ext(&self, x: RF::ExtendedExponentFpt<f64>) {
+    pub(crate) fn set_lower_x_xf(&self, x: RF::ExtendedExponentFpt<f64>) {
         let mut selfc: CircleEvent<F2> = self.0.get();
         let _ = selfc.set_raw_lower_x(num::cast::<f64, F2>(x.d()).unwrap());
         self.0.set(selfc);
@@ -239,8 +239,8 @@ where
         self.center_x_
     }
 
-    pub(crate) fn x_as_ext(&self) -> RF::ExtendedExponentFpt<f64> {
-        RF::ExtendedExponentFpt::<f64>::new(
+    pub(crate) fn x_as_xf(&self) -> RF::ExtendedExponentFpt<f64> {
+        RF::ExtendedExponentFpt::<f64>::from(
             num::cast::<F2, f64>(self.center_x_.into_inner()).unwrap(),
         )
     }
@@ -266,7 +266,7 @@ where
 
     #[allow(dead_code)]
     pub(crate) fn y_as_ext(&self) -> RF::ExtendedExponentFpt<f64> {
-        RF::ExtendedExponentFpt::<f64>::new(
+        RF::ExtendedExponentFpt::<f64>::from(
             num::cast::<F2, f64>(self.center_y_.into_inner()).unwrap(),
         )
     }

@@ -1,8 +1,8 @@
 #![allow(unused_imports)]
 use super::RobustFpt;
-use crate::robust_fpt as VR;
+use crate::robust_fpt as RF;
 use crate::TypeConverter4 as TCC;
-use num::{BigInt, Float, Num, NumCast, Zero};
+use num::{Float, Num, NumCast, Zero};
 
 #[test]
 /// Add and sub
@@ -16,11 +16,11 @@ fn sum_1() {
             let a = RobustFpt::new_1(a_);
             let b = RobustFpt::new_1(b_);
             let s = a + b;
-            assert_eq!(s.fpv(), a_ + b_);
+            approx::assert_ulps_eq!(s.fpv(), a_ + b_);
             let s = a - b;
-            assert_eq!(s.fpv(), a_ - b_);
+            approx::assert_ulps_eq!(s.fpv(), a_ - b_);
             let s = b - a;
-            assert_eq!(s.fpv(), b_ - a_);
+            approx::assert_ulps_eq!(s.fpv(), b_ - a_);
         }
     }
 }
@@ -38,11 +38,11 @@ fn sum_2() {
             let mut a = RobustFpt::new_1(a_);
             let b = RobustFpt::new_1(b_);
             a += b;
-            assert_eq!(a.fpv(), a_ + b_);
+            approx::assert_ulps_eq!(a.fpv(), a_ + b_);
             a -= b;
-            assert_eq!(a.fpv(), a_);
+            approx::assert_ulps_eq!(a.fpv(), a_);
             a -= b;
-            assert_eq!(a.fpv(), a_ - b_);
+            approx::assert_ulps_eq!(a.fpv(), a_ - b_);
             /* not implemented?
             a += c;
             assert_eq!(a.fpv(), a_ - b_ + c_);
@@ -61,8 +61,8 @@ fn sub_1() {
     let a = RobustFpt::new_1(a_);
     let b = RobustFpt::new_1(b_);
     let s = a - b;
-    assert_eq!(s.fpv(), a_ - b_);
-    assert_eq!(s.fpv(), 1.0)
+    approx::assert_ulps_eq!(s.fpv(), a_ - b_);
+    approx::assert_ulps_eq!(s.fpv(), 1.0)
 }
 
 #[test]
@@ -70,7 +70,39 @@ fn sub_2() {
     let mut a = RobustFpt::new_1(6.);
     let b = RobustFpt::new_1(2.);
     a -= b;
-    assert_eq!(a.fpv(), 4.0)
+    approx::assert_ulps_eq!(a.fpv(), 4.0)
+}
+
+#[test]
+fn sub_3() {
+    let aa = 51302308860895380373504_f64;
+    let a = RF::ExtendedExponentFpt::<f64>::from(aa);
+    let bb = -5986866286194975689408512_f64;
+    let b = RF::ExtendedExponentFpt::<f64>::from(bb);
+    let c = a - b;
+    println!("{:.0}", c.d());
+    println!("{:.0}", aa - bb);
+    approx::assert_ulps_eq!(c.d(), aa - bb)
+}
+
+#[test]
+fn sub_4() {
+    let a = RF::ExtendedExponentFpt::<f64>::from(-2429436843391029202764395141992491778048_f64);
+    let b = RF::ExtendedExponentFpt::<f64>::from(4527715074734887233719567492889438060544_f64);
+    let c = a - b;
+    println!(
+        "{:.0}",
+        -2429436843391029202764395141992491778048_f64
+            - 4527715074734887233719567492889438060544_f64
+    );
+    approx::assert_ulps_eq!(c.d(), -6957151918125916436483962634881929838592_f64)
+}
+
+#[test]
+fn sub_5() {
+    let aa = -6957151918125916436483962634881929838592_f64;
+    let a = RF::ExtendedExponentFpt::<f64>::from(aa);
+    approx::assert_ulps_eq!(a.d(), aa)
 }
 
 #[test]
@@ -84,10 +116,10 @@ fn mul_1() {
             let a = RobustFpt::new_1(a_);
             let b = RobustFpt::new_1(b_);
             let s = a * b;
-            assert_eq!(s.fpv(), a_ * b_);
+            approx::assert_ulps_eq!(s.fpv(), a_ * b_);
             if !b_.is_zero() {
                 let s = a / b;
-                assert_eq!(s.fpv(), a_ / b_);
+                approx::assert_ulps_eq!(s.fpv(), a_ / b_);
             }
         }
     }
@@ -104,12 +136,12 @@ fn mul_2() {
             let mut a = RobustFpt::new_1(a_);
             let b = RobustFpt::new_1(b_);
             a *= b;
-            assert_eq!(a.fpv(), a_ * b_);
+            approx::assert_ulps_eq!(a.fpv(), a_ * b_);
             if !b_.is_zero() {
                 let mut a = RobustFpt::new_1(a_);
                 let b = RobustFpt::new_1(b_);
                 a /= b;
-                assert_eq!(a.fpv(), a_ / b_);
+                approx::assert_ulps_eq!(a.fpv(), a_ / b_);
             }
         }
     }
@@ -120,7 +152,7 @@ fn div_1() {
     let a = RobustFpt::new_1(12.);
     let b = RobustFpt::new_1(4.);
     let s = a / b;
-    assert_eq!(s.fpv(), 3.0)
+    approx::assert_ulps_eq!(s.fpv(), 3.0)
 }
 
 #[test]
@@ -128,81 +160,81 @@ fn div_2() {
     let mut a = RobustFpt::new_1(6.);
     let b = RobustFpt::new_1(2.);
     a /= b;
-    assert_eq!(a.fpv(), 3.0)
+    approx::assert_ulps_eq!(a.fpv(), 3.0)
 }
 
 #[test]
 fn sqrt_1() {
     let a = RobustFpt::new_1(9.0f32);
     let b = a.sqrt();
-    assert_eq!(b.fpv(), 3.0, "a.fpv fail");
+    approx::assert_ulps_eq!(b.fpv(), 3.0);
     //assert_eq!(b.re(), 1.0 / 2.0 + 1.0, "a.re fail");
     let c = b * b;
-    assert_eq!(c.fpv(), 9.0, "b.fpv fail");
+    approx::assert_ulps_eq!(c.fpv(), 9.0);
     //assert_eq!(b.re(), (1.0 / 2.0 + 1.0) * 2.0, "b.re fail");
 }
 
 #[test]
 fn sqrt_2() {
     type F1 = f32;
-    let sqrte = VR::robust_sqrt_expr::<F1>::default();
+    let sqrte = RF::robust_sqrt_expr::<F1>::default();
 
-    let mut ca: [BigInt; 5] = [
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
+    let mut ca: [RF::ExtendedInt; 5] = [
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
     ];
-    let mut cb: [BigInt; 5] = [
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
+    let mut cb: [RF::ExtendedInt; 5] = [
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
     ];
 
     // Evaluates expression (re = 4 EPS):
     // A[0] * sqrt(B[0]).
-    ca[0] = BigInt::from(2);
-    cb[0] = BigInt::from(9);
+    ca[0] = RF::ExtendedInt::from(2);
+    cb[0] = RF::ExtendedInt::from(9);
 
     let a = sqrte.eval1(&ca[..], &cb[..]);
 
-    assert_eq!(a.d(), 2.0 * 3.0, "a.fpv fail");
+    approx::assert_ulps_eq!(a.d(), 2.0 * 3.0);
     //assert_eq!(a.re(), 4.0, "a.re fail");
 }
 
 #[test]
 fn sqrt_3() {
     type F1 = f32;
-    let sqrte = VR::robust_sqrt_expr::<F1>::default();
+    let sqrte = RF::robust_sqrt_expr::<F1>::default();
 
-    let mut ca: [BigInt; 5] = [
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
+    let mut ca: [RF::ExtendedInt; 5] = [
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
     ];
-    let mut cb: [BigInt; 5] = [
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
+    let mut cb: [RF::ExtendedInt; 5] = [
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
     ];
 
     // Evaluates expression (re = 7 EPS):
     // A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]).
-    ca[0] = BigInt::from(3);
-    cb[0] = BigInt::from(16);
-    ca[1] = BigInt::from(2);
-    cb[1] = BigInt::from(25);
+    ca[0] = RF::ExtendedInt::from(3);
+    cb[0] = RF::ExtendedInt::from(16);
+    ca[1] = RF::ExtendedInt::from(2);
+    cb[1] = RF::ExtendedInt::from(25);
 
     let a = sqrte.eval2(&ca[..], &cb[..]);
 
-    assert_eq!(a.d(), 3.0 * 4.0 + 2.0 * 5.0, "a.fpv fail");
+    approx::assert_ulps_eq!(a.d(), 3.0 * 4.0 + 2.0 * 5.0);
     //assert_eq!(a.re(), 7.0, "a.re fail");
 }
 
@@ -210,113 +242,109 @@ fn sqrt_3() {
 fn sqrt_4() {
     type F1 = f32;
 
-    let sqrte = VR::robust_sqrt_expr::<F1>::default();
+    let sqrte = RF::robust_sqrt_expr::<F1>::default();
 
-    let mut ca: [BigInt; 5] = [
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
+    let mut ca: [RF::ExtendedInt; 5] = [
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
     ];
-    let mut cb: [BigInt; 5] = [
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
-        BigInt::zero(),
+    let mut cb: [RF::ExtendedInt; 5] = [
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
+        RF::ExtendedInt::zero(),
     ];
 
     // A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) + A[2] * sqrt(B[2]).
 
-    ca[0] = BigInt::from(3);
-    cb[0] = BigInt::from(16);
-    ca[1] = BigInt::from(2);
-    cb[1] = BigInt::from(25);
-    ca[2] = BigInt::from(7);
-    cb[2] = BigInt::from(49);
+    ca[0] = RF::ExtendedInt::from(3);
+    cb[0] = RF::ExtendedInt::from(16);
+    ca[1] = RF::ExtendedInt::from(2);
+    cb[1] = RF::ExtendedInt::from(25);
+    ca[2] = RF::ExtendedInt::from(7);
+    cb[2] = RF::ExtendedInt::from(49);
 
     let a = sqrte.eval3(&ca[..], &cb[..]);
 
-    assert_eq!(a.d(), 3.0 * 4.0 + 2.0 * 5.0 + 7.0 * 7.0, "a.fpv fail");
+    approx::assert_ulps_eq!(a.d(), 3.0 * 4.0 + 2.0 * 5.0 + 7.0 * 7.0);
     //assert_eq!(a.re(), 7.0, "a.re fail");
 }
 
 #[test]
 fn sqrt_5() {
     type F2 = f64;
-    let sqrte = VR::robust_sqrt_expr::<F2>::default();
+    let sqrte = RF::robust_sqrt_expr::<F2>::default();
 
-    let ca: [BigInt; 5] = [
-        BigInt::from(3),
-        BigInt::from(2),
-        BigInt::from(7),
-        BigInt::from(8),
-        BigInt::zero(),
+    let ca: [RF::ExtendedInt; 5] = [
+        RF::ExtendedInt::from(3),
+        RF::ExtendedInt::from(2),
+        RF::ExtendedInt::from(7),
+        RF::ExtendedInt::from(8),
+        RF::ExtendedInt::zero(),
     ];
-    let cb: [BigInt; 5] = [
-        BigInt::from(16),
-        BigInt::from(25),
-        BigInt::from(49),
-        BigInt::from(64),
-        BigInt::zero(),
+    let cb: [RF::ExtendedInt; 5] = [
+        RF::ExtendedInt::from(16),
+        RF::ExtendedInt::from(25),
+        RF::ExtendedInt::from(49),
+        RF::ExtendedInt::from(64),
+        RF::ExtendedInt::zero(),
     ];
 
     // A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) +
     // A[2] * sqrt(B[2]) + A[3] * sqrt(B[3]).
     let a = sqrte.eval4(&ca[..], &cb[..]);
 
-    assert_eq!(
-        a.d(),
-        3.0 * 4.0 + 2.0 * 5.0 + 7.0 * 7.0 + 8.0 * 8.0,
-        "a.fpv fail"
-    );
+    approx::assert_ulps_eq!(a.d(), 3.0 * 4.0 + 2.0 * 5.0 + 7.0 * 7.0 + 8.0 * 8.0);
 }
 
 #[test]
 fn sqrt_6() {
     type F2 = f64;
-    let sqrte = VR::robust_sqrt_expr::<F2>::default();
+    let sqrte = RF::robust_sqrt_expr::<F2>::default();
 
-    let ca: [BigInt; 5] = [
-        BigInt::from(20205600),
-        BigInt::from(12),
-        BigInt::from(1147151200i64),
-        BigInt::from(-472),
-        BigInt::zero(),
+    let ca: [RF::ExtendedInt; 5] = [
+        RF::ExtendedInt::from(20205600),
+        RF::ExtendedInt::from(12),
+        RF::ExtendedInt::from(1147151200i64),
+        RF::ExtendedInt::from(-472),
+        RF::ExtendedInt::zero(),
     ];
-    let cb: [BigInt; 5] = [
-        BigInt::from(1825),
-        BigInt::from(6218073520360000i64),
-        BigInt::from(1),
-        BigInt::from(3407163572800i64),
-        BigInt::zero(),
+    let cb: [RF::ExtendedInt; 5] = [
+        RF::ExtendedInt::from(1825),
+        RF::ExtendedInt::from(6218073520360000i64),
+        RF::ExtendedInt::from(1),
+        RF::ExtendedInt::from(3407163572800i64),
+        RF::ExtendedInt::zero(),
     ];
 
     let a = sqrte.eval4(&ca[..], &cb[..]);
-    assert_eq!(a.d().floor(), 2085350584.0.floor(), "a.fpv fail");
+    approx::assert_ulps_eq!(a.d().floor(), 2085350584.0.floor());
 }
 
 #[test]
 fn sqrt_7() {
     type F2 = f64;
-    let sqrte = VR::robust_sqrt_expr::<F2>::default();
+    let sqrte = RF::robust_sqrt_expr::<F2>::default();
 
-    let ca: [BigInt; 5] = [
-        BigInt::from(74125000i64),
-        BigInt::from(17),
-        BigInt::from(370703125i64),
-        BigInt::from(-450),
-        BigInt::zero(),
+    let ca: [RF::ExtendedInt; 5] = [
+        RF::ExtendedInt::from(74125000i64),
+        RF::ExtendedInt::from(17),
+        RF::ExtendedInt::from(370703125i64),
+        RF::ExtendedInt::from(-450),
+        RF::ExtendedInt::zero(),
     ];
-    let cb: [BigInt; 5] = [
-        BigInt::from(1825),
-        BigInt::from(0),
-        BigInt::from(1),
-        BigInt::from(0),
-        BigInt::zero(),
+    let cb: [RF::ExtendedInt; 5] = [
+        RF::ExtendedInt::from(1825),
+        RF::ExtendedInt::from(0),
+        RF::ExtendedInt::from(1),
+        RF::ExtendedInt::from(0),
+        RF::ExtendedInt::zero(),
     ];
 
     let a = sqrte.eval4(&ca[..], &cb[..]);
-    assert_eq!(a.d().floor(), 3537324513.0.floor(), "a.fpv fail");
+    approx::assert_ulps_eq!(a.d().floor(), 3537324513.0.floor());
 }

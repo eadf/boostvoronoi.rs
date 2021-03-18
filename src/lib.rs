@@ -9,8 +9,6 @@
 #![allow(clippy::unknown_clippy_lints)]
 
 use core::fmt::Debug;
-use num::bigint::BigInt;
-use num::ToPrimitive;
 use num::{Float, NumCast, PrimInt, Zero};
 use std::cmp;
 use std::fmt;
@@ -373,9 +371,8 @@ where
 
     // todo! is there no way to solve this more efficiently?
     #[inline(always)]
-    pub fn i1_to_bi(input: I1) -> BigInt {
-        let stupid_generics = num::cast::<I1, i128>(input).unwrap();
-        BigInt::from(stupid_generics)
+    pub fn i1_to_xi(input: I1) -> robust_fpt::ExtendedInt {
+        robust_fpt::ExtendedInt::from(num::cast::<I1, i64>(input).unwrap())
     }
 
     #[inline(always)]
@@ -446,9 +443,8 @@ where
 
     // todo! is there no way to convert this directly?
     #[inline(always)]
-    pub fn i2_to_bi(input: I2) -> BigInt {
-        let stupid_generics = num::cast::<I2, i128>(input).unwrap();
-        BigInt::from(stupid_generics)
+    pub fn i2_to_xi(input: I2) -> robust_fpt::ExtendedInt {
+        robust_fpt::ExtendedInt::from(num::cast::<I2, i64>(input).unwrap())
     }
 
     #[inline(always)]
@@ -462,8 +458,8 @@ where
     }
 
     #[inline(always)]
-    pub fn bi_to_ext(input: &BigInt) -> robust_fpt::ExtendedExponentFpt<f64> {
-        robust_fpt::ExtendedExponentFpt::<f64>::new(input.to_f64().unwrap())
+    pub fn xi_to_xf(input: &robust_fpt::ExtendedInt) -> robust_fpt::ExtendedExponentFpt<f64> {
+        robust_fpt::ExtendedExponentFpt::from(input)
     }
 
     #[inline(always)]

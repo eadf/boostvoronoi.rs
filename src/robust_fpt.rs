@@ -52,7 +52,7 @@ mod robustdif_tests;
 mod robustfpt_tests;
 
 use super::OutputType;
-use num::{BigInt, Float, NumCast, ToPrimitive, Zero};
+use num::{Float, NumCast};
 use ordered_float::OrderedFloat;
 use std::fmt;
 use std::marker::PhantomData;
@@ -665,24 +665,45 @@ impl<
     > robust_sqrt_expr<_fpt>
 {
     #[inline(always)]
-    fn i_to_f(that: &BigInt) -> ExtendedExponentFpt<f64> {
-        ExtendedExponentFpt::<f64>::new(that.to_f64().unwrap())
+    fn i_to_f(that: &ExtendedInt) -> ExtendedExponentFpt<f64> {
+        ExtendedExponentFpt::<f64>::from(that)
     }
 
     /// Evaluates expression (re = 4 EPS):
     /// A[0] * sqrt(B[0]).
-    pub fn eval1(&self, a: &[BigInt], b: &[BigInt]) -> ExtendedExponentFpt<f64> {
+    pub fn eval1(&self, a: &[ExtendedInt], b: &[ExtendedInt]) -> ExtendedExponentFpt<f64> {
         let a = Self::i_to_f(&a[0]);
         let b = Self::i_to_f(&b[0]);
-        a * (b.sqrt())
+        //println!("eval1:");
+        //println!(" a:{:.0}", a.d());
+        //println!(" b:{:.0}", b.d());
+        #[cfg(feature = "console_debug_eval")]
+        {
+            let rv = a * (b.sqrt());
+            println!("eval1: {:.0}", rv.d());
+            rv
+        }
+        #[cfg(not(feature = "console_debug_eval"))]
+        {
+            a * (b.sqrt())
+        }
     }
 
     // Evaluates expression (re = 7 EPS):
     // A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]).
-    pub fn eval2(&self, a: &[BigInt], b: &[BigInt]) -> ExtendedExponentFpt<f64> {
+    pub fn eval2(&self, a: &[ExtendedInt], b: &[ExtendedInt]) -> ExtendedExponentFpt<f64> {
         let ra = self.eval1(a, b);
         let rb = self.eval1(&a[1..], &b[1..]);
-
+        #[cfg(feature = "console_debug_eval")]
+        {
+            println!("->eval2");
+            println!(" a[0]:{:.0}", a[0].d());
+            println!(" a[1]:{:.0}", a[1].d());
+            println!(" b[0]:{:.0}", b[0].d());
+            println!(" b[1]:{:.0}", b[1].d());
+            println!(" ra:{:.0}", ra.d());
+            println!(" rb:{:.0}", rb.d());
+        }
         if ra.is_zero()
             || rb.is_zero()
             || (!ra.is_neg() && !rb.is_neg())
@@ -690,21 +711,22 @@ impl<
         {
             return ra + rb;
         }
+
         let p = &a[0] * &a[0] * &b[0] - &a[1] * &a[1] * &b[1];
         let numer = Self::i_to_f(&p);
         let divisor = ra - rb;
-        #[cfg(feature = "console_debug")]
+        #[cfg(feature = "console_debug_eval")]
         {
             let rv = numer / divisor;
             println!(
-                "<-eval2:\n numer:{:?}\n divisor:{:?}\n rv:{:?}",
+                "<-eval2:\n numer:{:.0}\n divisor:{:.0}\n rv:{:.0}",
                 numer.d(),
                 divisor.d(),
                 rv.d()
             );
             rv
         }
-        #[cfg(not(feature = "console_debug"))]
+        #[cfg(not(feature = "console_debug_eval"))]
         {
             numer / divisor
         }
@@ -712,9 +734,21 @@ impl<
 
     /// Evaluates expression (re = 16 EPS):
     /// A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) + A[2] * sqrt(B[2]).
-    pub fn eval3(&self, a: &[BigInt], b: &[BigInt]) -> ExtendedExponentFpt<f64> {
+    pub fn eval3(&self, a: &[ExtendedInt], b: &[ExtendedInt]) -> ExtendedExponentFpt<f64> {
         let ra = self.eval2(a, b);
         let rb = self.eval1(&a[2..], &b[2..]);
+        #[cfg(feature = "console_debug_eval")]
+        {
+            println!("->eval3");
+            println!(" a[0]:{:.0}", a[0].d());
+            println!(" a[1]:{:.0}", a[1].d());
+            println!(" a[2]:{:.0}", a[2].d());
+            println!(" b[0]:{:.0}", b[0].d());
+            println!(" b[1]:{:.0}", b[1].d());
+            println!(" b[2]:{:.0}", b[2].d());
+            println!(" ra:{:.0}", ra.d());
+            println!(" rb:{:.0}", rb.d());
+        }
         if ra.is_zero()
             || rb.is_zero()
             || (!ra.is_neg() && !rb.is_neg())
@@ -722,21 +756,50 @@ impl<
         {
             return ra + rb;
         }
-        let mut ta = [BigInt::zero(), BigInt::zero()];
-        let mut tb = [BigInt::zero(), BigInt::zero()];
+        let mut ta = [ExtendedInt::zero(), ExtendedInt::zero()];
+        let mut tb = [ExtendedInt::zero(), ExtendedInt::zero()];
 
         ta[0] = &a[0] * &a[0] * &b[0] + &a[1] * &a[1] * &b[1] - &a[2] * &a[2] * &b[2];
-        tb[0] = BigInt::from(1);
-        ta[1] = &a[0] * &a[1] * 2;
+        tb[0] = ExtendedInt::from(1);
+        ta[1] = &a[0] * &a[1] * &ExtendedInt::from(2_i32);
         tb[1] = &b[0] * &b[1];
-
-        self.eval2(&ta[..], &tb[..]) / (ra - rb)
+        #[cfg(feature = "console_debug_eval")]
+        {
+            println!("<-eval3");
+            println!(" ta[0]:{:.0}", ta[0].d());
+            println!(" ta[1]:{:.0}", ta[1].d());
+            println!(" tb[0]:{:.0}", tb[0].d());
+            println!(" tb[1]:{:.0}", tb[1].d());
+            println!(" ra:{:.0} val:{:.12} exp:{:}", ra.d(), ra.val(), ra.exp());
+            println!(" rb:{:.0} val:{:.12} exp:{:}", rb.d(), rb.val(), rb.exp());
+            let rarb = ra - rb;
+            println!(
+                " ra-rb:{:.0} val:{:.12} exp:{:}",
+                rarb.d(),
+                rarb.val(),
+                rarb.exp()
+            );
+        }
+        let nom = self.eval2(&ta[..], &tb[..]);
+        let div = ra - rb;
+        #[cfg(feature = "console_debug_eval")]
+        {
+            let rv = nom / div;
+            println!(" nom:{:.0}", nom.d());
+            println!(" div:{:.0}", div.d());
+            println!(" rv:{:.0}", rv.d());
+            rv
+        }
+        #[cfg(not(feature = "console_debug_eval"))]
+        {
+            nom / div
+        }
     }
 
     /// Evaluates expression (re = 25 EPS):
     /// A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) +
     /// A[2] * sqrt(B[2]) + A[3] * sqrt(B[3]).
-    pub fn eval4(&self, a: &[BigInt], b: &[BigInt]) -> ExtendedExponentFpt<f64> {
+    pub fn eval4(&self, a: &[ExtendedInt], b: &[ExtendedInt]) -> ExtendedExponentFpt<f64> {
         let ra = self.eval2(a, b);
         let rb = self.eval2(&a[2..], &b[2..]);
 
@@ -747,25 +810,34 @@ impl<
         {
             return ra + rb;
         }
-        let mut ta = [BigInt::zero(), BigInt::zero(), BigInt::zero()];
-        let mut tb = [BigInt::zero(), BigInt::zero(), BigInt::zero()];
+        let mut ta = [
+            ExtendedInt::zero(),
+            ExtendedInt::zero(),
+            ExtendedInt::zero(),
+        ];
+        let mut tb = [
+            ExtendedInt::zero(),
+            ExtendedInt::zero(),
+            ExtendedInt::zero(),
+        ];
 
         ta[0] = &a[0] * &a[0] * &b[0] + &a[1] * &a[1] * &b[1]
             - &a[2] * &a[2] * &b[2]
             - &a[3] * &a[3] * &b[3];
-        tb[0] = BigInt::from(1);
-        ta[1] = &a[0] * &a[1] * 2;
+        tb[0] = ExtendedInt::from(1_i32);
+        ta[1] = &a[0] * &a[1] * &ExtendedInt::from(2_i32);
         tb[1] = &b[0] * &b[1];
-        ta[2] = &a[2] * &a[3] * -2;
+        ta[2] = &a[2] * &a[3] * &ExtendedInt::from(-2_i32);
         tb[2] = &b[2] * &b[3];
-        #[cfg(feature = "console_debug")]
+        #[cfg(feature = "console_debug_eval")]
         {
             let rv = self.eval3(&ta, &tb) / (ra - rb);
             println!("<-eval4:{}", rv.d());
             rv
         }
-        #[cfg(not(feature = "console_debug"))] {
-         self.eval3(&ta, &tb) / (ra - rb)
+        #[cfg(not(feature = "console_debug_eval"))]
+        {
+            self.eval3(&ta, &tb) / (ra - rb)
         }
     }
 
@@ -775,18 +847,18 @@ impl<
     #[allow(non_snake_case)]
     pub fn sqrt_expr_evaluator_pss3(
         &mut self,
-        A: &[BigInt],
-        B: &[BigInt],
+        A: &[ExtendedInt],
+        B: &[ExtendedInt],
     ) -> ExtendedExponentFpt<f64> {
-        let mut cA: [BigInt; 2] = [BigInt::zero(), BigInt::zero()];
-        let mut cB: [BigInt; 2] = [BigInt::zero(), BigInt::zero()];
+        let mut cA: [ExtendedInt; 2] = [ExtendedInt::zero(), ExtendedInt::zero()];
+        let mut cB: [ExtendedInt; 2] = [ExtendedInt::zero(), ExtendedInt::zero()];
 
         let lh = self.eval2(A, B);
         let rh = self.eval2(&A[2..], &B[2..]);
-        #[cfg(feature = "console_debug")]
+        #[cfg(feature = "console_debug_eval")]
         {
             println!(
-                "sqrt_expr_evaluator_pss3\n lh={:?}\n rh={:?}",
+                "sqrt_expr_evaluator_pss3\n lh={:.0}\n rh={:.0}",
                 lh.d(),
                 rh.d()
             );
@@ -796,7 +868,7 @@ impl<
             || (!lh.is_neg() && !rh.is_neg())
             || (!lh.is_pos() && !rh.is_pos())
         {
-            #[cfg(feature = "console_debug")]
+            #[cfg(feature = "console_debug_eval")]
             {
                 println!("<-sqrt_expr_evaluator_pss3 lh + rh");
             }
@@ -805,15 +877,15 @@ impl<
         cA[0] = &A[0] * &A[0] * &B[0] + &A[1] * &A[1] * &B[1]
             - &A[2] * &A[2]
             - &A[3] * &A[3] * &B[0] * &B[1];
-        cB[0] = BigInt::from(1);
-        cA[1] = (&A[0] * &A[1] - &A[2] * &A[3]) * 2;
+        cB[0] = ExtendedInt::from(1);
+        cA[1] = (&A[0] * &A[1] - &A[2] * &A[3]) * &ExtendedInt::from(2_i32);
         cB[1] = B[3].clone();
         let numer = self.eval2(&cA, &cB);
         let divisor = lh - rh;
-        #[cfg(feature = "console_debug")]
+        #[cfg(feature = "console_debug_eval")]
         {
             println!(
-                "<-sqrt_expr_evaluator_pss3\n numer={:?}\n divisor={:?}",
+                "<-sqrt_expr_evaluator_pss3\n numer:{:.0}\n divisor:{:.0}",
                 numer.d(),
                 divisor.d()
             );
@@ -826,60 +898,64 @@ impl<
     #[allow(non_snake_case)]
     pub fn sqrt_expr_evaluator_pss4(
         &mut self,
-        A: &[BigInt],
-        B: &[BigInt],
+        A: &[ExtendedInt],
+        B: &[ExtendedInt],
     ) -> ExtendedExponentFpt<f64> {
-        #[cfg(feature = "console_debug")]
+        #[cfg(feature = "console_debug_eval")]
         {
             println!("->sqrt_expr_evaluator_pss4");
-            println!(" A[0]={}", A[0]);
-            println!(" A[1]={}", A[1]);
-            println!(" A[2]={}", A[2]);
-            println!(" A[3]={}", A[3]);
-            println!(" B[0]={}", B[0]);
-            println!(" B[1]={}", B[1]);
-            println!(" B[2]={}", B[2]);
-            println!(" B[3]={}", B[3]);
+            println!(" A[0]={:?}", A[0]);
+            println!(" A[1]={:?}", A[1]);
+            println!(" A[2]={:?}", A[2]);
+            println!(" A[3]={:?}", A[3]);
+            println!(" B[0]={:?}", B[0]);
+            println!(" B[1]={:?}", B[1]);
+            println!(" B[2]={:?}", B[2]);
+            println!(" B[3]={:?}", B[3]);
         }
-        let mut cA: [BigInt; 4] = [
-            BigInt::zero(),
-            BigInt::zero(),
-            BigInt::zero(),
-            BigInt::zero(),
+        let mut cA: [ExtendedInt; 4] = [
+            ExtendedInt::zero(),
+            ExtendedInt::zero(),
+            ExtendedInt::zero(),
+            ExtendedInt::zero(),
         ];
-        let mut cB: [BigInt; 4] = [
-            BigInt::zero(),
-            BigInt::zero(),
-            BigInt::zero(),
-            BigInt::zero(),
+        let mut cB: [ExtendedInt; 4] = [
+            ExtendedInt::zero(),
+            ExtendedInt::zero(),
+            ExtendedInt::zero(),
+            ExtendedInt::zero(),
         ];
-        if A[3] == BigInt::zero() {
+        if A[3].is_zero() {
             let lh = self.eval2(A, B);
-            cA[0] = BigInt::from(1);
+            cA[0] = ExtendedInt::from(1);
             cB[0] = &B[0] * &B[1];
             cA[1] = B[2].clone();
-            cB[1] = BigInt::from(1);
+            cB[1] = ExtendedInt::from(1);
             let rh = self.eval1(&A[2..], &B[3..]) * self.eval2(&cA, &cB).sqrt();
             if lh.is_zero()
                 || rh.is_zero()
                 || (!lh.is_neg() && !rh.is_neg())
                 || (!lh.is_pos() && !rh.is_pos())
             {
-                #[cfg(feature = "console_debug")]
+                #[cfg(feature = "console_debug_eval")]
                 {
-                    println!("<-sqrt_expr_evaluator_pss4 1\nlh:{}\nrh:{}", lh.d(), rh.d());
+                    println!(
+                        "<-sqrt_expr_evaluator_pss4 1\nlh:{:.0}\nrh:{:.0}",
+                        lh.d(),
+                        rh.d()
+                    );
                 }
                 return lh + rh;
             }
             cA[0] = &A[0] * &A[0] * &B[0] + &A[1] * &A[1] * &B[1] - &A[2] * &A[2] * &B[3] * &B[2];
-            cB[0] = BigInt::from(1);
-            cA[1] = &A[0] * &A[1] * 2 - &A[2] * &A[2] * &B[3];
+            cB[0] = ExtendedInt::from(1_i32);
+            cA[1] = &A[0] * &A[1] * &ExtendedInt::from(2_i32) - &A[2] * &A[2] * &B[3];
             cB[1] = &B[0] * &B[1];
             let numer = self.eval2(&cA, &cB);
-            #[cfg(feature = "console_debug")]
+            #[cfg(feature = "console_debug_eval")]
             {
                 println!(
-                    "<-sqrt_expr_evaluator_pss4 2\nnumer:{}\nlh:{}\nrh:{}",
+                    "<-sqrt_expr_evaluator_pss4 2\nnumerator:{:.0}\nlh:{:.0}\nrh:{:.0}",
                     numer.d(),
                     lh.d(),
                     rh.d()
@@ -888,22 +964,22 @@ impl<
 
             return numer / (lh - rh);
         }
-        cA[0] = BigInt::from(1);
+        cA[0] = ExtendedInt::from(1);
         cB[0] = &B[0] * &B[1];
         cA[1] = B[2].clone();
-        cB[1] = BigInt::from(1);
+        cB[1] = ExtendedInt::from(1);
         let rh = self.eval1(&A[2..], &B[3..]) * (self.eval2(&cA, &cB).sqrt());
         cA[0] = A[0].clone();
         cB[0] = B[0].clone();
         cA[1] = A[1].clone();
         cB[1] = B[1].clone();
         cA[2] = A[3].clone();
-        cB[2] = BigInt::from(1);
+        cB[2] = ExtendedInt::from(1);
         let lh = self.eval3(&cA, &cB);
-        #[cfg(feature = "console_debug")]
+        #[cfg(feature = "console_debug_eval")]
         {
             println!(
-                "<-sqrt_expr_evaluator_pss4 2.5\nlh:{}\nrh:{}",
+                "<-sqrt_expr_evaluator_pss4 2.5\nlh:{:.0}\nrh:{:.0}",
                 lh.d(),
                 rh.d()
             );
@@ -920,23 +996,27 @@ impl<
             || (!lh.is_neg() && !rh.is_neg())
             || (!lh.is_pos() && !rh.is_pos())
         {
-            #[cfg(feature = "console_debug")]
+            #[cfg(feature = "console_debug_eval")]
             {
-                println!("<-sqrt_expr_evaluator_pss4 3\nlh:{}\nrh:{}", lh.d(), rh.d());
+                println!(
+                    "<-sqrt_expr_evaluator_pss4 3\nlh:{:.0}\nrh:{:.0}",
+                    lh.d(),
+                    rh.d()
+                );
             }
             return lh + rh;
         }
-        cA[0] = &A[3] * &A[0] * 2;
-        cA[1] = &A[3] * &A[1] * 2;
+        cA[0] = &A[3] * &A[0] * &ExtendedInt::from(2_i32);
+        cA[1] = &A[3] * &A[1] * &ExtendedInt::from(2_i32);
         cA[2] = &A[0] * &A[0] * &B[0] + &A[1] * &A[1] * &B[1] + &A[3] * &A[3]
             - &A[2] * &A[2] * &B[2] * &B[3];
-        cA[3] = &A[0] * &A[1] * 2 - &A[2] * &A[2] * &B[3];
+        cA[3] = &A[0] * &A[1] * &ExtendedInt::from(2_i32) - &A[2] * &A[2] * &B[3];
         cB[3] = &B[0] * &B[1];
         let numer = self.sqrt_expr_evaluator_pss3(&cA, &cB);
-        #[cfg(feature = "console_debug")]
+        #[cfg(feature = "console_debug_eval")]
         {
             println!(
-                "<-sqrt_expr_evaluator_pss4 4\nnumer:{}\nlh:{}\nrh:{}",
+                "<-sqrt_expr_evaluator_pss4 4\nnumer:{:.0}\nlh:{:.0}\nrh:{:.0}",
                 numer.d(),
                 lh.d(),
                 rh.d()
@@ -961,25 +1041,59 @@ where
 }
 const MAX_SIGNIFICANT_EXP_DIF_F64: i32 = 54;
 
+impl From<&ExtendedInt> for ExtendedExponentFpt<f64> {
+    #[inline]
+    /// converts to ExtendedExponentFpt::<f64>
+    /// ```
+    /// # use boostvoronoi::robust_fpt::ExtendedInt;
+    /// # use boostvoronoi::robust_fpt::ExtendedExponentFpt;
+    ///
+    /// let aa = 41232131332_f64;
+    /// let mut a = ExtendedInt::from(aa as i64);
+    /// let e = ExtendedExponentFpt::from(&a);
+    /// approx::assert_ulps_eq!(e.d(), aa);
+    /// ```
+    fn from(that: &ExtendedInt) -> Self {
+        let p = that.p();
+        Self::new2(p.0, p.1)
+    }
+}
+
+impl From<&ExtendedExponentFpt<f64>> for f64 {
+    #[inline]
+    /// converts from ExtendedExponentFpt<f64> to f64
+    /// ```
+    /// # use boostvoronoi::robust_fpt::*;
+    ///
+    /// let f1 = 345345345453_f64;
+    /// let e = ExtendedExponentFpt::from(f1);
+    /// let f2 = f64::from(&e);
+    /// approx::assert_ulps_eq!(f1, f2);
+    /// ```
+    fn from(that: &ExtendedExponentFpt<f64>) -> f64 {
+        that.d()
+    }
+}
+
+impl From<f64> for ExtendedExponentFpt<f64> {
+    #[inline]
+    /// converts from f64 to ExtendedExponentFpt<f64>
+    /// ```
+    /// # use boostvoronoi::robust_fpt::*;
+    ///
+    /// let f1 = 345345345453_f64;
+    /// let e = ExtendedExponentFpt::from(f1);
+    /// let f2 = f64::from(&e);
+    /// approx::assert_ulps_eq!(f1, f2);
+    /// ```
+    fn from(that: f64) -> ExtendedExponentFpt<f64> {
+        let rv = libm::frexp(that);
+        Self::new2(rv.0, rv.1)
+    }
+}
+
 #[allow(dead_code)]
 impl ExtendedExponentFpt<f64> {
-    /// Constructor with just one argument
-    /// ```
-    /// # use boostvoronoi::robust_fpt;
-    ///
-    /// let aa:f64 = 1000000000.0;
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
-    /// approx::assert_ulps_eq!(a.d(), aa);
-    /// ```
-    #[inline]
-    pub fn new(v: f64) -> Self {
-        let rv = libm::frexp(v);
-        Self {
-            val_: rv.0,
-            exp_: rv.1,
-        }
-    }
-
     /// Constructor with value and exponent as arguments.
     /// The value of this number is 'val_' * 2^ 'exp_'
     /// ```
@@ -990,9 +1104,10 @@ impl ExtendedExponentFpt<f64> {
     /// ```
     #[inline]
     pub fn new2(val: f64, exp: i32) -> Self {
+        let fr = libm::frexp(val);
         Self {
-            val_: val,
-            exp_: exp,
+            val_: fr.0,
+            exp_: exp + fr.1,
         }
     }
 
@@ -1002,15 +1117,15 @@ impl ExtendedExponentFpt<f64> {
     /// # use boostvoronoi::robust_fpt;
     ///
     /// let aa:f64 = 0_f64;
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(aa);
     /// assert_eq!(a.is_pos(), false);
     ///
     /// let aa:f64 = -0_f64;
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(aa);
     /// assert_eq!(a.is_pos(), false);
     ///
     /// let aa:f64 = f64::MIN_POSITIVE;
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(aa);
     /// assert_eq!(a.is_pos(), aa.is_sign_positive());
     /// ```
     #[inline]
@@ -1024,11 +1139,11 @@ impl ExtendedExponentFpt<f64> {
     /// # use boostvoronoi::robust_fpt;
     ///
     /// let aa:f64 = 0_f64;
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(aa);
     /// assert_eq!(a.is_neg(), aa.is_sign_negative());
     ///
     /// let aa:f64 = -0_f64;
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(aa);
     /// assert_eq!(a.is_neg(), false);
     /// ```
     #[inline]
@@ -1042,19 +1157,19 @@ impl ExtendedExponentFpt<f64> {
     /// # use num_traits::identities::Zero;
     ///
     /// let aa:f64 = 0_f64;
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(aa);
     /// assert_eq!(a.is_zero(), aa.is_zero());
     ///
     /// let aa:f64 = -0_f64;
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(aa);
     /// assert_eq!(a.is_zero(), aa.is_zero());
     ///
     /// let aa:f64 = f64::MIN_POSITIVE;
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(aa);
     /// assert_eq!(a.is_zero(), aa.is_zero());
     ///
     /// let aa:f64 = -f64::MIN_POSITIVE;
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(aa);
     /// assert_eq!(a.is_zero(), aa.is_zero());
     /// ```
     #[inline]
@@ -1067,19 +1182,43 @@ impl ExtendedExponentFpt<f64> {
     /// # use boostvoronoi::robust_fpt;
     ///
     /// let aa:f64 = f64::MAX;
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(aa);
     /// approx::assert_ulps_eq!(a.d(), aa);
     /// let a = a.sqrt();
     /// approx::assert_ulps_eq!(a.d(), aa.sqrt());
     /// ```
+    #[inline]
     pub fn sqrt(&self) -> Self {
+        #[cfg(feature = "console_debug_eval")]
+        {
+            println!(
+                "->sqrt:{:.12} val:{:.12} exp:{:}",
+                self.d(),
+                self.val(),
+                self.exp()
+            );
+        }
         let mut val = self.val_;
         let mut exp = self.exp_;
         if (exp & 1) != 0 {
             val *= 2.0;
             exp -= 1;
         }
-        Self::new2(val.sqrt(), exp >> 1)
+        #[cfg(feature = "console_debug_eval")]
+        {
+            let rv = Self::new2(val.sqrt(), exp >> 1);
+            println!(
+                "<-sqrt:{:.12} val:{:.12} exp:{:}",
+                rv.d(),
+                rv.val(),
+                rv.exp()
+            );
+            rv
+        }
+        #[cfg(not(feature = "console_debug_eval"))]
+        {
+            Self::new2(val.sqrt(), exp >> 1)
+        }
     }
 
     /// A to-float operation.
@@ -1087,13 +1226,21 @@ impl ExtendedExponentFpt<f64> {
     /// # use boostvoronoi::robust_fpt;
     ///
     /// let aa:f64 = 1000000000.0;
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(aa);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(aa);
     /// approx::assert_ulps_eq!(a.d(), aa);
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(-aa);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(-aa);
     /// approx::assert_ulps_eq!(a.d(), -aa);
     /// ```
     pub fn d(&self) -> f64 {
         libm::ldexp(self.val_, self.exp_)
+    }
+
+    pub fn val(&self) -> f64 {
+        self.val_
+    }
+
+    pub fn exp(&self) -> i32 {
+        self.exp_
     }
 }
 
@@ -1103,12 +1250,12 @@ impl ops::Neg for ExtendedExponentFpt<f64> {
     /// ```
     /// # use boostvoronoi::robust_fpt;
     ///
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
     ///
     /// approx::assert_ulps_eq!(a.d(), 1_f64);
     /// let c = -a;
     /// approx::assert_ulps_eq!(c.d(), -1_f64);
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1000000000.0);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(1000000000_f64);
     /// approx::assert_ulps_eq!(a.d(), 1000000000_f64);
     /// let c = -a;
     /// approx::assert_ulps_eq!(c.d(), -1000000000_f64);
@@ -1127,8 +1274,8 @@ impl ops::Add for ExtendedExponentFpt<f64> {
     /// ```
     /// # use boostvoronoi::robust_fpt;
     ///
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
-    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2.0);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::from(2_f64);
     ///
     /// approx::assert_ulps_eq!(a.d(), 1_f64);
     /// approx::assert_ulps_eq!(b.d(), 2_f64);
@@ -1136,8 +1283,8 @@ impl ops::Add for ExtendedExponentFpt<f64> {
     /// approx::assert_ulps_eq!(c.d(), 3_f64);
     /// let c = c + b;
     /// approx::assert_ulps_eq!(c.d(), 5_f64);
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1000000000.0);
-    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2000000000.0);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(1000000000_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::from(2000000000_f64);
     /// approx::assert_ulps_eq!(a.d(), 1000000000_f64);
     /// approx::assert_ulps_eq!(b.d(), 2000000000_f64);
     /// let c = a + b;
@@ -1167,8 +1314,8 @@ impl ops::Sub for ExtendedExponentFpt<f64> {
     /// ```
     /// # use boostvoronoi::robust_fpt;
     ///
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
-    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(-2.0);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::from(-2_f64);
     ///
     /// approx::assert_ulps_eq!(a.d(), 1_f64);
     /// approx::assert_ulps_eq!(b.d(), -2_f64);
@@ -1176,8 +1323,8 @@ impl ops::Sub for ExtendedExponentFpt<f64> {
     /// approx::assert_ulps_eq!(c.d(), 3_f64);
     /// let c = c - b;
     /// approx::assert_ulps_eq!(c.d(), 5_f64);
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1000000000.0);
-    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(-3000000000.0);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(1000000000_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::from(-3000000000_f64);
     /// approx::assert_ulps_eq!(a.d(), 1000000000_f64);
     /// approx::assert_ulps_eq!(b.d(), -3000000000_f64);
     /// let c = a - b;
@@ -1207,15 +1354,15 @@ impl ops::Mul for ExtendedExponentFpt<f64> {
     /// ```
     /// # use boostvoronoi::robust_fpt;
     ///
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
-    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2.0);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::from(2_f64);
     ///
     /// approx::assert_ulps_eq!(a.d(), 1_f64);
     /// approx::assert_ulps_eq!(b.d(), 2_f64);
     /// let c = a * b;
     /// approx::assert_ulps_eq!(c.d(), 2_f64);
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1000000000.0);
-    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2000000000.0);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(1000000000_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::from(2000000000_f64);
     /// approx::assert_ulps_eq!(a.d(), 1000000000_f64);
     /// approx::assert_ulps_eq!(b.d(), 2000000000_f64);
     /// let c = a * b;
@@ -1233,15 +1380,15 @@ impl ops::Div for ExtendedExponentFpt<f64> {
     /// ```
     /// # use boostvoronoi::robust_fpt;
     ///
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
-    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2.0);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::from(2_f64);
     ///
     /// approx::assert_ulps_eq!(a.d(), 1_f64);
     /// approx::assert_ulps_eq!(b.d(), 2_f64);
     /// let c = a / b;
     /// approx::assert_ulps_eq!(c.d(), 1.0/2.0);
-    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::new(2000000000_f64);
-    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(-2000000000_f64);
+    /// let a = robust_fpt::ExtendedExponentFpt::<f64>::from(2000000000_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::from(-2000000000_f64);
     /// approx::assert_ulps_eq!(a.d(),  2000000000_f64);
     /// approx::assert_ulps_eq!(b.d(), -2000000000_f64);
     /// let c = a / b;
@@ -1258,8 +1405,8 @@ impl ops::AddAssign for ExtendedExponentFpt<f64> {
     /// ```
     /// # use boostvoronoi::robust_fpt;
     ///
-    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
-    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2.0);
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::from(2_f64);
     ///
     /// approx::assert_ulps_eq!(a.d(), 1_f64);
     /// approx::assert_ulps_eq!(b.d(), 2_f64);
@@ -1267,8 +1414,8 @@ impl ops::AddAssign for ExtendedExponentFpt<f64> {
     /// approx::assert_ulps_eq!(a.d(), 3_f64);
     /// a += b;
     /// approx::assert_ulps_eq!(a.d(), 5_f64);
-    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(1000000000.0);
-    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2000000000.0);
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::from(1000000000_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::from(2000000000_f64);
     /// approx::assert_ulps_eq!(a.d(), 1000000000_f64);
     /// approx::assert_ulps_eq!(b.d(), 2000000000_f64);
     /// a += b;
@@ -1301,8 +1448,8 @@ impl ops::SubAssign for ExtendedExponentFpt<f64> {
     /// ```
     /// # use boostvoronoi::robust_fpt;
     ///
-    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
-    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(-2.0);
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::from(-2_f64);
     ///
     /// approx::assert_ulps_eq!(a.d(), 1_f64);
     /// approx::assert_ulps_eq!(b.d(), -2_f64);
@@ -1310,8 +1457,8 @@ impl ops::SubAssign for ExtendedExponentFpt<f64> {
     /// approx::assert_ulps_eq!(a.d(), 3_f64);
     /// a -= b;
     /// approx::assert_ulps_eq!(a.d(), 5_f64);
-    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(1000000000.0);
-    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(-3000000000.0);
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::from(1000000000_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::from(-3000000000_f64);
     /// approx::assert_ulps_eq!(a.d(), 1000000000_f64);
     /// approx::assert_ulps_eq!(b.d(), -3000000000_f64);
     /// a -= b;
@@ -1343,15 +1490,15 @@ impl ops::MulAssign for ExtendedExponentFpt<f64> {
     /// ```
     /// # use boostvoronoi::robust_fpt;
     ///
-    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
-    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2.0);
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::from(2_f64);
     ///
     /// approx::assert_ulps_eq!(a.d(), 1_f64);
     /// approx::assert_ulps_eq!(b.d(), 2_f64);
     /// a *= b;
     /// approx::assert_ulps_eq!(a.d(), 2_f64);
-    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(1000000000.0);
-    /// let     b = robust_fpt::ExtendedExponentFpt::<f64>::new(2000000000.0);
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::from(1000000000_f64);
+    /// let     b = robust_fpt::ExtendedExponentFpt::<f64>::from(2000000000_f64);
     /// approx::assert_ulps_eq!(a.d(), 1000000000_f64);
     /// approx::assert_ulps_eq!(b.d(), 2000000000_f64);
     /// a *= b;
@@ -1367,15 +1514,15 @@ impl ops::DivAssign for ExtendedExponentFpt<f64> {
     /// ```
     /// # use boostvoronoi::robust_fpt;
     ///
-    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(1.0);
-    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(2.0);
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::from(2_f64);
     ///
     /// approx::assert_ulps_eq!(a.d(), 1_f64);
     /// approx::assert_ulps_eq!(b.d(), 2_f64);
     /// a /= b;
     /// approx::assert_ulps_eq!(a.d(), 1.0/2.0);
-    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::new(2000000000_f64);
-    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::new(-2000000000_f64);
+    /// let mut a = robust_fpt::ExtendedExponentFpt::<f64>::from(2000000000_f64);
+    /// let b = robust_fpt::ExtendedExponentFpt::<f64>::from(-2000000000_f64);
     /// approx::assert_ulps_eq!(a.d(),  2000000000_f64);
     /// approx::assert_ulps_eq!(b.d(), -2000000000_f64);
     /// a /= b;
@@ -1402,41 +1549,39 @@ pub struct ExtendedInt {
     count: i32,
 }
 
-impl ExtendedInt {
+impl From<i32> for ExtendedInt {
+    #[inline]
     /// ```
     /// # use boostvoronoi::robust_fpt::ExtendedInt;
     ///
     /// let aa = 42_f64;
-    /// let a = ExtendedInt::new_i32(aa as i32);
+    /// let a = ExtendedInt::from(aa as i32);
     /// approx::assert_ulps_eq!(a.d(), aa);
     /// ```
-    pub fn new_i32(that: i32) -> Self {
-        let mut rv = Self {
-            chunks: smallvec::SmallVec::<[Wrapping<u32>; 4]>::default(),
-            count: 0,
-        };
+    fn from(that: i32) -> Self {
+        let mut rv = Self::zero();
         if that > 0 {
             rv.chunks.push(Wrapping(that as u32));
             rv.count = 1;
-        } else {
+        } else if that < 0 {
             rv.chunks.push(Wrapping((-that) as u32));
             rv.count = -1;
         }
         rv
     }
+}
 
+impl From<i64> for ExtendedInt {
+    #[inline]
     ///```
     /// # use boostvoronoi::robust_fpt::ExtendedInt;
     ///
     /// let aa = 41232131332_f64;
-    /// let a = ExtendedInt::new_i64(aa as i64);
+    /// let a = ExtendedInt::from(aa as i64);
     /// approx::assert_ulps_eq!(a.d(), aa);
     /// ```
-    pub fn new_i64(that: i64) -> Self {
-        let mut rv = Self {
-            chunks: smallvec::SmallVec::<[Wrapping<u32>; 4]>::default(),
-            count: 0,
-        };
+    fn from(that: i64) -> Self {
+        let mut rv = Self::zero();
         if that > 0 {
             let mut c = that as u64;
             rv.chunks.push(Wrapping((c & 0xFFFFFFFF) as u32));
@@ -1459,6 +1604,17 @@ impl ExtendedInt {
             }
         }
         rv
+    }
+}
+
+impl ExtendedInt {
+    /// todo implement num::Zero
+    #[inline(always)]
+    pub fn zero() -> Self {
+        Self {
+            chunks: smallvec::SmallVec::<[Wrapping<u32>; 4]>::default(),
+            count: 0,
+        }
     }
 
     /// Return the mantissa and exponent components of this integer.
@@ -1496,14 +1652,17 @@ impl ExtendedInt {
         rv
     }
 
+    #[inline(always)]
     pub fn is_pos(&self) -> bool {
         self.count > 0
     }
 
+    #[inline(always)]
     pub fn is_neg(&self) -> bool {
         self.count < 0
     }
 
+    #[inline(always)]
     pub fn is_zero(&self) -> bool {
         self.count == 0
     }
@@ -1513,7 +1672,7 @@ impl ExtendedInt {
     /// # use boostvoronoi::robust_fpt::ExtendedInt;
     ///
     /// let aa = 41232131332_f64;
-    /// let mut a = ExtendedInt::new_i64(aa as i64);
+    /// let mut a = ExtendedInt::from(aa as i64);
     /// a.negate();
     /// approx::assert_ulps_eq!(a.d(), -aa);
     /// ```
@@ -1533,7 +1692,7 @@ impl ExtendedInt {
     /// # use boostvoronoi::robust_fpt::ExtendedInt;
     ///
     /// let aa = 41232131332_f64;
-    /// let mut a = ExtendedInt::new_i64(aa as i64);
+    /// let mut a = ExtendedInt::from(aa as i64);
     /// let e = a.e();
     /// approx::assert_ulps_eq!(e.d(), aa);
     /// ```
@@ -1548,12 +1707,13 @@ impl ExtendedInt {
         //assert_eq!(rv,self.chunks.len());
         //rv
         // TODO replace this with return self.chunks.len() when stable
-        assert_eq!(self.chunks.len(),self.count.abs()as usize);
+        //assert_eq!(self.chunks.len(), self.count.abs()as usize);
         self.count.abs() as usize
     }
 
     /// this method assumes self is an empty object
     fn add_others(&mut self, e1: &Self, e2: &Self) {
+        //println!("->add_others {:?} {:?} {:?}", self, e1, e2);
         if e1.count == 0 {
             self.count = e2.count;
             self.chunks = e2.chunks.clone();
@@ -1597,10 +1757,14 @@ impl ExtendedInt {
             temp >>= 32;
         }
         if temp != 0 {
-            // whut diz??? && (self.count != N)) {
-            self.chunks[self.count as usize] = Wrapping(temp as u32);
+            if self.chunks.len() <= self.count as usize {
+                self.chunks.push(Wrapping(temp as u32));
+            } else {
+                self.chunks[self.count as usize] = Wrapping(temp as u32);
+            }
             self.count += 1;
         }
+        // Todo: remove these asserts when stable
         assert!(self.count >= 0);
         assert_eq!(self.chunks.len(), self.count as usize);
     }
@@ -1640,7 +1804,7 @@ impl ExtendedInt {
         sz2: usize,
         rec: bool,
     ) {
-        //println!("->dif_slice {:?} c1:{:?} sz1:{} c2:{:?} sz2:{} rec:{}", self, c1, sz1, c2, sz2, rec);
+        //println!("->dif_slice {:?} count:{} c1:{:?} sz1:{} c2:{:?} sz2:{} rec:{}", self, self.count, c1, sz1, c2, sz2, rec);
         let mut sz2 = sz2;
         let mut sz1 = sz1;
         if sz1 < sz2 {
@@ -1686,7 +1850,14 @@ impl ExtendedInt {
         }
         if self.chunks[self.count as usize].0 != 0 {
             self.count += 1;
+            if (self.count as usize) > self.chunks.len() {
+                self.chunks.push(Wrapping(0));
+            }
         }
+        if (self.count as usize) < self.chunks.len() {
+            let _ = self.chunks.pop();
+        }
+        // Todo: remove these asserts when stable
         assert!(self.count >= 0);
         assert_eq!(self.chunks.len(), self.count as usize);
         //println!("<-dif_slice#1 {:?}", self);
@@ -1751,9 +1922,13 @@ impl ExtendedInt {
         }
         if cur != 0 {
             //&& (self.count != N)) {
-            self.chunks[self.count as usize] = Wrapping(cur as u32);
+            assert_eq!(self.count as usize, self.chunks.len());
+            self.chunks.push(Wrapping(cur as u32));
+            //self.chunks[self.count as usize] = Wrapping(cur as u32);
             self.count += 1;
         }
+        // Todo: remove these asserts when stable
+
         assert!(self.count >= 0);
         assert_eq!(self.chunks.len(), self.count as usize);
         //println!("<-mul_slice {:?}", self);
@@ -1762,7 +1937,7 @@ impl ExtendedInt {
 
 impl Default for ExtendedInt {
     fn default() -> Self {
-        Self::new_i32(0)
+        Self::from(0_i32)
     }
 }
 
@@ -1774,8 +1949,8 @@ impl ops::Add for ExtendedInt {
     ///
     /// let aa = 472_f64;
     /// let bb = 147_f64;
-    /// let a = ExtendedInt::new_i64(aa as i64);
-    /// let b = ExtendedInt::new_i64(bb as i64);
+    /// let a = ExtendedInt::from(aa as i64);
+    /// let b = ExtendedInt::from(bb as i64);
     /// let c = a+b;
     /// approx::assert_ulps_eq!(c.d(), aa+bb);
     ///```
@@ -1794,8 +1969,8 @@ impl<'a, 'b> ops::Add<&'b ExtendedInt> for &'a ExtendedInt {
     ///
     /// let aa = 472_f64;
     /// let bb = 147_f64;
-    /// let a = ExtendedInt::new_i64(aa as i64);
-    /// let b = ExtendedInt::new_i64(bb as i64);
+    /// let a = ExtendedInt::from(aa as i64);
+    /// let b = ExtendedInt::from(bb as i64);
     /// let c = &a+&b;
     /// approx::assert_ulps_eq!(c.d(), aa+bb);
     ///```
@@ -1814,8 +1989,8 @@ impl<'b> ops::Add<&'b ExtendedInt> for ExtendedInt {
     ///
     /// let aa = 472_f64;
     /// let bb = 147_f64;
-    /// let a = ExtendedInt::new_i64(aa as i64);
-    /// let b = ExtendedInt::new_i64(bb as i64);
+    /// let a = ExtendedInt::from(aa as i64);
+    /// let b = ExtendedInt::from(bb as i64);
     /// let c = a+&b;
     /// approx::assert_ulps_eq!(c.d(), aa+bb);
     ///```
@@ -1834,8 +2009,8 @@ impl ops::Sub for ExtendedInt {
     ///
     /// let aa = 4727377593577731_f64;
     /// let bb = 759935777381_f64;
-    /// let a = ExtendedInt::new_i64(aa as i64);
-    /// let b = ExtendedInt::new_i64(bb as i64);
+    /// let a = ExtendedInt::from(aa as i64);
+    /// let b = ExtendedInt::from(bb as i64);
     /// let c = a-b;
     /// approx::assert_ulps_eq!(c.d(), aa-bb);
     ///```
@@ -1854,8 +2029,8 @@ impl<'a, 'b> ops::Sub<&'b ExtendedInt> for &'a ExtendedInt {
     ///
     /// let aa = 4727377593577731_f64;
     /// let bb = 759935777381_f64;
-    /// let a = ExtendedInt::new_i64(aa as i64);
-    /// let b = ExtendedInt::new_i64(bb as i64);
+    /// let a = ExtendedInt::from(aa as i64);
+    /// let b = ExtendedInt::from(bb as i64);
     /// let c = &a-&b;
     /// approx::assert_ulps_eq!(c.d(), aa-bb);
     ///```
@@ -1874,8 +2049,8 @@ impl<'b> ops::Sub<&'b ExtendedInt> for ExtendedInt {
     ///
     /// let aa = 4727377593577731_f64;
     /// let bb = 759935777381_f64;
-    /// let a = ExtendedInt::new_i64(aa as i64);
-    /// let b = ExtendedInt::new_i64(bb as i64);
+    /// let a = ExtendedInt::from(aa as i64);
+    /// let b = ExtendedInt::from(bb as i64);
     /// let c = a-&b;
     /// approx::assert_ulps_eq!(c.d(), aa-bb);
     ///```
@@ -1894,8 +2069,8 @@ impl ops::Mul for ExtendedInt {
     ///
     /// let aa = 4727377593577731_f64;
     /// let bb = 759935777381_f64;
-    /// let a = ExtendedInt::new_i64(aa as i64);
-    /// let b = ExtendedInt::new_i64(bb as i64);
+    /// let a = ExtendedInt::from(aa as i64);
+    /// let b = ExtendedInt::from(bb as i64);
     /// let c = a*b;
     /// approx::assert_ulps_eq!(c.d(), aa*bb);
     ///```
@@ -1914,8 +2089,8 @@ impl<'a, 'b> ops::Mul<&'b ExtendedInt> for &'a ExtendedInt {
     ///
     /// let aa = 4727377593577731_f64;
     /// let bb = 759935777381_f64;
-    /// let a = ExtendedInt::new_i64(aa as i64);
-    /// let b = ExtendedInt::new_i64(bb as i64);
+    /// let a = ExtendedInt::from(aa as i64);
+    /// let b = ExtendedInt::from(bb as i64);
     /// let c = &a*&b;
     /// approx::assert_ulps_eq!(c.d(), aa*bb);
     ///```
@@ -1934,8 +2109,8 @@ impl<'b> ops::Mul<&'b ExtendedInt> for ExtendedInt {
     ///
     /// let aa = 4727377593577731_f64;
     /// let bb = 759935777381_f64;
-    /// let a = ExtendedInt::new_i64(aa as i64);
-    /// let b = ExtendedInt::new_i64(bb as i64);
+    /// let a = ExtendedInt::from(aa as i64);
+    /// let b = ExtendedInt::from(bb as i64);
     /// let c = a*&b;
     /// approx::assert_ulps_eq!(c.d(), aa*bb);
     ///```
@@ -1953,7 +2128,7 @@ impl ops::Neg for ExtendedInt {
     /// # use boostvoronoi::robust_fpt::ExtendedInt;
     ///
     /// let aa = 4727377593577731_f64;
-    /// let a = -ExtendedInt::new_i64(aa as i64);
+    /// let a = -ExtendedInt::from(aa as i64);
     /// approx::assert_ulps_eq!(a.d(), -aa);
     ///```
     fn neg(mut self) -> Self {
@@ -1965,15 +2140,16 @@ impl ops::Neg for ExtendedInt {
 
 impl fmt::Debug for ExtendedInt {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.count == 0 {
+        write!(f, "{:.0}", self.d())
+        /*if self.count == 0 {
             write!(f, "ExtendedInt:0x0")
         } else {
             write!(f, "ExtendedInt:0x")?;
             for i in self.chunks.iter().rev() {
                 write!(f, "{:0>8X}_", *i)?;
             }
-            write!(f, " size:{}", self.size())?;
+            write!(f, " count:{}", self.count)?;
             Ok(())
-        }
+        }*/
     }
 }
