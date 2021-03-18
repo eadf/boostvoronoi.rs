@@ -149,6 +149,8 @@ pub enum BvError {
     SomeError { txt: String },
     #[error("Suspected self-intersecting input data")]
     SelfIntersecting { txt: String },
+    #[error("Could not cast number")]
+    NumberConversion { txt: String },
 }
 
 pub trait InputType:
@@ -369,7 +371,14 @@ where
         num::cast::<F1, i32>(input).unwrap()
     }
 
-    // todo! is there no way to solve this more efficiently?
+    #[inline(always)]
+    pub fn try_f1_to_i32(input: F1) -> Result<i32, BvError> {
+        num::cast::<F1, i32>(input).ok_or(BvError::NumberConversion {
+            txt: "Could not convert from float to int32".to_string(),
+        })
+    }
+
+    // todo! is there no way to do this more efficiently?
     #[inline(always)]
     pub fn i1_to_xi(input: I1) -> robust_fpt::ExtendedInt {
         robust_fpt::ExtendedInt::from(num::cast::<I1, i64>(input).unwrap())
@@ -386,6 +395,13 @@ where
     }
 
     #[inline(always)]
+    pub fn try_f1_to_i1(input: F1) -> Result<I1, BvError> {
+        num::cast::<F1, I1>(input).ok_or(BvError::NumberConversion {
+            txt: "Could not convert from float to int".to_string(),
+        })
+    }
+
+    #[inline(always)]
     pub fn f1_to_f64(input: F1) -> f64 {
         num::cast::<F1, f64>(input).unwrap()
     }
@@ -398,6 +414,11 @@ where
     #[inline(always)]
     pub fn i32_to_f1(input: i32) -> F1 {
         num::cast::<i32, F1>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn f32_to_f1(input: f32) -> F1 {
+        num::cast::<f32, F1>(input).unwrap()
     }
 
     #[inline(always)]

@@ -67,6 +67,12 @@ where
         affine: &SimpleAffine<I1, F1>,
         discretization: &mut Vec<[F1; 2]>,
     ) {
+        // no need to discretize infinitely small distances
+        if discretization[0][0] == discretization[1][0]
+            && discretization[0][1] == discretization[1][1]
+        {
+            return;
+        }
         // Apply the linear transformation to move start point of the segment to
         // the point with coordinates (0, 0) and the direction of the segment to
         // coincide the positive direction of the x-axis.
@@ -280,6 +286,27 @@ where
         }
         None
     }
+
+    /// grows the aabb uniformly by some percent.
+    /// method does nothing if not initialized
+    pub fn grow_percent(&mut self, percent: i32) {
+        if !self.min_max.is_none() {
+            let size_x = self.get_high().unwrap()[0] - self.get_low().unwrap()[0];
+            let size_y = self.get_high().unwrap()[1] - self.get_low().unwrap()[1];
+            let size = if size_x > size_y { size_x } else { size_y };
+
+            let delta = size * super::TypeConverter2::<I1, F1>::f32_to_f1((percent as f32) / 100.0);
+
+            let mut p = self.get_high().unwrap();
+            p[0] = p[0] + delta;
+            p[1] = p[1] + delta;
+            self.update_vertex(p[0], p[1]);
+            let mut p = self.get_low().unwrap();
+            p[0] = p[0] - delta;
+            p[1] = p[1] - delta;
+            self.update_vertex(p[0], p[1]);
+        }
+    }
 }
 
 /// This is a simple affine transformation object.
@@ -368,22 +395,24 @@ where
 
     /// transform from dest coordinate system to source coordinate system
     #[inline(always)]
-    pub fn reverse_transform(&self, x: F1, y: F1) -> [I1; 2] {
-        [self.reverse_transform_x(x), self.reverse_transform_y(y)]
+    pub fn reverse_transform(&self, x: F1, y: F1) -> Result<[I1; 2], BvError> {
+        let x = self.reverse_transform_x(x)?;
+        let y = self.reverse_transform_y(y)?;
+        Ok([x, y])
     }
 
     /// transform from dest coordinate system to source coordinate system
     #[inline(always)]
-    pub fn reverse_transform_x(&self, x: F1) -> I1 {
-        super::TypeConverter2::<I1, F1>::f1_to_i1(
+    pub fn reverse_transform_x(&self, x: F1) -> Result<I1, BvError> {
+        super::TypeConverter2::<I1, F1>::try_f1_to_i1(
             (x - self.to_offset[0]) / self.scale - self.to_center[0],
         )
     }
 
     /// transform from dest coordinate system to source coordinate system
     #[inline(always)]
-    pub fn reverse_transform_y(&self, y: F1) -> I1 {
-        super::TypeConverter2::<I1, F1>::f1_to_i1(
+    pub fn reverse_transform_y(&self, y: F1) -> Result<I1, BvError> {
+        super::TypeConverter2::<I1, F1>::try_f1_to_i1(
             (y - self.to_offset[1]) / self.scale - self.to_center[1],
         )
     }

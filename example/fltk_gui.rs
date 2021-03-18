@@ -324,7 +324,11 @@ fn main() -> Result<(), BvError> {
                 .visualizer
                 .affine
                 .reverse_transform(event.0 as f32, event.1 as f32);
-
+            if reverse_middle.is_err() {
+                println!("{:?}", reverse_middle.err().unwrap());
+                return false;
+            }
+            let reverse_middle = reverse_middle.unwrap();
             if event_dy != 0 {
                 shared_data_bm.visualizer.affine.scale *= 1.01_f32.powf(event_dy as f32);
             }
@@ -361,16 +365,15 @@ fn main() -> Result<(), BvError> {
                 mouse_drag = None;
             } else if event_key_down(Key::from_char('L')) || event_key_down(Key::from_char('S')) {
                 let mut shared_data_bm = shared_data_c.borrow_mut();
-                let point = Point {
-                    x: shared_data_bm
-                        .visualizer
-                        .affine
-                        .reverse_transform_x(event_x() as f32),
-                    y: shared_data_bm
-                        .visualizer
-                        .affine
-                        .reverse_transform_y(event_y() as f32),
-                };
+                let point = shared_data_bm
+                    .visualizer
+                    .affine
+                    .reverse_transform(event_x() as f32, event_y() as f32);
+                if point.is_err() {
+                    println!("{:?}", point.err().unwrap());
+                    return false;
+                }
+                let point = Point::from(point.unwrap());
                 if let Some(last_point) = shared_data_bm.last_click {
                     let line = Line {
                         start: last_point,
@@ -397,15 +400,16 @@ fn main() -> Result<(), BvError> {
                     println!("mouse at {:?}", event);
                     let mut shared_data_bm = shared_data_c.borrow_mut();
                     {
-                        let x = shared_data_bm
+                        let point = shared_data_bm
                             .visualizer
                             .affine
-                            .reverse_transform_x(event_x() as f32);
-                        let y = shared_data_bm
-                            .visualizer
-                            .affine
-                            .reverse_transform_y(event_y() as f32);
-                        shared_data_bm.visualizer.point_data_.push(Point { x, y });
+                            .reverse_transform(event_x() as f32, event_y() as f32);
+                        if point.is_err() {
+                            println!("{:?}", point.err().unwrap());
+                            return false;
+                        }
+                        let point = Point::from(point.unwrap());
+                        shared_data_bm.visualizer.point_data_.push(point);
                     }
                     let _ = shared_data_bm.visualizer.build();
 
@@ -464,9 +468,9 @@ where
     I2: BigIntType + Neg<Output = I2>,
     F2: BigFloatType + Neg<Output = F2>,
 {
-    bounding_rect: VU::Aabb2<I1, F1>,
+    screen_aabb: VU::Aabb2<I1, F1>,
     diagram: VD::VoronoiDiagram<I1, F1, I2, F2>,
-    vertex_aabb: VU::Aabb2<I1, F1>,
+    points_aabb: VU::Aabb2<I1, F1>,
 
     point_data_: Vec<boostvoronoi::Point<I1>>,
     segment_data_: Vec<boostvoronoi::Line<I1>>,
@@ -482,9 +486,9 @@ where
 {
     pub fn default() -> Self {
         Self {
-            bounding_rect: VU::Aabb2::<I1, F1>::new_from_i32(0, 0, FW, FH),
+            screen_aabb: VU::Aabb2::<I1, F1>::new_from_i32(0, 0, FW, FH),
             diagram: VD::VoronoiDiagram::<I1, F1, I2, F2>::new(0),
-            vertex_aabb: VU::Aabb2::<I1, F1>::default(),
+            points_aabb: VU::Aabb2::<I1, F1>::default(),
             point_data_: Vec::<boostvoronoi::Point<I1>>::new(),
             segment_data_: Vec::<boostvoronoi::Line<I1>>::new(),
             affine: VU::SimpleAffine::default(),
@@ -494,7 +498,7 @@ where
     /// recalculates the affine transformation, this should not be done every time
     /// the diagram is re-calculated or the screen will move around when adding new edges and points.
     pub fn re_calculate_affine(&mut self) -> Result<(), BvError> {
-        self.affine = VU::SimpleAffine::new(&self.vertex_aabb, &self.bounding_rect)?;
+        self.affine = VU::SimpleAffine::new(&self.points_aabb, &self.screen_aabb)?;
         Ok(())
     }
 
@@ -519,7 +523,17 @@ where
 
         // Construct voronoi diagram.
         self.diagram = vb.construct()?;
-        self.vertex_aabb = self.diagram.vertices_get_aabb();
+        self.points_aabb = {
+            let mut aabb = VU::Aabb2::default();
+            for p in self.point_data_.iter() {
+                aabb.update_point(p);
+            }
+            for l in self.segment_data_.iter() {
+                aabb.update_line(l);
+            }
+            aabb.grow_percent(20);
+            aabb
+        };
 
         // Color exterior edges.
         for it in self.diagram.edges().iter() {
@@ -656,10 +670,10 @@ where
     #[allow(dead_code)]
     /// Draw bounding box.
     fn draw_bb(&self) {
-        let min_x = Self::f1_to_i32(self.bounding_rect.get_low().unwrap()[0]);
-        let max_x = Self::f1_to_i32(self.bounding_rect.get_high().unwrap()[0]);
-        let min_y = Self::f1_to_i32(self.bounding_rect.get_low().unwrap()[1]);
-        let max_y = Self::f1_to_i32(self.bounding_rect.get_high().unwrap()[1]);
+        let min_x = Self::f1_to_i32(self.screen_aabb.get_low().unwrap()[0]);
+        let max_x = Self::f1_to_i32(self.screen_aabb.get_high().unwrap()[0]);
+        let min_y = Self::f1_to_i32(self.screen_aabb.get_low().unwrap()[1]);
+        let max_y = Self::f1_to_i32(self.screen_aabb.get_high().unwrap()[1]);
 
         draw::draw_line(min_x, min_y, max_x, min_y);
         draw::draw_line(min_x, max_y, max_x, max_y);
@@ -829,11 +843,24 @@ where
                 }
             }
             for i in 0..samples.len() - 1 {
-                let x1 = Self::f1_to_i32(samples[i][0]);
-                let y1 = Self::f1_to_i32(samples[i][1]);
-                let x2 = Self::f1_to_i32(samples[i + 1][0]);
-                let y2 = Self::f1_to_i32(samples[i + 1][1]);
-                draw::draw_line(x1, y1, x2, y2);
+                let x1 = Self::try_f1_to_i32(samples[i][0]);
+                if x1.is_err() {
+                    break;
+                }
+                let y1 = Self::try_f1_to_i32(samples[i][1]);
+                if y1.is_err() {
+                    break;
+                }
+                let x2 = Self::try_f1_to_i32(samples[i + 1][0]);
+                if x2.is_err() {
+                    break;
+                }
+                let y2 = Self::try_f1_to_i32(samples[i + 1][1]);
+                if y2.is_err() {
+                    break;
+                }
+
+                draw::draw_line(x1.unwrap(), y1.unwrap(), x2.unwrap(), y2.unwrap());
             }
         }
     }
@@ -887,8 +914,7 @@ where
                 direction[1] = dx;
             }
         }
-        let side =
-            self.bounding_rect.get_high().unwrap()[0] - self.bounding_rect.get_low().unwrap()[0];
+        let side = self.screen_aabb.get_high().unwrap()[0] - self.screen_aabb.get_low().unwrap()[0];
         let koef = side / Self::max_f1(direction[0].abs(), direction[1].abs());
 
         let vertex0 = edge.get().vertex0();
@@ -927,8 +953,7 @@ where
         sampled_edge: &mut Vec<[F1; 2]>,
     ) {
         let max_dist = Self::f32_to_f1(1E-3)
-            * (self.bounding_rect.get_high().unwrap()[0]
-                - self.bounding_rect.get_low().unwrap()[0]);
+            * (self.screen_aabb.get_high().unwrap()[0] - self.screen_aabb.get_low().unwrap()[0]);
 
         let cell_id = self.diagram.edge_get_cell(Some(edge_id)).unwrap();
         let cell = self.diagram.get_cell(cell_id).get();
@@ -1454,8 +1479,8 @@ where
     }
 
     #[inline(always)]
-    pub fn i1_to_i32(value: I1) -> i32 {
-        TypeConverter2::<I1, F1>::i1_to_i32(value)
+    pub fn try_f1_to_i32(value: F1) -> Result<i32, BvError> {
+        TypeConverter2::<I1, F1>::try_f1_to_i32(value)
     }
 
     #[inline(always)]
