@@ -791,19 +791,26 @@ where
             // This edge has already been colored, break recursion
             return;
         }
+
+        let v0 = self.edge_get_vertex0(edge_id);
+        let v1 = self.edge_get_vertex1(edge_id);
+        if v0.is_some() && v1.is_none() {
+            // this edge leads to nowhere, break recursion
+            self.edge_or_color(edge_id, external_color);
+            return
+        }
         // Color this and the twin edge as EXTERNAL
         self.edge_or_color(edge_id, external_color);
         self.edge_or_color(self.edge_get_twin(edge_id), external_color);
-        let v = self.edge_get_vertex1(edge_id);
-        if v.is_none()
-            || self.vertex_is_site_point(v).unwrap_or(true)
+        if v1.is_none()
+            || self.vertex_is_site_point(v1).unwrap_or(true)
             || !self.get_edge(edge_id.unwrap()).get().is_primary() {
             // stop recursion if this edge does not have a vertex1 (e.g is infinite)
             // or if this edge isn't a primary edge.
             return;
         }
-        self.vertex_set_color(v, external_color);
-        let incident_edge = self.vertex_get_incident_edge(v);
+        self.vertex_set_color(v1, external_color);
+        let incident_edge = self.vertex_get_incident_edge(v1);
         for e in self.edge_rot_next_iterator(incident_edge) {
             // mark all surrounding edges as EXTERNAL, but only recurse on primary edges
             self.color_exterior(Some(e), external_color);

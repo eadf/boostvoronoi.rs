@@ -1579,6 +1579,7 @@ where
                         return false;
                     }
                     LazyCircleFormationFunctor::<I1, F1, I2, F2>::ppp(site1, site2, site3, circle);
+                    //Self::circle_formation_predicate_test(site1, site2, site3, circle,"ppp".to_string());
                 } else {
                     // (point, point, segment) sites.
                     if !CircleExistencePredicate::<I1, F1, I2, F2>::pps(site1, site2, site3, 3) {
@@ -1587,6 +1588,7 @@ where
                     LazyCircleFormationFunctor::<I1, F1, I2, F2>::pps(
                         site1, site2, site3, 3, circle,
                     );
+                    //Self::circle_formation_predicate_test(site1, site2, site3, circle,"pps".to_string());
                 }
             } else if !site3.is_segment() {
                 // (point, segment, point) sites.
@@ -1594,12 +1596,15 @@ where
                     return false;
                 }
                 LazyCircleFormationFunctor::<I1, F1, I2, F2>::pps(site1, site3, site2, 2, circle);
+                //Self::circle_formation_predicate_test(site1, site2, site3, circle,"pps".to_string());
+
             } else {
                 // (point, segment, segment) sites.
                 if !CircleExistencePredicate::<I1, F1, I2, F2>::pss(site1, site2, site3, 1) {
                     return false;
                 }
                 LazyCircleFormationFunctor::<I1, F1, I2, F2>::pss(site1, site2, site3, 1, circle);
+                //Self::circle_formation_predicate_test(site1, site2, site3, circle,"pss".to_string());
             }
         } else if !site2.is_segment() {
             if !site3.is_segment() {
@@ -1608,12 +1613,14 @@ where
                     return false;
                 }
                 LazyCircleFormationFunctor::<I1, F1, I2, F2>::pps(site2, site3, site1, 1, circle);
+                //Self::circle_formation_predicate_test(site1, site2, site3, circle,"pss".to_string());
             } else {
                 // (segment, point, segment) sites.
                 if !CircleExistencePredicate::<I1, F1, I2, F2>::pss(site2, site1, site3, 2) {
                     return false;
                 }
                 LazyCircleFormationFunctor::<I1, F1, I2, F2>::pss(site2, site1, site3, 2, circle);
+                //Self::circle_formation_predicate_test(site1, site2, site3, circle,"pss".to_string());
             }
         } else if !site3.is_segment() {
             // (segment, segment, point) sites.
@@ -1621,12 +1628,14 @@ where
                 return false;
             }
             LazyCircleFormationFunctor::<I1, F1, I2, F2>::pss(site3, site1, site2, 3, circle);
+            //Self::circle_formation_predicate_test(site1, site2, site3, circle,"pss".to_string());
         } else {
             // (segment, segment, segment) sites.
             if !CircleExistencePredicate::<I1, F1, I2, F2>::sss(site1, site2, site3) {
                 return false;
             }
             LazyCircleFormationFunctor::<I1, F1, I2, F2>::sss(site1, site2, site3, circle);
+            //Self::circle_formation_predicate_test(site1, site2, site3, circle,"sss".to_string());
         }
 
         if Self::lies_outside_vertical_segment(&circle, site1)
@@ -1637,6 +1646,65 @@ where
         }
         true
     }
+    /*
+    /// Just a test
+    /// Only site1 and site2 can make a site-point-vertex
+    /// point, segment, segment can use site 1 - point 0
+    /// segment, point, segment can use site 2 - point 1
+    ///
+    #[allow(dead_code)]
+    pub(crate) fn circle_formation_predicate_test(
+        site1: &VSE::SiteEvent<I1, F1, I2, F2>,
+        _site2: &VSE::SiteEvent<I1, F1, I2, F2>,
+        _site3: &VSE::SiteEvent<I1, F1, I2, F2>,
+        circle: &VC::CircleEventType<F2>,
+        text:String,
+    ) {
+        if circle.is_site_point() {
+            return
+        }
+        let (x,y) = {
+            let c = circle.0.get();
+            (super::TypeConverter4::<I1,F1,I2,F2>::f2_to_f32(c.raw_x()),
+             super::TypeConverter4::<I1,F1,I2,F2>::f2_to_f32(c.raw_y()))
+        };
+        if approx::ulps_eq!(x, super::TypeConverter2::<I1,F1>::i1_to_f32(site1.point0_.x)) &&
+           approx::ulps_eq!(y,super::TypeConverter2::<I1,F1>::i1_to_f32(site1.point0_.y))
+        {
+            println!("{} makes a site-vertex site-1-0", text);
+            return
+        }
+        if approx::ulps_eq!(x, super::TypeConverter2::<I1,F1>::i1_to_f32(site1.point1_.x)) &&
+            approx::ulps_eq!(y,super::TypeConverter2::<I1,F1>::i1_to_f32(site1.point1_.y))
+        {
+            println!("{} makes a site-vertex site-1-1", text);
+            return
+        }
+        if approx::ulps_eq!(x, super::TypeConverter2::<I1,F1>::i1_to_f32(_site2.point0_.x)) &&
+            approx::ulps_eq!(y,super::TypeConverter2::<I1,F1>::i1_to_f32(_site2.point0_.y))
+        {
+            println!("{} makes a site-vertex site-2-0", text);
+            return
+        }
+        if approx::ulps_eq!(x, super::TypeConverter2::<I1,F1>::i1_to_f32(_site2.point1_.x)) &&
+            approx::ulps_eq!(y,super::TypeConverter2::<I1,F1>::i1_to_f32(_site2.point1_.y))
+        {
+            println!("{} makes a site-vertex site-2-1", text);
+            return
+        }
+        if approx::ulps_eq!(x, super::TypeConverter2::<I1,F1>::i1_to_f32(_site3.point0_.x)) &&
+            approx::ulps_eq!(y,super::TypeConverter2::<I1,F1>::i1_to_f32(_site3.point0_.y))
+        {
+            println!("{} makes a site-vertex site-3-0", text);
+            return
+        }
+        if approx::ulps_eq!(x, super::TypeConverter2::<I1,F1>::i1_to_f32(_site3.point1_.x)) &&
+            approx::ulps_eq!(y,super::TypeConverter2::<I1,F1>::i1_to_f32(_site3.point1_.y))
+        {
+            println!("{} makes a site-vertex site-3-1", text);
+            return
+        }
+    }*/
 }
 
 #[derive(Default)]

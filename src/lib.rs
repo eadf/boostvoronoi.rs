@@ -385,11 +385,6 @@ where
     }
 
     #[inline(always)]
-    pub fn i1_to_i128(input: I1) -> i128 {
-        num::cast::<I1, i128>(input).unwrap()
-    }
-
-    #[inline(always)]
     pub fn f1_to_i1(input: F1) -> I1 {
         num::cast::<F1, I1>(input).unwrap()
     }
@@ -404,6 +399,11 @@ where
     #[inline(always)]
     pub fn f1_to_f64(input: F1) -> f64 {
         num::cast::<F1, f64>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn f1_to_f32(input: F1) -> f32 {
+        num::cast::<F1, f32>(input).unwrap()
     }
 
     #[inline(always)]
@@ -424,6 +424,11 @@ where
     #[inline(always)]
     pub fn i1_to_i32(input: I1) -> i32 {
         num::cast::<I1, i32>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn i1_to_f32(input: I1) -> f32 {
+        num::cast::<I1, f32>(input).unwrap()
     }
 
     #[inline(always)]
@@ -496,6 +501,11 @@ where
     #[inline(always)]
     pub fn f2_to_f64(input: F2) -> f64 {
         num::cast::<F2, f64>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn f2_to_f32(input: F2) -> f32 {
+        num::cast::<F2, f32>(input).unwrap()
     }
 
     #[inline(always)]

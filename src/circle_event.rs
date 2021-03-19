@@ -187,6 +187,10 @@ impl<F2: OutputType + Neg<Output = F2>> CircleEventC<F2> {
         selfc.is_site_point = true;
         self.0.set(selfc)
     }
+    #[allow(dead_code)]
+    pub(crate) fn is_site_point(& self) -> bool{
+        self.0.get().is_site_point
+     }
 }
 
 impl<F2: OutputType + Neg<Output = F2>> PartialOrd for CircleEventC<F2> {
