@@ -43,36 +43,39 @@ bitflags! {
         // The edge/vertex belongs to a Cell defined by a point
         const CELL_POINT   = 0b00010000;
         const INFINITE     = 0b00100000;
+        // The vertex coincides with a site point
+        const SITE_VERTEX  = 0b01000000;
     }
 }
 
 bitflags! {
     pub struct DrawFilterFlag: u32 {
         /// Edges considered to be outside all closed input geometry
-        const EXTERNAL =      0b00000000000001;
-        const PRIMARY =       0b00000000000010;
-        const CURVE =         0b00000000000100;
-        const VERTICES=       0b00000000001000;
+        const EXTERNAL =      0b000000000000001;
+        const PRIMARY =       0b000000000000010;
+        const CURVE =         0b000000000000100;
+        const VERTICES=       0b000000000001000;
         /// All edges
-        const EDGES=          0b00000000010000;
-        const SECONDARY =     0b00000000100000;
+        const EDGES=          0b000000000010000;
+        const SECONDARY =     0b000000000100000;
         /// Input geometry points
-        const INPUT_POINT =   0b00000001000000;
+        const INPUT_POINT =   0b000000001000000;
         /// Input geometry segments
-        const INPUT_SEGMENT = 0b00000010000000;
+        const INPUT_SEGMENT = 0b000000010000000;
         /// Edge belonging to cells defined by a segment
-        const E_CELL_SEGMENT= 0b00000100000000;
+        const E_CELL_SEGMENT= 0b000000100000000;
         /// Edge belonging to cells defined by a point
-        const E_CELL_POINT =  0b00001000000000;
+        const E_CELL_POINT =  0b000001000000000;
         /// Vertices belonging to cells defined by a segment
-        const V_CELL_SEGMENT= 0b00010000000000;
+        const V_CELL_SEGMENT= 0b000010000000000;
         /// Vertices belonging to cells defined by a point
-        const V_CELL_POINT =  0b00100000000000;
+        const V_CELL_POINT =  0b000100000000000;
         /// Draw infinite edges
-        const INFINITE =      0b01000000000000;
+        const INFINITE =      0b001000000000000;
         /// Draw curves as straight lines
-        const CURVE_LINE =    0b10000000000000;
-        const DRAW_ALL =      0b11111111111111;
+        const CURVE_LINE =    0b010000000000000;
+        const SITE_VERTEX =   0b100000000000000;
+        const DRAW_ALL =      0b111111111111111;
     }
 }
 
@@ -154,6 +157,12 @@ fn main() -> Result<(), BvError> {
         .with_label("vertices");
     vertices_button.toggle(true);
     vertices_button.set_frame(FrameType::PlasticUpBox);
+
+    let mut site_vertices_button = RoundButton::default()
+        .with_size(180, 25)
+        .with_label("site vertices");
+    site_vertices_button.toggle(true);
+    site_vertices_button.set_frame(FrameType::PlasticUpBox);
 
     let mut edges_button = RoundButton::default()
         .with_size(180, 25)
@@ -276,6 +285,7 @@ fn main() -> Result<(), BvError> {
     input_segments_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::INPUT_SEGMENT));
     curved_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::CURVE));
     vertices_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::VERTICES));
+    site_vertices_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::SITE_VERTEX));
     edges_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::EDGES));
     curved_as_lines_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::CURVE_LINE));
 
@@ -689,9 +699,15 @@ where
         let draw_external = config.draw_flag.contains(DrawFilterFlag::EXTERNAL);
         let draw_cell_points = config.draw_flag.contains(DrawFilterFlag::V_CELL_POINT);
         let draw_cell_segment = config.draw_flag.contains(DrawFilterFlag::V_CELL_SEGMENT);
+        let draw_site_vertex = config.draw_flag.contains(DrawFilterFlag::SITE_VERTEX);
 
         for it in self.diagram.vertex_iter().enumerate() {
             let vertex = it.1.get();
+
+            if (!draw_site_vertex) && vertex.is_site_vertex()
+            {
+                continue;
+            }
             if (!draw_external)
                 && ColorFlag::from_bits(vertex.get_color())
                     .unwrap()

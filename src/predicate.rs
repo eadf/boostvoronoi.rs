@@ -1149,6 +1149,19 @@ where
         let segm_end1 = site2.point0();
         let segm_start2 = site3.point0();
         let segm_end2 = site3.point1();
+
+        // this is a case that does not exists in c++ boost voronoi
+        // It seems better to use the pristine int coordinate instead of calculating it - again,
+        // with floats.
+        if (site1.point0() == site2.point0() || site1.point0() == site2.point1() ) &&
+           (site1.point0() == site3.point0() || site1.point0() == site3.point1() ) {
+            c_event.set_is_site_point();
+            let x = i1_to_f2(site1.point0().x);
+            let y = i1_to_f2(site1.point0().y);
+            c_event.set_3_raw(x, y,x );
+            //println!("sv1: x:{}, y:{} site1:{:?} site2{:?}, site3:{:?}", x, y, site1, site2, site3);
+            return
+        }
         let a1 = i1_to_f2(segm_end1.x) - i1_to_f2(segm_start1.x);
         let b1 = i1_to_f2(segm_end1.y) - i1_to_f2(segm_start1.y);
         let a2 = i1_to_f2(segm_end2.x) - i1_to_f2(segm_start2.x);
@@ -1549,9 +1562,9 @@ where
             || UlpComparison::ulp_comparison(cc_y, y1, 64) == cmp::Ordering::Greater
     }
 
-    // Create a circle event from the given three sites.
-    // Returns true if the circle event exists, else false.
-    // If exists circle event is saved into the c_event variable.
+    /// Create a circle event from the given three sites.
+    /// Returns true if the circle event exists, else false.
+    /// If exists circle event is saved into the c_event variable.
     pub(crate) fn circle_formation_predicate(
         site1: &VSE::SiteEvent<I1, F1, I2, F2>,
         site2: &VSE::SiteEvent<I1, F1, I2, F2>,

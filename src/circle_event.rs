@@ -35,10 +35,8 @@ pub type CircleEventIndexType = usize;
 ///   center_x_ - center x-coordinate;
 ///   center_y_ - center y-coordinate;
 ///   lower_x_ - leftmost x-coordinate;
-///   is_active_ - states whether circle event is still active.
 /// NOTE: lower_y coordinate is always equal to center_y.
 ///
-
 #[derive(Copy, Clone)]
 pub struct CircleEvent<F2: OutputType + Neg<Output = F2>> {
     index_: Option<CircleEventIndexType>, // the list index inside CircleEventQueue
@@ -46,6 +44,7 @@ pub struct CircleEvent<F2: OutputType + Neg<Output = F2>> {
     center_y_: OrderedFloat<F2>,
     lower_x_: OrderedFloat<F2>,
     beach_line_index_: Option<VB::BeachLineIndex>, //beach_line_iterator in C++
+    is_site_point:bool,
 }
 
 impl<F2> fmt::Debug for CircleEvent<F2>
@@ -73,8 +72,8 @@ impl<F2: OutputType + Neg<Output = F2>> Default for CircleEvent<F2> {
             center_x_: OrderedFloat(F2::zero()),
             center_y_: OrderedFloat(F2::zero()),
             lower_x_: OrderedFloat(F2::zero()),
-            //is_active_: false,
             beach_line_index_: None,
+            is_site_point:false,
         }
     }
 }
@@ -182,6 +181,12 @@ impl<F2: OutputType + Neg<Output = F2>> CircleEventC<F2> {
         let _ = selfc.set_raw_lower_x(num::cast::<f64, F2>(x.d()).unwrap());
         self.0.set(selfc);
     }
+
+    pub(crate) fn set_is_site_point(& self){
+        let mut selfc = self.0.get();
+        selfc.is_site_point = true;
+        self.0.set(selfc)
+    }
 }
 
 impl<F2: OutputType + Neg<Output = F2>> PartialOrd for CircleEventC<F2> {
@@ -222,6 +227,7 @@ where
             lower_x_: OrderedFloat(F2::zero()),
             beach_line_index_: Some(bech_line_index),
             index_: None,
+            is_site_point:false,
         }
     }
 
@@ -297,6 +303,13 @@ where
         self
     }
 
+    #[allow(dead_code)]
+    #[inline(always)]
+    pub(crate) fn raw_lower_x(&self) -> F2 {
+        self.lower_x_.into_inner()
+    }
+
+    #[inline(always)]
     pub(crate) fn set_raw_lower_x(&mut self, x: F2) -> &mut Self {
         self.lower_x_ = OrderedFloat(x);
         self
@@ -308,10 +321,16 @@ where
         self.center_y_
     }
 
+    #[inline(always)]
     pub(crate) fn set_3_raw(&mut self, x: F2, y: F2, lower_x: F2) {
         let _ = self.set_x_raw(x);
         let _ = self.set_raw_y(y);
         let _ = self.set_raw_lower_x(lower_x);
+    }
+
+    #[inline(always)]
+    pub(crate) fn is_site_point(&self) ->bool{
+        self.is_site_point
     }
 }
 
