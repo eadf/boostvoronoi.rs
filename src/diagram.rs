@@ -763,6 +763,42 @@ where
         None
     }
 
+    /// Iterates over all edges, colors each edge as exterior if it has an unbroken primary edge
+    /// link connection to an infinite edge.
+    pub fn color_exterior_edges(&self, external_color: ColorType) {
+        for it in self.edges().iter() {
+            let edge_id = Some(it.get().get_id());
+            if !self.edge_is_finite(edge_id).unwrap() {
+                self.color_exterior(edge_id, external_color);
+            }
+        }
+    }
+
+    /// Todo: something is wrong here, some external edges will remain unmarked.
+    /// The same bug exists in C++ too.
+    /// Some secondary internal edges are inevitably marked too.
+    fn color_exterior(&self, edge_id: Option<VoronoiEdgeIndex>, external_color: ColorType) {
+        if edge_id.is_none() || (self.edge_get_color(edge_id).unwrap() & external_color) != 0 {
+            // This edge has already been colored, break recursion
+            return;
+        }
+        // Color this and the twin edge as EXTERNAL
+        self.edge_or_color(edge_id, external_color);
+        self.edge_or_color(self.edge_get_twin(edge_id), external_color);
+        let v = self.edge_get_vertex1(edge_id);
+        if v.is_none() || !self.get_edge(edge_id.unwrap()).get().is_primary() {
+            // stop if this edge does not have a vertex1 (e.g is infinite)
+            // or if this edge isn't a primary edge.
+            return;
+        }
+        self.vertex_set_color(v, external_color);
+        let incident_edge = self.vertex_get_incident_edge(v);
+        for e in self.edge_rot_next_iterator(incident_edge) {
+            // mark all surrounding edges as EXTERNAL, but only recurse on primary edges
+            self.color_exterior(Some(e), external_color);
+        }
+    }
+
     pub fn cell_iter(&self) -> core::slice::Iter<CellType<I1, F1>> {
         self.cells_.iter()
     }

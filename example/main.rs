@@ -1,4 +1,5 @@
 use boostvoronoi::builder as VB;
+use boostvoronoi::diagram as VD;
 use boostvoronoi::BvError;
 //use boostvoronoi::InputType;
 
@@ -6,6 +7,8 @@ type I1 = i64;
 type F1 = f64;
 type I2 = i64;
 type F2 = f64;
+
+const EXTERNAL: VD::ColorType = 1;
 
 #[allow(dead_code)]
 fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
@@ -65,7 +68,7 @@ fn main() -> Result<(), BvError> {
     println!("cells:{}", output.cells().len());
     println!("vertices:{}", output.vertices().len());
     //println!("edges:{}", output.edges().len());
-
+    output.color_exterior_edges(EXTERNAL);
     output.debug_print_edges();
     Ok(())
 }

@@ -536,10 +536,12 @@ where
         };
 
         // Color exterior edges.
+        self.diagram.color_exterior_edges(ColorFlag::EXTERNAL.bits);
+
+        // Color infinite edges
         for it in self.diagram.edges().iter() {
             let edge_id = Some(it.get().get_id());
             if !self.diagram.edge_is_finite(edge_id).unwrap() {
-                self.color_exterior(edge_id);
                 self.diagram
                     .edge_or_color(edge_id, ColorFlag::INFINITE.bits);
             }
@@ -612,38 +614,6 @@ where
             }
         }
         false
-    }
-
-    /// Todo something is wrong here, some external edges will remain unmarked
-    /// some secondary internal edges are marked too.
-    fn color_exterior(&self, edge_id: Option<VD::VoronoiEdgeIndex>) {
-        if edge_id.is_none()
-            || ColorFlag::from_bits(self.diagram.edge_get_color(edge_id).unwrap())
-                .unwrap()
-                .contains(ColorFlag::EXTERNAL)
-        {
-            // This edge has already been colored, break recursion
-            return;
-        }
-        // Color this and the twin edge as EXTERNAL
-        self.diagram
-            .edge_or_color(edge_id, ColorFlag::EXTERNAL.bits);
-        self.diagram.edge_or_color(
-            self.diagram.edge_get_twin(edge_id),
-            ColorFlag::EXTERNAL.bits,
-        );
-        let v = self.diagram.edge_get_vertex1(edge_id);
-        if v.is_none() || !self.diagram.get_edge(edge_id.unwrap()).get().is_primary() {
-            // stop if this edge does not have a vertex1 (e.g is infinite)
-            // or if this edge isn't a primary edge.
-            return;
-        }
-        self.diagram.vertex_set_color(v, ColorFlag::EXTERNAL.bits);
-        let incident_edge = self.diagram.vertex_get_incident_edge(v);
-        for e in self.diagram.edge_rot_next_iterator(incident_edge) {
-            // mark all surrounding edges as EXTERNAL, but only recurse on primary edges
-            self.color_exterior(Some(e));
-        }
     }
 
     fn draw(&self, config: &SharedData) -> Result<(), BvError> {
