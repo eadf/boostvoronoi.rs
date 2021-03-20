@@ -704,7 +704,7 @@ where
         for it in self.diagram.vertex_iter().enumerate() {
             let vertex = it.1.get();
 
-            if (!draw_site_vertex) && vertex.is_site_vertex()
+            if (!draw_site_vertex) && vertex.is_site_point()
             {
                 continue;
             }

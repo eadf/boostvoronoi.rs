@@ -502,9 +502,9 @@ where
         self.set_color(self.get_color() | color)
     }
 
-    /// Returns true if vertex coincides with an input site.
+    /// Returns true if this vertex coincides with an input site.
     #[inline]
-    pub fn is_site_vertex(&self) -> bool {
+    pub fn is_site_point(&self) -> bool {
         (self.color_ & ColorBits::SITE_VERTEX.0) != 0
     }
 }
@@ -1009,7 +1009,7 @@ where
     /// returns true if this vertex coincides with an site point
     pub fn vertex_is_site_point(&self, vertex_id: Option<VoronoiVertexIndex>)-> Option<bool> {
         let _ = vertex_id?;
-        self.vertex_get(vertex_id).map(|cell| cell.get().is_site_vertex())
+        self.vertex_get(vertex_id).map(|cell| cell.get().is_site_point())
     }
 
     fn _edge_new_3(
