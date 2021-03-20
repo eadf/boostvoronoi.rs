@@ -293,7 +293,7 @@ fn main() -> Result<(), BvError> {
         // initialize visualizer
         let cl = Rc::clone(&shared_data_rc);
         let mut shared_data_bm = cl.borrow_mut();
-        shared_data_bm.visualizer.read_data(Example::Simple);
+        shared_data_bm.visualizer.read_data(Example::Complex);
         let _ = shared_data_bm.visualizer.build();
         shared_data_bm.visualizer.re_calculate_affine()?;
     }

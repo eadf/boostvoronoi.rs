@@ -791,16 +791,15 @@ where
             // This edge has already been colored, break recursion
             return;
         }
+        // Color edge as EXTERNAL
+        self.edge_or_color(edge_id, external_color);
 
-        let v0 = self.edge_get_vertex0(edge_id);
         let v1 = self.edge_get_vertex1(edge_id);
-        if v0.is_some() && v1.is_none() {
+        if  self.edge_get_vertex0(edge_id).is_some() && v1.is_none() {
             // this edge leads to nowhere, break recursion
-            self.edge_or_color(edge_id, external_color);
             return
         }
-        // Color this and the twin edge as EXTERNAL
-        self.edge_or_color(edge_id, external_color);
+        // Color twin edge as EXTERNAL
         self.edge_or_color(self.edge_get_twin(edge_id), external_color);
         if v1.is_none()
             || self.vertex_is_site_point(v1).unwrap_or(true)
