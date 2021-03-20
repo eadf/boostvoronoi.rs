@@ -290,7 +290,7 @@ where
     /// grows the aabb uniformly by some percent.
     /// method does nothing if not initialized
     pub fn grow_percent(&mut self, percent: i32) {
-        if !self.min_max.is_none() {
+        if self.min_max.is_some() {
             let size_x = self.get_high().unwrap()[0] - self.get_low().unwrap()[0];
             let size_y = self.get_high().unwrap()[1] - self.get_low().unwrap()[1];
             let size = if size_x > size_y { size_x } else { size_y };

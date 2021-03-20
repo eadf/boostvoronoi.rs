@@ -1153,6 +1153,7 @@ where
         // this is a case that does not exists in c++ boost voronoi
         // It seems better to use the pristine int coordinate instead of re-calculating
         // it again with lossy floats.
+        #[allow(clippy::suspicious_operation_groupings)]
         if (site1.point0() == site2.point0() || site1.point0() == site2.point1() ) &&
            (site1.point0() == site3.point0() || site1.point0() == site3.point1() ) {
             c_event.set_is_site_point();

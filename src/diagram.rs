@@ -1009,11 +1009,7 @@ where
     /// returns true if this vertex coincides with an site point
     pub fn vertex_is_site_point(&self, vertex_id: Option<VoronoiVertexIndex>)-> Option<bool> {
         let _ = vertex_id?;
-        if let Some(cell) = self.vertex_get(vertex_id) {
-            Some(cell.get().is_site_vertex())
-        } else {
-            None
-        }
+        self.vertex_get(vertex_id).map(|cell| cell.get().is_site_vertex())
     }
 
     fn _edge_new_3(
