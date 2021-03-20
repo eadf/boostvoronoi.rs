@@ -11,6 +11,8 @@ This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortu
 Code still in development, not ready for any purpose.
 
 # Note
+The code uses ```#![feature(map_first_last)]``` i.e. rust nightly.
+
 The generics <I2,F2> will be removed in the next release. Instead, they will be hardcoded as ```i64``` and ```f64```.
 
 

@@ -4,9 +4,9 @@
 #![deny(unused_qualifications)]
 #![deny(unused_results)]
 #![deny(unused_imports)]
-// I use allow clippy::upper_case_acronyms
 #![allow(renamed_and_removed_lints)]
 #![allow(clippy::unknown_clippy_lints)]
+#![feature(map_first_last)]
 
 use core::fmt::Debug;
 use num::{Float, NumCast, PrimInt, Zero};

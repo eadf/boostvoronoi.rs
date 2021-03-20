@@ -14,7 +14,7 @@ use super::robust_fpt as RF;
 
 use super::OutputType;
 use ordered_float::OrderedFloat;
-use rb_tree::RBTree;
+use std::collections::BTreeSet;
 use std::cell::Cell;
 use std::cmp::Ordering;
 use std::fmt;
@@ -351,7 +351,7 @@ pub(crate) struct CircleEventQueue<F2>
 where
     F2: OutputType + Neg<Output = F2>,
 {
-    c_: RBTree<CircleEventType<F2>>,
+    c_: BTreeSet<CircleEventType<F2>>,
     c_list_: VecMap<CircleEventType<F2>>,
     c_list_next_free_index_: CircleEventIndexType,
     inactive_circle_ids_: yabf::Yabf, // Circle events turned inactive
@@ -360,7 +360,7 @@ where
 impl<F2: OutputType + Neg<Output = F2>> Default for CircleEventQueue<F2> {
     fn default() -> CircleEventQueue<F2> {
         Self {
-            c_: RBTree::new(),
+            c_: BTreeSet::new(),
             c_list_: VecMap::new(),
             c_list_next_free_index_: 0,
             inactive_circle_ids_: yabf::Yabf::default(),
@@ -385,14 +385,14 @@ where
 
     pub(crate) fn peek(&self) -> Option<&CircleEventType<F2>> {
         // Todo: maybe iterate until a non-removed event is found
-        self.c_.peek()
+        self.c_.first()
     }
 
     pub(crate) fn pop_inactive_at_top(&mut self) {
         let size_b4 = self.c_.len();
 
         while !self.is_empty() {
-            if let Some(peek) = self.c_.peek() {
+            if let Some(peek) = self.c_.first() {
                 if let Some(peek) = peek.0.get().get_index() {
                     //dbg!(peek);
                     if !self.is_active(peek) {
@@ -423,7 +423,7 @@ where
     /// was named pop in C++, but it was never used to actually get the item, only to destroy it
     ///
     pub(crate) fn pop_and_destroy(&mut self) {
-        if let Some(circle) = self.c_.pop() {
+        if let Some(circle) = self.c_.pop_first() {
             if let Some(circle_id) = circle.0.get().index_ {
                 let _ = self.c_list_.remove(circle_id);
                 let _ = self.inactive_circle_ids_.set_bit(circle_id, true);
@@ -487,7 +487,7 @@ where
     }
 
     pub(crate) fn top(&self) -> Option<&CircleEventType<F2>> {
-        let c = self.c_.peek();
+        let c = self.c_.first();
         if let Some(cc) = c {
             let id = cc.0.get().index_.unwrap();
             if !self.is_active(id) {
