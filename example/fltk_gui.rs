@@ -1,5 +1,6 @@
 use boostvoronoi::diagram as VD;
 use boostvoronoi::diagram::VoronoiEdgeIndex;
+use boostvoronoi::file_reader;
 use boostvoronoi::visual_utils as VU;
 use boostvoronoi::BvError;
 use boostvoronoi::{builder as VB, Line, Point};
@@ -11,6 +12,7 @@ use std::ops::Neg;
 use fltk::app::event_key_down;
 use fltk::app::{event_x, event_y, redraw};
 use fltk::button::RoundButton;
+use fltk::dialog::FileDialogType;
 use fltk::enums::Key;
 use fltk::menu::MenuButton;
 use fltk::*;
@@ -81,9 +83,9 @@ bitflags! {
 
 #[derive(Debug, Clone, Copy)]
 pub enum Example {
+    File,
     Simple,
     Complex,
-    Atest,
     Clean,
 }
 
@@ -245,6 +247,13 @@ fn main() -> Result<(), BvError> {
     let (sender, receiver) = app::channel::<GuiMessage>();
 
     menu_but.add_emit(
+        "From file",
+        Shortcut::None,
+        menu::MenuFlag::Normal,
+        sender,
+        GuiMessage::MenuChoice(Example::File),
+    );
+    menu_but.add_emit(
         "Simple",
         Shortcut::None,
         menu::MenuFlag::Normal,
@@ -264,13 +273,6 @@ fn main() -> Result<(), BvError> {
         menu::MenuFlag::Normal,
         sender,
         GuiMessage::MenuChoice(Example::Clean),
-    );
-    menu_but.add_emit(
-        "A Test",
-        Shortcut::None,
-        menu::MenuFlag::Normal,
-        sender,
-        GuiMessage::MenuChoice(Example::Atest),
     );
 
     e_segment_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::E_CELL_SEGMENT));
@@ -301,24 +303,26 @@ fn main() -> Result<(), BvError> {
     let shared_data_c = Rc::clone(&shared_data_rc);
     // This is called whenever the window is drawn and redrawn
     wind.draw(move || {
-        // todo, move the actual drawing away from draw() function, only keep the offscreen blit.
-        offs_rc.borrow_mut().begin();
-        let data_b = shared_data_c.borrow();
-        set_draw_color(Color::White);
-        draw_rectf(0, 0, FW, FH);
-        let _ = data_b.visualizer.draw(&data_b);
-        offs_rc.borrow_mut().end();
-
-        if offs_rc.borrow().is_valid() {
-            offs_rc.borrow().copy(5, 5, FW, FH, 0, 0);
-        } else {
-            // this will almost never be called
-            let data_b = shared_data_c.borrow();
+        if let Ok(data_b) = shared_data_c.try_borrow() {
+            // todo, move the actual drawing away from draw() function, only keep the offscreen blit.
             offs_rc.borrow_mut().begin();
-            set_draw_color(Color::Yellow);
-            draw_rectf(5, 5, FW, FH);
+
+            set_draw_color(Color::White);
+            draw_rectf(0, 0, FW, FH);
             let _ = data_b.visualizer.draw(&data_b);
             offs_rc.borrow_mut().end();
+
+            if offs_rc.borrow().is_valid() {
+                offs_rc.borrow().copy(5, 5, FW, FH, 0, 0);
+            } else {
+                // this will almost never be called
+                let data_b = shared_data_c.borrow();
+                offs_rc.borrow_mut().begin();
+                set_draw_color(Color::Yellow);
+                draw_rectf(5, 5, FW, FH);
+                let _ = data_b.visualizer.draw(&data_b);
+                offs_rc.borrow_mut().end();
+            }
         }
     });
 
@@ -704,8 +708,7 @@ where
         for it in self.diagram.vertex_iter().enumerate() {
             let vertex = it.1.get();
 
-            if (!draw_site_vertex) && vertex.is_site_point()
-            {
+            if (!draw_site_vertex) && vertex.is_site_point() {
                 continue;
             }
             if (!draw_external)
@@ -989,38 +992,6 @@ where
         self.point_data_.clear();
         self.diagram.clear();
 
-        let i32_to_i1 = |x| I1::from(x).unwrap();
-
-        let to_points = |points: &[[i32; 2]]| {
-            let mut rv = Vec::new();
-            for p in points.iter() {
-                rv.push(boostvoronoi::Point {
-                    x: i32_to_i1(p[0]), // + i32_to_i1(100),
-                    y: i32_to_i1(p[1]), // + i32_to_i1(100),
-                });
-            }
-            rv
-        };
-
-        let _to_segments = |segments_: &[[i32; 4]]| {
-            let mut rv = Vec::new();
-            for p in segments_.iter() {
-                let line = boostvoronoi::Line::<I1>::new(
-                    boostvoronoi::Point {
-                        x: i32_to_i1(p[0]), // + i32_to_i1(100),
-                        y: i32_to_i1(p[1]), // + i32_to_i1(100),
-                    },
-                    boostvoronoi::Point {
-                        x: i32_to_i1(p[2]), // + i32_to_i1(100),
-                        y: i32_to_i1(p[3]), // + i32_to_i1(100),
-                    },
-                );
-                rv.push(line);
-            }
-            rv
-        };
-
-        let points: [[i32; 2]; 0] = [];
         let _simple_segments: [[i32; 4]; 5] = [
             [300, 300, 300, 500],
             [300, 500, 500, 500],
@@ -1029,29 +1000,7 @@ where
             [629, 342, 467, 207],
         ];
 
-        let _test_segments: [[i32; 4]; 19] = [
-            [67035, 16168, -51301, 122269],
-            [-51301, 122269, -50598, 120727],
-            [-50598, 120727, -56132, 110391],
-            [-56132, 110391, -102080, 102917],
-            [-102080, 102917, -112508, 94666],
-            [-112508, 94666, -110974, 81469],
-            [-110974, 81469, -83788, 43709],
-            [-83788, 43709, -87201, 32462],
-            [-87201, 32462, -130792, 16168],
-            [-130792, 16168, -139396, 6040],
-            [-139396, 6040, -135315, -6597],
-            [-135315, -6597, -101213, -38399],
-            [-101213, -38399, -102342, -49954],
-            [-102342, -49954, -142015, -74507],
-            [-142015, -74507, -148480, -86107],
-            [-148480, -86107, -142015, -97715],
-            [-142015, -97715, -102342, -122269],
-            [-102342, -122269, 148479, -56855],
-            [148479, -56855, 67035, 16168],
-        ];
-
-        let _segments_rust: [[i32; 4]; 352] = [
+        let _segments_rust_logo: [[i32; 4]; 352] = [
             [402, 20, 395, 20],
             [408, 23, 402, 20],
             [476, 27, 469, 26],
@@ -1406,20 +1355,43 @@ where
             [556, 238, 529, 222],
         ];
         // Preparing Input Geometries.
-        self.point_data_.append(&mut to_points(&points));
-        let mut new_segments = match example {
-            Example::Simple => VB::to_segments::<i32, I1>(&_simple_segments),
-            Example::Complex => VB::to_segments::<i32, I1>(&_segments_rust),
-            Example::Atest => VB::to_segments::<i32, I1>(&_test_segments), //, 1.0 / 1024.0, 350, 350),
+        let (mut new_points, mut new_segments) = match example {
+            Example::Simple => (
+                Vec::<Point<I1>>::default(),
+                VB::to_segments::<i32, I1>(&_simple_segments),
+            ),
+            Example::Complex => (
+                Vec::<Point<I1>>::default(),
+                VB::to_segments::<i32, I1>(&_segments_rust_logo),
+            ),
             Example::Clean => {
                 let clean: [[i32; 4]; 0] = [];
-                VB::to_segments::<i32, I1>(&clean)
+                (
+                    Vec::<Point<I1>>::default(),
+                    VB::to_segments::<i32, I1>(&clean),
+                )
+            }
+            Example::File => {
+                let mut chooser = dialog::NativeFileChooser::new(FileDialogType::BrowseDir);
+
+                let _ = chooser.set_directory(std::path::Path::new("examples"));
+                let _ = chooser.set_title("select your input data");
+                chooser.set_filter("*.txt");
+                chooser.show();
+                if let Some(filename) = chooser.filenames().first() {
+                    if let Ok(file_parse_result) =
+                        file_reader::read_boost_input_file::<I1, F1>(filename.as_path())
+                    {
+                        file_parse_result
+                    } else {
+                        (Vec::<Point<I1>>::default(), Vec::<Line<I1>>::default())
+                    }
+                } else {
+                    (Vec::<Point<I1>>::default(), Vec::<Line<I1>>::default())
+                }
             }
         };
-        for s in new_segments.iter() {
-            assert!(!self.self_intersecting_check(s));
-        }
-
+        self.point_data_.append(&mut new_points);
         self.segment_data_.append(&mut new_segments);
     }
 
