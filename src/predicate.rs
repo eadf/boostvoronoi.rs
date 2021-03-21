@@ -1154,14 +1154,15 @@ where
         // It seems better to use the pristine int coordinate instead of re-calculating
         // it again with lossy floats.
         #[allow(clippy::suspicious_operation_groupings)]
-        if (site1.point0() == site2.point0() || site1.point0() == site2.point1() ) &&
-           (site1.point0() == site3.point0() || site1.point0() == site3.point1() ) {
+        if (site1.point0() == site2.point0() || site1.point0() == site2.point1())
+            && (site1.point0() == site3.point0() || site1.point0() == site3.point1())
+        {
             c_event.set_is_site_point();
             let x = i1_to_f2(site1.point0().x);
             let y = i1_to_f2(site1.point0().y);
-            c_event.set_3_raw(x, y,x );
+            c_event.set_3_raw(x, y, x);
             //println!("sv1: x:{}, y:{} site1:{:?} site2{:?}, site3:{:?}", x, y, site1, site2, site3);
-            return
+            return;
         }
         let a1 = i1_to_f2(segm_end1.x) - i1_to_f2(segm_start1.x);
         let b1 = i1_to_f2(segm_end1.y) - i1_to_f2(segm_start1.y);
@@ -1598,7 +1599,6 @@ where
                 }
                 LazyCircleFormationFunctor::<I1, F1, I2, F2>::pps(site1, site3, site2, 2, circle);
                 //Self::circle_formation_predicate_test(site1, site2, site3, circle,"pps".to_string());
-
             } else {
                 // (point, segment, segment) sites.
                 if !CircleExistencePredicate::<I1, F1, I2, F2>::pss(site1, site2, site3, 1) {

@@ -441,8 +441,17 @@ where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
 {
-    pub fn new_3(id: VoronoiVertexIndex, x: F1, y: F1, is_site_vertex:bool) -> Rc<Cell<VoronoiVertex<I1, F1>>> {
-        let color = if is_site_vertex {ColorBits::SITE_VERTEX.0} else {ColorBits::ZERO.0};
+    pub fn new_3(
+        id: VoronoiVertexIndex,
+        x: F1,
+        y: F1,
+        is_site_vertex: bool,
+    ) -> Rc<Cell<VoronoiVertex<I1, F1>>> {
+        let color = if is_site_vertex {
+            ColorBits::SITE_VERTEX.0
+        } else {
+            ColorBits::ZERO.0
+        };
         Rc::new(Cell::new(Self {
             id_: id,
             x_: x,
@@ -795,15 +804,16 @@ where
         self.edge_or_color(edge_id, external_color);
 
         let v1 = self.edge_get_vertex1(edge_id);
-        if  self.edge_get_vertex0(edge_id).is_some() && v1.is_none() {
+        if self.edge_get_vertex0(edge_id).is_some() && v1.is_none() {
             // this edge leads to nowhere, break recursion
-            return
+            return;
         }
         // Color twin edge as EXTERNAL
         self.edge_or_color(self.edge_get_twin(edge_id), external_color);
         if v1.is_none()
             || self.vertex_is_site_point(v1).unwrap_or(true)
-            || !self.get_edge(edge_id.unwrap()).get().is_primary() {
+            || !self.get_edge(edge_id.unwrap()).get().is_primary()
+        {
             // stop recursion if this edge does not have a vertex1 (e.g is infinite)
             // or if this edge isn't a primary edge.
             return;
@@ -1007,9 +1017,10 @@ where
     }
 
     /// returns true if this vertex coincides with an site point
-    pub fn vertex_is_site_point(&self, vertex_id: Option<VoronoiVertexIndex>)-> Option<bool> {
+    pub fn vertex_is_site_point(&self, vertex_id: Option<VoronoiVertexIndex>) -> Option<bool> {
         let _ = vertex_id?;
-        self.vertex_get(vertex_id).map(|cell| cell.get().is_site_point())
+        self.vertex_get(vertex_id)
+            .map(|cell| cell.get().is_site_point())
     }
 
     fn _edge_new_3(
@@ -1208,7 +1219,7 @@ where
         );
     }
 
-    fn _vertex_new_2(&mut self, x: F1, y: F1, is_site_vertex:bool) -> VoronoiVertexIndex {
+    fn _vertex_new_2(&mut self, x: F1, y: F1, is_site_vertex: bool) -> VoronoiVertexIndex {
         let new_vertex_id = VoronoiVertexIndex(self.vertices_.len());
         let new_edge = VoronoiVertex::new_3(new_vertex_id, x, y, is_site_vertex);
         let _ = self.vertices_.insert(new_vertex_id.0, new_edge);
@@ -1404,7 +1415,7 @@ where
         let new_vertex_id = self._vertex_new_2(
             TC4::<I1, F1, I2, F2>::f2_to_f1(circle.raw_x()),
             TC4::<I1, F1, I2, F2>::f2_to_f1(circle.raw_y()),
-            circle.is_site_point()
+            circle.is_site_point(),
         );
 
         // Update vertex pointers of the old edges.

@@ -14,9 +14,9 @@ use super::robust_fpt as RF;
 
 use super::OutputType;
 use ordered_float::OrderedFloat;
-use std::collections::BTreeSet;
 use std::cell::Cell;
 use std::cmp::Ordering;
+use std::collections::BTreeSet;
 use std::fmt;
 use std::ops::Neg;
 use std::rc::Rc;
@@ -44,7 +44,7 @@ pub struct CircleEvent<F2: OutputType + Neg<Output = F2>> {
     center_y_: OrderedFloat<F2>,
     lower_x_: OrderedFloat<F2>,
     beach_line_index_: Option<VB::BeachLineIndex>, //beach_line_iterator in C++
-    is_site_point:bool,
+    is_site_point: bool,
 }
 
 impl<F2> fmt::Debug for CircleEvent<F2>
@@ -73,7 +73,7 @@ impl<F2: OutputType + Neg<Output = F2>> Default for CircleEvent<F2> {
             center_y_: OrderedFloat(F2::zero()),
             lower_x_: OrderedFloat(F2::zero()),
             beach_line_index_: None,
-            is_site_point:false,
+            is_site_point: false,
         }
     }
 }
@@ -182,15 +182,15 @@ impl<F2: OutputType + Neg<Output = F2>> CircleEventC<F2> {
         self.0.set(selfc);
     }
 
-    pub(crate) fn set_is_site_point(& self){
+    pub(crate) fn set_is_site_point(&self) {
         let mut selfc = self.0.get();
         selfc.is_site_point = true;
         self.0.set(selfc)
     }
     #[allow(dead_code)]
-    pub(crate) fn is_site_point(& self) -> bool{
+    pub(crate) fn is_site_point(&self) -> bool {
         self.0.get().is_site_point
-     }
+    }
 }
 
 impl<F2: OutputType + Neg<Output = F2>> PartialOrd for CircleEventC<F2> {
@@ -231,7 +231,7 @@ where
             lower_x_: OrderedFloat(F2::zero()),
             beach_line_index_: Some(bech_line_index),
             index_: None,
-            is_site_point:false,
+            is_site_point: false,
         }
     }
 
@@ -333,7 +333,7 @@ where
     }
 
     #[inline(always)]
-    pub(crate) fn is_site_point(&self) ->bool{
+    pub(crate) fn is_site_point(&self) -> bool {
         self.is_site_point
     }
 }
