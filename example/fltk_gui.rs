@@ -817,11 +817,15 @@ where
                 if edge.is_curved() {
                     if draw_curved_as_line {
                         for i in 0..samples.len() - 1 {
-                            let x1 = Self::f1_to_i32(samples[i][0]);
-                            let y1 = Self::f1_to_i32(samples[i][1]);
-                            let x2 = Self::f1_to_i32(samples[i + 1][0]);
-                            let y2 = Self::f1_to_i32(samples[i + 1][1]);
-                            draw::draw_line(x1, y1, x2, y2);
+                            if let Ok(x1) = Self::try_f1_to_i32(samples[i][0]) {
+                                if let Ok(y1) = Self::try_f1_to_i32(samples[i][1]) {
+                                    if let Ok(x2) = Self::try_f1_to_i32(samples[i + 1][0]) {
+                                        if let Ok(y2) = Self::try_f1_to_i32(samples[i + 1][1]) {
+                                            draw::draw_line(x1, y1, x2, y2);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     if draw_curved {

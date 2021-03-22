@@ -117,6 +117,9 @@ where
                 dist = dist * dist
                     / ((new_y - cur_y) * (new_y - cur_y) + (new_x - cur_x) * (new_x - cur_x));
             }
+            if dist.is_nan() {
+                break;
+            }
             if dist <= max_dist_transformed {
                 // Distance between parabola and line segment is less than max_dist.
                 let _ = point_stack.pop();
@@ -344,6 +347,9 @@ where
     F1: OutputType + Neg<Output = F1>,
 {
     pub fn new(source_aabb: &Aabb2<I1, F1>, dest_aabb: &Aabb2<I1, F1>) -> Result<Self, BvError> {
+        let i32_to_f1 = super::TypeConverter::<I1, F1>::i32_to_f1;
+        let min_dim = i32_to_f1(10);
+
         if let Some(s_low) = source_aabb.get_low() {
             if let Some(s_high) = source_aabb.get_high() {
                 if let Some(d_low) = dest_aabb.get_low() {
@@ -351,12 +357,13 @@ where
                         //println!("s_low:{:?},s_high:{:?},d_low:{:?},d_high:{:?}", s_low, s_high, d_low, d_high);
 
                         let source_aabb_center = [
-                            -(s_low[0] + s_high[0])
-                                / super::TypeConverter::<I1, F1>::i32_to_f1(2_i32),
-                            -(s_low[1] + s_high[1])
-                                / super::TypeConverter::<I1, F1>::i32_to_f1(2_i32),
+                            -(s_low[0] + s_high[0]) / i32_to_f1(2_i32),
+                            -(s_low[1] + s_high[1]) / i32_to_f1(2_i32),
                         ];
-                        let source_aabb_size = [(s_high[0] - s_low[0]), (s_high[1] - s_low[1])];
+                        let source_aabb_size = [
+                            (s_high[0] - s_low[0]).max(min_dim),
+                            (s_high[1] - s_low[1]).max(min_dim),
+                        ];
 
                         let dest_aabb_center = [
                             (d_low[0] + d_high[0])
@@ -364,7 +371,10 @@ where
                             (d_low[1] + d_high[1])
                                 / super::TypeConverter::<I1, F1>::i32_to_f1(2_i32),
                         ];
-                        let dest_aabb_size = [(d_high[0] - d_low[0]), (d_high[1] - d_low[1])];
+                        let dest_aabb_size = [
+                            (d_high[0] - d_low[0]).max(min_dim),
+                            (d_high[1] - d_low[1]).max(min_dim),
+                        ];
 
                         // make sure the larges dimension of source fits inside smallest of dest
                         let source_aabb_size = source_aabb_size[0].max(source_aabb_size[1]);
