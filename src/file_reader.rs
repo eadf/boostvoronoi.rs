@@ -28,7 +28,7 @@ where
     I1: super::InputType + Neg<Output = I1>,
     F1: super::OutputType + Neg<Output = F1>,
 {
-    let line = line.split(" ").collect::<Vec<&str>>();
+    let line = line.split(' ').collect::<Vec<&str>>();
     //println!("line split: {:?}", line);
     match line.len() {
         1 => {
@@ -42,8 +42,8 @@ where
             let y1 = line[1].parse::<i32>();
             if x1.is_ok() && y1.is_ok() {
                 return Some(InputData::Point(super::Point::<I1> {
-                    x: super::TypeConverter2::<I1, F1>::i32_to_i1(x1.unwrap()),
-                    y: super::TypeConverter2::<I1, F1>::i32_to_i1(y1.unwrap()),
+                    x: super::TypeConverter::<I1, F1>::i32_to_i1(x1.unwrap()),
+                    y: super::TypeConverter::<I1, F1>::i32_to_i1(y1.unwrap()),
                 }));
             }
         }
@@ -54,22 +54,22 @@ where
             let y2 = line[3].parse::<i32>();
             if x1.is_ok() && y1.is_ok() && x2.is_ok() && y2.is_ok() {
                 return Some(InputData::Line(super::Line::<I1>::from([
-                    super::TypeConverter2::<I1, F1>::i32_to_i1(x1.unwrap()),
-                    super::TypeConverter2::<I1, F1>::i32_to_i1(y1.unwrap()),
-                    super::TypeConverter2::<I1, F1>::i32_to_i1(x2.unwrap()),
-                    super::TypeConverter2::<I1, F1>::i32_to_i1(y2.unwrap()),
+                    super::TypeConverter::<I1, F1>::i32_to_i1(x1.unwrap()),
+                    super::TypeConverter::<I1, F1>::i32_to_i1(y1.unwrap()),
+                    super::TypeConverter::<I1, F1>::i32_to_i1(x2.unwrap()),
+                    super::TypeConverter::<I1, F1>::i32_to_i1(y2.unwrap()),
                 ])));
             } else {
-                if !x1.is_ok() {
+                if x1.is_err() {
                     println!("failed to parse {}", line[0]);
                 }
-                if !y1.is_ok() {
+                if y1.is_err() {
                     println!("failed to parse {}", line[1]);
                 }
-                if !x2.is_ok() {
+                if x2.is_err() {
                     println!("failed to parse {}", line[2]);
                 }
-                if !y2.is_ok() {
+                if y2.is_err() {
                     println!("failed to parse {}", line[3]);
                 }
             }

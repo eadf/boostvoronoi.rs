@@ -4,8 +4,6 @@ use boostvoronoi::{BvError, Line, Point};
 
 type I1 = i32;
 type F1 = f64;
-type I2 = i64;
-type F2 = f64;
 
 #[allow(dead_code)]
 fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
@@ -142,7 +140,7 @@ fn large_segment_1() -> Result<(), BvError> {
         let _v = to_points::<I1, I1>(&points);
         let _s = to_segments::<I1, I1>(&segments);
 
-        let mut vb = Builder::<I1, F1, I2, F2>::new();
+        let mut vb = Builder::<I1, F1>::new();
         vb.with_vertices(_v.iter()).expect("large_segment_1");
         vb.with_segments(_s.iter()).expect("large_segment_1");
         (vb.construct().expect("large_segment_1"), _v, _s)

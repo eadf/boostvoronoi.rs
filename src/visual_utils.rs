@@ -9,7 +9,7 @@
 
 // Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
 
-use super::{BigFloatType, BigIntType, InputType, OutputType};
+use super::{InputType, OutputType};
 use crate::BvError;
 
 use super::{Line, Point};
@@ -18,29 +18,21 @@ use std::marker::PhantomData;
 use std::ops::Neg;
 
 /// Utilities class, that contains set of routines handful for visualization.
-pub struct VoronoiVisualUtils<I1, F1, I2, F2>
+pub struct VoronoiVisualUtils<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
     #[doc(hidden)]
     _pdi: PhantomData<I1>,
     #[doc(hidden)]
     _pdo: PhantomData<F1>,
-    #[doc(hidden)]
-    _pdbi: PhantomData<I2>,
-    #[doc(hidden)]
-    _pdbf: PhantomData<F2>,
 }
 
-impl<I1, F1, I2, F2> VoronoiVisualUtils<I1, F1, I2, F2>
+impl<I1, F1> VoronoiVisualUtils<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
     /// Discretize parabolic Voronoi edge.
     /// Parabolic Voronoi edges are always formed by one point and one segment
@@ -176,7 +168,7 @@ where
 
     #[inline(always)]
     pub fn cast_io(value: I1) -> F1 {
-        super::TypeConverter2::<I1, F1>::i1_to_f1(value)
+        super::TypeConverter::<I1, F1>::i1_to_f1(value)
     }
 }
 
@@ -230,15 +222,15 @@ where
 
     #[inline(always)]
     pub fn update_point(&mut self, point: &Point<I1>) {
-        let x = super::TypeConverter2::i1_to_f1(point.x);
-        let y = super::TypeConverter2::i1_to_f1(point.y);
+        let x = super::TypeConverter::i1_to_f1(point.x);
+        let y = super::TypeConverter::i1_to_f1(point.y);
         self.update_vertex(x, y);
     }
 
     #[inline(always)]
     pub fn update_coordinate(&mut self, x: i32, y: i32) {
-        let x = super::TypeConverter2::<I1, F1>::i32_to_f1(x);
-        let y = super::TypeConverter2::<I1, F1>::i32_to_f1(y);
+        let x = super::TypeConverter::<I1, F1>::i32_to_f1(x);
+        let y = super::TypeConverter::<I1, F1>::i32_to_f1(y);
         self.update_vertex(x, y);
     }
 
@@ -295,7 +287,7 @@ where
             let size_y = self.get_high().unwrap()[1] - self.get_low().unwrap()[1];
             let size = if size_x > size_y { size_x } else { size_y };
 
-            let delta = size * super::TypeConverter2::<I1, F1>::f32_to_f1((percent as f32) / 100.0);
+            let delta = size * super::TypeConverter::<I1, F1>::f32_to_f1((percent as f32) / 100.0);
 
             let mut p = self.get_high().unwrap();
             p[0] = p[0] + delta;
@@ -360,17 +352,17 @@ where
 
                         let source_aabb_center = [
                             -(s_low[0] + s_high[0])
-                                / super::TypeConverter2::<I1, F1>::i32_to_f1(2_i32),
+                                / super::TypeConverter::<I1, F1>::i32_to_f1(2_i32),
                             -(s_low[1] + s_high[1])
-                                / super::TypeConverter2::<I1, F1>::i32_to_f1(2_i32),
+                                / super::TypeConverter::<I1, F1>::i32_to_f1(2_i32),
                         ];
                         let source_aabb_size = [(s_high[0] - s_low[0]), (s_high[1] - s_low[1])];
 
                         let dest_aabb_center = [
                             (d_low[0] + d_high[0])
-                                / super::TypeConverter2::<I1, F1>::i32_to_f1(2_i32),
+                                / super::TypeConverter::<I1, F1>::i32_to_f1(2_i32),
                             (d_low[1] + d_high[1])
-                                / super::TypeConverter2::<I1, F1>::i32_to_f1(2_i32),
+                                / super::TypeConverter::<I1, F1>::i32_to_f1(2_i32),
                         ];
                         let dest_aabb_size = [(d_high[0] - d_low[0]), (d_high[1] - d_low[1])];
 
@@ -404,7 +396,7 @@ where
     /// transform from dest coordinate system to source coordinate system
     #[inline(always)]
     pub fn reverse_transform_x(&self, x: F1) -> Result<I1, BvError> {
-        super::TypeConverter2::<I1, F1>::try_f1_to_i1(
+        super::TypeConverter::<I1, F1>::try_f1_to_i1(
             (x - self.to_offset[0]) / self.scale - self.to_center[0],
         )
     }
@@ -412,7 +404,7 @@ where
     /// transform from dest coordinate system to source coordinate system
     #[inline(always)]
     pub fn reverse_transform_y(&self, y: F1) -> Result<I1, BvError> {
-        super::TypeConverter2::<I1, F1>::try_f1_to_i1(
+        super::TypeConverter::<I1, F1>::try_f1_to_i1(
             (y - self.to_offset[1]) / self.scale - self.to_center[1],
         )
     }
@@ -453,7 +445,7 @@ where
     /// /// integer x coordinate
     #[inline(always)]
     pub fn transform_ix(&self, x: I1) -> F1 {
-        (super::TypeConverter2::<I1, F1>::i1_to_f1(x) + self.to_center[0]) * self.scale
+        (super::TypeConverter::<I1, F1>::i1_to_f1(x) + self.to_center[0]) * self.scale
             + self.to_offset[0]
     }
 
@@ -461,7 +453,7 @@ where
     /// integer y coordinate
     #[inline(always)]
     pub fn transform_iy(&self, y: I1) -> F1 {
-        (super::TypeConverter2::<I1, F1>::i1_to_f1(y) + self.to_center[1]) * self.scale
+        (super::TypeConverter::<I1, F1>::i1_to_f1(y) + self.to_center[1]) * self.scale
             + self.to_offset[1]
     }
 }

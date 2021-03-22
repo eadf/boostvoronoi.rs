@@ -4,8 +4,6 @@ use criterion::{criterion_group, criterion_main, Criterion};
 
 type I1 = i32;
 type F1 = f64;
-type I2 = i64;
-type F2 = f64;
 
 #[cfg(test)]
 fn bench_1(c: &mut Criterion) {
@@ -117,7 +115,7 @@ fn bench_1(c: &mut Criterion) {
                     let _v = to_points::<I1, I1>(&points);
                     let _s = to_segments::<I1, I1>(&segments);
 
-                    let mut vb = Builder::<I1, F1, I2, F2>::new();
+                    let mut vb = Builder::<I1, F1>::new();
                     vb.with_vertices(_v.iter()).expect("bench_1");
                     vb.with_segments(_s.iter()).expect("bench_1");
                     (vb.construct().expect("bench_1"), _v, _s)

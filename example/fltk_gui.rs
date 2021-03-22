@@ -3,9 +3,9 @@ use boostvoronoi::diagram::VoronoiEdgeIndex;
 use boostvoronoi::file_reader;
 use boostvoronoi::visual_utils as VU;
 use boostvoronoi::BvError;
+use boostvoronoi::TypeConverter;
 use boostvoronoi::{builder as VB, Line, Point};
-use boostvoronoi::{BigFloatType, BigIntType, InputType, OutputType};
-use boostvoronoi::{TypeConverter2, TypeConverter4};
+use boostvoronoi::{InputType, OutputType};
 
 use std::ops::Neg;
 
@@ -99,7 +99,7 @@ pub enum GuiMessage {
 struct SharedData {
     draw_flag: DrawFilterFlag,
     last_message: Option<GuiMessage>,
-    visualizer: VoronoiVisualizer<i32, f32, i64, f64>,
+    visualizer: VoronoiVisualizer<i32, f32>,
     last_click: Option<Point<i32>>,
 }
 
@@ -475,15 +475,13 @@ fn main() -> Result<(), BvError> {
 }
 
 /// struct to help deal with the voronoi diagram input and output
-pub struct VoronoiVisualizer<I1, F1, I2, F2>
+pub struct VoronoiVisualizer<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
     screen_aabb: VU::Aabb2<I1, F1>,
-    diagram: VD::VoronoiDiagram<I1, F1, I2, F2>,
+    diagram: VD::VoronoiDiagram<I1, F1>,
     points_aabb: VU::Aabb2<I1, F1>,
 
     point_data_: Vec<boostvoronoi::Point<I1>>,
@@ -491,17 +489,15 @@ where
     affine: VU::SimpleAffine<I1, F1>,
 }
 
-impl<I1, F1, I2, F2> VoronoiVisualizer<I1, F1, I2, F2>
+impl<I1, F1> VoronoiVisualizer<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
     pub fn default() -> Self {
         Self {
             screen_aabb: VU::Aabb2::<I1, F1>::new_from_i32(0, 0, FW, FH),
-            diagram: VD::VoronoiDiagram::<I1, F1, I2, F2>::new(0),
+            diagram: VD::VoronoiDiagram::<I1, F1>::new(0),
             points_aabb: VU::Aabb2::<I1, F1>::default(),
             point_data_: Vec::<boostvoronoi::Point<I1>>::new(),
             segment_data_: Vec::<boostvoronoi::Line<I1>>::new(),
@@ -531,7 +527,7 @@ where
         }
         println!("];");
 
-        let mut vb = VB::Builder::<I1, F1, I2, F2>::new();
+        let mut vb = VB::Builder::<I1, F1>::new();
         vb.with_vertices(self.point_data_.iter())?;
         vb.with_segments(self.segment_data_.iter())?;
 
@@ -959,7 +955,7 @@ where
         } else {
             self.retrieve_segment(cell_id)
         };
-        VU::VoronoiVisualUtils::<I1, F1, I2, F2>::discretize(
+        VU::VoronoiVisualUtils::<I1, F1>::discretize(
             &point,
             segment,
             max_dist,
@@ -1414,31 +1410,31 @@ where
 
     #[inline(always)]
     pub fn i1_to_f1(value: I1) -> F1 {
-        TypeConverter2::<I1, F1>::i1_to_f1(value)
+        TypeConverter::<I1, F1>::i1_to_f1(value)
     }
     #[inline(always)]
     pub fn f1_to_i32(value: F1) -> i32 {
-        TypeConverter2::<I1, F1>::f1_to_i32(value)
+        TypeConverter::<I1, F1>::f1_to_i32(value)
     }
 
     #[inline(always)]
     pub fn f32_to_f1(value: f32) -> F1 {
-        TypeConverter4::<I1, F1, I2, F2>::f32_to_f1(value)
+        TypeConverter::<I1, F1>::f32_to_f1(value)
     }
 
     #[inline(always)]
     pub fn f1_to_i1(value: F1) -> I1 {
-        TypeConverter2::<I1, F1>::f1_to_i1(value)
+        TypeConverter::<I1, F1>::f1_to_i1(value)
     }
 
     #[inline(always)]
     pub fn i1_to_f64(value: I1) -> f64 {
-        TypeConverter2::<I1, F1>::i1_to_f64(value)
+        TypeConverter::<I1, F1>::i1_to_f64(value)
     }
 
     #[inline(always)]
     pub fn try_f1_to_i32(value: F1) -> Result<i32, BvError> {
-        TypeConverter2::<I1, F1>::try_f1_to_i32(value)
+        TypeConverter::<I1, F1>::try_f1_to_i32(value)
     }
 
     #[inline(always)]

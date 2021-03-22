@@ -13,9 +13,9 @@ use super::circle_event as VC;
 use super::ctypes as CT;
 use super::site_event as VSE;
 use super::visual_utils as VU;
-use super::TypeConverter4 as TC4;
+use super::TypeConverter as TC2;
 
-pub use super::{BigFloatType, BigIntType, InputType, OutputType};
+pub use super::{InputType, OutputType};
 use num::NumCast;
 use std::cell::Cell;
 use std::cmp::Ordering;
@@ -243,14 +243,12 @@ where
 /// Iterator over edges pointing away from the vertex indicated by the initial edge.
 /// edge.vertex()
 /// Do *NOT* use this when altering next, prev or twin edges.
-pub struct EdgeRotNextIterator<'s, I1, F1, I2, F2>
+pub struct EdgeRotNextIterator<'s, I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
-    diagram: &'s VoronoiDiagram<I1, F1, I2, F2>,
+    diagram: &'s VoronoiDiagram<I1, F1>,
     starting_edge: VoronoiEdgeIndex,
     next_edge: Option<VoronoiEdgeIndex>,
     #[doc(hidden)]
@@ -259,15 +257,13 @@ where
     _pdf: PhantomData<F1>,
 }
 
-impl<'s, I1, F1, I2, F2> EdgeRotNextIterator<'s, I1, F1, I2, F2>
+impl<'s, I1, F1> EdgeRotNextIterator<'s, I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
     pub(crate) fn new(
-        diagram: &'s VoronoiDiagram<I1, F1, I2, F2>,
+        diagram: &'s VoronoiDiagram<I1, F1>,
         starting_edge: Option<VoronoiEdgeIndex>,
     ) -> Self {
         if let Some(starting_edge) = starting_edge {
@@ -291,12 +287,10 @@ where
     }
 }
 
-impl<'s, I1, F1, I2, F2> Iterator for EdgeRotNextIterator<'s, I1, F1, I2, F2>
+impl<'s, I1, F1> Iterator for EdgeRotNextIterator<'s, I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
     type Item = VoronoiEdgeIndex;
     fn next(&mut self) -> Option<VoronoiEdgeIndex> {
@@ -319,14 +313,12 @@ where
 /// Iterator over edges pointing away from the vertex indicated by the initial edge.
 /// edge.vertex()
 /// Do *NOT* use this when altering next, prev or twin edges.
-pub struct EdgeRotPrevIterator<'s, I1, F1, I2, F2>
+pub struct EdgeRotPrevIterator<'s, I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
-    diagram: &'s VoronoiDiagram<I1, F1, I2, F2>,
+    diagram: &'s VoronoiDiagram<I1, F1>,
     starting_edge: VoronoiEdgeIndex,
     next_edge: Option<VoronoiEdgeIndex>,
     #[doc(hidden)]
@@ -335,16 +327,14 @@ where
     _pdf: PhantomData<F1>,
 }
 
-impl<'s, I1, F1, I2, F2> EdgeRotPrevIterator<'s, I1, F1, I2, F2>
+impl<'s, I1, F1> EdgeRotPrevIterator<'s, I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
     #[allow(dead_code)]
     pub(crate) fn new(
-        diagram: &'s VoronoiDiagram<I1, F1, I2, F2>,
+        diagram: &'s VoronoiDiagram<I1, F1>,
         starting_edge: Option<VoronoiEdgeIndex>,
     ) -> Self {
         if let Some(starting_edge) = starting_edge {
@@ -368,12 +358,10 @@ where
     }
 }
 
-impl<'s, I1, F1, I2, F2> Iterator for EdgeRotPrevIterator<'s, I1, F1, I2, F2>
+impl<'s, I1, F1> Iterator for EdgeRotPrevIterator<'s, I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
     type Item = VoronoiEdgeIndex;
     fn next(&mut self) -> Option<VoronoiEdgeIndex> {
@@ -528,12 +516,10 @@ where
 ///   5) pointer to the CCW prev edge
 ///   6) mutable color member
 #[derive(Copy, Clone)]
-pub struct VoronoiEdge<I1, F1, I2, F2>
+pub struct VoronoiEdge<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
     id: VoronoiEdgeIndex,
     cell_: Option<VoronoiCellIndex>,
@@ -546,18 +532,12 @@ where
     _pdi: PhantomData<I1>,
     #[doc(hidden)]
     _pdo: PhantomData<F1>,
-    #[doc(hidden)]
-    _pdbi: PhantomData<I2>,
-    #[doc(hidden)]
-    _pdbf: PhantomData<F2>,
 }
 
-impl<I1, F1, I2, F2> fmt::Debug for VoronoiEdge<I1, F1, I2, F2>
+impl<I1, F1> fmt::Debug for VoronoiEdge<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
@@ -579,12 +559,10 @@ where
     }
 }
 
-impl<I1, F1, I2, F2> VoronoiEdge<I1, F1, I2, F2>
+impl<I1, F1> VoronoiEdge<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
     const BIT_IS_LINEAR: ColorType = 0x1; // linear is opposite to curved
     const BIT_IS_PRIMARY: ColorType = 0x2; // primary is opposite to secondary
@@ -594,7 +572,7 @@ where
         cell: VoronoiCellIndex,
         is_linear: bool,
         is_primary: bool,
-    ) -> EdgeType<I1, F1, I2, F2> {
+    ) -> EdgeType<I1, F1> {
         let mut rv = Self {
             id,
             cell_: Some(cell),
@@ -605,8 +583,6 @@ where
             color_: 0,
             _pdi: PhantomData,
             _pdo: PhantomData,
-            _pdbi: PhantomData,
-            _pdbf: PhantomData,
         };
         if is_linear {
             rv.color_ |= Self::BIT_IS_LINEAR;
@@ -693,37 +669,33 @@ where
 }
 
 pub type CellType<I1, F1> = Rc<Cell<VoronoiCell<I1, F1>>>;
-pub type EdgeType<I1, F1, I2, F2> = Rc<Cell<VoronoiEdge<I1, F1, I2, F2>>>;
+pub type EdgeType<I1, F1> = Rc<Cell<VoronoiEdge<I1, F1>>>;
 pub type VertexType<I1, F1> = Rc<Cell<VoronoiVertex<I1, F1>>>;
 
 /// Voronoi output data structure.
 /// CCW ordering is used on the faces perimeter and around the vertices.
 /// Mandatory reading: <https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_diagram.htm>
 #[derive(Default, Debug)]
-pub struct VoronoiDiagram<I1, F1, I2, F2>
+pub struct VoronoiDiagram<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
-    cells_: Vec<CellType<I1, F1>>,         // indexed by VoronoiCellIndex
-    vertices_: Vec<VertexType<I1, F1>>,    // indexed by VoronoiVertexIndex
-    edges_: Vec<EdgeType<I1, F1, I2, F2>>, // indexed by VoronoiEdgeIndex
+    cells_: Vec<CellType<I1, F1>>,      // indexed by VoronoiCellIndex
+    vertices_: Vec<VertexType<I1, F1>>, // indexed by VoronoiVertexIndex
+    edges_: Vec<EdgeType<I1, F1>>,      // indexed by VoronoiEdgeIndex
 }
 
-impl<I1, F1, I2, F2> VoronoiDiagram<I1, F1, I2, F2>
+impl<I1, F1> VoronoiDiagram<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
     pub fn new(input_size: usize) -> Self {
         Self {
             cells_: Vec::<CellType<I1, F1>>::with_capacity(input_size),
             vertices_: Vec::<VertexType<I1, F1>>::with_capacity(input_size),
-            edges_: Vec::<EdgeType<I1, F1, I2, F2>>::with_capacity(input_size * 2),
+            edges_: Vec::<EdgeType<I1, F1>>::with_capacity(input_size * 2),
         }
     }
 
@@ -753,7 +725,7 @@ where
         rv
     }
 
-    pub fn edges(&self) -> &Vec<EdgeType<I1, F1, I2, F2>> {
+    pub fn edges(&self) -> &Vec<EdgeType<I1, F1>> {
         &self.edges_
     }
 
@@ -761,7 +733,7 @@ where
         self.cells_.get(cell.0).unwrap().clone()
     }
 
-    pub fn get_edge(&self, edge: VoronoiEdgeIndex) -> EdgeType<I1, F1, I2, F2> {
+    pub fn get_edge(&self, edge: VoronoiEdgeIndex) -> EdgeType<I1, F1> {
         self.edges_.get(edge.0).unwrap().clone()
     }
 
@@ -834,7 +806,7 @@ where
         self.vertices_.iter()
     }
 
-    pub fn edge_iter(&self) -> std::slice::Iter<EdgeType<I1, F1, I2, F2>> {
+    pub fn edge_iter(&self) -> std::slice::Iter<EdgeType<I1, F1>> {
         self.edges_.iter()
     }
 
@@ -893,7 +865,7 @@ where
         self.edges_.reserve((num_sites << 2) + (num_sites << 1));
     }
 
-    pub(crate) fn _process_single_site(&mut self, site: &VSE::SiteEvent<I1, F1, I2, F2>) {
+    pub(crate) fn _process_single_site(&mut self, site: &VSE::SiteEvent<I1, F1>) {
         let _ = self._make_new_cell_with_category(
             VoronoiCellIndex(site.sorted_index()),
             site.initial_index(),
@@ -1036,7 +1008,7 @@ where
     }
 
     #[inline]
-    fn _edge_get(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<&EdgeType<I1, F1, I2, F2>> {
+    fn _edge_get(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<&EdgeType<I1, F1>> {
         let _ = edge_id?;
         let rv = self.edges_.get(edge_id.unwrap().0);
         if rv.is_none() {
@@ -1110,7 +1082,7 @@ where
     pub fn edge_rot_next_iterator(
         &self,
         edge_id: Option<VoronoiEdgeIndex>,
-    ) -> EdgeRotNextIterator<I1, F1, I2, F2> {
+    ) -> EdgeRotNextIterator<I1, F1> {
         EdgeRotNextIterator::new(self, edge_id)
     }
 
@@ -1121,7 +1093,7 @@ where
     pub fn edge_rot_prev_iterator(
         &self,
         edge_id: Option<VoronoiEdgeIndex>,
-    ) -> EdgeRotPrevIterator<I1, F1, I2, F2> {
+    ) -> EdgeRotPrevIterator<I1, F1> {
         EdgeRotPrevIterator::new(self, edge_id)
     }
 
@@ -1331,8 +1303,8 @@ where
     /// Returns a pair of pointers to new half-edges.
     pub(crate) fn _insert_new_edge_2(
         &mut self,
-        site1: VSE::SiteEvent<I1, F1, I2, F2>,
-        site2: VSE::SiteEvent<I1, F1, I2, F2>,
+        site1: VSE::SiteEvent<I1, F1>,
+        site2: VSE::SiteEvent<I1, F1>,
     ) -> (VoronoiEdgeIndex, VoronoiEdgeIndex) {
         // Get sites' indexes.
         let site1_index = site1.sorted_index();
@@ -1383,9 +1355,9 @@ where
     /// new Voronoi vertex point. Returns a pair of pointers to a new half-edges.
     pub(crate) fn _insert_new_edge_5(
         &mut self,
-        site1: VSE::SiteEvent<I1, F1, I2, F2>,
-        site3: VSE::SiteEvent<I1, F1, I2, F2>,
-        circle: VC::CircleEvent<F2>,
+        site1: VSE::SiteEvent<I1, F1>,
+        site3: VSE::SiteEvent<I1, F1>,
+        circle: VC::CircleEvent,
         edge12_id: VoronoiEdgeIndex,
         edge23_id: VoronoiEdgeIndex,
     ) -> (VoronoiEdgeIndex, VoronoiEdgeIndex) {
@@ -1394,8 +1366,8 @@ where
         #[cfg(feature = "console_debug")]
         println!("new vertex@CE{:?}", circle);
 
-        let is_linear = VSE::SiteEvent::<I1, F1, I2, F2>::is_linear_edge(&site1, &site3);
-        let is_primary = VSE::SiteEvent::<I1, F1, I2, F2>::is_primary_edge(&site1, &site3);
+        let is_linear = VSE::SiteEvent::<I1, F1>::is_linear_edge(&site1, &site3);
+        let is_primary = VSE::SiteEvent::<I1, F1>::is_primary_edge(&site1, &site3);
 
         // Add a new half-edge.
         let new_edge1_id = self._edge_new_3(
@@ -1413,8 +1385,8 @@ where
 
         // Add a new Voronoi vertex.
         let new_vertex_id = self._vertex_new_2(
-            TC4::<I1, F1, I2, F2>::f2_to_f1(circle.raw_x()),
-            TC4::<I1, F1, I2, F2>::f2_to_f1(circle.raw_y()),
+            TC2::<I1, F1>::f64_to_f1(circle.raw_x()),
+            TC2::<I1, F1>::f64_to_f1(circle.raw_y()),
             circle.is_site_point(),
         );
 

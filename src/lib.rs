@@ -171,42 +171,8 @@ pub trait InputType:
 {
 }
 
-pub trait BigIntType:
-    Display
-    + Ord
-    + PartialOrd
-    + Eq
-    + PartialEq
-    + Hash
-    + PrimInt
-    + Copy
-    + Clone
-    + NumCast
-    + Debug
-    + Zero
-    + Default
-{
-}
-
 impl<I1> InputType for I1 where
     I1: Display
-        + Ord
-        + PartialOrd
-        + Eq
-        + PartialEq
-        + Hash
-        + PrimInt
-        + Copy
-        + Clone
-        + NumCast
-        + Debug
-        + Zero
-        + Default
-{
-}
-
-impl<I2> BigIntType for I2 where
-    I2: Display
         + Ord
         + PartialOrd
         + Eq
@@ -239,26 +205,6 @@ impl<F1> OutputType for F1 where
         + Debug
         + Zero
         + Neg<Output = F1>
-{
-}
-
-pub trait BigFloatType:
-    Float + PartialOrd + PartialEq + NumCast + Copy + Clone + Display + Default + Debug + Zero
-{
-}
-
-impl<F2> BigFloatType for F2 where
-    F2: Float
-        + PartialOrd
-        + PartialEq
-        + NumCast
-        + Copy
-        + Clone
-        + Display
-        + Default
-        + Debug
-        + Zero
-        + Neg<Output = F2>
 {
 }
 
@@ -332,21 +278,10 @@ where
     pub fn is_pos(v: I1) -> bool {
         v >= I1::zero()
     }
-
-    // TODO: this is stupid: why can't I1 just use an int literal?
-    #[inline(always)]
-    pub fn one() -> I1 {
-        num::cast::<i8, I1>(1i8).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn two() -> I1 {
-        num::cast::<i8, I1>(2i8).unwrap()
-    }
 }
 
 #[derive(Default)]
-pub struct TypeConverter2<I1, F1>
+pub struct TypeConverter<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
@@ -357,7 +292,7 @@ where
     _pdi: PhantomData<I1>,
 }
 
-impl<I1, F1> TypeConverter2<I1, F1>
+impl<I1, F1> TypeConverter<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
@@ -423,8 +358,18 @@ where
     }
 
     #[inline(always)]
+    pub fn f64_to_f1(input: f64) -> F1 {
+        num::cast::<f64, F1>(input).unwrap()
+    }
+
+    #[inline(always)]
     pub fn i1_to_i32(input: I1) -> i32 {
         num::cast::<I1, i32>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn i1_to_i64(input: I1) -> i64 {
+        num::cast::<I1, i64>(input).unwrap()
     }
 
     #[inline(always)]
@@ -436,101 +381,14 @@ where
     pub fn i1_to_f64(input: I1) -> f64 {
         NumCast::from(input).unwrap()
     }
-}
-
-#[derive(Default)]
-pub struct TypeConverter4<I1, F1, I2, F2>
-where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
-    I2: InputType + Neg<Output = I2>,
-    F2: OutputType + Neg<Output = F2>,
-{
-    #[doc(hidden)]
-    _pdo: PhantomData<F1>,
-    #[doc(hidden)]
-    _pdi: PhantomData<I1>,
-    #[doc(hidden)]
-    _pdbi: PhantomData<I2>,
-    #[doc(hidden)]
-    _pdbf: PhantomData<F2>,
-}
-
-impl<I1, F1, I2, F2> TypeConverter4<I1, F1, I2, F2>
-where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
-    I2: InputType + Neg<Output = I2>,
-    F2: OutputType + Neg<Output = F2>,
-{
-    #[inline(always)]
-    pub fn i1_to_f2(input: I1) -> F2 {
-        num::cast::<I1, F2>(input).unwrap()
-    }
-
-    // todo! is there no way to convert this directly?
-    #[inline(always)]
-    pub fn i2_to_xi(input: I2) -> robust_fpt::ExtendedInt {
-        robust_fpt::ExtendedInt::from(num::cast::<I2, i64>(input).unwrap())
-    }
 
     #[inline(always)]
-    pub fn i2_to_f1(input: I2) -> F1 {
-        num::cast::<I2, F1>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn i2_to_f2(input: I2) -> F2 {
-        num::cast::<I2, F2>(input).unwrap()
+    pub fn u64_to_f64(input: u64) -> f64 {
+        num::cast::<u64, f64>(input).unwrap()
     }
 
     #[inline(always)]
     pub fn xi_to_xf(input: &robust_fpt::ExtendedInt) -> robust_fpt::ExtendedExponentFpt<f64> {
         robust_fpt::ExtendedExponentFpt::from(input)
-    }
-
-    #[inline(always)]
-    pub fn f2_to_f1(input: F2) -> F1 {
-        num::cast::<F2, F1>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn f1_to_f2(input: F1) -> F2 {
-        num::cast::<F1, F2>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn f2_to_f64(input: F2) -> f64 {
-        num::cast::<F2, f64>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn f2_to_f32(input: F2) -> f32 {
-        num::cast::<F2, f32>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn i1_to_i2(input: I1) -> I2 {
-        num::cast::<I1, I2>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn f32_to_f1(input: f32) -> F1 {
-        num::cast::<f32, F1>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn f32_to_f2(input: f32) -> F2 {
-        num::cast::<f32, F2>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn f64_to_f2(input: f64) -> F2 {
-        num::cast::<f64, F2>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn u64_to_f2(input: u64) -> F2 {
-        num::cast::<u64, F2>(input).unwrap()
     }
 }

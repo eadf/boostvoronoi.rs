@@ -4,8 +4,6 @@ use boostvoronoi::{BvError, Line, Point};
 
 type I = i32;
 type O = f32;
-type DI = i64;
-type DF = f64;
 
 fn almost_equal(x1: O, x2: O, y1: O, y2: O) -> bool {
     let delta = 0.0001;
@@ -37,7 +35,7 @@ where
 fn single_segment_1() -> Result<(), BvError> {
     let output = {
         let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 50 })];
-        let mut vb = VB::Builder::<I, O, DI, DF>::new();
+        let mut vb = VB::Builder::<I, O>::new();
         vb.with_segments(_s.iter())?;
         vb.construct()?
     };
@@ -84,7 +82,7 @@ fn single_segment_1() -> Result<(), BvError> {
 fn single_segment_2() -> Result<(), BvError> {
     let output = {
         let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 50 })];
-        let mut vb = VB::Builder::<I, O, DI, DF>::new();
+        let mut vb = VB::Builder::<I, O>::new();
         vb.with_segments(_s.iter())?;
         vb.construct()?
     };
@@ -127,7 +125,7 @@ fn single_segment_2() -> Result<(), BvError> {
 fn single_segment_3() -> Result<(), BvError> {
     let output = {
         let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 10 })];
-        let mut vb = VB::Builder::<I, O, DI, DF>::new();
+        let mut vb = VB::Builder::<I, O>::new();
         vb.with_segments(_s.iter())?;
         vb.construct()?
     };
@@ -170,7 +168,7 @@ fn single_segment_3() -> Result<(), BvError> {
 fn single_segment_4() -> Result<(), BvError> {
     let output = {
         let _s = vec![Line::new(Point { x: 50, y: 10 }, Point { x: 10, y: 10 })];
-        let mut vb = VB::Builder::<I, O, DI, DF>::new();
+        let mut vb = VB::Builder::<I, O>::new();
         vb.with_segments(_s.iter())?;
         vb.construct()?
     };
@@ -218,7 +216,7 @@ fn two_segments_1() -> Result<(), BvError> {
             Line::new(Point { x: 1, y: 2 }, Point { x: 3, y: 4 }),
             Line::new(Point { x: 2, y: 2 }, Point { x: 5, y: 4 }),
         ];
-        let mut vb = VB::Builder::<I, O, DI, DF>::new();
+        let mut vb = VB::Builder::<I, O>::new();
         vb.with_segments(_s.iter())?;
         vb.construct()?
     };
@@ -387,7 +385,7 @@ fn two_segments_2() -> Result<(), BvError> {
             Line::new(Point { x: 1, y: 2 }, Point { x: 3, y: 4 }),
             Line::new(Point { x: 2, y: 2 }, Point { x: 5, y: 4 }),
         ];
-        let mut vb = VB::Builder::<I, O, DI, DF>::new();
+        let mut vb = VB::Builder::<I, O>::new();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
         vb.construct()?
@@ -797,7 +795,7 @@ fn two_segments_3() -> Result<(), BvError> {
             Line::new(Point { x: 1, y: 2 }, Point { x: 3, y: 4 }),
             Line::new(Point { x: 2, y: 2 }, Point { x: 5, y: 4 }),
         ];
-        let mut vb = VB::Builder::<I, O, DI, DF>::new();
+        let mut vb = VB::Builder::<I, O>::new();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
         vb.construct()?
@@ -1350,7 +1348,7 @@ fn two_segments_4() -> Result<(), BvError> {
             Line::new(Point { x: 2, y: 2 }, Point { x: 5, y: 4 }),
             Line::new(Point { x: 5, y: 6 }, Point { x: 3, y: 1 }),
         ];
-        let mut vb = VB::Builder::<I, O, DI, DF>::new();
+        let mut vb = VB::Builder::<I, O>::new();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
         vb.construct()?
@@ -1468,7 +1466,7 @@ fn two_segments_5() -> Result<(), BvError> {
         let _v = VB::to_points::<I, I>(&points);
         let _s = VB::to_segments::<I, I>(&segments);
 
-        let mut vb = VB::Builder::<I, O, DI, DF>::new();
+        let mut vb = VB::Builder::<I, O>::new();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
         vb.construct()?
@@ -1586,7 +1584,7 @@ fn two_segments_6() -> Result<(), BvError> {
         let _v = VB::to_points::<I, I>(&points);
         let _s = VB::to_segments::<I, I>(&segments);
 
-        let mut vb = VB::Builder::<I, O, DI, DF>::new();
+        let mut vb = VB::Builder::<I, O>::new();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
         vb.construct()?
@@ -1941,7 +1939,7 @@ fn two_segments_7() -> Result<(), BvError> {
         let _v = VB::to_points::<I, I>(&points);
         let _s = VB::to_segments::<I, I>(&segments);
 
-        let mut vb = VB::Builder::<I, O, DI, DF>::new();
+        let mut vb = VB::Builder::<I, O>::new();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
         vb.construct()?
@@ -2302,7 +2300,7 @@ fn two_segments_8() -> Result<(), BvError> {
         let _v = VB::to_points::<I, I>(&points);
         let _s = VB::to_segments::<I, I>(&segments);
 
-        let mut vb = VB::Builder::<I, O, DI, DF>::new();
+        let mut vb = VB::Builder::<I, O>::new();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
         (vb.construct()?, _v, _s)

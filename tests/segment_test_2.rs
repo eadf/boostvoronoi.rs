@@ -2,10 +2,7 @@ use boostvoronoi::builder as VB;
 use boostvoronoi::BvError;
 
 type I1 = i32;
-//type F1 = f32;
 type F1 = f64;
-type I2 = i64;
-type F2 = f64;
 
 fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
     let delta = 0.0001;
@@ -33,7 +30,7 @@ fn two_segments_9() -> Result<(), BvError> {
         let _v = VB::to_points::<I1, I1>(&points);
         let _s = VB::to_segments::<I1, I1>(&segments);
 
-        let mut vb = VB::Builder::<I1, F1, I2, F2>::new();
+        let mut vb = VB::Builder::<I1, F1>::new();
         vb.with_vertices(_v.iter()).expect("two_segments_9");
         vb.with_segments(_s.iter()).expect("two_segments_9");
         vb.construct().expect("two_segments_9")

@@ -4,8 +4,6 @@ use boostvoronoi::BvError;
 
 type I1 = i64;
 type F1 = f64;
-type I2 = i64;
-type F2 = f64;
 
 #[allow(dead_code)]
 fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
@@ -28,7 +26,7 @@ fn segment_5_1() -> Result<(), BvError> {
         ];
         let segments = to_segments(&segments);
 
-        let mut vb = Builder::<I1, F1, I2, F2>::new();
+        let mut vb = Builder::<I1, F1>::new();
         vb.with_segments(segments.iter())?;
         vb.construct()?
     };
@@ -143,7 +141,7 @@ fn segment_5_2() -> Result<(), BvError> {
 
         let segments = to_segments(&segments);
 
-        let mut vb = Builder::<I1, F1, I2, F2>::new();
+        let mut vb = Builder::<I1, F1>::new();
         vb.with_segments(segments.iter())?;
         vb.construct()?
     };
@@ -171,7 +169,7 @@ fn segment_5_3() -> Result<(), BvError> {
 
         let segments = to_segments(&segments);
 
-        let mut vb = Builder::<I1, F1, I2, F2>::new();
+        let mut vb = Builder::<I1, F1>::new();
         vb.with_segments(segments.iter())?;
         vb.construct()?
     };

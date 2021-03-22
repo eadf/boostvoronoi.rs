@@ -1,7 +1,7 @@
 #![allow(unused_imports)]
 use super::RobustFpt;
 use crate::robust_fpt as RF;
-use crate::TypeConverter4 as TCC;
+use crate::TypeConverter as TC;
 use num::{Float, Num, NumCast, Zero};
 
 #[test]

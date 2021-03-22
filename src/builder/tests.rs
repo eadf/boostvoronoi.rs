@@ -8,15 +8,12 @@ use super::{Line, Point};
 fn sort_1() {
     type I1 = i32;
     type F1 = f32;
-    type I2 = i64;
-    type F2 = f64;
-
     {
         let coord = |x, y| Point { x, y };
 
         let _v = vec![coord(10, 11), coord(0, 100), coord(10, 11), coord(0, 100)];
 
-        let mut vb = Builder::<I1, F1, I2, F2>::new();
+        let mut vb = Builder::<I1, F1>::new();
         assert!(vb.site_events_.is_empty());
         vb.with_vertices(_v.iter()).expect("sort_1");
         assert_eq!(vb.site_events_.len(), 4);

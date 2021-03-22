@@ -38,19 +38,16 @@ pub type CircleEventIndexType = usize;
 /// NOTE: lower_y coordinate is always equal to center_y.
 ///
 #[derive(Copy, Clone)]
-pub struct CircleEvent<F2: OutputType + Neg<Output = F2>> {
+pub struct CircleEvent {
     index_: Option<CircleEventIndexType>, // the list index inside CircleEventQueue
-    center_x_: OrderedFloat<F2>,
-    center_y_: OrderedFloat<F2>,
-    lower_x_: OrderedFloat<F2>,
+    center_x_: OrderedFloat<f64>,
+    center_y_: OrderedFloat<f64>,
+    lower_x_: OrderedFloat<f64>,
     beach_line_index_: Option<VB::BeachLineIndex>, //beach_line_iterator in C++
     is_site_point: bool,
 }
 
-impl<F2> fmt::Debug for CircleEvent<F2>
-where
-    F2: OutputType + Neg<Output = F2>,
-{
+impl fmt::Debug for CircleEvent {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
 
@@ -65,20 +62,20 @@ where
     }
 }
 
-impl<F2: OutputType + Neg<Output = F2>> Default for CircleEvent<F2> {
+impl Default for CircleEvent {
     fn default() -> Self {
         Self {
             index_: None, // do i really have to put this in an option?
-            center_x_: OrderedFloat(F2::zero()),
-            center_y_: OrderedFloat(F2::zero()),
-            lower_x_: OrderedFloat(F2::zero()),
+            center_x_: OrderedFloat(0_f64),
+            center_y_: OrderedFloat(0_f64),
+            lower_x_: OrderedFloat(0_f64),
             beach_line_index_: None,
             is_site_point: false,
         }
     }
 }
 
-impl<F2: OutputType + Neg<Output = F2>> PartialEq for CircleEvent<F2> {
+impl PartialEq for CircleEvent {
     fn eq(&self, other: &Self) -> bool {
         self.center_x_ == other.center_x_
             && self.center_y_ == other.center_y_
@@ -90,15 +87,15 @@ impl<F2: OutputType + Neg<Output = F2>> PartialEq for CircleEvent<F2> {
     }
 }
 
-impl<F2: OutputType + Neg<Output = F2>> Eq for CircleEvent<F2> {}
+impl Eq for CircleEvent {}
 
-impl<F2: OutputType + Neg<Output = F2>> PartialOrd for CircleEvent<F2> {
+impl PartialOrd for CircleEvent {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<F2: OutputType + Neg<Output = F2>> Ord for CircleEvent<F2> {
+impl Ord for CircleEvent {
     fn cmp(&self, other: &Self) -> Ordering {
         if self.lower_x() != other.lower_x() {
             return if self.lower_x() < other.lower_x() {
@@ -115,15 +112,9 @@ impl<F2: OutputType + Neg<Output = F2>> Ord for CircleEvent<F2> {
 
 /// Wrapper object that lets me implement Ord on a Cell<CircleEvent<O>>
 #[derive(Clone)]
-pub struct CircleEventC<F2: OutputType + Neg<Output = F2>>(
-    pub Cell<CircleEvent<F2>>,
-    pub(crate) Option<VB::BeachLineIndex>,
-);
+pub struct CircleEventC(pub Cell<CircleEvent>, pub(crate) Option<VB::BeachLineIndex>);
 
-impl<F2> fmt::Debug for CircleEventC<F2>
-where
-    F2: OutputType + Neg<Output = F2>,
-{
+impl fmt::Debug for CircleEventC {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
         let cell = self.0.get();
@@ -132,8 +123,8 @@ where
     }
 }
 
-impl<F2: OutputType + Neg<Output = F2>> CircleEventC<F2> {
-    pub(crate) fn new_1(c: CircleEvent<F2>) -> Rc<Self> {
+impl CircleEventC {
+    pub(crate) fn new_1(c: CircleEvent) -> Rc<Self> {
         let cc = Self(Cell::new(c), Some(c.beach_line_index_.unwrap())); // todo
         Rc::<Self>::new(cc)
     }
@@ -146,16 +137,12 @@ impl<F2: OutputType + Neg<Output = F2>> CircleEventC<F2> {
         lower_x: RF::ExtendedExponentFpt<f64>,
     ) {
         let mut selfc = self.0.get();
-        selfc.set_3_raw(
-            num::cast::<f64, F2>(x.d()).unwrap(),
-            num::cast::<f64, F2>(y.d()).unwrap(),
-            num::cast::<f64, F2>(lower_x.d()).unwrap(),
-        );
+        selfc.set_3_raw(x.d(), y.d(), lower_x.d());
         self.0.set(selfc);
     }
 
     /// sets the coordinates inside the Cell.
-    pub(crate) fn set_3_raw(&self, x: F2, y: F2, lower_x: F2) {
+    pub(crate) fn set_3_raw(&self, x: f64, y: f64, lower_x: f64) {
         let mut selfc = self.0.get();
         selfc.set_3_raw(x, y, lower_x);
         self.0.set(selfc);
@@ -164,21 +151,21 @@ impl<F2: OutputType + Neg<Output = F2>> CircleEventC<F2> {
     /// sets the x coordinates inside the Cell.
     pub(crate) fn set_x_xf(&self, x: RF::ExtendedExponentFpt<f64>) {
         let mut selfc = self.0.get();
-        let _ = selfc.set_x_raw(num::cast::<f64, F2>(x.d()).unwrap());
+        let _ = selfc.set_x_raw(x.d());
         self.0.set(selfc);
     }
 
     /// sets the y coordinate inside the Cell.
     pub(crate) fn set_y_xf(&self, y: RF::ExtendedExponentFpt<f64>) {
         let mut selfc = self.0.get();
-        let _ = selfc.set_raw_y(num::cast::<f64, F2>(y.d()).unwrap());
+        let _ = selfc.set_raw_y(y.d());
         self.0.set(selfc);
     }
 
     /// sets the y coordinate inside the Cell.
     pub(crate) fn set_lower_x_xf(&self, x: RF::ExtendedExponentFpt<f64>) {
-        let mut selfc: CircleEvent<F2> = self.0.get();
-        let _ = selfc.set_raw_lower_x(num::cast::<f64, F2>(x.d()).unwrap());
+        let mut selfc: CircleEvent = self.0.get();
+        let _ = selfc.set_raw_lower_x(x.d());
         self.0.set(selfc);
     }
 
@@ -193,13 +180,13 @@ impl<F2: OutputType + Neg<Output = F2>> CircleEventC<F2> {
     }
 }
 
-impl<F2: OutputType + Neg<Output = F2>> PartialOrd for CircleEventC<F2> {
+impl PartialOrd for CircleEventC {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<F2: OutputType + Neg<Output = F2>> Ord for CircleEventC<F2> {
+impl Ord for CircleEventC {
     fn cmp(&self, other: &Self) -> Ordering {
         let cself = self.0.get();
         let cother = other.0.get();
@@ -207,7 +194,7 @@ impl<F2: OutputType + Neg<Output = F2>> Ord for CircleEventC<F2> {
     }
 }
 
-impl<F2: OutputType + Neg<Output = F2>> PartialEq for CircleEventC<F2> {
+impl PartialEq for CircleEventC {
     fn eq(&self, other: &Self) -> bool {
         let cself = self.0.get();
         let cother = other.0.get();
@@ -218,17 +205,17 @@ impl<F2: OutputType + Neg<Output = F2>> PartialEq for CircleEventC<F2> {
     }
 }
 
-impl<F2: OutputType + Neg<Output = F2>> Eq for CircleEventC<F2> {}
+impl Eq for CircleEventC {}
 
-impl<F2> CircleEvent<F2>
+impl CircleEvent
 where
-    F2: OutputType + Neg<Output = F2>,
+    f64: OutputType + Neg<Output = f64>,
 {
-    pub(crate) fn new_1(bech_line_index: VB::BeachLineIndex) -> CircleEvent<F2> {
+    pub(crate) fn new_1(bech_line_index: VB::BeachLineIndex) -> CircleEvent {
         Self {
-            center_x_: OrderedFloat(F2::zero()),
-            center_y_: OrderedFloat(F2::zero()),
-            lower_x_: OrderedFloat(F2::zero()),
+            center_x_: OrderedFloat(0_f64),
+            center_y_: OrderedFloat(0_f64),
+            lower_x_: OrderedFloat(0_f64),
             beach_line_index_: Some(bech_line_index),
             index_: None,
             is_site_point: false,
@@ -245,88 +232,84 @@ where
     }
 
     #[allow(dead_code)]
-    pub(crate) fn x(&self) -> OrderedFloat<F2> {
+    pub(crate) fn x(&self) -> OrderedFloat<f64> {
         self.center_x_
     }
 
     pub(crate) fn x_as_xf(&self) -> RF::ExtendedExponentFpt<f64> {
-        RF::ExtendedExponentFpt::<f64>::from(
-            num::cast::<F2, f64>(self.center_x_.into_inner()).unwrap(),
-        )
+        RF::ExtendedExponentFpt::<f64>::from(self.center_x_.into_inner())
     }
 
-    pub(crate) fn raw_x(&self) -> F2 {
+    pub(crate) fn raw_x(&self) -> f64 {
         self.center_x_.into_inner()
     }
 
     #[allow(dead_code)]
-    pub(crate) fn set_x(&mut self, x: OrderedFloat<F2>) -> &mut Self {
+    pub(crate) fn set_x(&mut self, x: OrderedFloat<f64>) -> &mut Self {
         self.center_x_ = x;
         self
     }
 
-    pub(crate) fn set_x_raw(&mut self, x: F2) -> &mut Self {
+    pub(crate) fn set_x_raw(&mut self, x: f64) -> &mut Self {
         self.center_x_ = OrderedFloat(x);
         self
     }
 
-    pub(crate) fn y(&self) -> OrderedFloat<F2> {
+    pub(crate) fn y(&self) -> OrderedFloat<f64> {
         self.center_y_
     }
 
     #[allow(dead_code)]
     pub(crate) fn y_as_ext(&self) -> RF::ExtendedExponentFpt<f64> {
-        RF::ExtendedExponentFpt::<f64>::from(
-            num::cast::<F2, f64>(self.center_y_.into_inner()).unwrap(),
-        )
+        RF::ExtendedExponentFpt::<f64>::from(self.center_y_.into_inner())
     }
 
-    pub(crate) fn raw_y(&self) -> F2 {
+    pub(crate) fn raw_y(&self) -> f64 {
         self.center_y_.into_inner()
     }
 
     #[allow(dead_code)]
-    pub(crate) fn set_y(&mut self, y: OrderedFloat<F2>) -> &mut Self {
+    pub(crate) fn set_y(&mut self, y: OrderedFloat<f64>) -> &mut Self {
         self.center_y_ = y;
         self
     }
 
-    pub(crate) fn set_raw_y(&mut self, y: F2) -> &mut Self {
+    pub(crate) fn set_raw_y(&mut self, y: f64) -> &mut Self {
         self.center_y_ = OrderedFloat(y);
         self
     }
 
     #[inline(always)]
-    pub(crate) fn lower_x(&self) -> OrderedFloat<F2> {
+    pub(crate) fn lower_x(&self) -> OrderedFloat<f64> {
         self.lower_x_
     }
 
     #[allow(dead_code)]
-    pub(crate) fn set_lower_x(&mut self, x: OrderedFloat<F2>) -> &mut Self {
+    pub(crate) fn set_lower_x(&mut self, x: OrderedFloat<f64>) -> &mut Self {
         self.lower_x_ = x;
         self
     }
 
     #[allow(dead_code)]
     #[inline(always)]
-    pub(crate) fn raw_lower_x(&self) -> F2 {
+    pub(crate) fn raw_lower_x(&self) -> f64 {
         self.lower_x_.into_inner()
     }
 
     #[inline(always)]
-    pub(crate) fn set_raw_lower_x(&mut self, x: F2) -> &mut Self {
+    pub(crate) fn set_raw_lower_x(&mut self, x: f64) -> &mut Self {
         self.lower_x_ = OrderedFloat(x);
         self
     }
 
     #[allow(dead_code)]
     #[inline(always)]
-    pub(crate) fn lower_y(&self) -> OrderedFloat<F2> {
+    pub(crate) fn lower_y(&self) -> OrderedFloat<f64> {
         self.center_y_
     }
 
     #[inline(always)]
-    pub(crate) fn set_3_raw(&mut self, x: F2, y: F2, lower_x: F2) {
+    pub(crate) fn set_3_raw(&mut self, x: f64, y: f64, lower_x: f64) {
         let _ = self.set_x_raw(x);
         let _ = self.set_raw_y(y);
         let _ = self.set_raw_lower_x(lower_x);
@@ -338,7 +321,7 @@ where
     }
 }
 
-pub type CircleEventType<F2> = Rc<CircleEventC<F2>>;
+pub type CircleEventType = Rc<CircleEventC>;
 
 /// Event queue data structure, holds circle events.
 /// During algorithm run, some of the circle events disappear (become
@@ -347,18 +330,15 @@ pub type CircleEventType<F2> = Rc<CircleEventC<F2>>;
 /// Instead list is used to store all the circle events and priority queue
 /// of the iterators to the list elements is used to keep the correct circle
 /// events ordering.
-pub(crate) struct CircleEventQueue<F2>
-where
-    F2: OutputType + Neg<Output = F2>,
-{
-    c_: BTreeSet<CircleEventType<F2>>,
-    c_list_: VecMap<CircleEventType<F2>>,
+pub(crate) struct CircleEventQueue {
+    c_: BTreeSet<CircleEventType>,
+    c_list_: VecMap<CircleEventType>,
     c_list_next_free_index_: CircleEventIndexType,
     inactive_circle_ids_: yabf::Yabf, // Circle events turned inactive
 }
 
-impl<F2: OutputType + Neg<Output = F2>> Default for CircleEventQueue<F2> {
-    fn default() -> CircleEventQueue<F2> {
+impl Default for CircleEventQueue {
+    fn default() -> CircleEventQueue {
         Self {
             c_: BTreeSet::new(),
             c_list_: VecMap::new(),
@@ -368,10 +348,7 @@ impl<F2: OutputType + Neg<Output = F2>> Default for CircleEventQueue<F2> {
     }
 }
 
-impl<F2> CircleEventQueue<F2>
-where
-    F2: OutputType + Neg<Output = F2>,
-{
+impl CircleEventQueue {
     pub(crate) fn is_empty(&self) -> bool {
         self.c_.is_empty()
     }
@@ -383,7 +360,7 @@ where
         self.c_.len()
     }
 
-    pub(crate) fn peek(&self) -> Option<&CircleEventType<F2>> {
+    pub(crate) fn peek(&self) -> Option<&CircleEventType> {
         // Todo: maybe iterate until a non-removed event is found
         self.c_.first()
     }
@@ -448,7 +425,7 @@ where
     /// Insert Rc ref into the list
     /// Insert Rc wrapped object in self.c_
     /// return a Rc ref of the inserted element
-    pub(crate) fn associate_and_push(&mut self, cc: CircleEventType<F2>) -> Rc<CircleEventC<F2>> {
+    pub(crate) fn associate_and_push(&mut self, cc: CircleEventType) -> Rc<CircleEventC> {
         //assert!(!self.c_.contains(&cc)); // todo: is this supposed to happen?
         {
             let mut c = cc.0.get();
@@ -486,7 +463,7 @@ where
         }
     }
 
-    pub(crate) fn top(&self) -> Option<&CircleEventType<F2>> {
+    pub(crate) fn top(&self) -> Option<&CircleEventType> {
         let c = self.c_.first();
         if let Some(cc) = c {
             let id = cc.0.get().index_.unwrap();

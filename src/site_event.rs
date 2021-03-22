@@ -16,7 +16,7 @@ use super::predicate as VP;
 use std::cmp::Ordering;
 
 use super::Point;
-use super::{BigFloatType, BigIntType, InputType, OutputType};
+use super::{InputType, OutputType};
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
@@ -48,12 +48,10 @@ pub type SiteEventIndexType = usize;
 /// Note: for all sites is_inverse_ flag is equal to false by default.
 
 #[derive(Copy, Clone)]
-pub struct SiteEvent<I1, F1, I2, F2>
+pub struct SiteEvent<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
     pub(crate) point0_: Point<I1>,
     pub(crate) point1_: Point<I1>,
@@ -62,18 +60,12 @@ where
     flags_: VD::ColorType,
     #[doc(hidden)]
     _pdo: PhantomData<F1>,
-    #[doc(hidden)]
-    _pdbi: PhantomData<I2>,
-    #[doc(hidden)]
-    _pdbf: PhantomData<F2>,
 }
 
-impl<I1, F1, I2, F2> fmt::Debug for SiteEvent<I1, F1, I2, F2>
+impl<I1, F1> fmt::Debug for SiteEvent<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut rv = String::new();
@@ -110,61 +102,47 @@ where
     }
 }
 
-impl<I, O, BI, BF> PartialOrd for SiteEvent<I, O, BI, BF>
+impl<I, O> PartialOrd for SiteEvent<I, O>
 where
     I: InputType + Neg<Output = I>,
     O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(
-            VP::EventComparisonPredicate::<I, O, BI, BF>::event_comparison_predicate_ii(
-                self, other,
-            ),
-        )
+        Some(VP::EventComparisonPredicate::<I, O>::event_comparison_predicate_ii(self, other))
     }
 }
 
-impl<I, O, BI, BF> Ord for SiteEvent<I, O, BI, BF>
+impl<I, O> Ord for SiteEvent<I, O>
 where
     I: InputType + Neg<Output = I>,
     O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
 {
     fn cmp(&self, other: &Self) -> Ordering {
-        VP::EventComparisonPredicate::<I, O, BI, BF>::event_comparison_predicate_ii(self, other)
+        VP::EventComparisonPredicate::<I, O>::event_comparison_predicate_ii(self, other)
     }
 }
 
-impl<I, O, BI, BF> PartialEq for SiteEvent<I, O, BI, BF>
+impl<I, O> PartialEq for SiteEvent<I, O>
 where
     I: InputType + Neg<Output = I>,
     O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
 {
     fn eq(&self, other: &Self) -> bool {
         (self.point0_ == other.point0_) && (self.point1_ == other.point1_)
     }
 }
 
-impl<I, O, BI, BF> Eq for SiteEvent<I, O, BI, BF>
+impl<I, O> Eq for SiteEvent<I, O>
 where
     I: InputType + Neg<Output = I>,
     O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
 {
 }
 
-impl<I, O, BI, BF> Hash for SiteEvent<I, O, BI, BF>
+impl<I, O> Hash for SiteEvent<I, O>
 where
     I: InputType + Neg<Output = I>,
     O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.point0_.hash(state);
@@ -175,14 +153,12 @@ where
     }
 }
 
-impl<I1, F1, I2, F2> SiteEvent<I1, F1, I2, F2>
+impl<I1, F1> SiteEvent<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    I2: BigIntType + Neg<Output = I2>,
-    F2: BigFloatType + Neg<Output = F2>,
 {
-    pub fn new_2(a: Point<I1>, initial_index_: SiteEventIndexType) -> SiteEvent<I1, F1, I2, F2> {
+    pub fn new_2(a: Point<I1>, initial_index_: SiteEventIndexType) -> SiteEvent<I1, F1> {
         Self {
             point0_: a,
             point1_: a,
@@ -191,10 +167,6 @@ where
             flags_: VD::ColorBits::SINGLE_POINT.0,
             #[doc(hidden)]
             _pdo: PhantomData,
-            #[doc(hidden)]
-            _pdbi: PhantomData,
-            #[doc(hidden)]
-            _pdbf: PhantomData,
         }
     }
 
@@ -202,7 +174,7 @@ where
         a: Point<I1>,
         b: Point<I1>,
         initial_index_: SiteEventIndexType,
-    ) -> SiteEvent<I1, F1, I2, F2> {
+    ) -> SiteEvent<I1, F1> {
         Self {
             point0_: a,
             point1_: b,
@@ -211,10 +183,6 @@ where
             flags_: 0,
             #[doc(hidden)]
             _pdo: PhantomData,
-            #[doc(hidden)]
-            _pdbi: PhantomData,
-            #[doc(hidden)]
-            _pdbf: PhantomData,
         }
     }
 
@@ -227,7 +195,7 @@ where
         initial_index: usize,
         sorted_index: usize,
         flags: u32,
-    ) -> SiteEvent<I1, F1, I2, F2> {
+    ) -> SiteEvent<I1, F1> {
         Self {
             point0_: Point { x: x1, y: y1 },
             point1_: Point { x: x2, y: y2 },
@@ -235,8 +203,6 @@ where
             initial_index_: initial_index,
             flags_: flags,
             _pdo: PhantomData,
-            _pdbi: PhantomData,
-            _pdbf: PhantomData,
         }
     }
     /*
@@ -346,10 +312,7 @@ where
 
     #[allow(unknown_lints)]
     #[allow(clippy::suspicious_operation_groupings)]
-    pub fn is_primary_edge(
-        site1: &SiteEvent<I1, F1, I2, F2>,
-        site2: &SiteEvent<I1, F1, I2, F2>,
-    ) -> bool {
+    pub fn is_primary_edge(site1: &SiteEvent<I1, F1>, site2: &SiteEvent<I1, F1>) -> bool {
         let flag1 = site1.is_segment();
         let flag2 = site2.is_segment();
         if flag1 && !flag2 {
@@ -361,10 +324,7 @@ where
         true
     }
 
-    pub fn is_linear_edge(
-        site1: &SiteEvent<I1, F1, I2, F2>,
-        site2: &SiteEvent<I1, F1, I2, F2>,
-    ) -> bool {
+    pub fn is_linear_edge(site1: &SiteEvent<I1, F1>, site2: &SiteEvent<I1, F1>) -> bool {
         if !Self::is_primary_edge(site1, site2) {
             return true;
         }
@@ -372,12 +332,10 @@ where
     }
 }
 
-impl<I, O, BI, BF> fmt::Display for SiteEvent<I, O, BI, BF>
+impl<I, O> fmt::Display for SiteEvent<I, O>
 where
     I: InputType + Neg<Output = I>,
     O: OutputType + Neg<Output = O>,
-    BI: BigIntType + Neg<Output = BI>,
-    BF: BigFloatType + Neg<Output = BF>,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
