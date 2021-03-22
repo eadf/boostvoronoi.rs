@@ -14,9 +14,9 @@ mod tests;
 use super::beach_line as VB;
 use super::circle_event as VC;
 use super::ctypes::UlpComparison;
-use super::robust_fpt as RF;
-use super::extended_int as EI;
 use super::extended_exp_fpt as EX;
+use super::extended_int as EI;
+use super::robust_fpt as RF;
 use super::site_event as VSE;
 use super::Point;
 use super::TypeCheckF as TCF;
@@ -435,17 +435,23 @@ where
         //dbg!(left_point.x, left_point.y);
         //dbg!(right_point.x, right_point.y);
 
-        //#[allow(clippy::comparison_chain)] // todo fix clippy
-        if left_point.x > right_point.x {
-            if new_point.y <= left_point.y {
-                return false;
+        match left_point.x.cmp(&right_point.x) {
+            cmp::Ordering::Greater => {
+                if new_point.y <= left_point.y {
+                    return false;
+                }
             }
-        } else if left_point.x < right_point.x {
-            if new_point.y >= right_point.y {
-                return true;
+
+            cmp::Ordering::Less => {
+                if new_point.y >= right_point.y {
+                    return true;
+                }
             }
-        } else {
-            return i1_to_i64(left_point.y) + i1_to_i64(right_point.y) < i1_to_i64(new_point.y) * 2;
+
+            _ => {
+                return i1_to_i64(left_point.y) + i1_to_i64(right_point.y)
+                    < i1_to_i64(new_point.y) * 2
+            }
         }
 
         let dist1 = Self::find_distance_to_point_arc(left_site, new_point);

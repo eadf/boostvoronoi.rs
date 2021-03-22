@@ -10,6 +10,7 @@
 // Ported from C++ boost 1.75.0 to Rust in 2020 by Eadf (github.com/eadf)
 
 use super::extended_exp_fpt as EX;
+use std::cmp;
 use std::fmt;
 use std::num::Wrapping;
 use std::ops;
@@ -34,12 +35,16 @@ impl From<i32> for ExtendedInt {
     /// ```
     fn from(that: i32) -> Self {
         let mut rv = Self::zero();
-        if that > 0 {
-            rv.chunks.push(Wrapping(that as u32));
-            rv.count = 1;
-        } else if that < 0 {
-            rv.chunks.push(Wrapping((-that) as u32));
-            rv.count = -1;
+        match that.cmp(&0) {
+            cmp::Ordering::Greater => {
+                rv.chunks.push(Wrapping(that as u32));
+                rv.count = 1;
+            }
+            cmp::Ordering::Less => {
+                rv.chunks.push(Wrapping((-that) as u32));
+                rv.count = -1;
+            }
+            _ => (),
         }
         rv
     }
@@ -56,26 +61,30 @@ impl From<i64> for ExtendedInt {
     /// ```
     fn from(that: i64) -> Self {
         let mut rv = Self::zero();
-        if that > 0 {
-            let mut c = that as u64;
-            rv.chunks.push(Wrapping((c & 0xFFFFFFFF) as u32));
-            c >>= 32;
-            if c != 0 {
-                rv.chunks.push(Wrapping(c as u32));
-                rv.count = 2
-            } else {
-                rv.count = 1
+        match that.cmp(&0) {
+            cmp::Ordering::Greater => {
+                let mut c = that as u64;
+                rv.chunks.push(Wrapping((c & 0xFFFFFFFF) as u32));
+                c >>= 32;
+                if c != 0 {
+                    rv.chunks.push(Wrapping(c as u32));
+                    rv.count = 2
+                } else {
+                    rv.count = 1
+                }
             }
-        } else if that < 0 {
-            let mut c: u64 = (-that) as u64;
-            rv.chunks.push(Wrapping((c & 0xFFFFFFFF) as u32));
-            c >>= 32;
-            if c != 0 {
-                rv.chunks.push(Wrapping(c as u32));
-                rv.count = -2
-            } else {
-                rv.count = -1
+            cmp::Ordering::Less => {
+                let mut c: u64 = (-that) as u64;
+                rv.chunks.push(Wrapping((c & 0xFFFFFFFF) as u32));
+                c >>= 32;
+                if c != 0 {
+                    rv.chunks.push(Wrapping(c as u32));
+                    rv.count = -2
+                } else {
+                    rv.count = -1
+                }
             }
+            _ => (),
         }
         rv
     }
@@ -151,7 +160,7 @@ impl ExtendedInt {
     /// approx::assert_ulps_eq!(a.d(), -aa);
     /// ```
     pub fn negate(&mut self) {
-        assert_eq!(self.chunks.len(), self.size());
+        //assert_eq!(self.chunks.len(), self.size());
         self.count = -self.count;
     }
 
@@ -225,8 +234,8 @@ impl ExtendedInt {
             self.chunks[i] = Wrapping(temp as u32);
             temp >>= 32;
         }
-        for i in sz2..sz1 {
-            temp += c1[i].0 as u64;
+        for (i, c1_i) in c1.iter().enumerate().take(sz1).skip(sz2) {
+            temp += c1_i.0 as u64;
             self.chunks[i] = Wrapping(temp as u32);
             temp >>= 32;
         }
@@ -239,8 +248,8 @@ impl ExtendedInt {
             self.count += 1;
         }
         // Todo: remove these asserts when stable
-        assert!(self.count >= 0);
-        assert_eq!(self.chunks.len(), self.count as usize);
+        //assert!(self.count >= 0);
+        //assert_eq!(self.chunks.len(), self.count as usize);
     }
 
     /// this method assumes self is an empty object
@@ -288,14 +297,18 @@ impl ExtendedInt {
         } else if (sz1 == sz2) && !rec {
             loop {
                 sz1 -= 1;
-                if c1[sz1] < c2[sz1] {
-                    sz1 += 1;
-                    self.dif_slice(c2, sz1, c1, sz1, true);
-                    self.count = -self.count;
-                    return;
-                } else if c1[sz1] > c2[sz1] {
-                    sz1 += 1;
-                    break;
+                match c1[sz1].cmp(&c2[sz1]) {
+                    cmp::Ordering::Less => {
+                        sz1 += 1;
+                        self.dif_slice(c2, sz1, c1, sz1, true);
+                        self.count = -self.count;
+                        return;
+                    }
+                    cmp::Ordering::Greater => {
+                        sz1 += 1;
+                        break;
+                    }
+                    _ => (),
                 }
                 if sz1 == 0 {
                     break;
@@ -318,9 +331,9 @@ impl ExtendedInt {
             self.chunks[i] = c1[i] - c2[i] - if flag { Wrapping(1) } else { Wrapping(0) };
             flag = (c1[i] < c2[i]) || ((c1[i] == c2[i]) && flag);
         }
-        for i in sz2..sz1 {
-            self.chunks[i] = c1[i] - if flag { Wrapping(1) } else { Wrapping(0) };
-            flag = (c1[i].0 == 0) && flag;
+        for (i, c1_i) in c1.iter().enumerate().take(sz1).skip(sz2) {
+            self.chunks[i] = c1_i - if flag { Wrapping(1) } else { Wrapping(0) };
+            flag = (c1_i.0 == 0) && flag;
         }
         if self.chunks[self.count as usize].0 != 0 {
             self.count += 1;
@@ -332,8 +345,8 @@ impl ExtendedInt {
             let _ = self.chunks.pop();
         }
         // Todo: remove these asserts when stable
-        assert!(self.count >= 0);
-        assert_eq!(self.chunks.len(), self.count as usize);
+        //assert!(self.count >= 0);
+        //assert_eq!(self.chunks.len(), self.count as usize);
         //println!("<-dif_slice#1 {:?}", self);
     }
 
@@ -369,7 +382,7 @@ impl ExtendedInt {
         //dbg!(self.count);
         for shift in 0..(self.count as usize) {
             nxt = 0;
-            for first in 0..shift + 1 {
+            for (first, c1_first) in c1.iter().enumerate().take(shift + 1) {
                 if first >= sz1 {
                     //println!("mul_slice brk {:?}", self);
                     break;
@@ -380,7 +393,7 @@ impl ExtendedInt {
                     continue;
                 }
 
-                tmp = (c1[first].0 as u64) * (c2[second].0 as u64);
+                tmp = (c1_first.0 as u64) * (c2[second].0 as u64);
                 cur += tmp & 0xFFFF_FFFF;
                 nxt += tmp >> 32;
 
@@ -396,15 +409,14 @@ impl ExtendedInt {
         }
         if cur != 0 {
             //&& (self.count != N)) {
-            assert_eq!(self.count as usize, self.chunks.len());
+            //assert_eq!(self.count as usize, self.chunks.len());
             self.chunks.push(Wrapping(cur as u32));
             //self.chunks[self.count as usize] = Wrapping(cur as u32);
             self.count += 1;
         }
         // Todo: remove these asserts when stable
-
-        assert!(self.count >= 0);
-        assert_eq!(self.chunks.len(), self.count as usize);
+        //assert!(self.count >= 0);
+        //assert_eq!(self.chunks.len(), self.count as usize);
         //println!("<-mul_slice {:?}", self);
     }
 }
