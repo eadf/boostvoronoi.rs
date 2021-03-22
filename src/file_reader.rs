@@ -32,49 +32,51 @@ where
     //println!("line split: {:?}", line);
     match line.len() {
         1 => {
-            let n = line[0].parse::<usize>();
-            if n.is_ok() {
-                return Some(InputData::Number(n.unwrap()));
+            if let Ok(n) = line[0].parse::<usize>(){
+                return Some(InputData::Number(n));
+            } else {
+                println!("failed to parse {}, ignoring line", line[0]);
             }
         }
         2 => {
-            let x1 = line[0].parse::<i32>();
-            let y1 = line[1].parse::<i32>();
-            if x1.is_ok() && y1.is_ok() {
-                return Some(InputData::Point(super::Point::<I1> {
-                    x: super::TypeConverter::<I1, F1>::i32_to_i1(x1.unwrap()),
-                    y: super::TypeConverter::<I1, F1>::i32_to_i1(y1.unwrap()),
-                }));
+            if let Ok(x1) = line[0].parse::<i32>() {
+                if let Ok(y1) = line[1].parse::<i32>() {
+                    return Some(InputData::Point(super::Point::<I1> {
+                        x: super::TypeConverter::<I1, F1>::i32_to_i1(x1),
+                        y: super::TypeConverter::<I1, F1>::i32_to_i1(y1),
+                    }));
+                } else {
+                    println!("failed to parse {}, ignoring line", line[1]);
+                }
+            } else {
+                println!("failed to parse {}, ignoring line", line[0]);
             }
         }
         4 => {
-            let x1 = line[0].parse::<i32>();
-            let y1 = line[1].parse::<i32>();
-            let x2 = line[2].parse::<i32>();
-            let y2 = line[3].parse::<i32>();
-            if x1.is_ok() && y1.is_ok() && x2.is_ok() && y2.is_ok() {
-                return Some(InputData::Line(super::Line::<I1>::from([
-                    super::TypeConverter::<I1, F1>::i32_to_i1(x1.unwrap()),
-                    super::TypeConverter::<I1, F1>::i32_to_i1(y1.unwrap()),
-                    super::TypeConverter::<I1, F1>::i32_to_i1(x2.unwrap()),
-                    super::TypeConverter::<I1, F1>::i32_to_i1(y2.unwrap()),
-                ])));
+            if let Ok(x1) = line[0].parse::<i32>() {
+                if let Ok(y1) = line[1].parse::<i32>() {
+                    if let Ok(x2) = line[2].parse::<i32>() {
+                        if let Ok(y2) = line[3].parse::<i32>() {
+                            return Some(InputData::Line(super::Line::<I1>::from([
+                                super::TypeConverter::<I1, F1>::i32_to_i1(x1),
+                                super::TypeConverter::<I1, F1>::i32_to_i1(y1),
+                                super::TypeConverter::<I1, F1>::i32_to_i1(x2),
+                                super::TypeConverter::<I1, F1>::i32_to_i1(y2),
+                            ])));
+                        } else {
+                            println!("failed to parse {}, ignoring line", line[3]);
+                        }
+                    } else {
+                        println!("failed to parse {}, ignoring line", line[2]);
+                    }
+                } else {
+                    println!("failed to parse {}, ignoring line", line[1]);
+                }
             } else {
-                if x1.is_err() {
-                    println!("failed to parse {}", line[0]);
-                }
-                if y1.is_err() {
-                    println!("failed to parse {}", line[1]);
-                }
-                if x2.is_err() {
-                    println!("failed to parse {}", line[2]);
-                }
-                if y2.is_err() {
-                    println!("failed to parse {}", line[3]);
-                }
+                println!("failed to parse {}, ignoring line", line[0]);
             }
         }
-        _ => println!("failed to parse whole line {:?}", line),
+        _ => println!("failed to parse {:?}, ignoring line", line),
     }
     None
 }
@@ -85,6 +87,7 @@ where
 /// [number of lines]
 /// [X1] [Y1] [X2] [Y2](repeats)
 /// This entire module is implemented in about 20 lines of code in C++ boost :/
+#[allow(clippy::type_complexity)]
 pub fn read_boost_input_file<I1, F1>(
     filename: &Path,
 ) -> Result<(Vec<super::Point<I1>>, Vec<super::Line<I1>>), BvError>
@@ -118,7 +121,7 @@ where
                         continue;
                     } else {
                         println!(
-                            "#{}: can't read line {}. state:{:?} ignoring it",
+                            "#{}: can't read line {}. state:{:?} ignoring line",
                             index + 1,
                             line,
                             state
@@ -134,7 +137,7 @@ where
                             }
                         } else {
                             println!(
-                                "#{}: can't read line {}. state:{:?} ignoring it",
+                                "#{}: can't read line {}. state:{:?} ignoring line",
                                 index + 1,
                                 line,
                                 state
@@ -158,7 +161,7 @@ where
                         continue;
                     } else {
                         println!(
-                            "#{}: can't read line {}. state:{:?} ignoring it",
+                            "#{}: can't read line {}. state:{:?} ignoring line",
                             index + 1,
                             line,
                             state
@@ -177,7 +180,7 @@ where
                             continue;
                         } else {
                             println!(
-                                "#{}: can't read line {} state:{:?} ignoring it",
+                                "#{}: can't read line {} state:{:?} ignoring line",
                                 index + 1,
                                 line,
                                 state
@@ -186,7 +189,7 @@ where
                         }
                     } else {
                         println!(
-                            "#{}: Got too many lines {}. state:{:?} ignoring it",
+                            "#{}: Got too many lines {}. state:{:?} ignoring line",
                             index + 1,
                             line,
                             state
@@ -196,7 +199,7 @@ where
                 }
             };
             println!(
-                "#{}: can't parse line {}. state:{:?} ignoring it",
+                "#{}: can't parse line {}. state:{:?} ignoring line",
                 index + 1,
                 line,
                 state

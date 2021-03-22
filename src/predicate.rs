@@ -443,8 +443,7 @@ where
                 return true;
             }
         } else {
-            return i1_to_i64(left_point.y) + i1_to_i64(right_point.y)
-                < i1_to_i64(new_point.y) * 2;
+            return i1_to_i64(left_point.y) + i1_to_i64(right_point.y) < i1_to_i64(new_point.y) * 2;
         }
 
         let dist1 = Self::find_distance_to_point_arc(left_site, new_point);
