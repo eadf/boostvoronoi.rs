@@ -53,9 +53,6 @@ mod tests;
 ///
 /// type I1 = i32; // this is the integer input type
 /// type F1 = f64; // this is the float output type (circle event coordinates)
-/// type I2 = i64; // All integer calculations are made in this type (or num::BigInt when needed)
-/// type F2 = f64; // All float calculations are made in this type
-/// // it is ok to set I1=I2=i64 and F1=F2=f64
 ///
 /// // Points should be unique,
 /// let p = vec![Point{x:9_i32, y:10}];
