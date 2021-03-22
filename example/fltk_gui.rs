@@ -458,7 +458,11 @@ fn main() -> Result<(), BvError> {
             let mut shared_data_bm: RefMut<_> = shared_data_c.borrow_mut();
             match msg {
                 GuiMessage::MenuChoice(v) => {
-                    shared_data_bm.visualizer.read_data(v);
+                    let new_title = shared_data_bm.visualizer.read_data(v);
+                    {
+                        let w = &mut wind;
+                        w.set_label(new_title.as_str());
+                    }
                     let _ = shared_data_bm.visualizer.build();
                     let _ = shared_data_bm.visualizer.re_calculate_affine();
                     redraw();
@@ -983,10 +987,12 @@ where
         &self.segment_data_[index]
     }
 
-    fn read_data(&mut self, example: Example) {
+    #[allow(unused_assignments)]
+    fn read_data(&mut self, example: Example) -> String {
         self.segment_data_.clear();
         self.point_data_.clear();
         self.diagram.clear();
+        let mut rv = String::new();
 
         let _simple_segments: [[i32; 4]; 5] = [
             [300, 300, 300, 500],
@@ -1352,15 +1358,22 @@ where
         ];
         // Preparing Input Geometries.
         let (mut new_points, mut new_segments) = match example {
-            Example::Simple => (
-                Vec::<Point<I1>>::default(),
-                VB::to_segments::<i32, I1>(&_simple_segments),
-            ),
-            Example::Complex => (
-                Vec::<Point<I1>>::default(),
-                VB::to_segments::<i32, I1>(&_segments_rust_logo),
-            ),
+            Example::Simple => {
+                rv = "Simple example".to_string();
+                (
+                    Vec::<Point<I1>>::default(),
+                    VB::to_segments::<i32, I1>(&_simple_segments),
+                )
+            }
+            Example::Complex => {
+                rv = "Rust logo".to_string();
+                (
+                    Vec::<Point<I1>>::default(),
+                    VB::to_segments::<i32, I1>(&_segments_rust_logo),
+                )
+            }
             Example::Clean => {
+                rv = "Simple example".to_string();
                 let clean: [[i32; 4]; 0] = [];
                 (
                     Vec::<Point<I1>>::default(),
@@ -1378,17 +1391,21 @@ where
                     if let Ok(file_parse_result) =
                         file_reader::read_boost_input_file::<I1, F1>(filename.as_path())
                     {
+                        rv = filename.to_str().unwrap().to_string();
                         file_parse_result
                     } else {
+                        rv = "Failed to read file".to_string();
                         (Vec::<Point<I1>>::default(), Vec::<Line<I1>>::default())
                     }
                 } else {
+                    rv = "Failed to read file".to_string();
                     (Vec::<Point<I1>>::default(), Vec::<Line<I1>>::default())
                 }
             }
         };
         self.point_data_.append(&mut new_points);
         self.segment_data_.append(&mut new_segments);
+        rv
     }
 
     fn line_i1_to_f64(value: &boostvoronoi::Line<I1>) -> geo::Line<f64> {
