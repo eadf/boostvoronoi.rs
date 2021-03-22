@@ -1,4 +1,4 @@
-// Boost.Polygon library voronoi_diagram.hpp header file
+// Boost.Polygon library detail/robust_fpt.hpp header file
 
 //          Copyright Andrii Sydorchuk 2010-2012.
 // Distributed under the Boost Software License, Version 1.0.
@@ -7,10 +7,10 @@
 
 // See http://www.boost.org for updates, documentation, and revision history.
 
-// Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
+// Ported from C++ boost 1.75.0 to Rust in 2020 by Eadf (github.com/eadf)
 
 use super::beach_line as VB;
-use super::robust_fpt as RF;
+use super::extended_exp_fpt as EX;
 
 use super::OutputType;
 use ordered_float::OrderedFloat;
@@ -132,9 +132,9 @@ impl CircleEventC {
     /// sets the coordinates inside the Cell.
     pub(crate) fn set_3_ext(
         &self,
-        x: RF::ExtendedExponentFpt<f64>,
-        y: RF::ExtendedExponentFpt<f64>,
-        lower_x: RF::ExtendedExponentFpt<f64>,
+        x: EX::ExtendedExponentFpt<f64>,
+        y: EX::ExtendedExponentFpt<f64>,
+        lower_x: EX::ExtendedExponentFpt<f64>,
     ) {
         let mut selfc = self.0.get();
         selfc.set_3_raw(x.d(), y.d(), lower_x.d());
@@ -149,21 +149,21 @@ impl CircleEventC {
     }
 
     /// sets the x coordinates inside the Cell.
-    pub(crate) fn set_x_xf(&self, x: RF::ExtendedExponentFpt<f64>) {
+    pub(crate) fn set_x_xf(&self, x: EX::ExtendedExponentFpt<f64>) {
         let mut selfc = self.0.get();
         let _ = selfc.set_x_raw(x.d());
         self.0.set(selfc);
     }
 
     /// sets the y coordinate inside the Cell.
-    pub(crate) fn set_y_xf(&self, y: RF::ExtendedExponentFpt<f64>) {
+    pub(crate) fn set_y_xf(&self, y: EX::ExtendedExponentFpt<f64>) {
         let mut selfc = self.0.get();
         let _ = selfc.set_raw_y(y.d());
         self.0.set(selfc);
     }
 
     /// sets the y coordinate inside the Cell.
-    pub(crate) fn set_lower_x_xf(&self, x: RF::ExtendedExponentFpt<f64>) {
+    pub(crate) fn set_lower_x_xf(&self, x: EX::ExtendedExponentFpt<f64>) {
         let mut selfc: CircleEvent = self.0.get();
         let _ = selfc.set_raw_lower_x(x.d());
         self.0.set(selfc);
@@ -236,8 +236,8 @@ where
         self.center_x_
     }
 
-    pub(crate) fn x_as_xf(&self) -> RF::ExtendedExponentFpt<f64> {
-        RF::ExtendedExponentFpt::<f64>::from(self.center_x_.into_inner())
+    pub(crate) fn x_as_xf(&self) -> EX::ExtendedExponentFpt<f64> {
+        EX::ExtendedExponentFpt::<f64>::from(self.center_x_.into_inner())
     }
 
     pub(crate) fn raw_x(&self) -> f64 {
@@ -260,8 +260,8 @@ where
     }
 
     #[allow(dead_code)]
-    pub(crate) fn y_as_ext(&self) -> RF::ExtendedExponentFpt<f64> {
-        RF::ExtendedExponentFpt::<f64>::from(self.center_y_.into_inner())
+    pub(crate) fn y_as_ext(&self) -> EX::ExtendedExponentFpt<f64> {
+        EX::ExtendedExponentFpt::<f64>::from(self.center_y_.into_inner())
     }
 
     pub(crate) fn raw_y(&self) -> f64 {

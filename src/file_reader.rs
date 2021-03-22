@@ -1,3 +1,14 @@
+// Boost.Polygon library detail/robust_fpt.hpp header file
+
+//          Copyright Andrii Sydorchuk 2010-2012.
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          http://www.boost.org/LICENSE_1_0.txt)
+
+// See http://www.boost.org for updates, documentation, and revision history.
+
+// Ported from C++ boost 1.75.0 to Rust in 2020 by Eadf (github.com/eadf)
+
 use crate::BvError;
 use std::fs::File;
 use std::io::{BufRead, BufReader};

@@ -1,3 +1,14 @@
+// Boost.Polygon library detail/robust_fpt.hpp header file
+
+//          Copyright Andrii Sydorchuk 2010-2012.
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          http://www.boost.org/LICENSE_1_0.txt)
+
+// See http://www.boost.org for updates, documentation, and revision history.
+
+// Ported from C++ boost 1.75.0 to Rust in 2020 by Eadf (github.com/eadf)
+
 #![deny(non_camel_case_types)]
 #![deny(unused_parens)]
 #![deny(non_upper_case_globals)]
@@ -10,6 +21,8 @@
 
 use core::fmt::Debug;
 use num::{Float, NumCast, PrimInt, Zero};
+use extended_int as EI;
+use extended_exp_fpt as EX;
 use std::cmp;
 use std::fmt;
 use std::fmt::Display;
@@ -29,6 +42,8 @@ pub mod file_reader;
 pub mod robust_fpt;
 pub mod site_event;
 pub mod visual_utils;
+pub mod extended_int;
+pub mod extended_exp_fpt;
 
 /// Debug utility function, formats an id string
 pub(crate) fn format_id(value: Option<usize>) -> String {
@@ -316,8 +331,8 @@ where
 
     // todo! is there no way to do this more efficiently?
     #[inline(always)]
-    pub fn i1_to_xi(input: I1) -> robust_fpt::ExtendedInt {
-        robust_fpt::ExtendedInt::from(num::cast::<I1, i64>(input).unwrap())
+    pub fn i1_to_xi(input: I1) -> EI::ExtendedInt {
+        EI::ExtendedInt::from(num::cast::<I1, i64>(input).unwrap())
     }
 
     #[inline(always)]
@@ -388,7 +403,7 @@ where
     }
 
     #[inline(always)]
-    pub fn xi_to_xf(input: &robust_fpt::ExtendedInt) -> robust_fpt::ExtendedExponentFpt<f64> {
-        robust_fpt::ExtendedExponentFpt::from(input)
+    pub fn xi_to_xf(input: &EI::ExtendedInt) -> EX::ExtendedExponentFpt<f64> {
+        EX::ExtendedExponentFpt::from(input)
     }
 }

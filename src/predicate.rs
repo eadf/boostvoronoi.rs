@@ -7,7 +7,7 @@
 
 // See http://www.boost.org for updates, documentation, and revision history.
 
-// Ported from C++ boost 1.74.0 to Rust in 2020 by Eadf (github.com/eadf)
+// Ported from C++ boost 1.75.0 to Rust in 2020 by Eadf (github.com/eadf)
 
 mod tests;
 
@@ -15,6 +15,8 @@ use super::beach_line as VB;
 use super::circle_event as VC;
 use super::ctypes::UlpComparison;
 use super::robust_fpt as RF;
+use super::extended_int as EI;
+use super::extended_exp_fpt as EX;
 use super::site_event as VSE;
 use super::Point;
 use super::TypeCheckF as TCF;
@@ -1687,18 +1689,18 @@ where
 
         let inv_denom = {
             let tmp = &dif_x[0] * &dif_y[1] - &dif_x[1] * &dif_y[0];
-            RF::ExtendedExponentFpt::<f64>::from(0.5) / xi_to_xf(&tmp)
+            EX::ExtendedExponentFpt::<f64>::from(0.5) / xi_to_xf(&tmp)
         };
-        let numer1: RF::ExtendedInt = &dif_x[0] * &sum_x[0] + &dif_y[0] * &sum_y[0];
-        let numer2: RF::ExtendedInt = &dif_x[1] * &sum_x[1] + &dif_y[1] * &sum_y[1];
+        let numer1: EI::ExtendedInt = &dif_x[0] * &sum_x[0] + &dif_y[0] * &sum_y[0];
+        let numer2: EI::ExtendedInt = &dif_x[1] * &sum_x[1] + &dif_y[1] * &sum_y[1];
 
         if recompute_c_x || recompute_lower_x {
-            let c_x: RF::ExtendedInt = &numer1 * &dif_y[1] - &numer2 * &dif_y[0];
+            let c_x: EI::ExtendedInt = &numer1 * &dif_y[1] - &numer2 * &dif_y[0];
             circle.set_x_xf(xi_to_xf(&c_x) * inv_denom);
 
             if recompute_lower_x {
                 // Evaluate radius of the circle.
-                let sqr_r: RF::ExtendedInt = (&dif_x[0] * &dif_x[0] + &dif_y[0] * &dif_y[0])
+                let sqr_r: EI::ExtendedInt = (&dif_x[0] * &dif_x[0] + &dif_y[0] * &dif_y[0])
                     * (&dif_x[1] * &dif_x[1] + &dif_y[1] * &dif_y[1])
                     * (&dif_x[2] * &dif_x[2] + &dif_y[2] * &dif_y[2]);
                 let r = xi_to_xf(&sqr_r).sqrt();
@@ -1717,7 +1719,7 @@ where
                         circle.set_lower_x_xf(tmp_circle_x - r * inv_denom);
                     }
                 } else {
-                    let numer: RF::ExtendedInt = &c_x * &c_x - &sqr_r;
+                    let numer: EI::ExtendedInt = &c_x * &c_x - &sqr_r;
                     let lower_x = xi_to_xf(&numer) * inv_denom / (xi_to_xf(&c_x) + r);
                     circle.set_lower_x_xf(lower_x);
                 }
@@ -1725,7 +1727,7 @@ where
         }
 
         if recompute_c_y {
-            let c_y: RF::ExtendedInt = &numer2 * &dif_x[0] - &numer1 * &dif_x[1];
+            let c_y: EI::ExtendedInt = &numer2 * &dif_x[0] - &numer1 * &dif_x[1];
             circle.set_y_xf(xi_to_xf(&c_y) * inv_denom);
         }
         #[cfg(feature = "console_debug")]
@@ -1753,12 +1755,12 @@ where
         recompute_lower_x: bool,
     ) {
         // these should all be constants, but rust can't handle it
-        let quarter = RF::ExtendedExponentFpt::<f64>::from(1f64);
-        let half = RF::ExtendedExponentFpt::<f64>::from(0.5);
-        let one = RF::ExtendedExponentFpt::<f64>::from(1f64);
-        let neg_one = RF::ExtendedInt::from(-1);
-        let two = RF::ExtendedInt::from(2);
-        let four = RF::ExtendedInt::from(4);
+        let quarter = EX::ExtendedExponentFpt::<f64>::from(1f64);
+        let half = EX::ExtendedExponentFpt::<f64>::from(0.5);
+        let one = EX::ExtendedExponentFpt::<f64>::from(1f64);
+        let neg_one = EI::ExtendedInt::from(-1);
+        let two = EI::ExtendedInt::from(2);
+        let four = EI::ExtendedInt::from(4);
 
         #[cfg(feature = "console_debug")]
         {
@@ -1781,33 +1783,33 @@ where
         let sqrt_expr_ = RF::robust_sqrt_expr::<f64>::default();
 
         // Todo: is 5 the correct size?
-        let mut ca: [RF::ExtendedInt; 5] = [
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
+        let mut ca: [EI::ExtendedInt; 5] = [
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
         ];
-        let mut cb: [RF::ExtendedInt; 5] = [
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
+        let mut cb: [EI::ExtendedInt; 5] = [
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
         ];
-        let line_a: RF::ExtendedInt = i1_to_bi(site3.y1()) - i1_to_bi(site3.y0());
-        let line_b: RF::ExtendedInt = i1_to_bi(site3.x0()) - i1_to_bi(site3.x1());
-        let segm_len: RF::ExtendedInt = &line_a * &line_a + &line_b * &line_b;
-        let vec_x: RF::ExtendedInt = i1_to_bi(site2.y()) - i1_to_bi(site1.y());
-        let vec_y: RF::ExtendedInt = i1_to_bi(site1.x()) - i1_to_bi(site2.x());
-        let sum_x: RF::ExtendedInt = i1_to_bi(site1.x()) + i1_to_bi(site2.x());
-        let sum_y: RF::ExtendedInt = i1_to_bi(site1.y()) + i1_to_bi(site2.y());
-        let teta: RF::ExtendedInt = &line_a * &vec_x + &line_b * &vec_y;
-        let mut denom: RF::ExtendedInt = &vec_x * &line_b - &vec_y * &line_a;
+        let line_a: EI::ExtendedInt = i1_to_bi(site3.y1()) - i1_to_bi(site3.y0());
+        let line_b: EI::ExtendedInt = i1_to_bi(site3.x0()) - i1_to_bi(site3.x1());
+        let segm_len: EI::ExtendedInt = &line_a * &line_a + &line_b * &line_b;
+        let vec_x: EI::ExtendedInt = i1_to_bi(site2.y()) - i1_to_bi(site1.y());
+        let vec_y: EI::ExtendedInt = i1_to_bi(site1.x()) - i1_to_bi(site2.x());
+        let sum_x: EI::ExtendedInt = i1_to_bi(site1.x()) + i1_to_bi(site2.x());
+        let sum_y: EI::ExtendedInt = i1_to_bi(site1.y()) + i1_to_bi(site2.y());
+        let teta: EI::ExtendedInt = &line_a * &vec_x + &line_b * &vec_y;
+        let mut denom: EI::ExtendedInt = &vec_x * &line_b - &vec_y * &line_a;
 
-        let mut dif0: RF::ExtendedInt = i1_to_bi(site3.y1()) - i1_to_bi(site1.y());
-        let mut dif1: RF::ExtendedInt = i1_to_bi(site1.x()) - i1_to_bi(site3.x1());
-        let a: RF::ExtendedInt = &line_a * &dif1 - &line_b * &dif0;
+        let mut dif0: EI::ExtendedInt = i1_to_bi(site3.y1()) - i1_to_bi(site1.y());
+        let mut dif1: EI::ExtendedInt = i1_to_bi(site1.x()) - i1_to_bi(site3.x1());
+        let a: EI::ExtendedInt = &line_a * &dif1 - &line_b * &dif0;
 
         dif0 = i1_to_bi(site3.y1()) - i1_to_bi(site2.y());
         dif1 = i1_to_bi(site2.x()) - i1_to_bi(site3.x1());
@@ -1818,12 +1820,12 @@ where
             println!("a:{:?} b:{:?} denom:{:?}", a, b, denom);
         }
         if denom.is_zero() {
-            let numer: RF::ExtendedInt = &teta * &teta - &sum_ab * &sum_ab;
+            let numer: EI::ExtendedInt = &teta * &teta - &sum_ab * &sum_ab;
             denom = &teta * &sum_ab;
             ca[0] = &denom * &sum_x * &two + &numer * &vec_x;
             cb[0] = segm_len.clone();
             ca[1] = &denom * &sum_ab * &two + &numer * &teta;
-            cb[1] = RF::ExtendedInt::from(1);
+            cb[1] = EI::ExtendedInt::from(1);
             ca[2] = &denom * &sum_y * &two + &numer * &vec_y;
             let inv_denom = one / bi_to_ext(&denom);
             if recompute_c_x {
@@ -1840,7 +1842,7 @@ where
             }
             return;
         }
-        let det: RF::ExtendedInt = (&teta * &teta + &denom * &denom) * &a * &b * &four;
+        let det: EI::ExtendedInt = (&teta * &teta + &denom * &denom) * &a * &b * &four;
         let mut inv_denom_sqr = one / bi_to_ext(&denom);
         inv_denom_sqr = inv_denom_sqr * inv_denom_sqr;
         #[cfg(feature = "console_debug")]
@@ -1849,7 +1851,7 @@ where
         }
         if recompute_c_x || recompute_lower_x {
             ca[0] = sum_x * &denom * &denom + &teta * &sum_ab * &vec_x;
-            cb[0] = RF::ExtendedInt::from(1_i32);
+            cb[0] = EI::ExtendedInt::from(1_i32);
             ca[1] = if segment_index == 2 {
                 &vec_x * &neg_one
             } else {
@@ -1863,7 +1865,7 @@ where
 
         if recompute_c_y || recompute_lower_x {
             ca[2] = sum_y * &denom * &denom + &teta * &sum_ab * &vec_y;
-            cb[2] = RF::ExtendedInt::from(1);
+            cb[2] = EI::ExtendedInt::from(1);
             ca[3] = if segment_index == 2 {
                 vec_y * neg_one
             } else {
@@ -1879,7 +1881,7 @@ where
             cb[0] = cb[0].clone() * &segm_len;
             cb[1] = cb[1].clone() * &segm_len;
             ca[2] = sum_ab * (&denom * &denom + &teta * &teta);
-            cb[2] = RF::ExtendedInt::from(1);
+            cb[2] = EI::ExtendedInt::from(1);
             ca[3] = if segment_index == 2 { -teta } else { teta };
             cb[3] = det;
             let segm_len = bi_to_ext(&segm_len).sqrt();
@@ -1931,30 +1933,30 @@ where
         let xi_to_xf = TC2::<I1, F1>::xi_to_xf;
         let mut sqrt_expr_ = RF::robust_sqrt_expr::<f64>::default();
 
-        let mut c: [RF::ExtendedInt; 2] = [RF::ExtendedInt::zero(), RF::ExtendedInt::zero()];
-        let mut cA: [RF::ExtendedInt; 4] = [
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
+        let mut c: [EI::ExtendedInt; 2] = [EI::ExtendedInt::zero(), EI::ExtendedInt::zero()];
+        let mut cA: [EI::ExtendedInt; 4] = [
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
         ];
-        let mut cB: [RF::ExtendedInt; 4] = [
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
+        let mut cB: [EI::ExtendedInt; 4] = [
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
         ];
 
         let segm_start1 = site2.point1();
         let segm_end1 = site2.point0();
         let segm_start2 = site3.point0();
         let segm_end2 = site3.point1();
-        let a: [RF::ExtendedInt; 2] = [
+        let a: [EI::ExtendedInt; 2] = [
             i1_to_xi(segm_end1.x) - i1_to_xi(segm_start1.x),
             i1_to_xi(segm_end2.x) - i1_to_xi(segm_start2.x),
         ];
 
-        let b: [RF::ExtendedInt; 2] = [
+        let b: [EI::ExtendedInt; 2] = [
             i1_to_xi(segm_end1.y) - i1_to_xi(segm_start1.y),
             i1_to_xi(segm_end2.y) - i1_to_xi(segm_start2.y),
         ];
@@ -1969,49 +1971,49 @@ where
             println!(" recompute_c_y:{}", recompute_c_y);
             println!(" recompute_lower_x:{}", recompute_lower_x);
         }
-        let orientation: RF::ExtendedInt = &a[1] * &b[0] - &a[0] * &b[1];
+        let orientation: EI::ExtendedInt = &a[1] * &b[0] - &a[0] * &b[1];
         #[cfg(feature = "console_debug")]
         {
             println!(" orientation={:?}", orientation);
         }
         if orientation.is_zero() {
             let denom =
-                xi_to_xf(&((&a[0] * &a[0] + &b[0] * &b[0]) * &RF::ExtendedInt::from(2_i32)));
+                xi_to_xf(&((&a[0] * &a[0] + &b[0] * &b[0]) * &EI::ExtendedInt::from(2_i32)));
 
             c[0] = &b[0] * &(i1_to_xi(segm_start2.x) - i1_to_xi(segm_start1.x))
                 - &a[0] * &(i1_to_xi(segm_start2.y) - i1_to_xi(segm_start1.y));
-            let dx: RF::ExtendedInt = &a[0] * &(i1_to_xi(site1.y()) - i1_to_xi(segm_start1.y))
+            let dx: EI::ExtendedInt = &a[0] * &(i1_to_xi(site1.y()) - i1_to_xi(segm_start1.y))
                 - &b[0] * &(i1_to_xi(site1.x()) - i1_to_xi(segm_start1.x));
-            let dy: RF::ExtendedInt = &b[0] * &(i1_to_xi(site1.x()) - i1_to_xi(segm_start2.x))
+            let dy: EI::ExtendedInt = &b[0] * &(i1_to_xi(site1.x()) - i1_to_xi(segm_start2.x))
                 - &a[0] * &(i1_to_xi(site1.y()) - i1_to_xi(segm_start2.y));
             cB[0] = dx * &dy;
-            cB[1] = RF::ExtendedInt::from(1_i32);
+            cB[1] = EI::ExtendedInt::from(1_i32);
 
             if recompute_c_y {
                 cA[0] = if point_index == 2i32 {
-                    RF::ExtendedInt::from(2i32)
+                    EI::ExtendedInt::from(2i32)
                 } else {
-                    RF::ExtendedInt::from(-2i32)
+                    EI::ExtendedInt::from(-2i32)
                 } * &b[0];
                 cA[1] = &a[0] * &a[0] * (i1_to_xi(segm_start1.y) + i1_to_xi(segm_start2.y))
                     - &a[0]
                         * &b[0]
                         * (i1_to_xi(segm_start1.x) + i1_to_xi(segm_start2.x) - i1_to_xi(site1.x()))
-                        * RF::ExtendedInt::from(2_i32)
-                    + &b[0] * &b[0] * (i1_to_xi(site1.y())) * RF::ExtendedInt::from(2_i32);
+                        * EI::ExtendedInt::from(2_i32)
+                    + &b[0] * &b[0] * (i1_to_xi(site1.y())) * EI::ExtendedInt::from(2_i32);
                 let c_y = sqrt_expr_.eval2(&cA, &cB);
                 c_event.set_y_xf(c_y / denom);
             }
 
             if recompute_c_x || recompute_lower_x {
                 cA[0] =
-                    &a[0] * &RF::ExtendedInt::from(if point_index == 2i32 { 2i32 } else { -2i32 });
+                    &a[0] * &EI::ExtendedInt::from(if point_index == 2i32 { 2i32 } else { -2i32 });
                 cA[1] = &b[0] * &b[0] * (i1_to_xi(segm_start1.x) + i1_to_xi(segm_start2.x))
                     - &a[0]
                         * &b[0]
                         * (i1_to_xi(segm_start1.y) + i1_to_xi(segm_start2.y) - i1_to_xi(site1.y()))
-                        * &RF::ExtendedInt::from(2_i32)
-                    + &a[0] * &a[0] * (i1_to_xi(site1.x())) * &RF::ExtendedInt::from(2_i32);
+                        * &EI::ExtendedInt::from(2_i32)
+                    + &a[0] * &a[0] * (i1_to_xi(site1.x())) * &EI::ExtendedInt::from(2_i32);
                 #[cfg(feature = "console_debug")]
                 {
                     println!(" cA[0]={:.0}", cA[0].d());
@@ -2030,7 +2032,7 @@ where
 
                 if recompute_lower_x {
                     cA[2] = if c[0].is_neg() {
-                        c[0].clone() * &RF::ExtendedInt::from(-1_i32)
+                        c[0].clone() * &EI::ExtendedInt::from(-1_i32)
                     } else {
                         c[0].clone()
                     };
@@ -2043,10 +2045,10 @@ where
         }
         c[0] = &b[0] * &i1_to_xi(segm_end1.x) - &a[0] * &i1_to_xi(segm_end1.y);
         c[1] = &a[1] * &i1_to_xi(segm_end2.y) - &b[1] * &i1_to_xi(segm_end2.x);
-        let ix: RF::ExtendedInt = &a[0] * &c[1] + &a[1] * &c[0];
-        let iy: RF::ExtendedInt = &b[0] * &c[1] + &b[1] * &c[0];
-        let dx: RF::ExtendedInt = ix.clone() - &orientation * &i1_to_xi(site1.x());
-        let dy: RF::ExtendedInt = iy.clone() - &orientation * &i1_to_xi(site1.y());
+        let ix: EI::ExtendedInt = &a[0] * &c[1] + &a[1] * &c[0];
+        let iy: EI::ExtendedInt = &b[0] * &c[1] + &b[1] * &c[0];
+        let dx: EI::ExtendedInt = ix.clone() - &orientation * &i1_to_xi(site1.x());
+        let dy: EI::ExtendedInt = iy.clone() - &orientation * &i1_to_xi(site1.y());
         #[cfg(feature = "console_debug")]
         {
             println!(" ix={:?}", ix);
@@ -2062,22 +2064,22 @@ where
             return;
         }
 
-        let sign: RF::ExtendedInt = RF::ExtendedInt::from(if point_index == 2 { 1 } else { -1 })
-            * &RF::ExtendedInt::from(if orientation.is_neg() { 1_i32 } else { -1 });
+        let sign: EI::ExtendedInt = EI::ExtendedInt::from(if point_index == 2 { 1 } else { -1 })
+            * &EI::ExtendedInt::from(if orientation.is_neg() { 1_i32 } else { -1 });
         // todo: remove -1*-1
         #[cfg(feature = "console_debug")]
         {
             println!(" a[1]={:?}", &a[1]);
             println!(" b[1]={:?}", &b[1]);
-            println!(" cA[0]={:?}", (&a[1] * &RF::ExtendedInt::from(-1) * &dx));
-            println!(" cA[1]={:?}", (&b[1] * &RF::ExtendedInt::from(-1) * &dy));
+            println!(" cA[0]={:?}", (&a[1] * &EI::ExtendedInt::from(-1) * &dx));
+            println!(" cA[1]={:?}", (&b[1] * &EI::ExtendedInt::from(-1) * &dy));
         }
-        cA[0] = (&a[1] * &RF::ExtendedInt::from(-1_i32) * &dx)
-            + (&b[1] * &RF::ExtendedInt::from(-1_i32) * &dy);
-        cA[1] = (&a[0] * &RF::ExtendedInt::from(-1_i32) * &dx)
-            + (&b[0] * &RF::ExtendedInt::from(-1_i32) * &dy);
+        cA[0] = (&a[1] * &EI::ExtendedInt::from(-1_i32) * &dx)
+            + (&b[1] * &EI::ExtendedInt::from(-1_i32) * &dy);
+        cA[1] = (&a[0] * &EI::ExtendedInt::from(-1_i32) * &dx)
+            + (&b[0] * &EI::ExtendedInt::from(-1_i32) * &dy);
         cA[2] = sign.clone();
-        cA[3] = RF::ExtendedInt::zero();
+        cA[3] = EI::ExtendedInt::zero();
 
         #[cfg(feature = "console_debug")]
         {
@@ -2091,7 +2093,7 @@ where
         cB[2] = &a[0] * &a[1] + &b[0] * &b[1];
         cB[3] = (&a[0] * &dy - &b[0] * &dx)
             * (&a[1] * &dy - &b[1] * &dx)
-            * &RF::ExtendedInt::from(-2_i32);
+            * &EI::ExtendedInt::from(-2_i32);
         let temp = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
         let denom = temp * xi_to_xf(&orientation);
 
@@ -2116,7 +2118,7 @@ where
             if recompute_lower_x {
                 cA[3] = orientation
                     * (&dx * &dx + &dy * &dy)
-                    * &RF::ExtendedInt::from(if temp.is_neg() { -1_i32 } else { 1 });
+                    * &EI::ExtendedInt::from(if temp.is_neg() { -1_i32 } else { 1 });
                 let lower_x = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA, &cB);
                 c_event.set_lower_x_xf(lower_x / denom);
             }
@@ -2153,17 +2155,17 @@ where
         let i1_to_bi = TC2::<I1, F1>::i1_to_xi;
         let sqrt_expr_ = RF::robust_sqrt_expr::<f64>::default();
 
-        let mut cA: [RF::ExtendedInt; 4] = [
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
+        let mut cA: [EI::ExtendedInt; 4] = [
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
         ];
-        let mut cB: [RF::ExtendedInt; 4] = [
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
-            RF::ExtendedInt::zero(),
+        let mut cB: [EI::ExtendedInt; 4] = [
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
+            EI::ExtendedInt::zero(),
         ];
 
         // cA - corresponds to the cross product.
@@ -2212,7 +2214,7 @@ where
         }
 
         if recompute_c_x || recompute_lower_x {
-            cA[3] = RF::ExtendedInt::zero();
+            cA[3] = EI::ExtendedInt::zero();
             for i in 0..3 {
                 let j = (i + 1) % 3;
                 let k = (i + 2) % 3;
@@ -2228,7 +2230,7 @@ where
             }
 
             if recompute_lower_x {
-                cB[3] = RF::ExtendedInt::from(1);
+                cB[3] = EI::ExtendedInt::from(1);
                 let lower_x = sqrt_expr_.eval4(&cA, &cB);
                 c_event.set_lower_x_xf(lower_x / denom);
             }

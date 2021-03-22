@@ -3,9 +3,9 @@ fn extended_int_test_1() {
     let aa = 830003450000_f64;
     let bb = 320034543430_f64;
     let cc = 32_f64;
-    let a = super::ExtendedInt::from(aa as i64);
-    let b = super::ExtendedInt::from(bb as i64);
-    let c = super::ExtendedInt::from(cc as i64);
+    let a = crate::EI::ExtendedInt::from(aa as i64);
+    let b = crate::EI::ExtendedInt::from(bb as i64);
+    let c = crate::EI::ExtendedInt::from(cc as i64);
     println!("a:{:?} d():{}", &a, a.d());
     println!("b:{:?} d():{}", &b, b.d());
     println!("c:{:?} d():{}", &c, c.d());
@@ -32,9 +32,9 @@ fn extended_int_test_2() {
     let aa = -830003450000_f64;
     let bb = -320034543430_f64;
     let cc = -32_f64;
-    let a = super::ExtendedInt::from(aa as i64);
-    let b = super::ExtendedInt::from(bb as i64);
-    let c = super::ExtendedInt::from(cc as i64);
+    let a = crate::EI::ExtendedInt::from(aa as i64);
+    let b = crate::EI::ExtendedInt::from(bb as i64);
+    let c = crate::EI::ExtendedInt::from(cc as i64);
     println!("a:{:?} d():{}", &a, a.d());
     println!("b:{:?} d():{}", &b, b.d());
     println!("c:{:?} d():{}", &c, c.d());

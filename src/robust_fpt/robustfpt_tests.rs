@@ -1,6 +1,8 @@
 #![allow(unused_imports)]
 use super::RobustFpt;
 use crate::robust_fpt as RF;
+use crate::extended_exp_fpt as EX;
+use crate::extended_int as EI;
 use crate::TypeConverter as TC;
 use num::{Float, Num, NumCast, Zero};
 
@@ -76,9 +78,9 @@ fn sub_2() {
 #[test]
 fn sub_3() {
     let aa = 51302308860895380373504_f64;
-    let a = RF::ExtendedExponentFpt::<f64>::from(aa);
+    let a = EX::ExtendedExponentFpt::<f64>::from(aa);
     let bb = -5986866286194975689408512_f64;
-    let b = RF::ExtendedExponentFpt::<f64>::from(bb);
+    let b = EX::ExtendedExponentFpt::<f64>::from(bb);
     let c = a - b;
     println!("{:.0}", c.d());
     println!("{:.0}", aa - bb);
@@ -87,8 +89,8 @@ fn sub_3() {
 
 #[test]
 fn sub_4() {
-    let a = RF::ExtendedExponentFpt::<f64>::from(-2429436843391029202764395141992491778048_f64);
-    let b = RF::ExtendedExponentFpt::<f64>::from(4527715074734887233719567492889438060544_f64);
+    let a = EX::ExtendedExponentFpt::<f64>::from(-2429436843391029202764395141992491778048_f64);
+    let b = EX::ExtendedExponentFpt::<f64>::from(4527715074734887233719567492889438060544_f64);
     let c = a - b;
     println!(
         "{:.0}",
@@ -101,7 +103,7 @@ fn sub_4() {
 #[test]
 fn sub_5() {
     let aa = -6957151918125916436483962634881929838592_f64;
-    let a = RF::ExtendedExponentFpt::<f64>::from(aa);
+    let a = EX::ExtendedExponentFpt::<f64>::from(aa);
     approx::assert_ulps_eq!(a.d(), aa)
 }
 
@@ -179,25 +181,25 @@ fn sqrt_2() {
     type F1 = f32;
     let sqrte = RF::robust_sqrt_expr::<F1>::default();
 
-    let mut ca: [RF::ExtendedInt; 5] = [
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
+    let mut ca: [EI::ExtendedInt; 5] = [
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
     ];
-    let mut cb: [RF::ExtendedInt; 5] = [
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
+    let mut cb: [EI::ExtendedInt; 5] = [
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
     ];
 
     // Evaluates expression (re = 4 EPS):
     // A[0] * sqrt(B[0]).
-    ca[0] = RF::ExtendedInt::from(2);
-    cb[0] = RF::ExtendedInt::from(9);
+    ca[0] = EI::ExtendedInt::from(2);
+    cb[0] = EI::ExtendedInt::from(9);
 
     let a = sqrte.eval1(&ca[..], &cb[..]);
 
@@ -210,27 +212,27 @@ fn sqrt_3() {
     type F1 = f32;
     let sqrte = RF::robust_sqrt_expr::<F1>::default();
 
-    let mut ca: [RF::ExtendedInt; 5] = [
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
+    let mut ca: [EI::ExtendedInt; 5] = [
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
     ];
-    let mut cb: [RF::ExtendedInt; 5] = [
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
+    let mut cb: [EI::ExtendedInt; 5] = [
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
     ];
 
     // Evaluates expression (re = 7 EPS):
     // A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]).
-    ca[0] = RF::ExtendedInt::from(3);
-    cb[0] = RF::ExtendedInt::from(16);
-    ca[1] = RF::ExtendedInt::from(2);
-    cb[1] = RF::ExtendedInt::from(25);
+    ca[0] = EI::ExtendedInt::from(3);
+    cb[0] = EI::ExtendedInt::from(16);
+    ca[1] = EI::ExtendedInt::from(2);
+    cb[1] = EI::ExtendedInt::from(25);
 
     let a = sqrte.eval2(&ca[..], &cb[..]);
 
@@ -244,29 +246,29 @@ fn sqrt_4() {
 
     let sqrte = RF::robust_sqrt_expr::<F1>::default();
 
-    let mut ca: [RF::ExtendedInt; 5] = [
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
+    let mut ca: [EI::ExtendedInt; 5] = [
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
     ];
-    let mut cb: [RF::ExtendedInt; 5] = [
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
-        RF::ExtendedInt::zero(),
+    let mut cb: [EI::ExtendedInt; 5] = [
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
+        EI::ExtendedInt::zero(),
     ];
 
     // A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) + A[2] * sqrt(B[2]).
 
-    ca[0] = RF::ExtendedInt::from(3);
-    cb[0] = RF::ExtendedInt::from(16);
-    ca[1] = RF::ExtendedInt::from(2);
-    cb[1] = RF::ExtendedInt::from(25);
-    ca[2] = RF::ExtendedInt::from(7);
-    cb[2] = RF::ExtendedInt::from(49);
+    ca[0] = EI::ExtendedInt::from(3);
+    cb[0] = EI::ExtendedInt::from(16);
+    ca[1] = EI::ExtendedInt::from(2);
+    cb[1] = EI::ExtendedInt::from(25);
+    ca[2] = EI::ExtendedInt::from(7);
+    cb[2] = EI::ExtendedInt::from(49);
 
     let a = sqrte.eval3(&ca[..], &cb[..]);
 
@@ -279,19 +281,19 @@ fn sqrt_5() {
     type F2 = f64;
     let sqrte = RF::robust_sqrt_expr::<F2>::default();
 
-    let ca: [RF::ExtendedInt; 5] = [
-        RF::ExtendedInt::from(3),
-        RF::ExtendedInt::from(2),
-        RF::ExtendedInt::from(7),
-        RF::ExtendedInt::from(8),
-        RF::ExtendedInt::zero(),
+    let ca: [EI::ExtendedInt; 5] = [
+        EI::ExtendedInt::from(3),
+        EI::ExtendedInt::from(2),
+        EI::ExtendedInt::from(7),
+        EI::ExtendedInt::from(8),
+        EI::ExtendedInt::zero(),
     ];
-    let cb: [RF::ExtendedInt; 5] = [
-        RF::ExtendedInt::from(16),
-        RF::ExtendedInt::from(25),
-        RF::ExtendedInt::from(49),
-        RF::ExtendedInt::from(64),
-        RF::ExtendedInt::zero(),
+    let cb: [EI::ExtendedInt; 5] = [
+        EI::ExtendedInt::from(16),
+        EI::ExtendedInt::from(25),
+        EI::ExtendedInt::from(49),
+        EI::ExtendedInt::from(64),
+        EI::ExtendedInt::zero(),
     ];
 
     // A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) +
@@ -306,19 +308,19 @@ fn sqrt_6() {
     type F2 = f64;
     let sqrte = RF::robust_sqrt_expr::<F2>::default();
 
-    let ca: [RF::ExtendedInt; 5] = [
-        RF::ExtendedInt::from(20205600),
-        RF::ExtendedInt::from(12),
-        RF::ExtendedInt::from(1147151200i64),
-        RF::ExtendedInt::from(-472),
-        RF::ExtendedInt::zero(),
+    let ca: [EI::ExtendedInt; 5] = [
+        EI::ExtendedInt::from(20205600),
+        EI::ExtendedInt::from(12),
+        EI::ExtendedInt::from(1147151200i64),
+        EI::ExtendedInt::from(-472),
+        EI::ExtendedInt::zero(),
     ];
-    let cb: [RF::ExtendedInt; 5] = [
-        RF::ExtendedInt::from(1825),
-        RF::ExtendedInt::from(6218073520360000i64),
-        RF::ExtendedInt::from(1),
-        RF::ExtendedInt::from(3407163572800i64),
-        RF::ExtendedInt::zero(),
+    let cb: [EI::ExtendedInt; 5] = [
+        EI::ExtendedInt::from(1825),
+        EI::ExtendedInt::from(6218073520360000i64),
+        EI::ExtendedInt::from(1),
+        EI::ExtendedInt::from(3407163572800i64),
+        EI::ExtendedInt::zero(),
     ];
 
     let a = sqrte.eval4(&ca[..], &cb[..]);
@@ -330,19 +332,19 @@ fn sqrt_7() {
     type F2 = f64;
     let sqrte = RF::robust_sqrt_expr::<F2>::default();
 
-    let ca: [RF::ExtendedInt; 5] = [
-        RF::ExtendedInt::from(74125000i64),
-        RF::ExtendedInt::from(17),
-        RF::ExtendedInt::from(370703125i64),
-        RF::ExtendedInt::from(-450),
-        RF::ExtendedInt::zero(),
+    let ca: [EI::ExtendedInt; 5] = [
+        EI::ExtendedInt::from(74125000i64),
+        EI::ExtendedInt::from(17),
+        EI::ExtendedInt::from(370703125i64),
+        EI::ExtendedInt::from(-450),
+        EI::ExtendedInt::zero(),
     ];
-    let cb: [RF::ExtendedInt; 5] = [
-        RF::ExtendedInt::from(1825),
-        RF::ExtendedInt::from(0),
-        RF::ExtendedInt::from(1),
-        RF::ExtendedInt::from(0),
-        RF::ExtendedInt::zero(),
+    let cb: [EI::ExtendedInt; 5] = [
+        EI::ExtendedInt::from(1825),
+        EI::ExtendedInt::from(0),
+        EI::ExtendedInt::from(1),
+        EI::ExtendedInt::from(0),
+        EI::ExtendedInt::zero(),
     ];
 
     let a = sqrte.eval4(&ca[..], &cb[..]);
