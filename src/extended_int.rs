@@ -14,7 +14,6 @@ use std::fmt;
 use std::num::Wrapping;
 use std::ops;
 
-
 /// Stack allocated big integer class.
 /// Supports next set of arithmetic operations: +, -, *.
 /// Ported from voronoi_ctypes.hpp

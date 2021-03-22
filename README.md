@@ -30,10 +30,10 @@ use boostvoronoi::builder::{Builder};
 type I1 = i32; // this is the integer input type
 type F1 = f64; // this is the float output type (circle event coordinates)
 
-// Points should be unique,
+// Only unique Points will be used,
 let p = vec![Point{x:9_i32, y:10}];
 // Lines should never intersect with other lines.
-// The only points that can intersect are the endpoints.
+// The only line-points that can intersect are the endpoints.
 let s = vec![Line::new(Point{x:10_i32, y:11}, Point{x:12, y:13})];
 let mut vb = Builder::<I1, F1>::new();
 

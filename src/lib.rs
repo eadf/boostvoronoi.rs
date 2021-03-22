@@ -20,9 +20,9 @@
 #![feature(map_first_last)]
 
 use core::fmt::Debug;
-use num::{Float, NumCast, PrimInt, Zero};
-use extended_int as EI;
 use extended_exp_fpt as EX;
+use extended_int as EI;
+use num::{Float, NumCast, PrimInt, Zero};
 use std::cmp;
 use std::fmt;
 use std::fmt::Display;
@@ -38,12 +38,12 @@ pub mod diagram;
 mod end_point;
 pub mod predicate;
 // only made pub because of the documentation tests
+pub mod extended_exp_fpt;
+pub mod extended_int;
 pub mod file_reader;
 pub mod robust_fpt;
 pub mod site_event;
 pub mod visual_utils;
-pub mod extended_int;
-pub mod extended_exp_fpt;
 
 /// Debug utility function, formats an id string
 pub(crate) fn format_id(value: Option<usize>) -> String {

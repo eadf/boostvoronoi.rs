@@ -43,7 +43,7 @@ where
     //println!("line split: {:?}", line);
     match line.len() {
         1 => {
-            if let Ok(n) = line[0].parse::<usize>(){
+            if let Ok(n) = line[0].parse::<usize>() {
                 return Some(InputData::Number(n));
             } else {
                 println!("failed to parse {}, ignoring line", line[0]);

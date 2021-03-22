@@ -673,7 +673,11 @@ impl<
 
     /// Evaluates expression (re = 4 EPS):
     /// A[0] * sqrt(B[0]).
-    pub fn eval1(&self, a: &[EI::ExtendedInt], b: &[EI::ExtendedInt]) -> EX::ExtendedExponentFpt<f64> {
+    pub fn eval1(
+        &self,
+        a: &[EI::ExtendedInt],
+        b: &[EI::ExtendedInt],
+    ) -> EX::ExtendedExponentFpt<f64> {
         let a = Self::i_to_f(&a[0]);
         let b = Self::i_to_f(&b[0]);
         //println!("eval1:");
@@ -693,7 +697,11 @@ impl<
 
     // Evaluates expression (re = 7 EPS):
     // A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]).
-    pub fn eval2(&self, a: &[EI::ExtendedInt], b: &[EI::ExtendedInt]) -> EX::ExtendedExponentFpt<f64> {
+    pub fn eval2(
+        &self,
+        a: &[EI::ExtendedInt],
+        b: &[EI::ExtendedInt],
+    ) -> EX::ExtendedExponentFpt<f64> {
         let ra = self.eval1(a, b);
         let rb = self.eval1(&a[1..], &b[1..]);
         #[cfg(feature = "console_debug_eval")]
@@ -736,7 +744,11 @@ impl<
 
     /// Evaluates expression (re = 16 EPS):
     /// A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) + A[2] * sqrt(B[2]).
-    pub fn eval3(&self, a: &[EI::ExtendedInt], b: &[EI::ExtendedInt]) -> EX::ExtendedExponentFpt<f64> {
+    pub fn eval3(
+        &self,
+        a: &[EI::ExtendedInt],
+        b: &[EI::ExtendedInt],
+    ) -> EX::ExtendedExponentFpt<f64> {
         let ra = self.eval2(a, b);
         let rb = self.eval1(&a[2..], &b[2..]);
         #[cfg(feature = "console_debug_eval")]
@@ -801,7 +813,11 @@ impl<
     /// Evaluates expression (re = 25 EPS):
     /// A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) +
     /// A[2] * sqrt(B[2]) + A[3] * sqrt(B[3]).
-    pub fn eval4(&self, a: &[EI::ExtendedInt], b: &[EI::ExtendedInt]) -> EX::ExtendedExponentFpt<f64> {
+    pub fn eval4(
+        &self,
+        a: &[EI::ExtendedInt],
+        b: &[EI::ExtendedInt],
+    ) -> EX::ExtendedExponentFpt<f64> {
         let ra = self.eval2(a, b);
         let rb = self.eval2(&a[2..], &b[2..]);
 

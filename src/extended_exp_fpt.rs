@@ -9,8 +9,8 @@
 
 // Ported from C++ boost 1.75.0 to Rust in 2020 by Eadf (github.com/eadf)
 
-use num::{Float, NumCast};
 use super::extended_int as EI;
+use num::{Float, NumCast};
 use std::fmt;
 use std::ops;
 
@@ -20,8 +20,8 @@ use std::ops;
 /// Ported from the class extended_exponent_fpt in voronoi_ctypes.hpp
 #[derive(Copy, Clone)]
 pub struct ExtendedExponentFpt<F>
-    where
-        F: NumCast + Float + fmt::Display + Copy + fmt::Debug + ops::Neg<Output = F>,
+where
+    F: NumCast + Float + fmt::Display + Copy + fmt::Debug + ops::Neg<Output = F>,
 {
     val_: F,
     exp_: i32,
@@ -177,14 +177,14 @@ impl ExtendedExponentFpt<f64> {
     #[inline]
     pub fn sqrt(&self) -> Self {
         #[cfg(feature = "console_debug_eval")]
-            {
-                println!(
-                    "->sqrt:{:.12} val:{:.12} exp:{:}",
-                    self.d(),
-                    self.val(),
-                    self.exp()
-                );
-            }
+        {
+            println!(
+                "->sqrt:{:.12} val:{:.12} exp:{:}",
+                self.d(),
+                self.val(),
+                self.exp()
+            );
+        }
         let mut val = self.val_;
         let mut exp = self.exp_;
         if (exp & 1) != 0 {
@@ -192,20 +192,20 @@ impl ExtendedExponentFpt<f64> {
             exp -= 1;
         }
         #[cfg(feature = "console_debug_eval")]
-            {
-                let rv = Self::new2(val.sqrt(), exp >> 1);
-                println!(
-                    "<-sqrt:{:.12} val:{:.12} exp:{:}",
-                    rv.d(),
-                    rv.val(),
-                    rv.exp()
-                );
-                rv
-            }
+        {
+            let rv = Self::new2(val.sqrt(), exp >> 1);
+            println!(
+                "<-sqrt:{:.12} val:{:.12} exp:{:}",
+                rv.d(),
+                rv.val(),
+                rv.exp()
+            );
+            rv
+        }
         #[cfg(not(feature = "console_debug_eval"))]
-            {
-                Self::new2(val.sqrt(), exp >> 1)
-            }
+        {
+            Self::new2(val.sqrt(), exp >> 1)
+        }
     }
 
     /// A to-float operation.
@@ -526,4 +526,3 @@ impl fmt::Debug for ExtendedExponentFpt<f64> {
         write!(f, "{}^{}", self.val_, self.exp_)
     }
 }
-
