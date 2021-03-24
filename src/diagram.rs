@@ -16,6 +16,8 @@ use super::visual_utils as VU;
 use super::TypeConverter as TC2;
 
 pub use super::{InputType, OutputType};
+#[allow(unused_imports)]
+use crate::{t, tln};
 use num::NumCast;
 use std::cell::Cell;
 use std::cmp::Ordering;
@@ -1361,10 +1363,9 @@ where
         edge12_id: VoronoiEdgeIndex,
         edge23_id: VoronoiEdgeIndex,
     ) -> (VoronoiEdgeIndex, VoronoiEdgeIndex) {
-        //println!("-> insert_new_edge_5()");
+        //tln!("-> insert_new_edge_5()");
         //dbg!(&site1, &site3, &circle, edge12_id, edge23_id);
-        #[cfg(feature = "console_debug")]
-        println!("new vertex@CE{:?}", circle);
+        tln!("new vertex@CE{:?}", circle);
 
         let is_linear = VSE::SiteEvent::<I1, F1>::is_linear_edge(&site1, &site3);
         let is_primary = VSE::SiteEvent::<I1, F1>::is_primary_edge(&site1, &site3);
@@ -1594,25 +1595,26 @@ where
 
     /// prints cells and vertices to the console
     /// edges will be printed if the 'edge_filter' returns true for that edge id.
+    #[cfg(feature = "console_debug")]
     pub fn debug_print_all<F>(&self, edge_filter: F)
     where
         F: Fn(usize) -> bool,
     {
-        println!();
-        println!("output:");
+        tln!();
+        tln!("output:");
         for (i, c) in self.cells_.iter().enumerate() {
             let cc = c.get();
             print!("cell#{} {:?} ", i, &cc);
             if cc.contains_point() {
-                println!("point");
+                tln!("point");
             } else if cc.contains_segment() {
-                println!("segment");
+                tln!("segment");
             } else if cc.contains_segment_startpoint() {
-                println!("startpoint");
+                tln!("startpoint");
             } else if cc.contains_segment_endpoint() {
-                println!("endpoint");
+                tln!("endpoint");
             } else {
-                println!();
+                tln!();
             }
         }
         for (i, v) in self.vertices_.iter().enumerate() {
@@ -1631,18 +1633,19 @@ where
                 .filter(|x| edge_filter(*x))
                 .collect();
             //if !(edges1.is_empty() && edges2.is_empty()) {
-            print!("vertex#{} {:?}", i, &v.get());
-            print!(" outgoing edges:{:?}", edges1);
-            println!(" incoming edges:{:?}", edges2);
+            t!("vertex#{} {:?}", i, &v.get());
+            t!(" outgoing edges:{:?}", edges1);
+            tln!(" incoming edges:{:?}", edges2);
             //}
         }
     }
 
+    #[cfg(feature = "console_debug")]
     pub fn debug_print_edges(&self) {
-        println!("edges:{}", self.edges_.len());
+        tln!("edges:{}", self.edges_.len());
         for (i, e) in self.edges_.iter().enumerate() {
             let e = e.get();
-            println!("Edge:#{}=>{:?}", e.id.0, &e);
+            tln!("Edge:#{}=>{:?}", e.id.0, &e);
             assert_eq!(i, e.id.0);
         }
     }

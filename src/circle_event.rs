@@ -474,10 +474,12 @@ impl CircleEventQueue {
         c
     }
 
-    #[allow(dead_code)]
-    pub(crate) fn dbg(&self) {
-        for c in self.c_.iter() {
-            println!("{:?}", c);
+    #[cfg(feature = "console_debug")]
+    pub(crate) fn dbg_ce(&self, cei: CircleEventIndexType) {
+        if let Some(ce) = self.c_list_.get(cei) {
+            print!("{:?}", ce);
+        } else {
+            print!("{}: not found", cei);
         }
     }
 }

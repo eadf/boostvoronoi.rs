@@ -26,6 +26,7 @@ smallvec = "^1.6.1"
 console_debug = []
 console_debug_eval = []
 cpp_compat_debug = []
+debug_always_exact = []
 
 [[example]]
 name = "fltk_gui"
@@ -38,7 +39,7 @@ path = "example/main.rs"
 
 [dev-dependencies]
 geo = "^0.17.1"
-fltk = "^0.15.6"
+fltk = "^0.16.1"
 criterion = "^0.3.4"
 approx = "^0.4.0"
 

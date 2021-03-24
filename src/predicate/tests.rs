@@ -66,7 +66,7 @@ fn cross_product_1() {
     let b1 = -9;
     let b2 = 4;
 
-    let x = VP::Predicates::<I1, F1>::robust_cross_product_2i(a1, b1, a2, b2);
+    let x = VP::Predicates::<I1, F1>::robust_cross_product(a1, b1, a2, b2);
     assert_eq!(x, 9.0);
 }
 

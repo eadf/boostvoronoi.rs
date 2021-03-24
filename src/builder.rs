@@ -23,7 +23,7 @@ use std::ops::Neg;
 
 use super::{InputType, OutputType};
 use crate::beach_line::BeachLineNodeData;
-
+use crate::{t, tln};
 mod tests;
 
 /// GENERAL INFO:
@@ -56,8 +56,7 @@ mod tests;
 ///
 /// // Points should be unique,
 /// let p = vec![Point{x:9_i32, y:10}];
-/// // Lines should never intersect with other lines.
-/// // The only points that can intersect are the endpoints.
+/// // Lines may only intersect at the endpoints.
 /// let s = vec![Line::new(Point{x:10_i32, y:11}, Point{x:12, y:13})];
 /// let mut vb = Builder::<I1, F1>::new();
 ///
@@ -165,16 +164,11 @@ where
             VD::VoronoiDiagram::<I1, F1>::new(self.site_events_.len());
 
         let mut site_event_iterator_: VSE::SiteEventIndexType = self.init_sites_queue();
-        #[cfg(feature = "console_debug")]
-        {
-            println!(
-                "********************************************************************************"
-            );
-            println!("->construct()");
-            println!(
-                "********************************************************************************"
-            );
-        }
+
+        t!("********************************************************************************");
+        tln!("\n->construct()");
+        tln!("********************************************************************************");
+
         self.init_beach_line(&mut site_event_iterator_, &mut output);
         #[cfg(feature = "console_debug")]
         let mut i = 0;
@@ -183,8 +177,8 @@ where
         while !self.circle_events_.is_empty() || (site_event_iterator_ != self.site_events_.len()) {
             #[cfg(feature = "console_debug")]
             {
-                println!("################################################");
-                println!(
+                tln!("################################################");
+                tln!(
                     "loop:{} circle_events_:{} num_vertices:{} beach_line:{} debug_site_counter:{} debug_circle_counter:{}",
                     i,self.circle_events_.len(),
                     output.num_vertices(),
@@ -192,7 +186,7 @@ where
                     self.debug_site_counter,
                     self.debug_circle_counter,
                 );
-                println!("################################################");
+                tln!("################################################");
                 if i >= 8 {
                     self.beach_line_
                         .debug_print_all_compat(&self.circle_events_);
@@ -242,7 +236,7 @@ where
         }
         #[cfg(feature = "console_debug")]
         {
-            println!("post dedup:");
+            tln!("post dedup:");
             self.debug_site_events();
         }
         // Init site iterator.
@@ -301,7 +295,7 @@ where
         let first = self.site_events_[first];
         let second = *site_event_iterator_;
         let second = self.site_events_[second];
-
+        tln!("insert_new_arc init_beach_line_default");
         let _ = self.insert_new_arc(first, first, second, output);
 
         // The second site was already processed. Move the iterator.
@@ -366,7 +360,7 @@ where
     ) -> Result<(), BvError> {
         #[cfg(feature = "console_debug")]
         {
-            //println!("->process_site_event");
+            //tln!("->process_site_event");
             if self.debug_site_counter >= 109 {
                 print!("");
             }
@@ -377,10 +371,8 @@ where
         let (mut right_it, last_index) = {
             // Get next site event to process.
             let site_event = self.site_events_.get(*site_event_iterator_).unwrap();
-            #[cfg(feature = "console_debug")]
-            {
-                println!("processing site:{}", site_event); //dbg!(&site_event);
-            }
+            tln!("processing site:{}", site_event); //dbg!(&site_event);
+
             // Move site iterator.
             let mut last_index = *site_event_iterator_ + 1;
 
@@ -446,6 +438,12 @@ where
             let mut site_event = self.site_events_[*site_event_iterator_];
 
             let mut left_it = right_it;
+            #[cfg(feature = "console_debug")]
+            if let Some(ref left_it) = left_it {
+                tln!("left_it=right_it :{:?}", left_it);
+            } else {
+                tln!("left_it=right_it :None");
+            }
 
             // Do further processing depending on the above node position.
             // For any two neighboring nodes the second site of the first node
@@ -455,13 +453,14 @@ where
                 // Move the iterator to the last node.
 
                 left_it = Some(self.beach_line_.peek_last().unwrap().0);
+                tln!("left_it=beach_line_.peek_last() :{:?}", left_it.unwrap());
 
                 // Get the second site of the last node
                 let site_arc = *(left_it.unwrap().right_site());
 
                 // Insert new nodes into the beach line. Update the output.
-                let right_it_idx =
-                    self.insert_new_arc(site_arc, site_arc, site_event, /*right_it*/ output);
+                tln!("insert_new_arc right_it.is_none()");
+                let right_it_idx = self.insert_new_arc(site_arc, site_arc, site_event, output);
                 {
                     let right_it_complete = self.beach_line_.get_node(&right_it_idx);
                     right_it = Some(right_it_complete.0);
@@ -482,6 +481,7 @@ where
                 // The above arc corresponds to the first site of the first node.
                 let site_arc = right_it_some.left_site();
 
+                tln!("insert_new_arc is_at_beginning");
                 // Insert new nodes into the beach line. Update the output.
                 left_it = {
                     let new_key = self.insert_new_arc(
@@ -489,6 +489,7 @@ where
                     );
                     Some(self.beach_line_.get_node(&new_key).0)
                 };
+                tln!("left_it=insert_new_arc :{:?}", left_it.unwrap());
 
                 // If the site event is a segment, update its direction.
                 if site_event.is_segment() {
@@ -515,18 +516,20 @@ where
 
                 // Remove the candidate circle from the event queue.
                 self.deactivate_circle_event(&right_it);
+                tln!("insert_new_arc else. left_it:{:?}", left_it.unwrap());
 
+                // emulate --left_site
                 left_it = self
                     .beach_line_
                     .get_left_neighbour(left_it.unwrap())
-                    .map(|x| x.0); //--left_it;
+                    .map(|x| x.0);
+                tln!("insert_new_arc else. left_it:{:?}", left_it.unwrap());
 
                 let site_arc1 = *(left_it.unwrap().right_site());
                 let site1 = *(left_it.unwrap().left_site());
 
                 // Insert new nodes into the beach line. Update the output.
-                let new_node_it = self
-                    .insert_new_arc(site_arc1, site_arc2, site_event /*, right_it*/, output);
+                let new_node_it = self.insert_new_arc(site_arc1, site_arc2, site_event, output);
 
                 // Add candidate circles to the circle event queue.
                 // There could be up to two circle events formed by
@@ -568,42 +571,27 @@ where
     ) -> Result<(), BvError> {
         #[cfg(feature = "console_debug")]
         {
-            let debug_range = 999999;
-            if self.debug_circle_counter >= debug_range
-                && self.debug_circle_counter <= debug_range + 2
-            {
-                print!("");
-            }
             self.debug_circle_counter += 1;
         }
         // Get the topmost circle event.
         let e = self.circle_events_.top().unwrap();
         let circle_event = e.0.get();
-        #[cfg(feature = "console_debug")]
-        {
-            println!("processing:CE{:?}", circle_event);
-        }
+        tln!("processing:CE{:?}", circle_event);
+
         if !self
             .circle_events_
             .is_active(circle_event.get_index().unwrap())
         {
-            // todo: remove this panic
+            // todo: remove this panic when stable
             panic!();
         }
         let it_first = &self.beach_line_.get_node(&e.1.unwrap());
         let it_last = it_first;
         #[cfg(feature = "console_debug")]
         {
-            let debug_range = 999999;
-            if self.debug_circle_counter >= debug_range
-                && self.debug_circle_counter <= debug_range + 2
-            {
-                self.beach_line_
-                    .debug_print_all_compat(&self.circle_events_);
-                print!("it_first:");
-                self.beach_line_
-                    .debug_print_all_compat_node(&it_first.0, &self.circle_events_);
-            }
+            t!("it_first:");
+            self.beach_line_
+                .debug_print_all_compat_node(&it_first.0, &self.circle_events_);
         }
         // Get the C site.
         let site3 = it_first.0.right_site();
@@ -653,10 +641,10 @@ where
             {
                 self.beach_line_
                     .debug_print_all_compat(&self.circle_events_);
-                print!("replace key ");
+                t!("replace key ");
                 self.beach_line_
                     .debug_print_all_compat_node(&it_first_key_before, &self.circle_events_);
-                print!("b4:   ");
+                t!("b4:   ");
                 self.beach_line_
                     .debug_print_all_compat_node(&it_first_key_before, &self.circle_events_);
             }
@@ -668,7 +656,7 @@ where
                 self.beach_line_
                     .debug_print_all_compat(&self.circle_events_);
                 self.beach_line_.debug_print_all_cmp();
-                println!();
+                tln!();
             }
             rv
         };
@@ -690,7 +678,7 @@ where
         {
             self.beach_line_
                 .debug_print_all_compat(&self.circle_events_);
-            print!("erasing beach_line:");
+            t!("erasing beach_line:");
             self.beach_line_
                 .debug_print_all_compat_node(&it_last.0, &self.circle_events_);
         }
@@ -754,6 +742,12 @@ where
         //position: BeachLineIteratorType,
         output: &mut VD::VoronoiDiagram<I1, F1>,
     ) -> VB::BeachLineIndex {
+        tln!(
+            "->insert_new_arc(\n  site_arc1:{:?}\n  ,site_arc2:{:?}\n  ,site_event:{:?}",
+            site_arc1,
+            site_arc2,
+            site_event
+        );
         // Create two new bisectors with opposite directions.
         let new_left_node = VB::BeachLineNodeKey::<I1, F1>::new_2(site_arc1, site_event);
         let mut new_right_node = VB::BeachLineNodeKey::<I1, F1>::new_2(site_event, site_arc2);
@@ -761,10 +755,12 @@ where
         // Set correct orientation for the first site of the second node.
         if site_event.is_segment() {
             let _ = new_right_node.left_site_m().inverse();
+            tln!("new bl key i:{:?}", new_right_node);
         }
 
         // Update the output.
         let edges = output._insert_new_edge_2(site_arc2, site_event);
+        tln!("new bl key:{:?}", new_right_node);
 
         #[cfg(not(feature = "console_debug"))]
         let _ = self
@@ -832,16 +828,20 @@ where
             // Add the new circle event to the circle events queue.
             // Update bisector's circle event iterator to point to the
             // new circle event in the circle event queue.
-            #[cfg(feature = "console_debug")]
-            {
-                println!("added circle event:{:?}", c_event);
-            }
+            tln!("added circle event:{:?}", c_event);
+
             let e = self.circle_events_.associate_and_push(c_event);
             {
                 let b = self.beach_line_.get_node(&bisector_node);
                 if let Some(mut bd) = b.1.get() {
                     let _ = bd.set_circle_event_id(Some(e.0.get().get_index().unwrap())); // make sure it is_some()
                     b.1.set(Some(bd));
+                    #[cfg(feature = "console_debug")]
+                    {
+                        t!("with bisector_node: ");
+                        self.beach_line_
+                            .debug_print_all_compat_node(&b.0, &self.circle_events_);
+                    }
                 } else {
                     // todo: raise error instead
                     panic!();
@@ -853,11 +853,11 @@ where
     #[allow(dead_code)]
     #[cfg(feature = "console_debug")]
     fn debug_site_events(&self) {
-        println!("Site event list:");
+        tln!("Site event list:");
         for s in self.site_events_.iter() {
-            println!("{}", s);
+            tln!("{}", s);
         }
-        println!("#site_events={}", self.site_events_.len());
+        tln!("#site_events={}", self.site_events_.len());
     }
 }
 

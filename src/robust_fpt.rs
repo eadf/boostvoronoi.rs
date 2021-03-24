@@ -54,58 +54,83 @@ mod robustfpt_tests;
 
 use super::extended_exp_fpt as EX;
 use super::extended_int as EI;
-use super::OutputType;
-use num::{Float, NumCast};
+#[allow(unused_imports)]
+use crate::{t, tln};
+use num::{Float, NumCast, Zero};
 use ordered_float::OrderedFloat;
 use std::fmt;
 use std::marker::PhantomData;
 use std::ops;
 
 /// Rounding error is at most 1 EPS.
-pub const ROUNDING_ERROR: u8 = 1;
+pub const ROUNDING_ERROR: f64 = 1_f64;
 
-#[derive(Copy, Clone, fmt::Debug, Default)]
-pub struct RobustFpt<F: OutputType + ops::Neg<Output = F>> {
-    fpv_: F,
-    re_: OrderedFloat<F>,
+/// Is positive method.
+/// IMPORTANT!!!!! in c++ boost voronoi implementation zero values can't be positive.
+#[inline(always)]
+fn is_pos_f(fpv: f64) -> bool {
+    fpv > 0_f64
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> RobustFpt<F> {
-    pub fn new_1(fpv: F) -> Self {
+/// Is negative method.
+/// IMPORTANT!!!!! in c++ boost voronoi implementation zero values can't be negative.
+#[inline(always)]
+fn is_neg_f(fpv: f64) -> bool {
+    fpv < 0_f64
+}
+
+#[derive(Copy, Clone)]
+pub struct RobustFpt {
+    fpv_: f64,
+    re_: OrderedFloat<f64>,
+}
+
+impl Default for RobustFpt {
+    fn default() -> Self {
+        Self {
+            fpv_: 0_f64,
+            re_: OrderedFloat(0_f64),
+        }
+    }
+}
+
+impl RobustFpt {
+    pub fn new_1(fpv: f64) -> Self {
         Self {
             fpv_: fpv,
-            re_: OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap()),
+            re_: OrderedFloat(0_f64),
         }
     }
 
-    pub fn new_2(fpv: F, error: F) -> Self {
+    pub fn new_2(fpv: f64, error: f64) -> Self {
         Self {
             fpv_: fpv,
             re_: OrderedFloat(error),
         }
     }
 
-    pub fn copy_from(other: &RobustFpt<F>) -> Self {
+    // todo This is just plain wrong in so many ways
+    pub fn copy_from(other: &RobustFpt) -> Self {
         Self {
             fpv_: other.fpv_,
-            re_: OrderedFloat(F::zero()),
+            re_: OrderedFloat(0_f64),
         }
     }
 
     #[inline(always)]
-    pub fn fpv(&self) -> F {
+    pub fn fpv(&self) -> f64 {
         self.fpv_
     }
 
     #[inline(always)]
     #[allow(dead_code)]
-    pub fn re(&self) -> F {
+    pub fn re(&self) -> f64 {
         self.re_.into_inner()
     }
 
     #[inline(always)]
-    pub fn ulp(&self) -> F {
-        self.re_.into_inner()
+    pub fn ulp(&self) -> f64 {
+        self.re()
     }
 
     #[allow(dead_code)]
@@ -121,20 +146,20 @@ impl<F: OutputType + ops::Neg<Output = F>> RobustFpt<F> {
     /// # use boostvoronoi::robust_fpt;
     /// println!("is_pos()");
     /// let aa:f64 = 0_f64;
-    /// let a = robust_fpt::RobustFpt::<f64>::new_1(aa);
+    /// let a = robust_fpt::RobustFpt::new_1(aa);
     /// assert_eq!(a.is_pos(), false);
     ///
     /// let aa:f64 = -0_f64;
-    /// let a = robust_fpt::RobustFpt::<f64>::new_1(aa);
+    /// let a = robust_fpt::RobustFpt::new_1(aa);
     /// assert_eq!(a.is_pos(), false);
     ///
     /// let aa:f64 = f64::MIN_POSITIVE;
-    /// let a = robust_fpt::RobustFpt::<f64>::new_1(aa);
+    /// let a = robust_fpt::RobustFpt::new_1(aa);
     /// assert_eq!(a.is_pos(), aa.is_sign_positive());
     /// ```
     #[inline(always)]
     pub fn is_pos(&self) -> bool {
-        self.fpv_ > F::zero()
+        is_pos_f(self.fpv_)
     }
 
     /// Is negative method.
@@ -144,16 +169,16 @@ impl<F: OutputType + ops::Neg<Output = F>> RobustFpt<F> {
     ///
     /// println!("is_neg()");
     /// let aa:f64 = 0_f64;
-    /// let a = robust_fpt::RobustFpt::<f64>::new_1(aa);
+    /// let a = robust_fpt::RobustFpt::new_1(aa);
     /// assert_eq!(a.is_neg(), aa.is_sign_negative());
     ///
     /// let aa:f64 = -0_f64;
-    /// let a = robust_fpt::RobustFpt::<f64>::new_1(aa);
+    /// let a = robust_fpt::RobustFpt::new_1(aa);
     /// assert_eq!(a.is_neg(), false);
     /// ```
-    #[inline(always)]
+    //#[inline(always)]
     pub fn is_neg(&self) -> bool {
-        self.fpv_ < F::zero()
+        is_neg_f(self.fpv_)
     }
 
     #[inline(always)]
@@ -162,161 +187,240 @@ impl<F: OutputType + ops::Neg<Output = F>> RobustFpt<F> {
         self.fpv_.is_zero()
     }
 
-    pub fn sqrt(&self) -> RobustFpt<F> {
+    pub fn sqrt(&self) -> RobustFpt {
         Self {
             //fpv_: Self::get_sqrt(self.fpv_),
             fpv_: self.fpv_.sqrt(),
             // self.re_ * 0.5 + ROUNDING_ERROR
-            re_: self.re_ * OrderedFloat(num::cast::<f32, F>(0.5f32).unwrap())
-                + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap()),
+            re_: self.re_ * OrderedFloat(num::cast::<f32, f64>(0.5f32).unwrap())
+                + OrderedFloat(ROUNDING_ERROR),
         }
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::Add<RobustFpt<F>> for RobustFpt<F> {
-    type Output = RobustFpt<F>;
+impl fmt::Debug for RobustFpt {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_fmt(format_args!("{:.12}[{:.12}]", self.fpv_, self.re_))
+    }
+}
 
-    fn add(self, _rhs: RobustFpt<F>) -> Self {
-        let fpv: F = self.fpv_ + _rhs.fpv_;
-        let re = if (!self.fpv_.is_sign_negative() && !_rhs.fpv_.is_sign_negative())
-            || (!self.fpv_.is_sign_positive() && !_rhs.fpv_.is_sign_positive())
-        {
-            std::cmp::max(self.re_, _rhs.re_)
-                + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap())
+impl ops::Add<RobustFpt> for RobustFpt {
+    type Output = RobustFpt;
+
+    fn add(self, _rhs: RobustFpt) -> Self {
+        let fpv: f64 = self.fpv_ + _rhs.fpv_;
+        let re = if (!self.is_neg() && !_rhs.is_neg()) || (!self.is_pos() && !_rhs.is_pos()) {
+            std::cmp::max(self.re_, _rhs.re_) + ROUNDING_ERROR
         } else {
-            let mut temp = OrderedFloat(
-                (self.fpv_ * *self.re_.as_ref() - _rhs.fpv_ * *_rhs.re_.as_ref()) / fpv,
-            );
-            if temp.is_sign_negative() {
+            let mut temp =
+                (self.fpv_ * self.re_.into_inner() - _rhs.fpv_ * _rhs.re_.into_inner()) / fpv;
+            if is_neg_f(temp) {
                 temp = -temp;
+            } else if temp.is_nan() {
+                temp = f64::INFINITY;
             }
-            temp + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap())
+
+            OrderedFloat(temp + ROUNDING_ERROR)
         };
+        #[cfg(feature = "console_debug")]
+        {
+            if !fpv.is_finite() {
+                tln!("!fpv.is_finite() self:{:?}, _rhs:{:?}", self, _rhs);
+            }
+            if re.is_nan() {
+                tln!("re.is_nan() self:{:?}, _rhs:{:?}", self, _rhs);
+            }
+            assert!(fpv.is_finite());
+            assert!(!re.is_nan());
+        }
         Self { fpv_: fpv, re_: re }
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::AddAssign<RobustFpt<F>> for RobustFpt<F> {
-    fn add_assign(&mut self, _rhs: RobustFpt<F>) {
-        let fpv: F = self.fpv_ + _rhs.fpv_;
-        let re = if (!self.fpv_.is_sign_negative() && !_rhs.fpv_.is_sign_negative())
-            || (!self.fpv_.is_sign_positive() && !_rhs.fpv_.is_sign_positive())
-        {
-            std::cmp::max(self.re_, _rhs.re_)
-                + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap())
+impl ops::AddAssign<RobustFpt> for RobustFpt {
+    fn add_assign(&mut self, _rhs: RobustFpt) {
+        let fpv: f64 = self.fpv_ + _rhs.fpv_;
+        let re = if (!self.is_neg() && !_rhs.is_neg()) || (!self.is_pos() && !_rhs.is_pos()) {
+            std::cmp::max(self.re_, _rhs.re_) + OrderedFloat(ROUNDING_ERROR)
         } else {
-            let mut temp = OrderedFloat(
-                (self.fpv_ * *self.re_.as_ref() - _rhs.fpv_ * *_rhs.re_.as_ref()) / fpv,
-            );
-            if temp.is_sign_negative() {
+            let mut temp =
+                (self.fpv_ * self.re_.into_inner() - _rhs.fpv_ * _rhs.re_.into_inner()) / fpv;
+            if is_neg_f(temp) {
                 temp = -temp;
+            } else if temp.is_nan() {
+                temp = f64::INFINITY;
             }
-            temp + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap())
+            OrderedFloat(temp + ROUNDING_ERROR)
         };
         self.fpv_ = fpv;
         self.re_ = re;
+        #[cfg(feature = "console_debug")]
+        {
+            assert!(self.fpv_.is_finite());
+            assert!(!self.re_.is_nan());
+        }
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::Mul<F> for RobustFpt<F> {
-    type Output = RobustFpt<F>;
+impl ops::Mul<f64> for RobustFpt {
+    type Output = RobustFpt;
     // Todo make this more efficient
-    fn mul(self, _rhs: F) -> Self {
-        let _rhs = RobustFpt::<F>::new_1(_rhs);
+    fn mul(self, _rhs: f64) -> Self {
+        let _rhs = RobustFpt::new_1(_rhs);
         self * _rhs
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::Mul<RobustFpt<F>> for RobustFpt<F> {
-    type Output = RobustFpt<F>;
+impl ops::Mul<RobustFpt> for RobustFpt {
+    type Output = RobustFpt;
 
-    fn mul(self, _rhs: RobustFpt<F>) -> Self {
-        let fpv: F = self.fpv_ * _rhs.fpv_;
-        let re: OrderedFloat<F> =
-            self.re_ + _rhs.re_ + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap());
+    fn mul(self, _rhs: RobustFpt) -> Self {
+        let fpv: f64 = self.fpv_ * _rhs.fpv_;
+        let re: OrderedFloat<f64> = self.re_ + _rhs.re_ + OrderedFloat(ROUNDING_ERROR);
 
         Self { fpv_: fpv, re_: re }
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::MulAssign<RobustFpt<F>> for RobustFpt<F> {
-    fn mul_assign(&mut self, _rhs: RobustFpt<F>) {
-        self.re_ = self.re_ + _rhs.re_ + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap());
+impl ops::MulAssign<RobustFpt> for RobustFpt {
+    fn mul_assign(&mut self, _rhs: RobustFpt) {
+        self.re_ = self.re_ + _rhs.re_ + OrderedFloat(ROUNDING_ERROR);
         self.fpv_ = self.fpv_ * _rhs.fpv_;
+
+        #[cfg(feature = "console_debug")]
+        {
+            assert!(self.fpv_.is_finite());
+            assert!(!self.re_.is_nan());
+        }
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::Sub<RobustFpt<F>> for RobustFpt<F> {
-    type Output = RobustFpt<F>;
+impl ops::Sub<RobustFpt> for RobustFpt {
+    type Output = RobustFpt;
 
-    fn sub(self, _rhs: RobustFpt<F>) -> Self {
-        let fpv: F = self.fpv_ - _rhs.fpv_;
-        let re = if (!self.fpv_.is_sign_negative() && !_rhs.fpv_.is_sign_positive())
-            || (!self.fpv_.is_sign_positive() && !_rhs.fpv_.is_sign_negative())
-        {
-            std::cmp::max(self.re_, _rhs.re_)
-                + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap())
+    fn sub(self, _rhs: RobustFpt) -> Self {
+        #[cfg(feature = "console_debug")]
+        let old_self = self.clone();
+
+        let fpv: f64 = self.fpv_ - _rhs.fpv_;
+        let re = if (!self.is_neg() && !_rhs.is_pos()) || (!self.is_pos() && !_rhs.is_neg()) {
+            std::cmp::max(self.re_, _rhs.re_) + OrderedFloat(ROUNDING_ERROR)
         } else {
-            let mut temp = (self.fpv_ * *self.re_ + _rhs.fpv_ * *_rhs.re_) / fpv;
-            if temp.is_sign_negative() {
+            let mut temp =
+                (self.fpv_ * self.re_.into_inner() + _rhs.fpv_ * _rhs.re_.into_inner()) / fpv;
+            if is_neg_f(temp) {
                 temp = -temp;
+            } else if temp.is_nan() {
+                temp = f64::INFINITY;
             }
-            OrderedFloat(temp) + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap())
+            OrderedFloat(temp) + OrderedFloat(ROUNDING_ERROR)
         };
+        #[cfg(feature = "console_debug")]
+        {
+            if !self.fpv_.is_finite() {
+                tln!(
+                    "!self.fpv.is_finite() self:{:?}, _rhs:{:?} old_self:{:?}",
+                    self,
+                    _rhs,
+                    old_self
+                );
+            }
+            if self.re_.is_nan() {
+                tln!(
+                    "self.re.is_nan() self:{:?}, _rhs:{:?} old_self:{:?}",
+                    self,
+                    _rhs,
+                    old_self
+                );
+            }
+            assert!(self.fpv_.is_finite());
+            assert!(!self.re_.is_nan());
+        }
         Self { fpv_: fpv, re_: re }
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::SubAssign<RobustFpt<F>> for RobustFpt<F> {
-    fn sub_assign(&mut self, _rhs: RobustFpt<F>) {
+impl ops::SubAssign<RobustFpt> for RobustFpt {
+    fn sub_assign(&mut self, _rhs: RobustFpt) {
+        #[cfg(feature = "console_debug")]
+        let old_self = self.clone();
+
         let fpv = self.fpv_ - _rhs.fpv_;
-        if (!self.fpv_.is_sign_negative() && !_rhs.fpv_.is_sign_positive())
-            || (!self.fpv_.is_sign_positive() && !_rhs.fpv_.is_sign_negative())
-        {
-            self.re_ = std::cmp::max(self.re_, _rhs.re_)
-                + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap());
+        if (!self.is_neg() && !_rhs.is_pos()) || (!self.is_pos() && !_rhs.is_neg()) {
+            self.re_ = std::cmp::max(self.re_, _rhs.re_) + OrderedFloat(ROUNDING_ERROR);
         } else {
-            let mut temp: F =
-                (self.fpv_ * *self.re_.as_ref() + _rhs.fpv_ * *_rhs.re_.as_ref()) / fpv;
-            if temp.is_sign_negative() {
+            let mut temp: f64 =
+                (self.fpv_ * self.re_.into_inner() + _rhs.fpv_ * _rhs.re_.into_inner()) / fpv;
+            if is_neg_f(temp) {
                 temp = -temp;
+            } else if temp.is_nan() {
+                temp = f64::INFINITY;
             }
-            self.re_ =
-                OrderedFloat(temp) + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap());
+            self.re_ = OrderedFloat(temp) + OrderedFloat(ROUNDING_ERROR);
         }
         self.fpv_ = fpv;
+        #[cfg(feature = "console_debug")]
+        {
+            if !self.fpv_.is_finite() {
+                tln!(
+                    "!self.fpv.is_finite() self:{:?}, _rhs:{:?} old_self:{:?}",
+                    self,
+                    _rhs,
+                    old_self
+                );
+            }
+            if self.re_.is_nan() {
+                tln!(
+                    "self.re.is_nan() self:{:?}, _rhs:{:?} old_self:{:?}",
+                    self,
+                    _rhs,
+                    old_self
+                );
+            }
+            assert!(self.fpv_.is_finite());
+            assert!(!self.re_.is_nan());
+        }
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::Div<F> for RobustFpt<F> {
-    type Output = RobustFpt<F>;
+impl ops::Div<f64> for RobustFpt {
+    type Output = RobustFpt;
 
-    // todo make efficient
-    fn div(self, _rhs: F) -> Self {
-        let _rhs = RobustFpt::<F>::new_1(_rhs);
+    fn div(self, _rhs: f64) -> Self {
+        let _rhs = RobustFpt::new_1(_rhs);
         self / _rhs
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::Div<RobustFpt<F>> for RobustFpt<F> {
-    type Output = RobustFpt<F>;
+impl ops::Div<RobustFpt> for RobustFpt {
+    type Output = RobustFpt;
 
-    fn div(self, _rhs: RobustFpt<F>) -> Self {
-        let fpv: F = self.fpv_ / _rhs.fpv_;
-        let re = self.re_ + _rhs.re_ + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap());
+    fn div(self, _rhs: RobustFpt) -> Self {
+        let fpv: f64 = self.fpv_ / _rhs.fpv_;
+        let re = self.re_ + _rhs.re_ + OrderedFloat(ROUNDING_ERROR);
+        #[cfg(feature = "console_debug")]
+        {
+            assert!(fpv.is_finite());
+            assert!(!re.is_nan());
+        }
         Self { fpv_: fpv, re_: re }
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::DivAssign<RobustFpt<F>> for RobustFpt<F> {
-    fn div_assign(&mut self, _rhs: RobustFpt<F>) {
-        self.re_ = self.re_ + _rhs.re_ + OrderedFloat(num::cast::<u8, F>(ROUNDING_ERROR).unwrap());
+impl ops::DivAssign<RobustFpt> for RobustFpt {
+    fn div_assign(&mut self, _rhs: RobustFpt) {
+        self.re_ = self.re_ + _rhs.re_ + OrderedFloat(ROUNDING_ERROR);
         self.fpv_ = self.fpv_ / _rhs.fpv_;
+        #[cfg(feature = "console_debug")]
+        {
+            assert!(self.fpv_.is_finite());
+            assert!(!self.re_.is_nan());
+        }
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::Neg for RobustFpt<F> {
-    type Output = RobustFpt<F>;
+impl ops::Neg for RobustFpt {
+    type Output = RobustFpt;
 
     fn neg(self) -> Self {
         Self {
@@ -332,22 +436,22 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::Neg for RobustFpt<F> {
 /// and subtraction of a negative value is equivalent to the addition to
 /// value1. The structure implicitly avoids difference computation.
 
-#[derive(Copy, Clone, fmt::Debug, Default)]
-pub struct RobustDif<F: OutputType + ops::Neg<Output = F>> {
-    positive_sum_: RobustFpt<F>,
-    negative_sum_: RobustFpt<F>,
+#[derive(Copy, Clone, Default)]
+pub struct RobustDif {
+    positive_sum_: RobustFpt,
+    negative_sum_: RobustFpt,
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> RobustDif<F> {
+impl RobustDif {
     pub fn new() -> Self {
         Self {
-            positive_sum_: RobustFpt::<F>::default(),
-            negative_sum_: RobustFpt::<F>::default(),
+            positive_sum_: RobustFpt::default(),
+            negative_sum_: RobustFpt::default(),
         }
     }
 
     // TODO take & reference to other
-    pub fn new_from(other: RobustDif<F>) -> Self {
+    pub fn new_from(other: RobustDif) -> Self {
         Self {
             positive_sum_: other.positive_sum_,
             negative_sum_: other.negative_sum_,
@@ -355,7 +459,7 @@ impl<F: OutputType + ops::Neg<Output = F>> RobustDif<F> {
     }
 
     #[allow(dead_code)]
-    pub fn new_from_2(a: &RobustFpt<F>, b: &RobustFpt<F>) -> Self {
+    pub fn new_from_2(a: &RobustFpt, b: &RobustFpt) -> Self {
         Self {
             positive_sum_: *a,
             negative_sum_: *b,
@@ -363,42 +467,46 @@ impl<F: OutputType + ops::Neg<Output = F>> RobustDif<F> {
     }
 
     #[allow(dead_code)]
-    pub fn new_1(value: F) -> Self {
-        if value.is_sign_positive() {
+    pub fn new_1(value: f64) -> Self {
+        if is_pos_f(value) {
             Self {
-                positive_sum_: RobustFpt::<F>::new_1(value),
-                negative_sum_: RobustFpt::<F>::default(),
+                positive_sum_: RobustFpt::new_1(value),
+                negative_sum_: RobustFpt::default(),
             }
         } else {
             Self {
-                positive_sum_: RobustFpt::<F>::default(),
-                negative_sum_: RobustFpt::<F>::new_1(value),
+                positive_sum_: RobustFpt::default(),
+                negative_sum_: RobustFpt::new_1(value),
             }
         }
     }
 
     #[allow(dead_code)]
-    pub fn new_2(pos: F, neg: F) -> Self {
-        assert!(!pos.is_sign_negative());
-        assert!(!neg.is_sign_negative());
+    pub fn new_2(pos: f64, neg: f64) -> Self {
+        #[cfg(feature = "console_debug")]
+        {
+            // todo: remove asserts when stable
+            assert!(!pos.is_sign_negative());
+            assert!(!neg.is_sign_negative());
+        }
         Self {
-            positive_sum_: RobustFpt::<F>::new_1(pos),
-            negative_sum_: RobustFpt::<F>::new_1(neg),
+            positive_sum_: RobustFpt::new_1(pos),
+            negative_sum_: RobustFpt::new_1(neg),
         }
     }
 
-    pub fn dif(&self) -> RobustFpt<F> {
+    pub fn dif(&self) -> RobustFpt {
         self.positive_sum_ - self.negative_sum_
     }
 
     #[inline]
-    pub fn positive(&self) -> RobustFpt<F> {
+    pub fn positive(&self) -> RobustFpt {
         self.positive_sum_
     }
 
     #[inline]
     // neg() will collide with the trait RobustDif
-    pub fn negative(&self) -> RobustFpt<F> {
+    pub fn negative(&self) -> RobustFpt {
         self.negative_sum_
     }
 
@@ -408,8 +516,8 @@ impl<F: OutputType + ops::Neg<Output = F>> RobustDif<F> {
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::Neg for RobustDif<F> {
-    type Output = RobustDif<F>;
+impl ops::Neg for RobustDif {
+    type Output = RobustDif;
 
     fn neg(self) -> Self {
         Self {
@@ -418,25 +526,11 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::Neg for RobustDif<F> {
         }
     }
 }
-/*
-    pub fn robust_dif<T>& operator+=(const T& val) {
-    if (!is_neg(val))
-      positive_sum_ += val;
-    else
-      negative_sum_ -= val;
-    return *this;
-  }
 
-    pub fn robust_dif<T>& operator+=(const robust_dif<T>& that) {
-    positive_sum_ += that.positive_sum_;
-    negative_sum_ += that.negative_sum_;
-    return *this;
-  }
-*/
-impl<F: OutputType + ops::Neg<Output = F>> ops::Add<RobustDif<F>> for RobustDif<F> {
-    type Output = RobustDif<F>;
+impl ops::Add<RobustDif> for RobustDif {
+    type Output = RobustDif;
 
-    fn add(self, _rhs: RobustDif<F>) -> Self {
+    fn add(self, _rhs: RobustDif) -> Self {
         Self {
             positive_sum_: self.positive_sum_ + _rhs.positive_sum_,
             negative_sum_: self.negative_sum_ + _rhs.negative_sum_,
@@ -444,16 +538,16 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::Add<RobustDif<F>> for RobustDif<
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::AddAssign<RobustDif<F>> for RobustDif<F> {
-    fn add_assign(&mut self, _rhs: RobustDif<F>) {
+impl ops::AddAssign<RobustDif> for RobustDif {
+    fn add_assign(&mut self, _rhs: RobustDif) {
         self.positive_sum_ += _rhs.positive_sum_;
         self.negative_sum_ += _rhs.negative_sum_;
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::AddAssign<RobustFpt<F>> for RobustDif<F> {
-    fn add_assign(&mut self, _rhs: RobustFpt<F>) {
-        if _rhs.is_pos() {
+impl ops::AddAssign<RobustFpt> for RobustDif {
+    fn add_assign(&mut self, _rhs: RobustFpt) {
+        if !_rhs.is_neg() {
             self.positive_sum_ += _rhs;
         } else {
             self.negative_sum_ -= _rhs;
@@ -461,37 +555,10 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::AddAssign<RobustFpt<F>> for Robu
     }
 }
 
-/*
-impl<F: BoostOutputType + ops::Neg<Output = F>> ops::AddAssign<RobustFpt<F>> for RobustDif<F> {
-    fn add_assign(&mut self, _rhs: RobustFpt<F>) {
-        let _rhs: F = _rhs.fpv();
-        if is_pos(rhs) {
-            self.positive_sum_ = self.positive_sum_ + _rhs;
-        } else {
-            self.negative_sum_ = self.negative_sum_ + _rhs;
-        }
-    }
-}*/
+impl ops::Sub<RobustDif> for RobustDif {
+    type Output = RobustDif;
 
-/*
-    pub fn robust_dif<T>& operator-=(const T& val) {
-    if (!is_neg(val))
-      negative_sum_ += val;
-    else
-      positive_sum_ -= val;
-    return *this;
-  }
-
-    pub fn robust_dif<T>& operator-=(const robust_dif<T>& that) {
-    positive_sum_ += that.negative_sum_;
-    negative_sum_ += that.positive_sum_;
-    return *this;
-  }
-*/
-impl<F: OutputType + ops::Neg<Output = F>> ops::Sub<RobustDif<F>> for RobustDif<F> {
-    type Output = RobustDif<F>;
-
-    fn sub(self, _rhs: RobustDif<F>) -> Self {
+    fn sub(self, _rhs: RobustDif) -> Self {
         Self {
             positive_sum_: self.positive_sum_ + _rhs.negative_sum_,
             negative_sum_: self.negative_sum_ + _rhs.positive_sum_,
@@ -499,17 +566,17 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::Sub<RobustDif<F>> for RobustDif<
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::SubAssign<RobustDif<F>> for RobustDif<F> {
-    fn sub_assign(&mut self, _rhs: RobustDif<F>) {
+impl ops::SubAssign<RobustDif> for RobustDif {
+    fn sub_assign(&mut self, _rhs: RobustDif) {
         self.positive_sum_ += _rhs.negative_sum_;
         self.negative_sum_ += _rhs.positive_sum_;
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::SubAssign<RobustFpt<F>> for RobustDif<F> {
-    fn sub_assign(&mut self, _rhs: RobustFpt<F>) {
+impl ops::SubAssign<RobustFpt> for RobustDif {
+    fn sub_assign(&mut self, _rhs: RobustFpt) {
         //dbg!(&self, &_rhs);
-        if _rhs.is_pos() {
+        if !_rhs.is_neg() {
             self.negative_sum_ += _rhs;
         } else {
             self.positive_sum_ -= _rhs;
@@ -517,34 +584,10 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::SubAssign<RobustFpt<F>> for Robu
     }
 }
 
-/*
-    pub fn robust_dif<T>& operator*=(const T& val) {
-    if (!is_neg(val)) {
-      positive_sum_ *= val;
-      negative_sum_ *= val;
-    } else {
-      positive_sum_ *= -val;
-      negative_sum_ *= -val;
-      swap();
-    }
-    return *this;
-  }
+impl ops::Mul<RobustDif> for RobustDif {
+    type Output = RobustDif;
 
-    pub fn robust_dif<T>& operator*=(const robust_dif<T>& that) {
-    T positive_sum = this->positive_sum_ * that.positive_sum_ +
-                     this->negative_sum_ * that.negative_sum_;
-    T negative_sum = this->positive_sum_ * that.negative_sum_ +
-                     this->negative_sum_ * that.positive_sum_;
-    positive_sum_ = positive_sum;
-    negative_sum_ = negative_sum;
-    return *this;
-  }
-*/
-
-impl<F: OutputType + ops::Neg<Output = F>> ops::Mul<RobustDif<F>> for RobustDif<F> {
-    type Output = RobustDif<F>;
-
-    fn mul(self, _rhs: RobustDif<F>) -> Self {
+    fn mul(self, _rhs: RobustDif) -> Self {
         Self {
             positive_sum_: self.positive_sum_ * _rhs.positive_sum_,
             negative_sum_: self.negative_sum_ * _rhs.negative_sum_,
@@ -552,18 +595,18 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::Mul<RobustDif<F>> for RobustDif<
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::Mul<F> for RobustDif<F> {
-    type Output = RobustDif<F>;
+impl ops::Mul<f64> for RobustDif {
+    type Output = RobustDif;
 
-    fn mul(self, _rhs: F) -> Self {
-        if _rhs.is_sign_positive() {
-            let rhs = RobustFpt::<F>::new_1(_rhs);
+    fn mul(self, _rhs: f64) -> Self {
+        if is_pos_f(_rhs) {
+            let rhs = RobustFpt::new_1(_rhs);
             Self {
                 positive_sum_: self.positive_sum_ * rhs,
                 negative_sum_: self.negative_sum_ * rhs,
             }
         } else {
-            let rhs = RobustFpt::<F>::new_1(_rhs);
+            let rhs = RobustFpt::new_1(_rhs);
             Self {
                 positive_sum_: self.negative_sum_ * rhs,
                 negative_sum_: self.positive_sum_ * rhs,
@@ -572,28 +615,28 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::Mul<F> for RobustDif<F> {
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::Mul<RobustFpt<F>> for RobustDif<F> {
-    type Output = RobustDif<F>;
+impl ops::Mul<RobustFpt> for RobustDif {
+    type Output = RobustDif;
 
-    fn mul(self, mut _rhs: RobustFpt<F>) -> Self {
-        if _rhs.is_neg() {
+    fn mul(self, mut _rhs: RobustFpt) -> Self {
+        if !_rhs.is_neg() {
+            Self {
+                positive_sum_: self.positive_sum_ * _rhs,
+                negative_sum_: self.negative_sum_ * _rhs,
+            }
+        } else {
             _rhs = -_rhs;
             Self {
                 positive_sum_: self.negative_sum_ * _rhs,
                 negative_sum_: self.positive_sum_ * _rhs,
             }
-        } else {
-            Self {
-                positive_sum_: self.positive_sum_ * _rhs,
-                negative_sum_: self.negative_sum_ * _rhs,
-            }
         }
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::MulAssign<F> for RobustDif<F> {
-    fn mul_assign(&mut self, mut _rhs: F) {
-        if _rhs.is_sign_negative() {
+impl ops::MulAssign<f64> for RobustDif {
+    fn mul_assign(&mut self, mut _rhs: f64) {
+        if is_neg_f(_rhs) {
             _rhs = -_rhs;
             self.swap();
         }
@@ -602,8 +645,8 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::MulAssign<F> for RobustDif<F> {
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::MulAssign<RobustFpt<F>> for RobustDif<F> {
-    fn mul_assign(&mut self, mut _rhs: RobustFpt<F>) {
+impl ops::MulAssign<RobustFpt> for RobustDif {
+    fn mul_assign(&mut self, mut _rhs: RobustFpt) {
         if _rhs.is_neg() {
             _rhs = -_rhs;
             self.swap();
@@ -613,28 +656,37 @@ impl<F: OutputType + ops::Neg<Output = F>> ops::MulAssign<RobustFpt<F>> for Robu
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::MulAssign<RobustDif<F>> for RobustDif<F> {
-    fn mul_assign(&mut self, _rhs: RobustDif<F>) {
+impl ops::MulAssign<RobustDif> for RobustDif {
+    fn mul_assign(&mut self, _rhs: RobustDif) {
         self.positive_sum_ = self.positive_sum_ * _rhs.positive_sum_;
         self.negative_sum_ = self.negative_sum_ * _rhs.negative_sum_;
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::DivAssign<F> for RobustDif<F> {
-    fn div_assign(&mut self, _rhs: F) {
-        let rhs = if _rhs.is_sign_negative() {
+impl ops::DivAssign<f64> for RobustDif {
+    fn div_assign(&mut self, _rhs: f64) {
+        let rhs = if is_neg_f(_rhs) {
             self.swap();
-            RobustFpt::<F>::new_1(-_rhs)
+            RobustFpt::new_1(-_rhs)
         } else {
-            RobustFpt::<F>::new_1(-_rhs)
+            RobustFpt::new_1(-_rhs)
         };
         self.positive_sum_ /= rhs;
         self.negative_sum_ /= rhs;
     }
 }
 
-impl<F: OutputType + ops::Neg<Output = F>> ops::DivAssign<RobustFpt<F>> for RobustDif<F> {
-    fn div_assign(&mut self, _rhs: RobustFpt<F>) {
+impl fmt::Debug for RobustDif {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_fmt(format_args!(
+            "({:?},{:?})",
+            self.positive_sum_, self.negative_sum_
+        ))
+    }
+}
+
+impl ops::DivAssign<RobustFpt> for RobustDif {
+    fn div_assign(&mut self, _rhs: RobustFpt) {
         self.positive_sum_ /= _rhs;
         self.negative_sum_ /= _rhs;
     }
@@ -680,13 +732,13 @@ impl<
     ) -> EX::ExtendedExponentFpt<f64> {
         let a = Self::i_to_f(&a[0]);
         let b = Self::i_to_f(&b[0]);
-        //println!("eval1:");
-        //println!(" a:{:.0}", a.d());
-        //println!(" b:{:.0}", b.d());
+        //tln!("eval1:");
+        //tln!(" a:{:.0}", a.d());
+        //tln!(" b:{:.0}", b.d());
         #[cfg(feature = "console_debug_eval")]
         {
             let rv = a * (b.sqrt());
-            println!("eval1: {:.0}", rv.d());
+            tln!("eval1: {:.0}", rv.d());
             rv
         }
         #[cfg(not(feature = "console_debug_eval"))]
@@ -706,13 +758,13 @@ impl<
         let rb = self.eval1(&a[1..], &b[1..]);
         #[cfg(feature = "console_debug_eval")]
         {
-            println!("->eval2");
-            println!(" a[0]:{:.0}", a[0].d());
-            println!(" a[1]:{:.0}", a[1].d());
-            println!(" b[0]:{:.0}", b[0].d());
-            println!(" b[1]:{:.0}", b[1].d());
-            println!(" ra:{:.0}", ra.d());
-            println!(" rb:{:.0}", rb.d());
+            tln!("->eval2");
+            tln!(" a[0]:{:.0}", a[0].d());
+            tln!(" a[1]:{:.0}", a[1].d());
+            tln!(" b[0]:{:.0}", b[0].d());
+            tln!(" b[1]:{:.0}", b[1].d());
+            tln!(" ra:{:.0}", ra.d());
+            tln!(" rb:{:.0}", rb.d());
         }
         if ra.is_zero()
             || rb.is_zero()
@@ -728,7 +780,7 @@ impl<
         #[cfg(feature = "console_debug_eval")]
         {
             let rv = numer / divisor;
-            println!(
+            tln!(
                 "<-eval2:\n numer:{:.0}\n divisor:{:.0}\n rv:{:.0}",
                 numer.d(),
                 divisor.d(),
@@ -753,15 +805,15 @@ impl<
         let rb = self.eval1(&a[2..], &b[2..]);
         #[cfg(feature = "console_debug_eval")]
         {
-            println!("->eval3");
-            println!(" a[0]:{:.0}", a[0].d());
-            println!(" a[1]:{:.0}", a[1].d());
-            println!(" a[2]:{:.0}", a[2].d());
-            println!(" b[0]:{:.0}", b[0].d());
-            println!(" b[1]:{:.0}", b[1].d());
-            println!(" b[2]:{:.0}", b[2].d());
-            println!(" ra:{:.0}", ra.d());
-            println!(" rb:{:.0}", rb.d());
+            tln!("->eval3");
+            tln!(" a[0]:{:.0}", a[0].d());
+            tln!(" a[1]:{:.0}", a[1].d());
+            tln!(" a[2]:{:.0}", a[2].d());
+            tln!(" b[0]:{:.0}", b[0].d());
+            tln!(" b[1]:{:.0}", b[1].d());
+            tln!(" b[2]:{:.0}", b[2].d());
+            tln!(" ra:{:.0}", ra.d());
+            tln!(" rb:{:.0}", rb.d());
         }
         if ra.is_zero()
             || rb.is_zero()
@@ -779,15 +831,15 @@ impl<
         tb[1] = &b[0] * &b[1];
         #[cfg(feature = "console_debug_eval")]
         {
-            println!("<-eval3");
-            println!(" ta[0]:{:.0}", ta[0].d());
-            println!(" ta[1]:{:.0}", ta[1].d());
-            println!(" tb[0]:{:.0}", tb[0].d());
-            println!(" tb[1]:{:.0}", tb[1].d());
-            println!(" ra:{:.0} val:{:.12} exp:{:}", ra.d(), ra.val(), ra.exp());
-            println!(" rb:{:.0} val:{:.12} exp:{:}", rb.d(), rb.val(), rb.exp());
+            tln!("<-eval3");
+            tln!(" ta[0]:{:.0}", ta[0].d());
+            tln!(" ta[1]:{:.0}", ta[1].d());
+            tln!(" tb[0]:{:.0}", tb[0].d());
+            tln!(" tb[1]:{:.0}", tb[1].d());
+            tln!(" ra:{:.0} val:{:.12} exp:{:}", ra.d(), ra.val(), ra.exp());
+            tln!(" rb:{:.0} val:{:.12} exp:{:}", rb.d(), rb.val(), rb.exp());
             let rarb = ra - rb;
-            println!(
+            tln!(
                 " ra-rb:{:.0} val:{:.12} exp:{:}",
                 rarb.d(),
                 rarb.val(),
@@ -799,9 +851,9 @@ impl<
         #[cfg(feature = "console_debug_eval")]
         {
             let rv = nom / div;
-            println!(" nom:{:.0}", nom.d());
-            println!(" div:{:.0}", div.d());
-            println!(" rv:{:.0}", rv.d());
+            tln!(" nom:{:.0}", nom.d());
+            tln!(" div:{:.0}", div.d());
+            tln!(" rv:{:.0}", rv.d());
             rv
         }
         #[cfg(not(feature = "console_debug_eval"))]
@@ -850,7 +902,7 @@ impl<
         #[cfg(feature = "console_debug_eval")]
         {
             let rv = self.eval3(&ta, &tb) / (ra - rb);
-            println!("<-eval4:{}", rv.d());
+            tln!("<-eval4:{}", rv.d());
             rv
         }
         #[cfg(not(feature = "console_debug_eval"))]
@@ -875,7 +927,7 @@ impl<
         let rh = self.eval2(&A[2..], &B[2..]);
         #[cfg(feature = "console_debug_eval")]
         {
-            println!(
+            tln!(
                 "sqrt_expr_evaluator_pss3\n lh={:.0}\n rh={:.0}",
                 lh.d(),
                 rh.d()
@@ -888,7 +940,7 @@ impl<
         {
             #[cfg(feature = "console_debug_eval")]
             {
-                println!("<-sqrt_expr_evaluator_pss3 lh + rh");
+                tln!("<-sqrt_expr_evaluator_pss3 lh + rh");
             }
             return lh + rh;
         }
@@ -902,7 +954,7 @@ impl<
         let divisor = lh - rh;
         #[cfg(feature = "console_debug_eval")]
         {
-            println!(
+            tln!(
                 "<-sqrt_expr_evaluator_pss3\n numer:{:.0}\n divisor:{:.0}",
                 numer.d(),
                 divisor.d()
@@ -921,15 +973,15 @@ impl<
     ) -> EX::ExtendedExponentFpt<f64> {
         #[cfg(feature = "console_debug_eval")]
         {
-            println!("->sqrt_expr_evaluator_pss4");
-            println!(" A[0]={:?}", A[0]);
-            println!(" A[1]={:?}", A[1]);
-            println!(" A[2]={:?}", A[2]);
-            println!(" A[3]={:?}", A[3]);
-            println!(" B[0]={:?}", B[0]);
-            println!(" B[1]={:?}", B[1]);
-            println!(" B[2]={:?}", B[2]);
-            println!(" B[3]={:?}", B[3]);
+            tln!("->sqrt_expr_evaluator_pss4");
+            tln!(" A[0]={:?}", A[0]);
+            tln!(" A[1]={:?}", A[1]);
+            tln!(" A[2]={:?}", A[2]);
+            tln!(" A[3]={:?}", A[3]);
+            tln!(" B[0]={:?}", B[0]);
+            tln!(" B[1]={:?}", B[1]);
+            tln!(" B[2]={:?}", B[2]);
+            tln!(" B[3]={:?}", B[3]);
         }
         let mut cA: [EI::ExtendedInt; 4] = [
             EI::ExtendedInt::zero(),
@@ -957,7 +1009,7 @@ impl<
             {
                 #[cfg(feature = "console_debug_eval")]
                 {
-                    println!(
+                    tln!(
                         "<-sqrt_expr_evaluator_pss4 1\nlh:{:.0}\nrh:{:.0}",
                         lh.d(),
                         rh.d()
@@ -972,7 +1024,7 @@ impl<
             let numer = self.eval2(&cA, &cB);
             #[cfg(feature = "console_debug_eval")]
             {
-                println!(
+                tln!(
                     "<-sqrt_expr_evaluator_pss4 2\nnumerator:{:.0}\nlh:{:.0}\nrh:{:.0}",
                     numer.d(),
                     lh.d(),
@@ -996,14 +1048,14 @@ impl<
         let lh = self.eval3(&cA, &cB);
         #[cfg(feature = "console_debug_eval")]
         {
-            println!(
+            tln!(
                 "<-sqrt_expr_evaluator_pss4 2.5\nlh:{:.0}\nrh:{:.0}",
                 lh.d(),
                 rh.d()
             );
-            println!("lh.is_neg():{} lh.is_pos():{}", lh.is_neg(), lh.is_pos());
-            println!("rh.is_neg():{} rh.is_pos():{}", rh.is_neg(), rh.is_pos());
-            println!(
+            tln!("lh.is_neg():{} lh.is_pos():{}", lh.is_neg(), lh.is_pos());
+            tln!("rh.is_neg():{} rh.is_pos():{}", rh.is_neg(), rh.is_pos());
+            tln!(
                 "lh.is_zero():{} rh.is_zero():{}",
                 lh.is_zero(),
                 rh.is_zero()
@@ -1016,7 +1068,7 @@ impl<
         {
             #[cfg(feature = "console_debug_eval")]
             {
-                println!(
+                tln!(
                     "<-sqrt_expr_evaluator_pss4 3\nlh:{:.0}\nrh:{:.0}",
                     lh.d(),
                     rh.d()
@@ -1033,7 +1085,7 @@ impl<
         let numer = self.sqrt_expr_evaluator_pss3(&cA, &cB);
         #[cfg(feature = "console_debug_eval")]
         {
-            println!(
+            tln!(
                 "<-sqrt_expr_evaluator_pss4 4\nnumer:{:.0}\nlh:{:.0}\nrh:{:.0}",
                 numer.d(),
                 lh.d(),

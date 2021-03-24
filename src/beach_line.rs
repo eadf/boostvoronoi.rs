@@ -18,6 +18,8 @@ use super::site_event as VSE;
 
 use super::{InputType, OutputType};
 use crate::BvError;
+#[allow(unused_imports)]
+use crate::{t, tln};
 use std::cell::Cell;
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
@@ -130,43 +132,25 @@ where
         let _ = self.beach_line_vec.insert(self.next_free_.0, (key, node));
         let _prev_value = self.beach_line_.insert(key, key.node_index_);
         if _prev_value.is_some() {
-            println!("+++++++++++++++++++++++++++++++++++++++++");
-            println!(
+            eprintln!("+++++++++++++++++++++++++++++++++++++++++");
+            eprintln!(
                 "inserted beach_line but it collided id:{:?}",
                 _prev_value.unwrap()
             );
-            println!("with {:?}", _prev_value.unwrap());
+            eprintln!("with {:?}", _prev_value.unwrap());
         }
         let _ = self.next_free_.increment();
-        #[cfg(feature = "console_debug")]
-        print!("inserted beach_line:");
+        t!("inserted beach_line:");
         #[cfg(feature = "console_debug")]
         self.debug_print_all_compat_node(&key, _ce);
         key
-    }
-
-    /// This is a quick & dirty fix. Re-creating the entire beach_line BTreeMap
-    #[allow(dead_code)]
-    #[deprecated(since = "0.5.0")]
-    fn rebuild_beach_line_do_not_use(&mut self) {
-        #[cfg(feature = "console_debug")]
-        println!("remap_beachline()");
-        let mut beachline_tmp = BTreeMap::<BeachLineNodeKey<I1, F1>, BeachLineIndex>::new();
-        // append does not solve the problem
-        //beachline_tmp.append(&mut self.beach_line_);
-        for i in self.beach_line_.iter() {
-            let _ = beachline_tmp.insert(*i.0, *i.1);
-        }
-        std::mem::swap(&mut self.beach_line_, &mut beachline_tmp);
-        //beachline_tmp.clear();
     }
 
     /// removes a beach-line item from the beach-line priority queue
     pub(crate) fn erase(&mut self, beachline_index: BeachLineIndex) -> Result<(), BvError> {
         if let Some(node) = self.beach_line_vec.get(beachline_index.0) {
             let node = node.0;
-            //#[cfg(feature = "console_debug")]
-            //println!("erasing beach_line:{:?}", node);
+            //tln!("erasing beach_line:{:?}", node);
 
             #[allow(clippy::collapsible_if)]
             if self.beach_line_.remove(&node).is_none() {
@@ -177,20 +161,15 @@ where
                 //self.rebuild_beachline();
 
                 //if self.beach_line_.remove(&node).is_none() {
-                println!("Tried to remove a non-existent beach_line, this error can occur if the input data is self-intersecting");
-                println!("{:?}", node);
+                eprintln!("Tried to remove a non-existent beach_line, this error may occur if the input data is self-intersecting");
+                eprintln!("{:?}", node);
                 self.debug_print_all_dump_and_cmp(&node);
-                return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beach_line, this error can occur if the input data is self-intersecting".to_string()});
+                return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beach_line, this error may occur if the input data is self-intersecting".to_string()});
                 //}
             }
-            //if self.beach_line_.contains_key(&node) {
-            //    return Err(BvError::SomeError {
-            //        txt: "Beachline: internal error there are more identical keys".to_string(),
-            //   });
-            //}
             let _ = self.beach_line_vec.remove(beachline_index.0);
         } else {
-            return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beach_line, this error can occur if the input data is self-intersecting".to_string()});
+            return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beach_line, this error may occur if the input data is self-intersecting".to_string()});
         }
         Ok(())
     }
@@ -345,10 +324,10 @@ where
     #[cfg(feature = "console_debug")]
     #[allow(dead_code)]
     pub(crate) fn debug_print_all(&self) {
-        println!();
-        println!("beach_line.len()={}", self.beach_line_.len());
+        tln!();
+        tln!("beach_line.len()={}", self.beach_line_.len());
         for (i, (node, id)) in self.beach_line_.iter().enumerate() {
-            print!(
+            t!(
                 "beach_line{} L:{:?},R:{:?}",
                 i,
                 &node.left_site(),
@@ -356,33 +335,32 @@ where
             );
 
             #[cfg(not(feature = "cpp_compat_debug"))]
-            print!(", id={:?}", id);
+            t!(", id={:?}", id);
             if let Some(data) = self.get_node(id).1.get() {
                 if let Some(circle_event) = data.circle_event_ {
-                    print!(" -> CircleEvent:{}", circle_event);
+                    t!(" -> CircleEvent:{}", circle_event);
                 } else {
-                    print!(" -> CircleEvent:-");
+                    t!(" -> CircleEvent:-");
                 }
-                print!(", edge:{:?}", data.edge_);
+                t!(", edge:{:?}", data.edge_);
             } else {
-                print!(" temporary bisector");
+                t!(" temporary bisector");
             }
-            println!();
+            tln!();
         }
-        println!();
+        tln!();
     }
 
     #[cfg(feature = "console_debug")]
     pub(crate) fn debug_print_all_compat(&self, ce: &VC::CircleEventQueue) {
-        println!("-----beach_line----{}", self.beach_line_.len());
+        tln!("-----beach_line----{}", self.beach_line_.len());
         for (i, (node, _id)) in self.beach_line_.iter().enumerate() {
-            print!("#{}:", i);
+            t!("#{}:", i);
             self.debug_print_all_compat_node(&node, ce);
         }
-        println!();
+        tln!();
     }
 
-    #[warn(dead_code)]
     pub(crate) fn debug_print_all_dump_and_cmp(&self, key: &BeachLineNodeKey<I1, F1>) {
         println!("-----beach_line----{}", self.beach_line_.len());
         println!("Looking for {:?} in the beach_line", key);
@@ -427,18 +405,18 @@ where
         }
     }
 
-    #[allow(dead_code)]
+    #[cfg(feature = "console_debug")]
     pub(crate) fn debug_print_all_cmp(&self) {
         let mut it1 = self.beach_line_.iter().enumerate();
         for it2_v in self.beach_line_.iter().enumerate().skip(1) {
             let it1_v = it1.next().unwrap();
-            print!(
+            t!(
                 "key(#{}).partial_cmp(key(#{})) == {:?}",
                 it1_v.0,
                 it2_v.0,
                 it1_v.1 .0.partial_cmp(it2_v.1 .0).unwrap()
             );
-            println!(
+            tln!(
                 "\tkey(#{}).partial_cmp(key(#{})) == {:?}",
                 it2_v.0,
                 it1_v.0,
@@ -454,23 +432,24 @@ where
         ce: &VC::CircleEventQueue,
     ) {
         let id = &node.get_index();
-        print!("L:{:?},R:{:?}", &node.left_site(), &node.right_site(),);
+        t!("L:{:?},R:{:?}", &node.left_site(), &node.right_site(),);
         if let Some(data) = self.get_node(id).1.get() {
             if let Some(_circle_event) = data.circle_event_ {
                 if ce.is_active(_circle_event) {
-                    print!(" -> CircleEvent(..)");
+                    t!(" -> CircleEvent: ");
+                    ce.dbg_ce(_circle_event);
                 } else {
-                    print!(" -> CircleEvent=--");
+                    t!(" -> CircleEvent=¡");
                 }
             } else {
-                print!(" -> CircleEvent=-");
+                t!(" -> CircleEvent=-");
             }
         } else {
-            print!(" Temporary bisector");
+            t!(" Temporary bisector");
         }
         #[cfg(not(feature = "cpp_compat_debug"))]
         print!(" id={}", id);
-        println!();
+        tln!();
     }
 }
 

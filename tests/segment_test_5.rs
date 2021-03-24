@@ -439,3 +439,80 @@ fn segment_5_3() -> Result<(), BvError> {
     assert_eq!(v.get_incident_edge().unwrap().0, 115);
     Ok(())
 }
+
+#[test]
+// this is the old gui test 'A_test'
+fn segment_5_4() -> Result<(), BvError> {
+    let output = {
+        let segments: [[I1; 4]; 2] = [
+            [35058881, -35000000, 31058881, -35000000],
+            [31058881, -35000000, 25058881, -35000001],
+        ];
+
+        let segments = to_segments(&segments);
+
+        let mut vb = Builder::<I1, F1>::new();
+        vb.with_segments(segments.iter())?;
+        vb.construct()?
+    };
+    assert_eq!(output.cells().len(), 5);
+    let cell = output.cells()[0].get();
+    assert_eq!(cell.get_id(), 0);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[1].get();
+    assert_eq!(cell.get_id(), 1);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[2].get();
+    assert_eq!(cell.get_id(), 2);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[3].get();
+    assert_eq!(cell.get_id(), 3);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[4].get();
+    assert_eq!(cell.get_id(), 4);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    assert_eq!(output.vertices().len(), 3);
+    assert_eq!(output.edges().len(), 14);
+    let v = output.vertices()[0].get();
+    assert!(almost_equal(
+        v.x(),
+        31058881.0000000,
+        v.y(),
+        -35000000.0000000
+    ));
+    assert_eq!(v.get_incident_edge().unwrap().0, 7);
+    let v = output.vertices()[1].get();
+    assert!(almost_equal(
+        v.x(),
+        35058881.0000000,
+        v.y(),
+        -48000035000000.3281250
+    ));
+    assert_eq!(v.get_incident_edge().unwrap().0, 11);
+    let v = output.vertices()[2].get();
+    assert!(almost_equal(
+        v.x(),
+        37558881.0000001,
+        v.y(),
+        -75000035000001.7500000
+    ));
+    assert_eq!(v.get_incident_edge().unwrap().0, 13);
+    Ok(())
+}

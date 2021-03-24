@@ -33,8 +33,8 @@ where
     }
 }
 
-//#[ignore]
 #[test]
+#[should_panic]
 fn segment_4_1_intersecting() {
     let _output = {
         let segments: [[I1; 4]; 9] = [
@@ -54,7 +54,7 @@ fn segment_4_1_intersecting() {
         vb.with_segments(segments.iter()).expect("should not fail");
         vb.construct()
     };
-    _output.expect_err("should fail");
+    _output.unwrap();
 }
 
 //#[ignore]

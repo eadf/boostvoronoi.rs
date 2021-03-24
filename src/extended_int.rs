@@ -10,6 +10,8 @@
 // Ported from C++ boost 1.75.0 to Rust in 2020 by Eadf (github.com/eadf)
 
 use super::extended_exp_fpt as EX;
+#[allow(unused_imports)]
+use crate::{t, tln};
 use std::cmp;
 use std::fmt;
 use std::num::Wrapping;
@@ -115,16 +117,16 @@ impl ExtendedInt {
                     + num::cast::<u32, f64>(self.chunks.get(0).unwrap().0).unwrap();
             }
             _ => {
-                //println!("{:?}",self);
-                //println!("->p()");
+                //fln!("{:?}",self);
+                //fln!("->p()");
                 // why does not self.chunks.len() match self.size()?
                 //let skip = self.chunks.len()-self.size();
                 for v in self.chunks.iter().rev().take(3) {
-                    //println!("i={}",i);
+                    //fln!("i={}",i);
                     rv.0 *= sep;
-                    //println!("{}", rv.0);
+                    //fln!("{}", rv.0);
                     rv.0 += num::cast::<u32, f64>(v.0).unwrap();
-                    //println!("{}", rv.0);
+                    //fln!("{}", rv.0);
                 }
                 rv.1 = ((self.size() - 3) << 5) as i32;
             }
@@ -196,7 +198,7 @@ impl ExtendedInt {
 
     /// this method assumes self is an empty object
     fn add_others(&mut self, e1: &Self, e2: &Self) {
-        //println!("->add_others {:?} {:?} {:?}", self, e1, e2);
+        //fln!("->add_others {:?} {:?} {:?}", self, e1, e2);
         if e1.count == 0 {
             self.count = e2.count;
             self.chunks = e2.chunks.clone();
@@ -218,7 +220,7 @@ impl ExtendedInt {
     }
 
     fn add_slice(&mut self, c1: &[Wrapping<u32>], sz1: usize, c2: &[Wrapping<u32>], sz2: usize) {
-        //println!("->add_slice {:?} {:?} {:?}", self, c1, c2);
+        //fln!("->add_slice {:?} {:?} {:?}", self, c1, c2);
         if sz1 < sz2 {
             self.add_slice(c2, sz2, c1, sz1);
             return;
@@ -254,18 +256,18 @@ impl ExtendedInt {
 
     /// this method assumes self is an empty object
     fn dif_other(&mut self, e1: &Self, e2: &Self) {
-        //println!("->dif_other {:?} {:?} {:?}", self, e1, e2);
+        //fln!("->dif_other {:?} {:?} {:?}", self, e1, e2);
         if e1.count == 0 {
             self.count = e2.count;
             self.chunks = e2.chunks.clone();
             self.count = -self.count;
-            //println!("<-dif_other#1 {:?}", self);
+            //fln!("<-dif_other#1 {:?}", self);
             return;
         }
         if e2.count == 0 {
             self.count = e1.count;
             self.chunks = e1.chunks.clone();
-            //println!("<-dif_other#2 {:?}", self);
+            //fln!("<-dif_other#2 {:?}", self);
             return;
         }
         if (e1.count > 0) ^ (e2.count > 0) {
@@ -276,7 +278,7 @@ impl ExtendedInt {
         if e1.count < 0 {
             self.count = -self.count;
         }
-        //println!("<-dif_other#3 {:?}", self);
+        //fln!("<-dif_other#3 {:?}", self);
     }
 
     fn dif_slice(
@@ -287,7 +289,7 @@ impl ExtendedInt {
         sz2: usize,
         rec: bool,
     ) {
-        //println!("->dif_slice {:?} count:{} c1:{:?} sz1:{} c2:{:?} sz2:{} rec:{}", self, self.count, c1, sz1, c2, sz2, rec);
+        //fln!("->dif_slice {:?} count:{} c1:{:?} sz1:{} c2:{:?} sz2:{} rec:{}", self, self.count, c1, sz1, c2, sz2, rec);
         let mut sz2 = sz2;
         let mut sz1 = sz1;
         if sz1 < sz2 {
@@ -347,27 +349,27 @@ impl ExtendedInt {
         // Todo: remove these asserts when stable
         //assert!(self.count >= 0);
         //assert_eq!(self.chunks.len(), self.count as usize);
-        //println!("<-dif_slice#1 {:?}", self);
+        //fln!("<-dif_slice#1 {:?}", self);
     }
 
     fn mul_other(&mut self, e1: &Self, e2: &Self) {
-        //println!("->mul_other {:?} {:?} {:?}", self, e1, e2);
+        //fln!("->mul_other {:?} {:?} {:?}", self, e1, e2);
 
         if e1.count == 0 || e2.count == 0 {
             self.count = 0;
-            //println!("<-mul_other#1 {:?}", self);
+            //fln!("<-mul_other#1 {:?}", self);
             return;
         }
         self.mul_slice(&e1.chunks, e1.size(), &e2.chunks, e2.size());
         if (e1.count > 0) ^ (e2.count > 0) {
             self.count = -self.count;
         }
-        //println!("<-mul_other#2 {:?}", self);
+        //fln!("<-mul_other#2 {:?}", self);
     }
 
     #[allow(unused_assignments)]
     fn mul_slice(&mut self, c1: &[Wrapping<u32>], sz1: usize, c2: &[Wrapping<u32>], sz2: usize) {
-        //println!("->mul_slice {:?} c1:{:?} sz1:{} c2:{:?} sz2:{}", self, c1, sz1, c2, sz2);
+        //fln!("->mul_slice {:?} c1:{:?} sz1:{} c2:{:?} sz2:{}", self, c1, sz1, c2, sz2);
 
         let mut cur: u64 = 0;
         let mut nxt: u64 = 0;
@@ -384,12 +386,12 @@ impl ExtendedInt {
             nxt = 0;
             for (first, c1_first) in c1.iter().enumerate().take(shift + 1) {
                 if first >= sz1 {
-                    //println!("mul_slice brk {:?}", self);
+                    //fln!("mul_slice brk {:?}", self);
                     break;
                 }
                 let second = shift - first;
                 if second >= sz2 {
-                    //println!("mul_slice cnt {:?}", self);
+                    //fln!("mul_slice cnt {:?}", self);
                     continue;
                 }
 
@@ -397,14 +399,14 @@ impl ExtendedInt {
                 cur += tmp & 0xFFFF_FFFF;
                 nxt += tmp >> 32;
 
-                //println!("shift:{} first:{}, second:{}",shift, first, second);
-                //println!("cur:{:0>16X}", cur );
-                //println!("nxt:{:0>16X}", nxt);
+                //fln!("shift:{} first:{}, second:{}",shift, first, second);
+                //fln!("cur:{:0>16X}", cur );
+                //fln!("nxt:{:0>16X}", nxt);
             }
 
             self.chunks[shift] = Wrapping((cur & 0xFFFF_FFFF) as u32);
-            //println!("self.chunks[shift]:{:0>8X}", self.chunks[shift]);
-            //println!("self.chunks[shift]:{:}\n", self.chunks[shift]);
+            //fln!("self.chunks[shift]:{:0>8X}", self.chunks[shift]);
+            //fln!("self.chunks[shift]:{:}\n", self.chunks[shift]);
             cur = nxt + (cur >> 32);
         }
         if cur != 0 {
@@ -417,7 +419,7 @@ impl ExtendedInt {
         // Todo: remove these asserts when stable
         //assert!(self.count >= 0);
         //assert_eq!(self.chunks.len(), self.count as usize);
-        //println!("<-mul_slice {:?}", self);
+        //fln!("<-mul_slice {:?}", self);
     }
 }
 

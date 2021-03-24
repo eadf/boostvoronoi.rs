@@ -31,14 +31,27 @@ fn main() -> Result<(), BvError> {
             [9100000, 0, 10000000, 10000000],
             [10000000, 10000000, 0, 10000000],
         ];
-        let segments: [[I1; 4]; 2] = [
+        let segments_1: [[I1; 4]; 2] = [
             [35058881, -35000000, 31058881, -35000000],
             [31058881, -35000000, 25058881, -35000001],
         ];
-        let segments: [[I1; 4]; 2] = [
+        let segments_1: [[I1; 4]; 2] = [
             [35058881, -35000000, 35058881, -25732145],
             [35058881, -25732145, 35058882, -19586070],
         ];
+
+        let segments_1: [[I1; 4]; 4] = [
+            [35058881, -35000000, 35058881, -25732145],
+            [35058881, -25732145, 35058881, -19586070],
+            [35058881, -19586070, -31657205, -35000000],
+            [-31657205, -35000000, 35058881, -35000000],
+        ];
+        let segments_1: [[I1; 4]; 2] = [
+            [35058881, -35000000, 31058881, -35000000],
+            [31058881, -35000000, 25058881, -35000001],
+        ];
+        //let points: [[I1; 2]; 2] = [[4, 3], [1, 1]];
+        //let segments: [[I1; 4]; 2] = [[1, 2, 3, 4], [2, 2, 5, 4]];
         /*
         let shift:I1 = 35058881;
         let a:I1 = 0; // nope: -5,-4,-3,-1,0
@@ -49,10 +62,16 @@ fn main() -> Result<(), BvError> {
             [a + shift, -19586070, -66716086 + shift, -35000000],
             [ -66716086 + shift, -35000000 , a + shift, -35000000],
         ];*/
+        //let points: [[I1; 2]; 2] = [[4, 3], [1, 1]];
+        //let segments: [[I1; 4]; 2] = [[1, 2, 3, 4], [2, 2, 5, 4]];
 
         let _v = VB::to_points::<I1, I1>(&points);
         let _s = VB::to_segments::<I1, I1>(&segments);
-        println!("-------\n0\n{}", segments.len());
+        println!("-------\n{}", points.len());
+        for p in points.iter() {
+            println!("{} {}", p[0], p[1]);
+        }
+        println!("{}", segments.len());
         for s in segments.iter() {
             println!("{} {} {} {}", s[0], s[1], s[2], s[3]);
         }
@@ -63,7 +82,6 @@ fn main() -> Result<(), BvError> {
         vb.with_segments(_s.iter())?;
         vb.construct()?
     };
-
     println!();
     for (i, v) in output.vertices().iter().enumerate() {
         println!(
@@ -79,6 +97,12 @@ fn main() -> Result<(), BvError> {
     println!("vertices:{}", output.vertices().len());
     //println!("edges:{}", output.edges().len());
     output.color_exterior_edges(EXTERNAL);
-    output.debug_print_edges();
+
+    println!("edges:{}", output.edges().len());
+    for (i, e) in output.edges().iter().enumerate() {
+        let e = e.get();
+        println!("Edge:#{}=>{:?}", e.get_id().0, &e);
+        assert_eq!(i, e.get_id().0);
+    }
     Ok(())
 }

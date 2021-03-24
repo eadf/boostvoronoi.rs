@@ -54,6 +54,22 @@ pub(crate) fn format_id(value: Option<usize>) -> String {
     }
 }
 
+#[macro_export]
+macro_rules! t {
+    ($($arg:tt)*) => ({
+     #[cfg(feature = "console_debug")]
+     print!($($arg)*)
+    });
+}
+
+#[macro_export]
+macro_rules! tln {
+    ($($arg:tt)*) => ({
+     #[cfg(feature = "console_debug")]
+     println!($($arg)*)
+    });
+}
+
 /// 2d coordinate type - integer only
 #[derive(Copy, Clone, cmp::PartialEq, cmp::Eq, Hash)]
 pub struct Point<T: InputType> {
@@ -395,11 +411,6 @@ where
     #[inline(always)]
     pub fn i1_to_f64(input: I1) -> f64 {
         NumCast::from(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn u64_to_f64(input: u64) -> f64 {
-        num::cast::<u64, f64>(input).unwrap()
     }
 
     #[inline(always)]

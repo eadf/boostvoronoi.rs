@@ -58,8 +58,8 @@ fn sum_2() {
 
 #[test]
 fn sub_1() {
-    let a_: f32 = 5.;
-    let b_: f32 = 4.;
+    let a_: f64 = 5.;
+    let b_: f64 = 4.;
     let a = RobustFpt::new_1(a_);
     let b = RobustFpt::new_1(b_);
     let s = a - b;
@@ -167,7 +167,7 @@ fn div_2() {
 
 #[test]
 fn sqrt_1() {
-    let a = RobustFpt::new_1(9.0f32);
+    let a = RobustFpt::new_1(9.0f64);
     let b = a.sqrt();
     approx::assert_ulps_eq!(b.fpv(), 3.0);
     //assert_eq!(b.re(), 1.0 / 2.0 + 1.0, "a.re fail");
