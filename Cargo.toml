@@ -1,6 +1,6 @@
 [package]
 name = "boostvoronoi"
-version = "0.6.0"
+version = "0.7.0"
 authors = ["eadf"]
 edition = "2018"
 description = "Boost voronoi ported to 100% rust"
