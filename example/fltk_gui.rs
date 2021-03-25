@@ -148,15 +148,9 @@ fn main() -> Result<(), BvError> {
     external_button.toggle(true);
     external_button.set_frame(FrameType::PlasticUpBox);
 
-    let mut infinite_button = RoundButton::default()
-        .with_size(180, 25)
-        .with_label("infinite edges");
-    infinite_button.toggle(true);
-    infinite_button.set_frame(FrameType::PlasticUpBox);
-
     let mut vertices_button = RoundButton::default()
         .with_size(180, 25)
-        .with_label("vertices");
+        .with_label("vertices (all)");
     vertices_button.toggle(true);
     vertices_button.set_frame(FrameType::PlasticUpBox);
 
@@ -168,9 +162,15 @@ fn main() -> Result<(), BvError> {
 
     let mut edges_button = RoundButton::default()
         .with_size(180, 25)
-        .with_label("edges");
+        .with_label("edges (all)");
     edges_button.toggle(true);
     edges_button.set_frame(FrameType::PlasticUpBox);
+
+    let mut infinite_button = RoundButton::default()
+        .with_size(180, 25)
+        .with_label("infinite edges");
+    infinite_button.toggle(true);
+    infinite_button.set_frame(FrameType::PlasticUpBox);
 
     let mut curved_button = RoundButton::default()
         .with_size(180, 25)
@@ -196,30 +196,30 @@ fn main() -> Result<(), BvError> {
     secondary_button.toggle(true);
     secondary_button.set_frame(FrameType::PlasticUpBox);
 
-    let mut e_segment_cell_button = RoundButton::default()
-        .with_size(180, 25)
-        .with_label("cell segment edges");
-    e_segment_cell_button.toggle(true);
-    e_segment_cell_button.set_frame(FrameType::PlasticUpBox);
+    /*let mut e_segment_cell_button = RoundButton::default()
+            .with_size(180, 25)
+            .with_label("cell segment edges");
+        e_segment_cell_button.toggle(true);
+        e_segment_cell_button.set_frame(FrameType::PlasticUpBox);
 
-    let mut e_point_cell_button = RoundButton::default()
-        .with_size(180, 25)
-        .with_label("cell point edges");
-    e_point_cell_button.toggle(true);
-    e_point_cell_button.set_frame(FrameType::PlasticUpBox);
+        let mut e_point_cell_button = RoundButton::default()
+            .with_size(180, 25)
+            .with_label("cell point edges");
+        e_point_cell_button.toggle(true);
+        e_point_cell_button.set_frame(FrameType::PlasticUpBox);
 
-    let mut v_segment_cell_button = RoundButton::default()
-        .with_size(180, 25)
-        .with_label("cell segment vertices");
-    v_segment_cell_button.toggle(true);
-    v_segment_cell_button.set_frame(FrameType::PlasticUpBox);
+        let mut v_segment_cell_button = RoundButton::default()
+            .with_size(180, 25)
+            .with_label("cell segment vertices");
+        v_segment_cell_button.toggle(true);
+        v_segment_cell_button.set_frame(FrameType::PlasticUpBox);
 
-    let mut v_point_cell_button = RoundButton::default()
-        .with_size(180, 25)
-        .with_label("cell point vertices");
-    v_point_cell_button.toggle(true);
-    v_point_cell_button.set_frame(FrameType::PlasticUpBox);
-
+        let mut v_point_cell_button = RoundButton::default()
+            .with_size(180, 25)
+            .with_label("cell point vertices");
+        v_point_cell_button.toggle(true);
+        v_point_cell_button.set_frame(FrameType::PlasticUpBox);
+    */
     pack.end();
 
     wind.set_color(Color::White);
@@ -275,10 +275,10 @@ fn main() -> Result<(), BvError> {
         GuiMessage::MenuChoice(Example::Clean),
     );
 
-    e_segment_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::E_CELL_SEGMENT));
-    e_point_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::E_CELL_POINT));
-    v_segment_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::V_CELL_SEGMENT));
-    v_point_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::V_CELL_POINT));
+    //e_segment_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::E_CELL_SEGMENT));
+    //e_point_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::E_CELL_POINT));
+    //v_segment_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::V_CELL_SEGMENT));
+    //v_point_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::V_CELL_POINT));
     external_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::EXTERNAL));
     infinite_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::INFINITE));
     primary_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::PRIMARY));
