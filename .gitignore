@@ -15,3 +15,4 @@ Cargo.lock
 boost_voronoi_c++.dia~
 compare_cpp.txt
 compare_rust.txt
+issue_43_1.txt
