@@ -302,6 +302,55 @@ where
             self.update_vertex(p[0], p[1]);
         }
     }
+
+    /// returns Some(true) if the aabb contains the point (inclusive)
+    /// returns None if the aabb is uninitialized
+    ///```
+    /// # use boostvoronoi::Point;
+    /// # use boostvoronoi::visual_utils::Aabb2;
+    /// let p0 = Point::from([0,0]);
+    /// let p1 = Point::from([1,1]);
+    ///
+    /// let aabb = Aabb2::<i32,f32>::new(&p0,&p1);
+    /// assert!(aabb.contains_point(&Point::from([1,1])).unwrap_or(false));
+    /// assert!(!aabb.contains_point(&Point::from([2,1])).unwrap_or(true));
+    /// ```
+    #[inline]
+    pub fn contains_point(&self, point: &Point<I1>) -> Option<bool> {
+        if let Some(min_max) = self.min_max {
+            let x = super::TypeConverter::<I1, F1>::i1_to_f1(point.x);
+            let y = super::TypeConverter::<I1, F1>::i1_to_f1(point.y);
+
+            Some(x >= min_max.0[0] && x <= min_max.1[0] && y >= min_max.0[1] && y <= min_max.1[1])
+        } else {
+            None
+        }
+    }
+
+    /// returns Some(true) if the aabb contains the line (inclusive)
+    /// returns None if the aabb is uninitialized
+    /// ```
+    /// # use boostvoronoi::{Line,Point};
+    /// # use boostvoronoi::visual_utils::Aabb2;
+    /// let p0 = Point::from([0,0]);
+    /// let p1 = Point::from([10,10]);
+    ///
+    /// let aabb = Aabb2::<i32,f32>::new(&p0,&p1);
+    /// assert!( aabb.contains_line(&Line::from([1,1,10,10])).unwrap_or(false));
+    /// assert!(!aabb.contains_line(&Line::from([1,-1,10,10])).unwrap_or(true));
+    /// ```
+    #[inline]
+    pub fn contains_line(&self, line: &Line<I1>) -> Option<bool> {
+        if let Some(_min_max) = self.min_max {
+            // unwrap is safe now
+            Some(
+                self.contains_point(&line.start).unwrap()
+                    && self.contains_point(&line.end).unwrap(),
+            )
+        } else {
+            None
+        }
+    }
 }
 
 /// This is a simple affine transformation object.
