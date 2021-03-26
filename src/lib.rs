@@ -70,7 +70,7 @@ macro_rules! tln {
     });
 }
 
-/// 2d coordinate type - integer only
+/// A really simple 2d coordinate container type - integer only
 #[derive(Copy, Clone, cmp::PartialEq, cmp::Eq, Hash)]
 pub struct Point<T: InputType> {
     pub x: T,
@@ -107,7 +107,7 @@ impl<T: InputType> From<&[T; 2]> for Point<T> {
     }
 }
 
-/// 2d line type - integer only
+/// A really simple 2d line container type - integer only
 #[derive(Copy, Clone, cmp::PartialEq, cmp::Eq, Hash, Debug)]
 pub struct Line<T: InputType> {
     pub start: Point<T>,
@@ -251,28 +251,10 @@ impl<F> TypeCheckF<F>
 where
     F: Default + Copy + Clone + Float + Zero + Neg<Output = F>,
 {
-    //#[inline]
-    // todo: remove!
-    //pub fn is_zero(v: F) -> bool {
-    //    v == F::zero()
-    //}
-
-    //#[inline]
-    // todo: remove!
-    //pub fn is_neg(v: F) -> bool {
-    //    v < F::zero()
-    //}
-
-    //#[inline]
-    // todo: remove!
-    //pub fn is_pos(v: F) -> bool {
-    //    v > F::zero()
-    //}
-
     // TODO: this is stupid: why can't I1 just use a float literal?
     #[inline]
     pub fn half() -> F {
-        num::cast::<f32, F>(1.0f32 / 2.0f32).unwrap()
+        num::cast::<f32, F>(0.5f32).unwrap()
     }
 
     #[inline]
@@ -283,31 +265,6 @@ where
     #[inline]
     pub fn two() -> F {
         num::cast::<f32, F>(2.0f32).unwrap()
-    }
-}
-
-/// Project wide checker for integer
-pub struct TypeCheckI<I1>
-where
-    I1: PrimInt + Default + Copy + Clone + Zero + Neg<Output = I1>,
-{
-    _pdbf: PhantomData<I1>,
-}
-
-impl<I1> TypeCheckI<I1>
-where
-    I1: Default + Copy + Clone + PrimInt + Zero + Neg<Output = I1>,
-{
-    // todo: remove!
-    #[inline(always)]
-    pub fn is_neg(v: I1) -> bool {
-        v < I1::zero()
-    }
-
-    // todo: remove!
-    #[inline(always)]
-    pub fn is_pos(v: I1) -> bool {
-        v >= I1::zero()
     }
 }
 

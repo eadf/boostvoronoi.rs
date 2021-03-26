@@ -367,13 +367,12 @@ impl ExtendedInt {
         //fln!("<-mul_other#2 {:?}", self);
     }
 
-    #[allow(unused_assignments)]
     fn mul_slice(&mut self, c1: &[Wrapping<u32>], sz1: usize, c2: &[Wrapping<u32>], sz2: usize) {
         //fln!("->mul_slice {:?} c1:{:?} sz1:{} c2:{:?} sz2:{}", self, c1, sz1, c2, sz2);
 
         let mut cur: u64 = 0;
-        let mut nxt: u64 = 0;
-        let mut tmp: u64 = 0;
+        let mut nxt: u64;
+        let mut tmp: u64;
 
         self.count = (sz1 + sz2 - 1_usize) as i32;
 
@@ -551,7 +550,7 @@ impl<'b> ops::Sub<&'b ExtendedInt> for ExtendedInt {
 
 impl ops::Mul for ExtendedInt {
     type Output = Self;
-    /// Multiplies `self` with `self` returning a new object with the result
+    /// Multiplies `self` with `that` returning a new object with the result
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///
@@ -571,7 +570,7 @@ impl ops::Mul for ExtendedInt {
 
 impl<'a, 'b> ops::Mul<&'b ExtendedInt> for &'a ExtendedInt {
     type Output = ExtendedInt;
-    /// Multiplies `self` with `self` returning a new object with the result
+    /// Multiplies `self` with `that` returning a new object with the result
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///
@@ -591,7 +590,7 @@ impl<'a, 'b> ops::Mul<&'b ExtendedInt> for &'a ExtendedInt {
 
 impl<'b> ops::Mul<&'b ExtendedInt> for ExtendedInt {
     type Output = ExtendedInt;
-    /// Multiplies `self` with `self` returning a new object with the result
+    /// Multiplies `self` with `that` returning a new object with the result
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///
@@ -604,6 +603,27 @@ impl<'b> ops::Mul<&'b ExtendedInt> for ExtendedInt {
     ///```
     fn mul(self, that: &'b ExtendedInt) -> ExtendedInt {
         let mut rv = ExtendedInt::default();
+        rv.mul_other(&self, &that);
+        rv
+    }
+}
+
+impl<'b> ops::Mul<i32> for ExtendedInt {
+    type Output = ExtendedInt;
+    /// Multiplies `self` with `that` returning a new object with the result
+    /// ```
+    /// # use boostvoronoi::extended_int::ExtendedInt;
+    ///
+    /// let aa = 4727377593577731_f64;
+    /// let bb = 759935_f64;
+    /// let a = ExtendedInt::from(aa as i64);
+    /// let b = bb as i32;
+    /// let c = a*b;
+    /// approx::assert_ulps_eq!(c.d(), aa*bb);
+    ///```
+    fn mul(self, that: i32) -> ExtendedInt {
+        let mut rv = ExtendedInt::default();
+        let that = ExtendedInt::from(that);
         rv.mul_other(&self, &that);
         rv
     }

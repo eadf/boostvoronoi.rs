@@ -20,7 +20,6 @@ use super::robust_fpt as RF;
 use super::site_event as VSE;
 use super::Point;
 use super::TypeCheckF as TCF;
-use super::TypeCheckI as TCI;
 use super::TypeConverter as TC2;
 use super::{InputType, OutputType};
 #[allow(unused_imports)]
@@ -174,39 +173,20 @@ where
     _pdo: PhantomData<F1>,
     #[doc(hidden)]
     _pdi: PhantomData<I1>,
-    #[doc(hidden)]
-    _pdbi: PhantomData<i64>,
-    #[doc(hidden)]
-    _pdbf: PhantomData<f64>,
 }
 
 impl<I1, F1> OrientationTest<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
-    i64: InputType + Neg<Output = i64>,
-    f64: OutputType + Neg<Output = f64>,
 {
-    /// Value is a determinant of two vectors (e.g. x1 * y2 - x2 * y1).
-    /// Return orientation based on the sign of the determinant.
-    #[allow(dead_code)]
-    fn eval_i(value: I1) -> Orientation {
-        if value.is_zero() {
-            return Orientation::COLLINEAR;
-        }
-        match TCI::<I1>::is_neg(value) {
-            true => Orientation::RIGHT,
-            false => Orientation::LEFT,
-        }
-    }
-
     /// Value is a determinant of two vectors (e.g. x1 * y2 - x2 * y1).
     /// Return orientation based on the sign of the determinant.
     fn eval_f(value: f64) -> Orientation {
         if value.is_zero() {
             return Orientation::COLLINEAR;
         }
-        match value.is_sign_negative() {
+        match value < 0.0 {
             true => Orientation::RIGHT,
             false => Orientation::LEFT,
         }
@@ -780,10 +760,6 @@ where
     _pdo: PhantomData<F1>,
     #[doc(hidden)]
     _pdi: PhantomData<I1>,
-    #[doc(hidden)]
-    _pdbi: PhantomData<i64>,
-    #[doc(hidden)]
-    _pdbf: PhantomData<f64>,
 }
 
 impl<I1, F1> CircleExistencePredicate<I1, F1>
@@ -872,10 +848,6 @@ where
     _pdo: PhantomData<F1>,
     #[doc(hidden)]
     _pdi: PhantomData<I1>,
-    #[doc(hidden)]
-    _pdbi: PhantomData<i64>,
-    #[doc(hidden)]
-    _pdbf: PhantomData<f64>,
 }
 
 #[allow(non_snake_case)]
@@ -1112,7 +1084,6 @@ where
     }
 
     #[allow(unused_parens)]
-    #[allow(unused_assignments)]
     fn pss(
         site1: &VSE::SiteEvent<I1, F1>,
         site2: &VSE::SiteEvent<I1, F1>,
@@ -1153,9 +1124,9 @@ where
         let b1 = i1_to_f64(segm_end1.y) - i1_to_f64(segm_start1.y);
         let a2 = i1_to_f64(segm_end2.x) - i1_to_f64(segm_start2.x);
         let b2 = i1_to_f64(segm_end2.y) - i1_to_f64(segm_start2.y);
-        let mut recompute_c_x = false;
-        let mut recompute_c_y = false;
-        let mut recompute_lower_x = false;
+        let recompute_c_x:bool;
+        let recompute_c_y:bool;
+        let recompute_lower_x:bool;
 
         let orientation = RF::RobustFpt::new_2(
             Predicates::<I1, F1>::robust_cross_product(
@@ -1589,10 +1560,6 @@ where
     _pdo: PhantomData<F1>,
     #[doc(hidden)]
     _pdi: PhantomData<I1>,
-    #[doc(hidden)]
-    _pdbi: PhantomData<i64>,
-    #[doc(hidden)]
-    _pdbf: PhantomData<f64>,
 }
 
 impl<I1, F1> CircleFormationFunctor<I1, F1>
@@ -1884,10 +1851,6 @@ where
         let quarter = EX::ExtendedExponentFpt::<f64>::from(1f64);
         let half = EX::ExtendedExponentFpt::<f64>::from(0.5);
         let one = EX::ExtendedExponentFpt::<f64>::from(1f64);
-        let neg_one = EI::ExtendedInt::from(-1);
-        let two = EI::ExtendedInt::from(2);
-        let four = EI::ExtendedInt::from(4);
-
         tln!(
             "->pps site1:{:?} site2:{:?} site3:{:?}",
             site1,
@@ -1948,11 +1911,11 @@ where
         if denom.is_zero() {
             let numer: EI::ExtendedInt = &teta * &teta - &sum_ab * &sum_ab;
             denom = &teta * &sum_ab;
-            ca[0] = &denom * &sum_x * &two + &numer * &vec_x;
+            ca[0] = &denom * &sum_x * 2 + &numer * &vec_x;
             cb[0] = segm_len.clone();
-            ca[1] = &denom * &sum_ab * &two + &numer * &teta;
+            ca[1] = &denom * &sum_ab * 2 + &numer * &teta;
             cb[1] = EI::ExtendedInt::from(1);
-            ca[2] = &denom * &sum_y * &two + &numer * &vec_y;
+            ca[2] = &denom * &sum_y * 2 + &numer * &vec_y;
             let inv_denom = one / bi_to_ext(&denom);
             if recompute_c_x {
                 c_event.set_x_xf(quarter * bi_to_ext(&ca[0]) * inv_denom);
@@ -1968,7 +1931,7 @@ where
             }
             return;
         }
-        let det: EI::ExtendedInt = (&teta * &teta + &denom * &denom) * &a * &b * &four;
+        let det: EI::ExtendedInt = (&teta * &teta + &denom * &denom) * &a * &b * 4;
         let mut inv_denom_sqr = one / bi_to_ext(&denom);
         inv_denom_sqr = inv_denom_sqr * inv_denom_sqr;
         tln!("det:{:?} inv_denom_sqr:{:.12}", det, inv_denom_sqr.d());
@@ -1977,7 +1940,7 @@ where
             ca[0] = sum_x * &denom * &denom + &teta * &sum_ab * &vec_x;
             cb[0] = EI::ExtendedInt::from(1_i32);
             ca[1] = if segment_index == 2 {
-                &vec_x * &neg_one
+                -vec_x
             } else {
                 vec_x
             };
@@ -1991,7 +1954,7 @@ where
             ca[2] = sum_y * &denom * &denom + &teta * &sum_ab * &vec_y;
             cb[2] = EI::ExtendedInt::from(1);
             ca[3] = if segment_index == 2 {
-                vec_y * neg_one
+                -vec_y
             } else {
                 vec_y
             };

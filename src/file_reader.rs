@@ -31,7 +31,6 @@ enum StateMachine {
     ExpectPoints,
     StartingLines,
     ExpectLines,
-    Ended,
 }
 
 fn line_to_data<I1, F1>(line: &str) -> Option<InputData<I1>>
@@ -183,9 +182,7 @@ where
                     if expected_lines > lines.len() {
                         if let InputData::Line(a_line) = data {
                             lines.push(a_line);
-                            #[allow(unused_assignments)]
                             if expected_lines == lines.len() {
-                                state = StateMachine::Ended;
                                 break;
                             }
                             continue;

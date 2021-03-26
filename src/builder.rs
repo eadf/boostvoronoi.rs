@@ -54,7 +54,7 @@ mod tests;
 /// type I1 = i32; // this is the integer input type
 /// type F1 = f64; // this is the float output type (circle event coordinates)
 ///
-/// // Points should be unique,
+/// // Points should be unique. Points should not intersect lines
 /// let p = vec![Point{x:9_i32, y:10}];
 /// // Lines may only intersect at the endpoints.
 /// let s = vec![Line::new(Point{x:10_i32, y:11}, Point{x:12, y:13})];
