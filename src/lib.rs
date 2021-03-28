@@ -183,6 +183,8 @@ pub enum BvError {
     SelfIntersecting { txt: String },
     #[error("Could not cast number")]
     NumberConversion { txt: String },
+    #[error(transparent)]
+    BvError(#[from] std::io::Error),
 }
 
 pub trait InputType:

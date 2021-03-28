@@ -105,15 +105,31 @@ where
     I1: super::InputType + Neg<Output = I1>,
     F1: super::OutputType + Neg<Output = F1>,
 {
+    // Open the file in read-only mode
+    let file = File::open(filename)?;
+    let reader = BufReader::new(file);
+    read_boost_input_buffer::<I1,F1,_>(reader)
+}
+
+/// Reads an example from a buffer using the format used by C++ boost voronoi
+/// [number of points]
+/// [X] [Y] (repeats)
+/// [number of lines]
+/// [X1] [Y1] [X2] [Y2](repeats)
+#[allow(clippy::type_complexity)]
+pub fn read_boost_input_buffer<I1, F1, F>(
+    reader: BufReader<F>,
+) -> Result<(Vec<super::Point<I1>>, Vec<super::Line<I1>>), BvError>
+    where
+        I1: super::InputType + Neg<Output = I1>,
+        F1: super::OutputType + Neg<Output = F1>,
+        F: std::io::Read
+{
     let mut points = Vec::<super::Point<I1>>::default();
     let mut lines = Vec::<super::Line<I1>>::default();
     let mut state = StateMachine::StartingPoints;
     let mut expected_points = 0;
     let mut expected_lines = 0;
-
-    // Open the file in read-only mode (ignoring errors).
-    let file = File::open(filename).unwrap();
-    let reader = BufReader::new(file);
 
     // Read the file line by line using the lines() iterator from std::io::BufRead.
     for (index, line) in reader.lines().enumerate() {
