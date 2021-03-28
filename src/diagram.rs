@@ -139,7 +139,7 @@ where
 
         rv.push_str(
             format!(
-                "(id:{:?} ii:{} ie:{:?} col:{})",
+                "(id:{:?} ii:{} ie:{} col:{})",
                 self.id_.0,
                 self.source_index_,
                 super::format_id(self.incident_edge_.map(|x| x.0)),

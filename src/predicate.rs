@@ -1124,9 +1124,9 @@ where
         let b1 = i1_to_f64(segm_end1.y) - i1_to_f64(segm_start1.y);
         let a2 = i1_to_f64(segm_end2.x) - i1_to_f64(segm_start2.x);
         let b2 = i1_to_f64(segm_end2.y) - i1_to_f64(segm_start2.y);
-        let recompute_c_x:bool;
-        let recompute_c_y:bool;
-        let recompute_lower_x:bool;
+        let recompute_c_x: bool;
+        let recompute_c_y: bool;
+        let recompute_lower_x: bool;
 
         let orientation = RF::RobustFpt::new_2(
             Predicates::<I1, F1>::robust_cross_product(
@@ -1939,11 +1939,7 @@ where
         if recompute_c_x || recompute_lower_x {
             ca[0] = sum_x * &denom * &denom + &teta * &sum_ab * &vec_x;
             cb[0] = EI::ExtendedInt::from(1_i32);
-            ca[1] = if segment_index == 2 {
-                -vec_x
-            } else {
-                vec_x
-            };
+            ca[1] = if segment_index == 2 { -vec_x } else { vec_x };
             cb[1] = det.clone();
             if recompute_c_x {
                 c_event.set_x_xf(sqrt_expr_.eval2(&ca, &cb) * half * inv_denom_sqr);
@@ -1953,11 +1949,7 @@ where
         if recompute_c_y || recompute_lower_x {
             ca[2] = sum_y * &denom * &denom + &teta * &sum_ab * &vec_y;
             cb[2] = EI::ExtendedInt::from(1);
-            ca[3] = if segment_index == 2 {
-                -vec_y
-            } else {
-                vec_y
-            };
+            ca[3] = if segment_index == 2 { -vec_y } else { vec_y };
             cb[3] = det.clone();
             if recompute_c_y {
                 c_event.set_y_xf(sqrt_expr_.eval2(&ca[2..], &cb[2..]) * half * inv_denom_sqr);

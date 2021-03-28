@@ -108,7 +108,7 @@ where
     // Open the file in read-only mode
     let file = File::open(filename)?;
     let reader = BufReader::new(file);
-    read_boost_input_buffer::<I1,F1,_>(reader)
+    read_boost_input_buffer::<I1, F1, _>(reader)
 }
 
 /// Reads an example from a buffer using the format used by C++ boost voronoi
@@ -120,10 +120,10 @@ where
 pub fn read_boost_input_buffer<I1, F1, F>(
     reader: BufReader<F>,
 ) -> Result<(Vec<super::Point<I1>>, Vec<super::Line<I1>>), BvError>
-    where
-        I1: super::InputType + Neg<Output = I1>,
-        F1: super::OutputType + Neg<Output = F1>,
-        F: std::io::Read
+where
+    I1: super::InputType + Neg<Output = I1>,
+    F1: super::OutputType + Neg<Output = F1>,
+    F: std::io::Read,
 {
     let mut points = Vec::<super::Point<I1>>::default();
     let mut lines = Vec::<super::Line<I1>>::default();
