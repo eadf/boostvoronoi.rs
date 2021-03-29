@@ -50,6 +50,13 @@ fn main() -> Result<(), BvError> {
             [35058881, -35000000, 31058881, -35000000],
             [31058881, -35000000, 25058881, -35000001],
         ];
+
+        let points: [[I1; 2]; 0] = [];
+        let segments: [[I1; 4]; 3] = [
+            [1403829871, 74, 1403829871, 275],
+            [1403829871, 275, 1403829741, 275],
+            [1403829741, 275, 1403829744, 73],
+        ];
         //let points: [[I1; 2]; 2] = [[4, 3], [1, 1]];
         //let segments: [[I1; 4]; 2] = [[1, 2, 3, 4], [2, 2, 5, 4]];
         /*
@@ -76,7 +83,17 @@ fn main() -> Result<(), BvError> {
             println!("{} {} {} {}", s[0], s[1], s[2], s[3]);
         }
         println!("-------");
-
+        println!("int INPUT_PTS[{}][2] = {{", points.len());
+        for p in points.iter() {
+            print!("{{{},{}}},", p[0], p[1]);
+        }
+        println!("}};");
+        println!("int INPUT_SGS[{}][4] = {{", segments.len());
+        for s in segments.iter() {
+            print!("{{{},{},{},{}}},", s[0], s[1], s[2], s[3]);
+        }
+        println!("}};");
+        println!("-------");
         let mut vb = VB::Builder::<I1, F1>::new();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;

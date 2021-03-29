@@ -311,7 +311,7 @@ where
     #[inline(always)]
     pub fn try_f1_to_i32(input: F1) -> Result<i32, BvError> {
         num::cast::<F1, i32>(input).ok_or(BvError::NumberConversion {
-            txt: "Could not convert from float to int32".to_string(),
+            txt: format!("Could not convert from float{:?} to int32", input),
         })
     }
 
@@ -329,7 +329,7 @@ where
     #[inline(always)]
     pub fn try_f1_to_i1(input: F1) -> Result<I1, BvError> {
         num::cast::<F1, I1>(input).ok_or(BvError::NumberConversion {
-            txt: "Could not convert from float to int".to_string(),
+            txt: format!("Could not convert from float:{:?} to int32", input),
         })
     }
 

@@ -844,25 +844,27 @@ where
                     }
                 }
             }
-            for i in 0..samples.len() - 1 {
-                let x1 = Self::try_f1_to_i32(samples[i][0]);
-                if x1.is_err() {
-                    break;
-                }
-                let y1 = Self::try_f1_to_i32(samples[i][1]);
-                if y1.is_err() {
-                    break;
-                }
-                let x2 = Self::try_f1_to_i32(samples[i + 1][0]);
-                if x2.is_err() {
-                    break;
-                }
-                let y2 = Self::try_f1_to_i32(samples[i + 1][1]);
-                if y2.is_err() {
-                    break;
-                }
+            if samples.len() > 1 {
+                for i in 0..samples.len() - 1 {
+                    let x1 = Self::try_f1_to_i32(samples[i][0]);
+                    if x1.is_err() {
+                        break;
+                    }
+                    let y1 = Self::try_f1_to_i32(samples[i][1]);
+                    if y1.is_err() {
+                        break;
+                    }
+                    let x2 = Self::try_f1_to_i32(samples[i + 1][0]);
+                    if x2.is_err() {
+                        break;
+                    }
+                    let y2 = Self::try_f1_to_i32(samples[i + 1][1]);
+                    if y2.is_err() {
+                        break;
+                    }
 
-                draw::draw_line(x1.unwrap(), y1.unwrap(), x2.unwrap(), y2.unwrap());
+                    draw::draw_line(x1.unwrap(), y1.unwrap(), x2.unwrap(), y2.unwrap());
+                }
             }
         }
     }
@@ -924,10 +926,13 @@ where
             }
         }
 
-        let side = affine.reverse_transform_x(self.screen_aabb.get_high().unwrap()[0])?
-            - affine.reverse_transform_x(self.screen_aabb.get_low().unwrap()[0])?;
+        let side =
+            Self::i1_to_f1(affine.reverse_transform_x(self.screen_aabb.get_high().unwrap()[0])?)
+                - Self::i1_to_f1(
+                    affine.reverse_transform_x(self.screen_aabb.get_low().unwrap()[0])?,
+                );
         // absolute value is taken in case the affine transform flips one coordinate
-        let side = Self::i1_to_f1(side).abs();
+        let side = side.abs();
         let koef = side / Self::max_f1(direction[0].abs(), direction[1].abs());
 
         let vertex0 = edge.get().vertex0();
