@@ -222,7 +222,17 @@ impl<I1> InputType for I1 where
 }
 
 pub trait OutputType:
-    Float + PartialOrd + PartialEq + NumCast + Copy + Clone + Display + Default + Debug + Zero
+    Float
+    + PartialOrd
+    + PartialEq
+    + NumCast
+    + Copy
+    + Clone
+    + Display
+    + Default
+    + Debug
+    + Zero
+    + std::ops::MulAssign
 {
 }
 
@@ -237,6 +247,7 @@ impl<F1> OutputType for F1 where
         + Default
         + Debug
         + Zero
+        + std::ops::MulAssign
         + Neg<Output = F1>
 {
 }

@@ -341,7 +341,7 @@ where
     /// ```
     #[inline]
     pub fn contains_line(&self, line: &Line<I1>) -> Option<bool> {
-        if let Some(_min_max) = self.min_max {
+        if self.min_max.is_some() {
             // unwrap is safe now
             Some(
                 self.contains_point(&line.start).unwrap()
@@ -366,7 +366,7 @@ where
     /// in this case.
     to_center: [F1; 2],
     /// A zoom scale
-    pub scale: F1,
+    pub scale: [F1; 2],
     /// The offsets needed to center coordinates of interest on the 'dest' coordinate system.
     /// i.e. the screen coordinate system.
     pub to_offset: [F1; 2],
@@ -383,7 +383,7 @@ where
     fn default() -> Self {
         Self {
             to_center: [F1::zero(), F1::zero()],
-            scale: F1::one(),
+            scale: [F1::one(), F1::one()],
             to_offset: [F1::zero(), F1::zero()],
             _pdi: PhantomData,
         }
@@ -428,10 +428,11 @@ where
                         // make sure the larges dimension of source fits inside smallest of dest
                         let source_aabb_size = source_aabb_size[0].max(source_aabb_size[1]);
                         let dest_aabb_size = dest_aabb_size[0].min(dest_aabb_size[1]);
+                        let scale = dest_aabb_size / source_aabb_size;
 
                         return Ok(Self {
                             to_center: source_aabb_center,
-                            scale: dest_aabb_size / source_aabb_size,
+                            scale: [scale, scale],
                             to_offset: dest_aabb_center,
                             _pdi: PhantomData,
                         });
@@ -456,7 +457,7 @@ where
     #[inline(always)]
     pub fn reverse_transform_x(&self, x: F1) -> Result<I1, BvError> {
         super::TypeConverter::<I1, F1>::try_f1_to_i1(
-            (x - self.to_offset[0]) / self.scale - self.to_center[0],
+            (x - self.to_offset[0]) / self.scale[0] - self.to_center[0],
         )
     }
 
@@ -464,7 +465,7 @@ where
     #[inline(always)]
     pub fn reverse_transform_y(&self, y: F1) -> Result<I1, BvError> {
         super::TypeConverter::<I1, F1>::try_f1_to_i1(
-            (y - self.to_offset[1]) / self.scale - self.to_center[1],
+            (y - self.to_offset[1]) / self.scale[1] - self.to_center[1],
         )
     }
 
@@ -478,14 +479,14 @@ where
     /// float x coordinate
     #[inline(always)]
     pub fn transform_x(&self, x: F1) -> F1 {
-        (x + self.to_center[0]) * self.scale + self.to_offset[0]
+        (x + self.to_center[0]) * self.scale[0] + self.to_offset[0]
     }
 
     /// transform from source coordinate system to dest coordinate system
     /// float y coordinate
     #[inline(always)]
     pub fn transform_y(&self, y: F1) -> F1 {
-        (y + self.to_center[1]) * self.scale + self.to_offset[1]
+        (y + self.to_center[1]) * self.scale[1] + self.to_offset[1]
     }
 
     /// transform from source coordinate system to dest coordinate system
@@ -504,7 +505,7 @@ where
     /// /// integer x coordinate
     #[inline(always)]
     pub fn transform_ix(&self, x: I1) -> F1 {
-        (super::TypeConverter::<I1, F1>::i1_to_f1(x) + self.to_center[0]) * self.scale
+        (super::TypeConverter::<I1, F1>::i1_to_f1(x) + self.to_center[0]) * self.scale[0]
             + self.to_offset[0]
     }
 
@@ -512,7 +513,7 @@ where
     /// integer y coordinate
     #[inline(always)]
     pub fn transform_iy(&self, y: I1) -> F1 {
-        (super::TypeConverter::<I1, F1>::i1_to_f1(y) + self.to_center[1]) * self.scale
+        (super::TypeConverter::<I1, F1>::i1_to_f1(y) + self.to_center[1]) * self.scale[1]
             + self.to_offset[1]
     }
 }

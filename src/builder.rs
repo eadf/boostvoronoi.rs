@@ -894,16 +894,17 @@ pub fn to_segments<T1: InputType, T2: InputType>(segments: &[[T1; 4]]) -> Vec<Li
 /// helper function: converts a slice of [[integer,integer,integer,integer]] into input data for the Builder.
 pub fn to_segments_offset<T1: InputType, T2: InputType>(
     points: &[[T1; 4]],
-    scale: f64,
+    scale_x: f64,
+    scale_y: f64,
     dx: i64,
     dy: i64,
 ) -> Vec<Line<T2>> {
     let fx = |x: T1| {
-        num::cast::<f64, T2>(num::cast::<T1, f64>(x).unwrap() * scale).unwrap()
+        num::cast::<f64, T2>(num::cast::<T1, f64>(x).unwrap() * scale_x).unwrap()
             + num::cast::<i64, T2>(dx).unwrap()
     };
     let fy = |y: T1| {
-        num::cast::<f64, T2>(num::cast::<T1, f64>(y).unwrap() * scale).unwrap()
+        num::cast::<f64, T2>(num::cast::<T1, f64>(y).unwrap() * scale_y).unwrap()
             + num::cast::<i64, T2>(dy).unwrap()
     };
     points
