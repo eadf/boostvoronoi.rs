@@ -3,8 +3,7 @@ use boostvoronoi::diagram::VoronoiEdgeIndex;
 use boostvoronoi::file_reader;
 use boostvoronoi::visual_utils as VU;
 use boostvoronoi::BvError;
-use boostvoronoi::TypeConverter;
-use boostvoronoi::{builder as VB, Line, Point};
+use boostvoronoi::{builder as VB, Line, Point, TypeConverter1, TypeConverter2};
 use boostvoronoi::{InputType, OutputType};
 
 use std::ops::Neg;
@@ -1425,7 +1424,7 @@ where
                 chooser.show();
                 if let Some(filename) = chooser.filenames().first() {
                     if let Ok(file_parse_result) =
-                        file_reader::read_boost_input_file::<I1, F1>(filename.as_path())
+                        file_reader::read_boost_input_file::<I1>(filename.as_path())
                     {
                         rv = filename.to_str().unwrap().to_string();
                         file_parse_result
@@ -1463,31 +1462,31 @@ where
 
     #[inline(always)]
     pub fn i1_to_f1(value: I1) -> F1 {
-        TypeConverter::<I1, F1>::i1_to_f1(value)
+        TypeConverter2::<I1, F1>::i1_to_f1(value)
     }
     #[inline(always)]
     pub fn f1_to_i32(value: F1) -> i32 {
-        TypeConverter::<I1, F1>::f1_to_i32(value)
+        TypeConverter2::<I1, F1>::f1_to_i32(value)
     }
 
     #[inline(always)]
     pub fn f32_to_f1(value: f32) -> F1 {
-        TypeConverter::<I1, F1>::f32_to_f1(value)
+        TypeConverter2::<I1, F1>::f32_to_f1(value)
     }
 
     #[inline(always)]
     pub fn f1_to_i1(value: F1) -> I1 {
-        TypeConverter::<I1, F1>::f1_to_i1(value)
+        TypeConverter2::<I1, F1>::f1_to_i1(value)
     }
 
     #[inline(always)]
     pub fn i1_to_f64(value: I1) -> f64 {
-        TypeConverter::<I1, F1>::i1_to_f64(value)
+        TypeConverter1::<I1>::i1_to_f64(value)
     }
 
     #[inline(always)]
     pub fn try_f1_to_i32(value: F1) -> Result<i32, BvError> {
-        TypeConverter::<I1, F1>::try_f1_to_i32(value)
+        TypeConverter2::<I1, F1>::try_f1_to_i32(value)
     }
 
     #[inline(always)]

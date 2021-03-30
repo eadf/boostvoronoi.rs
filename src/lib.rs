@@ -282,7 +282,51 @@ where
 }
 
 #[derive(Default)]
-pub struct TypeConverter<I1, F1>
+pub struct TypeConverter1<I1>
+where
+    I1: InputType + Neg<Output = I1>,
+{
+    #[doc(hidden)]
+    _pdi: PhantomData<I1>,
+}
+
+impl<I1> TypeConverter1<I1>
+where
+    I1: InputType + Neg<Output = I1>,
+{
+    #[inline(always)]
+    pub fn i1_to_xi(input: I1) -> EI::ExtendedInt {
+        EI::ExtendedInt::from(num::cast::<I1, i64>(input).unwrap())
+    }
+
+    #[inline(always)]
+    pub fn i32_to_i1(input: i32) -> I1 {
+        num::cast::<i32, I1>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn i1_to_i32(input: I1) -> i32 {
+        num::cast::<I1, i32>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn i1_to_i64(input: I1) -> i64 {
+        num::cast::<I1, i64>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn i1_to_f32(input: I1) -> f32 {
+        num::cast::<I1, f32>(input).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn i1_to_f64(input: I1) -> f64 {
+        NumCast::from(input).unwrap()
+    }
+}
+
+#[derive(Default)]
+pub struct TypeConverter2<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
@@ -293,7 +337,7 @@ where
     _pdi: PhantomData<I1>,
 }
 
-impl<I1, F1> TypeConverter<I1, F1>
+impl<I1, F1> TypeConverter2<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
@@ -315,7 +359,6 @@ where
         })
     }
 
-    // todo! is there no way to do this more efficiently?
     #[inline(always)]
     pub fn i1_to_xi(input: I1) -> EI::ExtendedInt {
         EI::ExtendedInt::from(num::cast::<I1, i64>(input).unwrap())
@@ -344,11 +387,6 @@ where
     }
 
     #[inline(always)]
-    pub fn i32_to_i1(input: i32) -> I1 {
-        num::cast::<i32, I1>(input).unwrap()
-    }
-
-    #[inline(always)]
     pub fn i32_to_f1(input: i32) -> F1 {
         num::cast::<i32, F1>(input).unwrap()
     }
@@ -361,26 +399,6 @@ where
     #[inline(always)]
     pub fn f64_to_f1(input: f64) -> F1 {
         num::cast::<f64, F1>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn i1_to_i32(input: I1) -> i32 {
-        num::cast::<I1, i32>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn i1_to_i64(input: I1) -> i64 {
-        num::cast::<I1, i64>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn i1_to_f32(input: I1) -> f32 {
-        num::cast::<I1, f32>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn i1_to_f64(input: I1) -> f64 {
-        NumCast::from(input).unwrap()
     }
 
     #[inline(always)]

@@ -32,7 +32,7 @@ fn sample_polygon_001() -> Result<(), BvError> {
 "#;
         let mut vb = VB::Builder::<I1, F1>::new();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I1, F1, _>(br)?;
+        let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.construct()?
@@ -229,7 +229,7 @@ fn sample_polygon_002() -> Result<(), BvError> {
 "#;
         let mut vb = VB::Builder::<I1, F1>::new();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I1, F1, _>(br)?;
+        let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.construct()?
@@ -567,7 +567,7 @@ fn sample_polygon_003() -> Result<(), BvError> {
 "#;
         let mut vb = VB::Builder::<I1, F1>::new();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I1, F1, _>(br)?;
+        let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.construct()?
@@ -740,7 +740,7 @@ fn sample_polygon_004() -> Result<(), BvError> {
 "#;
         let mut vb = VB::Builder::<I1, F1>::new();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I1, F1, _>(br)?;
+        let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.construct()?
@@ -920,7 +920,7 @@ fn sample_polygon_005() -> Result<(), BvError> {
 "#;
         let mut vb = VB::Builder::<I1, F1>::new();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I1, F1, _>(br)?;
+        let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.construct()?
@@ -1057,7 +1057,7 @@ fn sample_polygon_006() -> Result<(), BvError> {
 "#;
         let mut vb = VB::Builder::<I1, F1>::new();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I1, F1, _>(br)?;
+        let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.construct()?
@@ -1221,7 +1221,7 @@ fn sample_polygon_007() -> Result<(), BvError> {
 "#;
         let mut vb = VB::Builder::<I1, F1>::new();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I1, F1, _>(br)?;
+        let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.construct()?
@@ -1523,7 +1523,7 @@ fn sample_polygon_008() -> Result<(), BvError> {
 "#;
         let mut vb = VB::Builder::<I1, F1>::new();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I1, F1, _>(br)?;
+        let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.construct()?
@@ -1754,7 +1754,7 @@ fn sample_polygon_009() -> Result<(), BvError> {
 "#;
         let mut vb = VB::Builder::<I1, F1>::new();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I1, F1, _>(br)?;
+        let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.construct()?
@@ -1867,7 +1867,7 @@ fn sample_polygon_010() -> Result<(), BvError> {
 "#;
         let mut vb = VB::Builder::<I1, F1>::new();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I1, F1, _>(br)?;
+        let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.construct()?
@@ -2389,7 +2389,7 @@ fn sample_polygon_011() -> Result<(), BvError> {
 "#;
         let mut vb = VB::Builder::<I1, F1>::new();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I1, F1, _>(br)?;
+        let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.construct()?
@@ -2621,7 +2621,7 @@ fn sample_polygon_012() -> Result<(), BvError> {
 "#;
         let mut vb = VB::Builder::<I1, F1>::new();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I1, F1, _>(br)?;
+        let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.construct()?

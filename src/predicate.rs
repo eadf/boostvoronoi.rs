@@ -20,7 +20,8 @@ use super::robust_fpt as RF;
 use super::site_event as VSE;
 use super::Point;
 use super::TypeCheckF as TCF;
-use super::TypeConverter as TC2;
+use super::TypeConverter1 as TC1;
+use super::TypeConverter2 as TC2;
 use super::{InputType, OutputType};
 #[allow(unused_imports)]
 use crate::{t, tln};
@@ -69,7 +70,7 @@ where
         /// with epsilon relative error equal to 1EPS.
         #[inline(always)]
         pub(crate) fn robust_cross_product(a1_: I1, b1_: I1, a2_: I1, b2_: I1) -> f64 {
-            let i1_to_i64 = TC2::<I1, F1>::i1_to_i64;
+            let i1_to_i64 = TC1::<I1>::i1_to_i64;
 
             let a1: i64 = i1_to_i64(a1_);
             let b1: i64 = i1_to_i64(b1_);
@@ -205,7 +206,7 @@ where
     }
 
     fn eval_3(point1: &Point<I1>, point2: &Point<I1>, point3: &Point<I1>) -> Orientation {
-        let i1_to_i64 = TC2::<I1, F1>::i1_to_i64;
+        let i1_to_i64 = TC1::<I1>::i1_to_i64;
         let dx1: i64 = i1_to_i64(point1.x) - i1_to_i64(point2.x);
         let dx2: i64 = i1_to_i64(point2.x) - i1_to_i64(point3.x);
         let dy1: i64 = i1_to_i64(point1.y) - i1_to_i64(point2.y);
@@ -327,7 +328,7 @@ where
         lhs: &VSE::SiteEvent<I1, F1>,
         rhs: &VC::CircleEvent,
     ) -> bool {
-        let lhs = TC2::<I1, F1>::i1_to_f64(lhs.x0());
+        let lhs = TC1::<I1>::i1_to_f64(lhs.x0());
         let rhs = rhs.lower_x().into_inner();
         let ulps = Predicates::<I1, F1>::ulps();
         let rv = UlpComparison::ulp_comparison(lhs, rhs, ulps) == cmp::Ordering::Less;
@@ -410,7 +411,7 @@ where
     ) -> bool {
         let left_point = left_site.point0();
         let right_point = right_site.point0();
-        let i1_to_i64 = TC2::<I1, F1>::i1_to_i64;
+        let i1_to_i64 = TC1::<I1>::i1_to_i64;
         //dbg!(&left_site, &right_site, &new_point);
         //dbg!(left_point.x, left_point.y);
         //dbg!(right_point.x, right_point.y);
@@ -479,19 +480,18 @@ where
     }
 
     fn find_distance_to_point_arc(site: &VSE::SiteEvent<I1, F1>, point: &Point<I1>) -> f64 {
-        let dx = TC2::<I1, F1>::i1_to_f64(site.x()) - TC2::<I1, F1>::i1_to_f64(point.x);
-        let dy = TC2::<I1, F1>::i1_to_f64(site.y()) - TC2::<I1, F1>::i1_to_f64(point.y);
+        let dx = TC1::<I1>::i1_to_f64(site.x()) - TC1::<I1>::i1_to_f64(point.x);
+        let dy = TC1::<I1>::i1_to_f64(site.y()) - TC1::<I1>::i1_to_f64(point.y);
         // The relative error is at most 3EPS.
         (dx * dx + dy * dy) / (dx * 2_f64)
     }
 
     fn find_distance_to_segment_arc(site: &VSE::SiteEvent<I1, F1>, point: &Point<I1>) -> f64 {
-        let i1_to_i64 = TC2::<I1, F1>::i1_to_i64;
-        let i1_to_f64 = TC2::<I1, F1>::i1_to_f64;
+        let i1_to_i64 = TC1::<I1>::i1_to_i64;
+        let i1_to_f64 = TC1::<I1>::i1_to_f64;
 
         if Predicates::<I1, F1>::is_vertical_1(site) {
-            (TC2::<I1, F1>::i1_to_f64(site.x()) - TC2::<I1, F1>::i1_to_f64(point.x))
-                * TCF::<f64>::half()
+            (TC1::<I1>::i1_to_f64(site.x()) - TC1::<I1>::i1_to_f64(point.x)) * TCF::<f64>::half()
         } else {
             let segment0: &Point<I1> = site.point0();
             let segment1: &Point<I1> = site.point1();
@@ -521,8 +521,8 @@ where
         new_point: &Point<I1>,
         reverse_order: bool,
     ) -> KPredicateResult {
-        let i1_to_f64 = TC2::<I1, F1>::i1_to_f64;
-        let i1_to_i64 = TC2::<I1, F1>::i1_to_i64;
+        let i1_to_f64 = TC1::<I1>::i1_to_f64;
+        let i1_to_i64 = TC1::<I1>::i1_to_i64;
 
         let site_point: &Point<I1> = left_site.point0();
         let segment_start: &Point<I1> = right_site.point0();
@@ -862,8 +862,8 @@ where
         site3: &VSE::SiteEvent<I1, F1>,
         c_event: &VC::CircleEventType,
     ) {
-        let i1_to_f64 = TC2::<I1, F1>::i1_to_f64;
-        let i1_to_i64 = TC2::<I1, F1>::i1_to_i64;
+        let i1_to_f64 = TC1::<I1>::i1_to_f64;
+        let i1_to_i64 = TC1::<I1>::i1_to_i64;
 
         let dif_x1 = i1_to_f64(site1.x()) - i1_to_f64(site2.x());
         let dif_x2 = i1_to_f64(site2.x()) - i1_to_f64(site3.x());
@@ -948,8 +948,8 @@ where
         segment_index: usize,
         c_event: &VC::CircleEventType,
     ) {
-        let i1_to_f64 = TC2::<I1, F1>::i1_to_f64;
-        let i1_to_i64 = TC2::<I1, F1>::i1_to_i64;
+        let i1_to_f64 = TC1::<I1>::i1_to_f64;
+        let i1_to_i64 = TC1::<I1>::i1_to_i64;
 
         tln!("->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{})", site1, site2, site3, segment_index);
 
@@ -1091,8 +1091,8 @@ where
         point_index: i32,
         c_event: &VC::CircleEventType,
     ) {
-        let i1_to_f64 = TC2::<I1, F1>::i1_to_f64;
-        let i1_to_i64 = TC2::<I1, F1>::i1_to_i64;
+        let i1_to_f64 = TC1::<I1>::i1_to_f64;
+        let i1_to_i64 = TC1::<I1>::i1_to_i64;
 
         let segm_start1 = site2.point1();
         let segm_end1 = site2.point0();
@@ -1324,7 +1324,7 @@ where
             t /= (a * a);
             tln!("4: t:{:?}", t);
             tln!(
-                "  LazyCircleFormationFunctor::pss t:{:?} det:{:?}",
+                "  LazyCircleFormationFunctor::pss t:{:.12} det:{:.12}",
                 t.dif().fpv(),
                 det.fpv()
             );
@@ -1406,8 +1406,8 @@ where
         site3: &VSE::SiteEvent<I1, F1>,
         c_event: &VC::CircleEventType,
     ) {
-        let i1_to_f64 = TC2::<I1, F1>::i1_to_f64;
-        let i1_to_i64 = TC2::<I1, F1>::i1_to_i64;
+        let i1_to_f64 = TC1::<I1>::i1_to_f64;
+        let i1_to_i64 = TC1::<I1>::i1_to_i64;
 
         let a1 = RF::RobustFpt::new_1(i1_to_f64(site1.x1()) - i1_to_f64(site1.x0()));
         let b1 = RF::RobustFpt::new_1(i1_to_f64(site1.y1()) - i1_to_f64(site1.y0()));
@@ -1571,7 +1571,7 @@ where
         c: &VC::CircleEventType,
         s: &VSE::SiteEvent<I1, F1>,
     ) -> bool {
-        let i1_to_f64 = TC2::<I1, F1>::i1_to_f64;
+        let i1_to_f64 = TC1::<I1>::i1_to_f64;
 
         if !s.is_segment() || !Predicates::<I1, F1>::is_vertical_1(s) {
             return false;

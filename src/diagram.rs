@@ -13,7 +13,7 @@ use super::circle_event as VC;
 use super::ctypes as CT;
 use super::site_event as VSE;
 use super::visual_utils as VU;
-use super::TypeConverter as TC2;
+use super::TypeConverter2 as TC2;
 
 pub use super::{InputType, OutputType};
 #[allow(unused_imports)]

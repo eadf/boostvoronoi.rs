@@ -171,7 +171,7 @@ where
 
     #[inline(always)]
     pub fn cast_io(value: I1) -> F1 {
-        super::TypeConverter::<I1, F1>::i1_to_f1(value)
+        super::TypeConverter2::<I1, F1>::i1_to_f1(value)
     }
 }
 
@@ -225,15 +225,15 @@ where
 
     #[inline(always)]
     pub fn update_point(&mut self, point: &Point<I1>) {
-        let x = super::TypeConverter::i1_to_f1(point.x);
-        let y = super::TypeConverter::i1_to_f1(point.y);
+        let x = super::TypeConverter2::i1_to_f1(point.x);
+        let y = super::TypeConverter2::i1_to_f1(point.y);
         self.update_vertex(x, y);
     }
 
     #[inline(always)]
     pub fn update_coordinate(&mut self, x: i32, y: i32) {
-        let x = super::TypeConverter::<I1, F1>::i32_to_f1(x);
-        let y = super::TypeConverter::<I1, F1>::i32_to_f1(y);
+        let x = super::TypeConverter2::<I1, F1>::i32_to_f1(x);
+        let y = super::TypeConverter2::<I1, F1>::i32_to_f1(y);
         self.update_vertex(x, y);
     }
 
@@ -290,7 +290,7 @@ where
             let size_y = self.get_high().unwrap()[1] - self.get_low().unwrap()[1];
             let size = if size_x > size_y { size_x } else { size_y };
 
-            let delta = size * super::TypeConverter::<I1, F1>::f32_to_f1((percent as f32) / 100.0);
+            let delta = size * super::TypeConverter2::<I1, F1>::f32_to_f1((percent as f32) / 100.0);
 
             let mut p = self.get_high().unwrap();
             p[0] = p[0] + delta;
@@ -318,8 +318,8 @@ where
     #[inline]
     pub fn contains_point(&self, point: &Point<I1>) -> Option<bool> {
         if let Some(min_max) = self.min_max {
-            let x = super::TypeConverter::<I1, F1>::i1_to_f1(point.x);
-            let y = super::TypeConverter::<I1, F1>::i1_to_f1(point.y);
+            let x = super::TypeConverter2::<I1, F1>::i1_to_f1(point.x);
+            let y = super::TypeConverter2::<I1, F1>::i1_to_f1(point.y);
 
             Some(x >= min_max.0[0] && x <= min_max.1[0] && y >= min_max.0[1] && y <= min_max.1[1])
         } else {
@@ -396,7 +396,7 @@ where
     F1: OutputType + Neg<Output = F1>,
 {
     pub fn new(source_aabb: &Aabb2<I1, F1>, dest_aabb: &Aabb2<I1, F1>) -> Result<Self, BvError> {
-        let i32_to_f1 = super::TypeConverter::<I1, F1>::i32_to_f1;
+        let i32_to_f1 = super::TypeConverter2::<I1, F1>::i32_to_f1;
         let min_dim = i32_to_f1(10);
 
         if let Some(s_low) = source_aabb.get_low() {
@@ -416,9 +416,9 @@ where
 
                         let dest_aabb_center = [
                             (d_low[0] + d_high[0])
-                                / super::TypeConverter::<I1, F1>::i32_to_f1(2_i32),
+                                / super::TypeConverter2::<I1, F1>::i32_to_f1(2_i32),
                             (d_low[1] + d_high[1])
-                                / super::TypeConverter::<I1, F1>::i32_to_f1(2_i32),
+                                / super::TypeConverter2::<I1, F1>::i32_to_f1(2_i32),
                         ];
                         let dest_aabb_size = [
                             (d_high[0] - d_low[0]).max(min_dim),
@@ -456,7 +456,7 @@ where
     /// transform from dest coordinate system to source coordinate system
     #[inline(always)]
     pub fn reverse_transform_x(&self, x: F1) -> Result<I1, BvError> {
-        super::TypeConverter::<I1, F1>::try_f1_to_i1(
+        super::TypeConverter2::<I1, F1>::try_f1_to_i1(
             (x - self.to_offset[0]) / self.scale[0] - self.to_center[0],
         )
     }
@@ -464,7 +464,7 @@ where
     /// transform from dest coordinate system to source coordinate system
     #[inline(always)]
     pub fn reverse_transform_y(&self, y: F1) -> Result<I1, BvError> {
-        super::TypeConverter::<I1, F1>::try_f1_to_i1(
+        super::TypeConverter2::<I1, F1>::try_f1_to_i1(
             (y - self.to_offset[1]) / self.scale[1] - self.to_center[1],
         )
     }
@@ -505,7 +505,7 @@ where
     /// /// integer x coordinate
     #[inline(always)]
     pub fn transform_ix(&self, x: I1) -> F1 {
-        (super::TypeConverter::<I1, F1>::i1_to_f1(x) + self.to_center[0]) * self.scale[0]
+        (super::TypeConverter2::<I1, F1>::i1_to_f1(x) + self.to_center[0]) * self.scale[0]
             + self.to_offset[0]
     }
 
@@ -513,7 +513,7 @@ where
     /// integer y coordinate
     #[inline(always)]
     pub fn transform_iy(&self, y: I1) -> F1 {
-        (super::TypeConverter::<I1, F1>::i1_to_f1(y) + self.to_center[1]) * self.scale[1]
+        (super::TypeConverter2::<I1, F1>::i1_to_f1(y) + self.to_center[1]) * self.scale[1]
             + self.to_offset[1]
     }
 }
