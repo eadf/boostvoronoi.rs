@@ -109,14 +109,6 @@ impl RobustFpt {
         }
     }
 
-    // todo This is just plain wrong in so many ways
-    pub fn copy_from(other: &RobustFpt) -> Self {
-        Self {
-            fpv_: other.fpv_,
-            re_: OrderedFloat(0_f64),
-        }
-    }
-
     #[inline(always)]
     pub fn fpv(&self) -> f64 {
         self.fpv_

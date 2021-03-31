@@ -1506,15 +1506,21 @@ where
 
         let lower_x = c_x + r;
 
-        let denom_dif = RF::RobustFpt::copy_from(&denom.dif());
-        let c_x_dif = RF::RobustFpt::copy_from(&c_x.dif()) / denom_dif;
-        let c_y_dif = RF::RobustFpt::copy_from(&c_y.dif()) / denom_dif;
-        let lower_x_dif = RF::RobustFpt::copy_from(&lower_x.dif()) / denom_dif;
+        let denom_dif = denom.dif();
+        //tln!("  denom_dif:{:?}", denom_dif);
+        let c_x_dif = c_x.dif() / denom_dif;
+        let c_y_dif = c_y.dif() / denom_dif;
+        let lower_x_dif = lower_x.dif() / denom_dif;
 
         let ulps = Predicates::<I1, F1>::ulps() as f64;
         let recompute_c_x = c_x_dif.ulp() > ulps;
         let recompute_c_y = c_y_dif.ulp() > ulps;
         let recompute_lower_x = lower_x_dif.ulp() > ulps;
+
+        t!(" c_x_dif.ulp():{:.12}", c_x_dif.ulp());
+        t!("  c_y_dif.ulp() :{:.12}", c_y_dif.ulp());
+        tln!(" lower_x_dif.ulp():{:.12}", lower_x_dif.ulp());
+
         #[cfg(feature = "console_debug")]
         {
             assert!(!denom_dif.ulp().is_nan());
@@ -1848,7 +1854,7 @@ where
         recompute_lower_x: bool,
     ) {
         // these should all be constants, but rust can't handle it
-        let quarter = EX::ExtendedExponentFpt::<f64>::from(1f64);
+        let quarter = EX::ExtendedExponentFpt::<f64>::from(0.25f64);
         let half = EX::ExtendedExponentFpt::<f64>::from(0.5);
         let one = EX::ExtendedExponentFpt::<f64>::from(1f64);
         tln!(
@@ -1857,13 +1863,13 @@ where
             site2,
             site3
         );
-        tln!(
-            " segment_index:{} recompute_c_x:{} ",
+        t!(
+            "  segment_index:{} recompute_c_x:{}",
             segment_index,
             recompute_c_x
         );
         tln!(
-            "recompute_c_y:{} recompute_lower_x:{}",
+            " recompute_c_y:{} recompute_lower_x:{}",
             recompute_c_y,
             recompute_lower_x
         );
@@ -2215,6 +2221,8 @@ where
         recompute_c_y: bool,
         recompute_lower_x: bool,
     ) {
+        tln!(">ExactCircleFormationFunctor:sss site1:{:?} site2:{:?}, site3:{:?}, recompute_c_x:{} recompute_c_y:{}, recompute_lower_x:{}", site1, site2, site3, recompute_c_x,recompute_c_y, recompute_lower_x);
+
         let i1_to_bi = TC2::<I1, F1>::i1_to_xi;
         let sqrt_expr_ = RF::robust_sqrt_expr::<f64>::default();
 

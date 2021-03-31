@@ -1,6 +1,7 @@
 use boostvoronoi::builder as VB;
 use boostvoronoi::diagram as VD;
 use boostvoronoi::BvError;
+use num_traits::float::FloatConst;
 //use boostvoronoi::InputType;
 
 type I1 = i64;
@@ -14,6 +15,24 @@ fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
     assert!(F1::abs(x1 - x2) < delta, "{} != {}", x1, x2);
     assert!(F1::abs(y1 - y2) < delta, "{} != {}", y1, y2);
     (F1::abs(x1 - x2) < delta) && (F1::abs(y1 - y2) < delta)
+}
+
+#[allow(dead_code)]
+fn circle(cx: I1, cy: I1, r: F1, n: I1) -> Vec<[I1; 4]> {
+    let i_2_f = |x| num::cast::<I1, f64>(x).unwrap();
+    let f_2_i = |x| num::cast::<f64, I1>(x).unwrap();
+
+    let d_angle = f64::PI() * 2.0 / num::cast::<I1, f64>(n).unwrap();
+    let mut angle = 0_f64;
+    let mut last: [I1; 2] = [cx + f_2_i(angle.cos() * r), cy + f_2_i(angle.sin() * r)];
+    let mut rv = Vec::<[I1; 4]>::new();
+    for i in 1..n {
+        angle = d_angle * i_2_f(i);
+        let next = [cx + f_2_i(angle.cos() * r), cy + f_2_i(angle.sin() * r)];
+        rv.push([last[0], last[1], next[0], next[1]]);
+        last = next;
+    }
+    rv
 }
 
 /// This example will fail, something is wrong with the beach-line ordering
@@ -96,6 +115,50 @@ fn main() -> Result<(), BvError> {
         ];*/
         //let points: [[I1; 2]; 2] = [[4, 3], [1, 1]];
         //let segments: [[I1; 4]; 2] = [[1, 2, 3, 4], [2, 2, 5, 4]];
+        //let segments = circle(0,0,100.0,7);
+
+        let points: [[I1; 2]; 0] = [];
+        let segments: [[I1; 4]; 23] = [
+            [-12, 4, -12, -4],
+            [-12, -4, -8, -4],
+            [-8, -4, -8, -1],
+            [-8, -1, -9, 0],
+            [-9, 0, -8, 1],
+            [-8, 1, -8, 4],
+            [-8, 4, -12, 4],
+            [-4, 4, -4, -4],
+            [-4, -4, 0, -4],
+            [0, -4, 0, 4],
+            [0, 4, -4, 4],
+            [4, 4, 4, -4],
+            [4, -4, 8, -4],
+            [8, -4, 8, 4],
+            [8, 4, 4, 4],
+            [-4, -8, -8, -8],
+            [-8, -8, -8, -12],
+            [-8, -12, -4, -12],
+            [-4, -12, -4, -16],
+            [-4, -16, -8, -16],
+            [0, -8, 2, -8],
+            [2, -8, 4, -8],
+            [2, -8, 2, -16],
+        ];
+
+        let points: [[I1; 2]; 0] = [];
+        let segments: [[I1; 4]; 12] = [
+            [-1, 10, 1, 10],
+            [10, -1, 10, 1],
+            [-1, -10, 1, -10],
+            [-10, -1, -10, 1],
+            [-6, 8, -2, 11],
+            [-8, 6, -11, 2],
+            [6, 8, 2, 11],
+            [8, 6, 11, 2],
+            [6, -8, 2, -11],
+            [8, -6, 11, -2],
+            [-6, -8, -2, -11],
+            [-8, -6, -11, -2],
+        ];
 
         let _v = VB::to_points::<I1, I1>(&points);
         let _s = VB::to_segments::<I1, I1>(&segments);

@@ -16,7 +16,7 @@ fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
 type I1 = i32;
 type F1 = f64;
 
-#[ignore]
+//#[ignore]
 #[test]
 fn sample_primary_031() -> Result<(), BvError> {
     let output = {
@@ -721,7 +721,7 @@ fn sample_primary_034() -> Result<(), BvError> {
     Ok(())
 }
 
-#[ignore]
+//#[ignore]
 #[test]
 fn sample_primary_035() -> Result<(), BvError> {
     let output = {

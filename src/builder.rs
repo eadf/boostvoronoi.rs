@@ -438,12 +438,13 @@ where
             let mut site_event = self.site_events_[*site_event_iterator_];
 
             let mut left_it = right_it;
-            #[cfg(feature = "console_debug")]
-            if let Some(ref left_it) = left_it {
-                tln!("left_it=right_it :{:?}", left_it);
-            } else {
-                tln!("left_it=right_it :None");
-            }
+
+            //#[cfg(feature = "console_debug")]
+            //if let Some(ref left_it) = left_it {
+            //    tln!("left_it=right_it :{:?}", left_it);
+            //} else {
+            //    tln!("left_it=right_it :None");
+            //}
 
             // Do further processing depending on the above node position.
             // For any two neighboring nodes the second site of the first node
@@ -453,13 +454,13 @@ where
                 // Move the iterator to the last node.
 
                 left_it = Some(self.beach_line_.peek_last().unwrap().0);
-                tln!("left_it=beach_line_.peek_last() :{:?}", left_it.unwrap());
+                //tln!("left_it=beach_line_.peek_last() :{:?}", left_it.unwrap());
 
                 // Get the second site of the last node
                 let site_arc = *(left_it.unwrap().right_site());
 
                 // Insert new nodes into the beach line. Update the output.
-                tln!("insert_new_arc right_it.is_none()");
+                //tln!("insert_new_arc right_it.is_none()");
                 let right_it_idx = self.insert_new_arc(site_arc, site_arc, site_event, output);
                 {
                     let right_it_complete = self.beach_line_.get_node(&right_it_idx);
@@ -481,7 +482,7 @@ where
                 // The above arc corresponds to the first site of the first node.
                 let site_arc = right_it_some.left_site();
 
-                tln!("insert_new_arc is_at_beginning");
+                //tln!("insert_new_arc is_at_beginning");
                 // Insert new nodes into the beach line. Update the output.
                 left_it = {
                     let new_key = self.insert_new_arc(
@@ -489,7 +490,7 @@ where
                     );
                     Some(self.beach_line_.get_node(&new_key).0)
                 };
-                tln!("left_it=insert_new_arc :{:?}", left_it.unwrap());
+                // tln!("left_it=insert_new_arc :{:?}", left_it.unwrap());
 
                 // If the site event is a segment, update its direction.
                 if site_event.is_segment() {
@@ -516,14 +517,14 @@ where
 
                 // Remove the candidate circle from the event queue.
                 self.deactivate_circle_event(&right_it);
-                tln!("insert_new_arc else. left_it:{:?}", left_it.unwrap());
+                //tln!("insert_new_arc else. left_it:{:?}", left_it.unwrap());
 
                 // emulate --left_site
                 left_it = self
                     .beach_line_
                     .get_left_neighbour(left_it.unwrap())
                     .map(|x| x.0);
-                tln!("insert_new_arc else. left_it:{:?}", left_it.unwrap());
+                //tln!("insert_new_arc else. left_it:{:?}", left_it.unwrap());
 
                 let site_arc1 = *(left_it.unwrap().right_site());
                 let site1 = *(left_it.unwrap().left_site());

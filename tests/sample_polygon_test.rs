@@ -1835,7 +1835,7 @@ fn sample_polygon_009() -> Result<(), BvError> {
     Ok(())
 }
 
-#[ignore]
+//#[ignore]
 #[test]
 fn sample_polygon_010() -> Result<(), BvError> {
     let output = {

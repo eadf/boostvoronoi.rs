@@ -1156,17 +1156,23 @@ where
 
     /// Remove degenerate edge.
     fn _remove_edge(&mut self, edge: Option<VoronoiEdgeIndex>) {
+        #[cfg(feature = "console_debug")]
+        if let Some(edge_id) = edge {
+            tln!("removing edge: {}", edge_id.0);
+        } else {
+            tln!("removing edge: but it was None!");
+            return;
+        }
         // Update the endpoints of the incident edges to the second vertex.
         let vertex = self.edge_get_vertex0(edge);
-        let edge_twin = self.edge_get_twin(edge);
-        let mut updated_edge = self.edge_rot_next(edge_twin);
+        let mut updated_edge = self.edge_rot_next(self.edge_get_twin(edge));
 
-        while updated_edge != edge_twin {
+        while updated_edge != self.edge_get_twin(edge) {
             self._edge_set_vertex0(updated_edge, vertex);
             updated_edge = self.edge_rot_next(updated_edge);
         }
         let edge1 = edge;
-        let edge2 = edge_twin;
+        let edge2 = self.edge_get_twin(edge);
 
         // Update prev/next pointers for the incident edges.
         //edge1_rot_next->twin()->next(edge2_rot_prev);
@@ -1432,6 +1438,8 @@ where
     /// edges etc. etc
     pub(crate) fn _build(&mut self) {
         // Remove degenerate edges.
+        #[cfg(feature = "console_debug")]
+        self.debug_print_edges("b4 degenerate");
         if !self.edges_.is_empty() {
             let mut last_edge: usize = 0;
             let mut it: usize = last_edge;
@@ -1444,6 +1452,7 @@ where
                     let v1 = self.vertex_get(v1);
                     let v2 = self.edge_get_vertex1(Some(VoronoiEdgeIndex(it)));
                     let v2 = self.vertex_get(v2);
+                    tln!("looking at edge:{}, v1={:?}, v2={:?}",it, v1, v2);
                     v1.is_some()
                         && v2.is_some()
                         && v1
@@ -1451,6 +1460,7 @@ where
                             .get()
                             .vertex_equality_predicate_eq(&v2.unwrap().get())
                 };
+
                 if is_equal {
                     self._remove_edge(Some(VoronoiEdgeIndex(it)));
                 } else {
@@ -1491,6 +1501,9 @@ where
                 let _ = self.edges_.remove(e);
             }
         }
+        #[cfg(feature = "console_debug")]
+        self.debug_print_edges("after degenerate");
+        tln!();
 
         // Set up incident edge pointers for cells and vertices.
         for edge_it in self.edge_iter().enumerate().map(|x| VoronoiEdgeIndex(x.0)) {
@@ -1500,6 +1513,20 @@ where
             self._vertex_set_incident_edge(vertex, Some(edge_it));
         }
 
+        #[cfg(feature = "console_debug")]
+        for (i, v) in self.vertices_.iter().enumerate() {
+            println!(
+                "vertex #{} contains a point: ({:.12}, {:.12}) ie:{}",
+                i,
+                v.get().x(),
+                v.get().y(),
+                v.get()
+                    .get_incident_edge()
+                    .map_or("-".to_string(), |x| x.0.clone().to_string())
+            );
+        }
+
+        tln!("vertices b4 degenerate {}", self.vertices_.len());
         // Remove degenerate vertices.
         if !self.vertices_.is_empty() {
             let mut last_vertex_iterator = (0..self.vertices_.len()).map(VoronoiVertexIndex);
@@ -1530,6 +1557,8 @@ where
                 }
             }
         }
+        tln!("vertices after degenerate {}", self.vertices_.len());
+
         // Set up next/prev pointers for infinite edges.
         if self.vertices_.is_empty() {
             if !self.edges_.is_empty() {
@@ -1641,11 +1670,11 @@ where
     }
 
     #[cfg(feature = "console_debug")]
-    pub fn debug_print_edges(&self) {
-        tln!("edges:{}", self.edges_.len());
+    pub fn debug_print_edges(&self, text:&str) {
+        tln!("edges {} {}", text, self.edges_.len());
         for (i, e) in self.edges_.iter().enumerate() {
             let e = e.get();
-            tln!("Edge:#{}=>{:?}", e.id.0, &e);
+            tln!("edge{} ({:?})", e.id.0, &e);
             assert_eq!(i, e.id.0);
         }
     }

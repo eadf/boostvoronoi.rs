@@ -1466,7 +1466,7 @@ fn sample_primary_057() -> Result<(), BvError> {
     Ok(())
 }
 
-#[ignore]
+//#[ignore]
 #[test]
 fn sample_primary_058() -> Result<(), BvError> {
     let output = {
