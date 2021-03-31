@@ -222,7 +222,7 @@ where
     }
 
     // todo! make pub (crate)
-    pub fn init_sites_queue(&mut self) -> VSE::SiteEventIndexType {
+    pub(crate) fn init_sites_queue(&mut self) -> VSE::SiteEventIndexType {
         // Sort site events.
         self.site_events_
             .sort_by(VP::EventComparisonPredicate::<I1, F1>::event_comparison_predicate_ii);
@@ -475,7 +475,7 @@ where
                     *(left_it.unwrap().right_site()),
                     site_event,
                     right_it_idx,
-                );
+                )?;
             } else if self.beach_line_.is_at_beginning(&right_it) {
                 let right_it_some = right_it.unwrap();
 
@@ -505,7 +505,7 @@ where
                     *(right_it_some.left_site()),
                     *(right_it_some.right_site()),
                     right_it_some.get_index(),
-                );
+                )?;
                 right_it = left_it;
             } else {
                 let (site_arc2, site3) = {
@@ -535,7 +535,7 @@ where
                 // Add candidate circles to the circle event queue.
                 // There could be up to two circle events formed by
                 // a new bisector and the one on the left or right.
-                self.activate_circle_event(site1, site_arc1, site_event, new_node_it);
+                self.activate_circle_event(site1, site_arc1, site_event, new_node_it)?;
 
                 // If the site event is a segment, update its direction.
                 if site_event.is_segment() {
@@ -547,7 +547,7 @@ where
                     site_arc2,
                     site3,
                     right_it.unwrap().get_index(),
-                );
+                )?;
                 //right_it = new_node_it;
                 right_it = Some(self.beach_line_.get_node_key(new_node_it));
             }
@@ -711,7 +711,7 @@ where
             };
 
             let site_l1 = it_first.0.left_site();
-            self.activate_circle_event(*site_l1, site1, site3, it_last.0.get_index());
+            self.activate_circle_event(*site_l1, site1, site3, it_last.0.get_index())?;
         }
 
         // Check the new triplet formed by the neighboring arcs
@@ -728,19 +728,17 @@ where
                 .deactivate(it_last_node.get().and_then(|x| x.get_circle_event_id()));
 
             let site_r1 = it_last.right_site();
-            self.activate_circle_event(site1, site3, *site_r1, it_last.get_index());
+            self.activate_circle_event(site1, site3, *site_r1, it_last.get_index())?;
         }
         Ok(())
     }
 
     /// Insert new nodes into the beach line. Update the output.
-    /// Todo: should the site events be references and only copied when inserted in beach_line?
     fn insert_new_arc(
         &mut self,
         site_arc1: VSE::SiteEvent<I1, F1>,
         site_arc2: VSE::SiteEvent<I1, F1>,
         site_event: VSE::SiteEvent<I1, F1>,
-        //position: BeachLineIteratorType,
         output: &mut VD::VoronoiDiagram<I1, F1>,
     ) -> VB::BeachLineIndex {
         tln!(
@@ -794,7 +792,7 @@ where
             ));
         }
         let new_node_data = VB::BeachLineNodeData::new_1(edges.0);
-        //let rv =
+
         #[cfg(not(feature = "console_debug"))]
         {
             self.beach_line_
@@ -817,9 +815,8 @@ where
         site2: VSE::SiteEvent<I1, F1>,
         site3: VSE::SiteEvent<I1, F1>,
         bisector_node: VB::BeachLineIndex,
-    ) {
+    ) -> Result<(), BvError> {
         // Check if the three input sites create a circle event.
-
         let c_event = VC::CircleEvent::new_1(bisector_node);
         let c_event = VC::CircleEventC::new_1(c_event);
 
@@ -844,11 +841,16 @@ where
                             .debug_print_all_compat_node(&b.0, &self.circle_events_);
                     }
                 } else {
-                    // todo: raise error instead
-                    panic!();
+                    return Err(BvError::SomeError {
+                        txt: format!(
+                            "activate_circle_event could not find node by key {}",
+                            bisector_node.0
+                        ),
+                    });
                 }
             }
         }
+        Ok(())
     }
 
     #[allow(dead_code)]

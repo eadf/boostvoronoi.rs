@@ -36,11 +36,10 @@ mod circle_event;
 mod ctypes;
 pub mod diagram;
 mod end_point;
-pub mod predicate;
-// only made pub because of the documentation tests
 pub mod extended_exp_fpt;
 pub mod extended_int;
 pub mod file_reader;
+pub mod predicate;
 pub mod robust_fpt;
 pub mod site_event;
 pub mod visual_utils;
