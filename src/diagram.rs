@@ -1452,7 +1452,7 @@ where
                     let v1 = self.vertex_get(v1);
                     let v2 = self.edge_get_vertex1(Some(VoronoiEdgeIndex(it)));
                     let v2 = self.vertex_get(v2);
-                    tln!("looking at edge:{}, v1={:?}, v2={:?}",it, v1, v2);
+                    tln!("looking at edge:{}, v1={:?}, v2={:?}", it, v1, v2);
                     v1.is_some()
                         && v2.is_some()
                         && v1
@@ -1670,7 +1670,7 @@ where
     }
 
     #[cfg(feature = "console_debug")]
-    pub fn debug_print_edges(&self, text:&str) {
+    pub fn debug_print_edges(&self, text: &str) {
         tln!("edges {} {}", text, self.edges_.len());
         for (i, e) in self.edges_.iter().enumerate() {
             let e = e.get();
