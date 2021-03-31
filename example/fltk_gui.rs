@@ -98,7 +98,7 @@ pub enum GuiMessage {
 struct SharedData {
     draw_flag: DrawFilterFlag,
     last_message: Option<GuiMessage>,
-    visualizer: VoronoiVisualizer<i32, f32>,
+    visualizer: VoronoiVisualizer<i32, f64>,
     last_click: Option<Point<i32>>,
 }
 
@@ -336,24 +336,24 @@ fn main() -> Result<(), BvError> {
             let reverse_middle = shared_data_bm
                 .visualizer
                 .affine
-                .reverse_transform(event.0 as f32, event.1 as f32);
+                .reverse_transform(event.0 as f64, event.1 as f64);
             if reverse_middle.is_err() {
                 println!("{:?}", reverse_middle.err().unwrap());
                 return false;
             }
             let reverse_middle = reverse_middle.unwrap();
             if event_dy != 0 {
-                let scale_mod = 1.01_f32.powf(event_dy as f32);
+                let scale_mod = 1.01_f64.powf(event_dy as f64);
                 shared_data_bm.visualizer.affine.scale[0] *= scale_mod;
                 shared_data_bm.visualizer.affine.scale[1] *= scale_mod;
             }
             let new_middle = shared_data_bm
                 .visualizer
                 .affine
-                .transform(reverse_middle[0] as f32, reverse_middle[1] as f32);
+                .transform(reverse_middle[0] as f64, reverse_middle[1] as f64);
             // When zooming we want the center of screen remain at the same relative position.
-            shared_data_bm.visualizer.affine.to_offset[0] += (event.0 as f32) - new_middle[0];
-            shared_data_bm.visualizer.affine.to_offset[1] += (event.1 as f32) - new_middle[1];
+            shared_data_bm.visualizer.affine.to_offset[0] += (event.0 as f64) - new_middle[0];
+            shared_data_bm.visualizer.affine.to_offset[1] += (event.1 as f64) - new_middle[1];
 
             //println!("mouse wheel at dy:{:?} scale:{:?}", event_dy, shared_data_bm.visualizer.affine.scale);
             redraw();
@@ -366,8 +366,8 @@ fn main() -> Result<(), BvError> {
             } else {
                 let md = mouse_drag.unwrap();
                 let mut shared_data_bm = shared_data_c.borrow_mut();
-                shared_data_bm.visualizer.affine.to_offset[0] += (event.0 - md.0) as f32;
-                shared_data_bm.visualizer.affine.to_offset[1] += (event.1 - md.1) as f32;
+                shared_data_bm.visualizer.affine.to_offset[0] += (event.0 - md.0) as f64;
+                shared_data_bm.visualizer.affine.to_offset[1] += (event.1 - md.1) as f64;
                 mouse_drag = Some(*event);
                 redraw();
             }
@@ -383,7 +383,7 @@ fn main() -> Result<(), BvError> {
                 let point = shared_data_bm
                     .visualizer
                     .affine
-                    .reverse_transform(event_x() as f32, event_y() as f32);
+                    .reverse_transform(event_x() as f64, event_y() as f64);
                 if point.is_err() {
                     println!("{:?}", point.err().unwrap());
                     return false;
@@ -418,7 +418,7 @@ fn main() -> Result<(), BvError> {
                         let point = shared_data_bm
                             .visualizer
                             .affine
-                            .reverse_transform(event_x() as f32, event_y() as f32);
+                            .reverse_transform(event_x() as f64, event_y() as f64);
                         if point.is_err() {
                             println!("{:?}", point.err().unwrap());
                             return false;
@@ -892,8 +892,8 @@ where
         if cell1.contains_point() && cell2.contains_point() {
             let p1 = self.retrieve_point(cell1_id);
             let p2 = self.retrieve_point(cell2_id);
-            origin[0] = (Self::i1_to_f1(p1.x) + Self::i1_to_f1(p2.x)) * Self::f32_to_f1(0.5);
-            origin[1] = (Self::i1_to_f1(p1.y) + Self::i1_to_f1(p2.y)) * Self::f32_to_f1(0.5);
+            origin[0] = (Self::i1_to_f1(p1.x) + Self::i1_to_f1(p2.x)) * Self::f64_to_f1(0.5);
+            origin[1] = (Self::i1_to_f1(p1.y) + Self::i1_to_f1(p2.y)) * Self::f64_to_f1(0.5);
             direction[0] = Self::i1_to_f1(p1.y) - Self::i1_to_f1(p2.y);
             direction[1] = Self::i1_to_f1(p2.x) - Self::i1_to_f1(p1.x);
         } else {
@@ -971,7 +971,7 @@ where
         edge_id: VD::VoronoiEdgeIndex,
         sampled_edge: &mut Vec<[F1; 2]>,
     ) {
-        let max_dist = Self::f32_to_f1(1E-3)
+        let max_dist = Self::f64_to_f1(1E-3)
             * (self.screen_aabb.get_high().unwrap()[0] - self.screen_aabb.get_low().unwrap()[0]);
 
         let cell_id = self.diagram.edge_get_cell(Some(edge_id)).unwrap();
@@ -1470,8 +1470,8 @@ where
     }
 
     #[inline(always)]
-    pub fn f32_to_f1(value: f32) -> F1 {
-        TypeConverter2::<I1, F1>::f32_to_f1(value)
+    pub fn f64_to_f1(value: f64) -> F1 {
+        TypeConverter2::<I1, F1>::f64_to_f1(value)
     }
 
     #[inline(always)]
