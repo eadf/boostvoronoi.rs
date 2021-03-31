@@ -252,35 +252,6 @@ impl<F1> OutputType for F1 where
 {
 }
 
-/// Project wide checker for float
-pub struct TypeCheckF<F>
-where
-    F: Default + Copy + Clone + Float + Zero + Neg<Output = F>,
-{
-    _pdbf: PhantomData<F>,
-}
-
-impl<F> TypeCheckF<F>
-where
-    F: Default + Copy + Clone + Float + Zero + Neg<Output = F>,
-{
-    // TODO: this is stupid: why can't I1 just use a float literal?
-    #[inline]
-    pub fn half() -> F {
-        num::cast::<f32, F>(0.5f32).unwrap()
-    }
-
-    #[inline]
-    pub fn one() -> F {
-        num::cast::<f32, F>(1.0f32).unwrap()
-    }
-
-    #[inline]
-    pub fn two() -> F {
-        num::cast::<f32, F>(2.0f32).unwrap()
-    }
-}
-
 #[derive(Default)]
 pub struct TypeConverter1<I1>
 where

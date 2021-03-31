@@ -362,6 +362,31 @@ impl ops::Mul for ExtendedExponentFpt<f64> {
     }
 }
 
+impl ops::Mul<f64> for ExtendedExponentFpt<f64> {
+    type Output = Self;
+    /// ```
+    /// # use boostvoronoi::extended_exp_fpt;
+    ///
+    /// let a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(7_f64);
+    /// let b = 2_f64;
+    ///
+    /// approx::assert_ulps_eq!(a.d(), 7_f64);
+    /// approx::assert_ulps_eq!(b, 2_f64);
+    /// let c = a * b;
+    /// approx::assert_ulps_eq!(c.d(), 7_f64*2_f64);
+    /// let a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(1234567890_f64);
+    /// let b = 2000000000_f64;
+    /// approx::assert_ulps_eq!(a.d(), 1234567890_f64);
+    /// approx::assert_ulps_eq!(b, 2000000000_f64);
+    /// let c = a * b;
+    /// approx::assert_ulps_eq!(c.d(), 1234567890_f64*2000000000_f64);
+    /// ```
+    fn mul(self, that: f64) -> Self {
+        let that = Self::from(that);
+        self * that
+    }
+}
+
 impl ops::Div for ExtendedExponentFpt<f64> {
     type Output = Self;
     /// ```

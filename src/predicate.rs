@@ -19,7 +19,6 @@ use super::extended_int as EI;
 use super::robust_fpt as RF;
 use super::site_event as VSE;
 use super::Point;
-use super::TypeCheckF as TCF;
 use super::TypeConverter1 as TC1;
 use super::TypeConverter2 as TC2;
 use super::{InputType, OutputType};
@@ -491,7 +490,7 @@ where
         let i1_to_f64 = TC1::<I1>::i1_to_f64;
 
         if Predicates::<I1, F1>::is_vertical_1(site) {
-            (TC1::<I1>::i1_to_f64(site.x()) - TC1::<I1>::i1_to_f64(point.x)) * TCF::<f64>::half()
+            (TC1::<I1>::i1_to_f64(site.x()) - TC1::<I1>::i1_to_f64(point.x)) * 0.5_f64
         } else {
             let segment0: &Point<I1> = site.point0();
             let segment1: &Point<I1> = site.point1();
@@ -501,7 +500,7 @@ where
             // Avoid subtraction while computing k.
             #[allow(clippy::suspicious_operation_groupings)]
             if !b1.is_sign_negative() {
-                k = TCF::<f64>::one() / (b1 + k);
+                k = 1_f64 / (b1 + k);
             } else {
                 k = (k - b1) / (a1 * a1);
             }
@@ -1853,10 +1852,6 @@ where
         recompute_c_y: bool,
         recompute_lower_x: bool,
     ) {
-        // these should all be constants, but rust can't handle it
-        let quarter = EX::ExtendedExponentFpt::<f64>::from(0.25f64);
-        let half = EX::ExtendedExponentFpt::<f64>::from(0.5);
-        let one = EX::ExtendedExponentFpt::<f64>::from(1f64);
         tln!(
             "->pps site1:{:?} site2:{:?} site3:{:?}",
             site1,
@@ -1922,23 +1917,23 @@ where
             ca[1] = &denom * &sum_ab * 2 + &numer * &teta;
             cb[1] = EI::ExtendedInt::from(1);
             ca[2] = &denom * &sum_y * 2 + &numer * &vec_y;
-            let inv_denom = one / bi_to_ext(&denom);
+            let inv_denom = EX::ExtendedExponentFpt::from(1f64) / bi_to_ext(&denom);
             if recompute_c_x {
-                c_event.set_x_xf(quarter * bi_to_ext(&ca[0]) * inv_denom);
+                c_event.set_x_xf(bi_to_ext(&ca[0]) * inv_denom * 0.25f64);
             }
             if recompute_c_y {
-                c_event.set_y_xf(quarter * bi_to_ext(&ca[2]) * inv_denom);
+                c_event.set_y_xf(bi_to_ext(&ca[2]) * inv_denom * 0.25f64);
             }
             if recompute_lower_x {
                 c_event.set_lower_x_xf(
-                    sqrt_expr_.eval2(&ca, &cb) * quarter * inv_denom
+                    sqrt_expr_.eval2(&ca, &cb) * inv_denom * 0.25f64
                         / (bi_to_ext(&segm_len).sqrt()),
                 );
             }
             return;
         }
         let det: EI::ExtendedInt = (&teta * &teta + &denom * &denom) * &a * &b * 4;
-        let mut inv_denom_sqr = one / bi_to_ext(&denom);
+        let mut inv_denom_sqr = EX::ExtendedExponentFpt::from(1f64) / bi_to_ext(&denom);
         inv_denom_sqr = inv_denom_sqr * inv_denom_sqr;
         tln!("det:{:?} inv_denom_sqr:{:.12}", det, inv_denom_sqr.d());
 
@@ -1948,7 +1943,7 @@ where
             ca[1] = if segment_index == 2 { -vec_x } else { vec_x };
             cb[1] = det.clone();
             if recompute_c_x {
-                c_event.set_x_xf(sqrt_expr_.eval2(&ca, &cb) * half * inv_denom_sqr);
+                c_event.set_x_xf(sqrt_expr_.eval2(&ca, &cb) * inv_denom_sqr * 0.5f64);
             }
         }
 
@@ -1958,7 +1953,7 @@ where
             ca[3] = if segment_index == 2 { -vec_y } else { vec_y };
             cb[3] = det.clone();
             if recompute_c_y {
-                c_event.set_y_xf(sqrt_expr_.eval2(&ca[2..], &cb[2..]) * half * inv_denom_sqr);
+                c_event.set_y_xf(sqrt_expr_.eval2(&ca[2..], &cb[2..]) * inv_denom_sqr * 0.5f64);
             }
         }
 
@@ -1983,7 +1978,7 @@ where
             let eval4 = sqrt_expr_.eval4(&ca, &cb);
             tln!("eval4:{:.12}", eval4.d());
 
-            c_event.set_lower_x_xf(eval4 * half * inv_denom_sqr / segm_len);
+            c_event.set_lower_x_xf(eval4 * inv_denom_sqr * 0.5f64 / segm_len);
         }
         #[cfg(feature = "console_debug")]
         {
