@@ -14,6 +14,7 @@ use super::ctypes as CT;
 use super::site_event as VSE;
 use super::visual_utils as VU;
 use super::TypeConverter2 as TC2;
+use crate::sync_diagram as SD;
 
 pub use super::{InputType, OutputType};
 #[allow(unused_imports)]
@@ -212,6 +213,7 @@ where
         self.internal_color().0 == ColorBits::SEGMENT_END_POINT.0
     }
 
+    /// TODO: this should return VoronoiCellIndex
     #[inline(always)]
     pub fn get_id(&self) -> SourceIndex {
         self.id_.0
@@ -707,7 +709,7 @@ where
         self.edges_.clear();
     }
 
-    /// Returns a reference to all of the cells
+    /// Returns a reference to the list of cells
     pub fn cells(&self) -> &Vec<CellType<I1, F1>> {
         &self.cells_
     }
@@ -766,9 +768,8 @@ where
         }
     }
 
-    /// Todo: something is wrong here, some external edges will remain unmarked.
-    /// The same bug exists in C++ too.
-    /// Some secondary internal edges are inevitably marked too.
+    /// Mark all edges connected to an 'infinite' edge via primary edges as 'external'
+    /// You should only call this on edges that you know are infinite. i.e. lacks one or two vertexes
     fn color_exterior(&self, edge_id: Option<VoronoiEdgeIndex>, external_color: ColorType) {
         if edge_id.is_none() || (self.edge_get_color(edge_id).unwrap() & external_color) != 0 {
             // This edge has already been colored, break recursion
@@ -1676,6 +1677,21 @@ where
             let e = e.get();
             tln!("edge{} ({:?})", e.id.0, &e);
             assert_eq!(i, e.id.0);
+        }
+    }
+}
+
+#[allow(clippy::from_over_into)]
+impl<I1, F1> Into<SD::SyncVoronoiDiagram<I1, F1>> for VoronoiDiagram<I1, F1>
+where
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+{
+    fn into(self) -> SD::SyncVoronoiDiagram<I1, F1> {
+        SD::SyncVoronoiDiagram {
+            cells: self.cells_.into_iter().map(|x| x.get()).collect(),
+            vertices: self.vertices_.into_iter().map(|x| x.get()).collect(),
+            edges: self.edges_.into_iter().map(|x| x.get()).collect(),
         }
     }
 }

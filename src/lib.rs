@@ -42,6 +42,7 @@ pub mod file_reader;
 pub mod predicate;
 pub mod robust_fpt;
 pub mod site_event;
+pub mod sync_diagram;
 pub mod visual_utils;
 
 /// Debug utility function, formats an id string
@@ -170,6 +171,10 @@ where
 
 #[derive(thiserror::Error, Debug)]
 pub enum BvError {
+    #[error("error: Some error with object id")]
+    IdError { txt: String },
+    #[error("error: Some error with a value")]
+    ValueError { txt: String },
     #[error("error: Some error with the beach-line")]
     BeachLineError { txt: String },
     #[error("error: given value for the radius is less than 0.0.")]
