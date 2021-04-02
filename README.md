@@ -47,7 +47,7 @@ let result = vb.construct().unwrap();
 Edges may become curves when line segments are used as input, see the example code for discretization and interpolation. 
 
 ## Todo
-- [ ] Fix the degenerate vertex key problem
+- [x] Fix the degenerate vertex key problem
 - [ ] Fix the beach-line key problem
 - [ ] Error handling
 - [X] Evaluate the generic API. Is <I1, F1, I2, F2> really needed?
