@@ -7,7 +7,7 @@
 
 // See http://www.boost.org for updates, documentation, and revision history.
 
-// Ported from C++ boost 1.75.0 to Rust in 2020 by Eadf (github.com/eadf)
+// Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 use super::beach_line as VB;
 use super::predicate as VP;
@@ -24,8 +24,8 @@ pub(crate) struct EndPointPair<I>
 where
     I: InputType + Neg<Output = I>,
 {
-    pub(crate) first: Point<I>,            // TODO: better name
-    pub(crate) second: VB::BeachLineIndex, // TODO: better name
+    pub(crate) site: Point<I>,
+    pub(crate) beachline_index: VB::BeachLineIndex,
 }
 
 impl<I> EndPointPair<I>
@@ -33,7 +33,7 @@ where
     I: InputType + Neg<Output = I>,
 {
     pub(crate) fn new_2(first: Point<I>, second: VB::BeachLineIndex) -> Self {
-        Self { first, second }
+        Self { site: first, beachline_index: second }
     }
 }
 
@@ -51,10 +51,10 @@ where
     I: InputType + Neg<Output = I>,
 {
     fn cmp(&self, other: &Self) -> Ordering {
-        if VP::PointComparisonPredicate::<I>::point_comparison_predicate(&self.first, &other.first)
+        if VP::PointComparisonPredicate::<I>::point_comparison_predicate(&self.site, &other.site)
         {
             Ordering::Greater
-        } else if self.first == other.first {
+        } else if self.site == other.site {
             Ordering::Equal
         } else {
             Ordering::Less
@@ -67,7 +67,7 @@ where
     I: InputType + Neg<Output = I>,
 {
     fn eq(&self, other: &Self) -> bool {
-        self.first.eq(&other.first)
+        self.site.eq(&other.site)
     }
 }
 

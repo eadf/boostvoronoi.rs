@@ -10,9 +10,9 @@
 // Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 use super::diagram as VD;
-use std::marker::PhantomData;
 pub use super::{InputType, OutputType};
 use crate::BvError;
+use std::marker::PhantomData;
 use std::ops::Neg;
 
 #[allow(unused_imports)]
@@ -42,32 +42,6 @@ where
     pub fn cells(&self) -> &Vec<VD::VoronoiCell<I1, F1>> {
         &self.cells
     }
-/*
-    #[inline]
-    /// Returns the color field of the edge.
-    pub fn edge_get_color(&self, edge_id: VD::VoronoiEdgeIndex) -> Result<VD::ColorType, BvError> {
-        Ok(self.edge_get(edge_id)?.get_color())
-    }*/
-/*
-    #[inline]
-    /// Sets the color field with new value
-    pub fn edge_set_color(
-        &mut self,
-        edge_id: VD::VoronoiEdgeIndex,
-        color: VD::ColorType,
-    ) -> Result<VD::ColorType, BvError> {
-        Ok(self.edge_get_mut(edge_id)?.set_color(color))
-    }*/
-/*
-    #[inline]
-    /// OR the previous color field value with this new color value
-    pub fn edge_or_color(
-        &mut self,
-        edge_id: VD::VoronoiEdgeIndex,
-        color: VD::ColorType,
-    ) -> Result<VD::ColorType, BvError> {
-        Ok(self.edge_get_mut(edge_id)?.or_color(color))
-    }*/
 
     #[inline]
     /// Returns an edge iterator, the edges will all originate at the same vertex as 'edge_id'.
@@ -78,17 +52,6 @@ where
     ) -> EdgeRotNextIterator<I1, F1> {
         EdgeRotNextIterator::new(self, edge_id)
     }
-
-    /*
-    #[inline]
-    /// Returns an edge iterator, the edges will all originate at the same vertex as 'edge_id'.
-    ///  'edge_id' will be the first edge returned by the iterator.
-    pub fn edge_rot_prev_iterator(
-        &self,
-        edge_id: Option<VD::VoronoiEdgeIndex>,
-    ) -> EdgeRotPrevIterator<I1, F1> {
-        EdgeRotPrevIterator::new(self, edge_id)
-    }*/
 
     #[inline]
     /// Returns a pointer to the rotation next edge
@@ -116,7 +79,9 @@ where
         &self,
         edge_id: Option<VD::VoronoiEdgeIndex>,
     ) -> Option<VD::VoronoiEdgeIndex> {
-        self.edges.get(self.edges.get(edge_id?.0)?.prev()?.0)?.twin()
+        self.edges
+            .get(self.edges.get(edge_id?.0)?.prev()?.0)?
+            .twin()
     }
 
     #[inline]
@@ -142,7 +107,7 @@ where
         &self,
         edge_id: VD::VoronoiEdgeIndex,
     ) -> Result<VD::VoronoiEdgeIndex, BvError> {
-        if let Some (edge_id) = self.edge_get(edge_id)?.next() {
+        if let Some(edge_id) = self.edge_get(edge_id)?.next() {
             Ok(edge_id)
         } else {
             Err(BvError::ValueError {
@@ -270,7 +235,10 @@ where
     }
 
     #[inline]
-    pub fn vertex_get(&self, vertex_id: VD::VoronoiVertexIndex) -> Result<&VD::VoronoiVertex<I1, F1>, BvError> {
+    pub fn vertex_get(
+        &self,
+        vertex_id: VD::VoronoiVertexIndex,
+    ) -> Result<&VD::VoronoiVertex<I1, F1>, BvError> {
         if let Some(vertex) = self.vertices.get(vertex_id.0) {
             Ok(vertex)
         } else {
@@ -281,7 +249,10 @@ where
     }
 
     #[inline]
-    pub fn vertex_get_mut(&mut self, vertex_id: VD::VoronoiVertexIndex) -> Result<&mut VD::VoronoiVertex<I1, F1>, BvError> {
+    pub fn vertex_get_mut(
+        &mut self,
+        vertex_id: VD::VoronoiVertexIndex,
+    ) -> Result<&mut VD::VoronoiVertex<I1, F1>, BvError> {
         if let Some(vertex) = self.vertices.get_mut(vertex_id.0) {
             Ok(vertex)
         } else {
@@ -292,13 +263,12 @@ where
     }
 }
 
-
 /// Iterator over edges pointing away from the vertex indicated by the initial edge.
 /// edge.vertex()
 pub struct EdgeRotNextIterator<'s, I1, F1>
-    where
-        I1: InputType + Neg<Output = I1>,
-        F1: OutputType + Neg<Output = F1>,
+where
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
 {
     diagram: &'s SyncVoronoiDiagram<I1, F1>,
     starting_edge: VD::VoronoiEdgeIndex,
@@ -310,9 +280,9 @@ pub struct EdgeRotNextIterator<'s, I1, F1>
 }
 
 impl<'s, I1, F1> EdgeRotNextIterator<'s, I1, F1>
-    where
-        I1: InputType + Neg<Output = I1>,
-        F1: OutputType + Neg<Output = F1>,
+where
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
 {
     pub(crate) fn new(
         diagram: &'s SyncVoronoiDiagram<I1, F1>,
@@ -340,9 +310,9 @@ impl<'s, I1, F1> EdgeRotNextIterator<'s, I1, F1>
 }
 
 impl<'s, I1, F1> Iterator for EdgeRotNextIterator<'s, I1, F1>
-    where
-        I1: InputType + Neg<Output = I1>,
-        F1: OutputType + Neg<Output = F1>,
+where
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
 {
     type Item = VD::VoronoiEdgeIndex;
     fn next(&mut self) -> Option<VD::VoronoiEdgeIndex> {
@@ -361,74 +331,3 @@ impl<'s, I1, F1> Iterator for EdgeRotNextIterator<'s, I1, F1>
         rv
     }
 }
-
-/*
-/// Iterator over edges pointing away from the vertex indicated by the initial edge.
-/// edge.vertex()
-pub struct EdgeRotPrevIterator<'s, I1, F1>
-    where
-        I1: InputType + Neg<Output = I1>,
-        F1: OutputType + Neg<Output = F1>,
-{
-    diagram: &'s SyncVoronoiDiagram<I1, F1>,
-    starting_edge: VD::VoronoiEdgeIndex,
-    next_edge: Option<VD::VoronoiEdgeIndex>,
-    #[doc(hidden)]
-    _pdi: PhantomData<I1>,
-    #[doc(hidden)]
-    _pdf: PhantomData<F1>,
-}
-
-impl<'s, I1, F1> EdgeRotPrevIterator<'s, I1, F1>
-    where
-        I1: InputType + Neg<Output = I1>,
-        F1: OutputType + Neg<Output = F1>,
-{
-    #[allow(dead_code)]
-    pub(crate) fn new(
-        diagram: &'s SyncVoronoiDiagram<I1, F1>,
-        starting_edge: Option<VD::VoronoiEdgeIndex>,
-    ) -> Self {
-        if let Some(starting_edge) = starting_edge {
-            Self {
-                diagram,
-                starting_edge,
-                next_edge: Some(starting_edge),
-                _pdf: PhantomData,
-                _pdi: PhantomData,
-            }
-        } else {
-            Self {
-                diagram,
-                // Value does not matter next edge is None
-                starting_edge: VD::VoronoiEdgeIndex(0),
-                next_edge: None,
-                _pdf: PhantomData,
-                _pdi: PhantomData,
-            }
-        }
-    }
-}
-
-impl<'s, I1, F1> Iterator for EdgeRotPrevIterator<'s, I1, F1>
-    where
-        I1: InputType + Neg<Output = I1>,
-        F1: OutputType + Neg<Output = F1>,
-{
-    type Item = VD::VoronoiEdgeIndex;
-    fn next(&mut self) -> Option<VD::VoronoiEdgeIndex> {
-        let rv = self.next_edge;
-        let new_next_edge = self.diagram.edge_rot_prev(self.next_edge);
-        self.next_edge = if let Some(nne) = new_next_edge {
-            if nne.0 == self.starting_edge.0 {
-                // Break the loop when we see starting edge again
-                None
-            } else {
-                new_next_edge
-            }
-        } else {
-            None
-        };
-        rv
-    }
-}*/

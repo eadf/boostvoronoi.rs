@@ -1,6 +1,6 @@
 [package]
 name = "boostvoronoi"
-version = "0.7.0"
+version = "0.8.0"
 authors = ["eadf"]
 edition = "2018"
 description = "Boost voronoi ported to 100% rust"
@@ -20,6 +20,7 @@ thiserror = "^1.0.24"
 bitflags = "^1.2.1"
 libm = "^0.2.1"
 smallvec = "^1.6.1"
+lazy_static = "1.4.0"
 
 # These features are only for debug purposes, should normally not be used
 [features]

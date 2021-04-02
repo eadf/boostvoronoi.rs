@@ -7,7 +7,7 @@
 
 // See http://www.boost.org for updates, documentation, and revision history.
 
-// Ported from C++ boost 1.75.0 to Rust in 2020 by Eadf (github.com/eadf)
+// Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 use super::beach_line as VB;
 use super::circle_event as VC;
@@ -380,10 +380,10 @@ where
             // remove temporary nodes from the beach line data structure.
             if !site_event.is_segment() {
                 while !self.end_points_.is_empty()
-                    && &self.end_points_.peek().unwrap().first == site_event.point0()
+                    && &self.end_points_.peek().unwrap().site == site_event.point0()
                 {
                     let b_it = self.end_points_.peek().unwrap();
-                    let b_it = b_it.second;
+                    let b_it = b_it.beachline_index;
                     let _ = self.end_points_.pop();
                     #[cfg(feature = "console_debug")]
                     {
