@@ -535,7 +535,7 @@ where
         }
         println!("];");
 
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         vb.with_vertices(self.point_data_.iter())?;
         vb.with_segments(self.segment_data_.iter())?;
 

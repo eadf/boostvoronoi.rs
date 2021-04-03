@@ -85,15 +85,13 @@ where
     segments_added: bool, // make sure eventual vertices are added before segments
 }
 
-impl<I1, F1> Builder<I1, F1>
-where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+impl<I1, F1> Default for Builder<I1, F1>
+    where
+        I1: InputType + Neg<Output = I1>,
+        F1: OutputType + Neg<Output = F1>,
 {
-    #[allow(clippy::new_without_default)]
-    pub fn new() -> Builder<I1, F1> {
+    fn default() -> Self {
         Self {
-            /// key by SiteEventIndexType
             site_events_: Vec::new(),
             beach_line_: VB::BeachLine::default(),
             index_: 0,
@@ -105,6 +103,21 @@ where
             debug_site_counter: 0,
             segments_added: false,
         }
+    }
+}
+
+impl<I1, F1> Builder<I1, F1>
+where
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
+{
+    /// todo replace with default
+    #[deprecated(
+    since = "0.9.0",
+    note = "Please use the default function instead"
+    )]
+    pub fn new() -> Builder<I1, F1> {
+        Self::default()
     }
 
     pub fn with_vertices<'a, T>(&mut self, vertices: T) -> Result<(), BvError>
@@ -565,7 +578,6 @@ where
     /// (B, C) bisector and change (A, B) bisector to the (A, C). That's
     /// why we use const_cast there and take all the responsibility that
     /// map data structure keeps correct ordering.
-    #[allow(clippy::unnecessary_unwrap)]
     pub(crate) fn process_circle_event(
         &mut self,
         output: &mut VD::VoronoiDiagram<I1, F1>,
@@ -721,8 +733,7 @@ where
             .beach_line_
             .get_right_neighbour_by_id(it_last.0.get_index());
 
-        if it_last.is_some() {
-            let it_last = it_last.unwrap();
+        if let Some(it_last) = it_last {
             let it_last_node = self.beach_line_.get_node(&it_last.get_index()).1;
             self.circle_events_
                 .deactivate(it_last_node.get().and_then(|x| x.get_circle_event_id()));

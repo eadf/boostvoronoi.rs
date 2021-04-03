@@ -49,7 +49,7 @@ fn beachline_1() {
     // Co-linear sites
     let _v = vec![coord(10, 10), coord(1, 1), coord(1, 6)];
 
-    let mut vb = Builder::<I1, F1>::new();
+    let mut vb = Builder::<I1, F1>::default();
     vb.with_vertices(_v.iter()).unwrap();
     let _output = vb.construct();
     //assert!(false);
@@ -67,7 +67,7 @@ fn beachline_2() {
         let _v = vec![coord(10, 18), coord(12, 3), coord(4, 21), coord(8, 62)];
         let mut output: VD::VoronoiDiagram<I1, F1> = VD::VoronoiDiagram::<I1, F1>::default();
 
-        let mut b = Builder::<I1, F1>::new();
+        let mut b = Builder::<I1, F1>::default();
         b.with_vertices(_v.iter()).unwrap();
         let mut site_event_iterator_: VSE::SiteEventIndexType = b.init_sites_queue();
         println!("site_event_iterator_:{:?}", site_event_iterator_);
@@ -102,7 +102,7 @@ fn beachline_3() {
         let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 50 })];
         let mut output: VD::VoronoiDiagram<I1, F1> = VD::VoronoiDiagram::<I1, F1>::default();
 
-        let mut b = Builder::<I1, F1>::new();
+        let mut b = Builder::<I1, F1>::default();
         b.with_segments(_s.iter()).unwrap();
         let mut site_event_iterator_: VSE::SiteEventIndexType = b.init_sites_queue();
         println!("site_event_iterator_:{:?}", site_event_iterator_);

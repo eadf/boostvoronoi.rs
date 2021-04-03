@@ -33,7 +33,10 @@ where
     I: InputType + Neg<Output = I>,
 {
     pub(crate) fn new_2(first: Point<I>, second: VB::BeachLineIndex) -> Self {
-        Self { site: first, beachline_index: second }
+        Self {
+            site: first,
+            beachline_index: second,
+        }
     }
 }
 
@@ -51,8 +54,7 @@ where
     I: InputType + Neg<Output = I>,
 {
     fn cmp(&self, other: &Self) -> Ordering {
-        if VP::PointComparisonPredicate::<I>::point_comparison_predicate(&self.site, &other.site)
-        {
+        if VP::PointComparisonPredicate::<I>::point_comparison_predicate(&self.site, &other.site) {
             Ordering::Greater
         } else if self.site == other.site {
             Ordering::Equal

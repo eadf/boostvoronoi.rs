@@ -30,7 +30,7 @@ fn two_segments_9() -> Result<(), BvError> {
         let _v = VB::to_points::<I1, I1>(&points);
         let _s = VB::to_segments::<I1, I1>(&segments);
 
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("two_segments_9");
         vb.with_segments(_s.iter()).expect("two_segments_9");
         vb.construct().expect("two_segments_9")

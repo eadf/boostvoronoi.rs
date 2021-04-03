@@ -16,7 +16,7 @@ fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
 fn single_point_1() {
     let output = {
         let _v = vec![Point { x: 10, y: 11 }];
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("single_point_1");
         vb.construct().expect("single_point_1")
     };
@@ -33,7 +33,7 @@ fn single_point_1() {
 fn two_points_1() {
     let output = {
         let _v = vec![Point { x: 10, y: 11 }, Point { x: 1, y: 3 }];
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("two_points_1");
         vb.construct().expect("two_points_1")
     };
@@ -86,7 +86,7 @@ fn two_points_1() {
 fn two_points_2() {
     let output = {
         let _v = vec![Point { x: 1, y: 3 }, Point { x: 10, y: 11 }];
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("two_points_1");
         vb.construct().expect("two_points_1")
     };
@@ -115,7 +115,7 @@ fn two_points_2() {
 fn two_points_3() {
     let output = {
         let _v = vec![Point { x: 45, y: 1 }, Point { x: 8, y: 23 }];
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("two_points_2");
         vb.construct().expect("two_points_2")
     };
@@ -148,7 +148,7 @@ fn three_points_1() {
             Point { x: 1, y: 3 },
             Point { x: 5, y: 4 },
         ];
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("three_points_1");
         vb.construct().expect("three_points_1")
     };
@@ -207,7 +207,7 @@ fn three_points_2() {
             Point { x: 1, y: 3 },
             Point { x: 1, y: 2 },
         ];
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("three_points_2");
         vb.construct().expect("three_points_2")
     };
@@ -254,7 +254,7 @@ fn three_points_3() {
             Point { x: 19, y: 1 },
             Point { x: 19, y: 20 },
         ];
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("three_points_3");
         vb.construct().expect("three_points_3")
     };
@@ -301,7 +301,7 @@ fn three_points_4() {
             Point { x: 1, y: 1 },
             Point { x: 1, y: 6 },
         ];
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("three_points_4");
         vb.construct().expect("three_points_4")
     };
@@ -360,7 +360,7 @@ fn four_points_1() {
             Point { x: 4, y: 2 },
             Point { x: 5, y: 6 },
         ];
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("four_points_1");
         vb.construct().expect("four_points_1")
     };
@@ -445,7 +445,7 @@ fn four_points_2() {
             Point { x: 4, y: 21 },
             Point { x: 8, y: 62 },
         ];
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("four_points_2");
         vb.construct().expect("four_points_2")
     };
@@ -545,7 +545,7 @@ fn four_points_3() {
             Point { x: 4, y: 21 },
             Point { x: 8, y: 3 },
         ];
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("four_points_3");
         vb.construct().expect("four_points_3")
     };
@@ -631,7 +631,7 @@ fn five_points_1() {
             Point { x: 4, y: 16 },
             Point { x: 9, y: 8 },
         ];
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("five_points_1");
         vb.construct().expect("five_points_1")
     };
@@ -769,7 +769,7 @@ fn eighth_points_1() {
             Point { x: 9, y: 8 },
             Point { x: 11, y: 11 },
         ];
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("eighth_points_1");
         vb.construct().expect("eighth_points_1")
     };

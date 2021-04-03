@@ -83,19 +83,25 @@ where
     pub(crate) beach_line_vec: VecMap<(BeachLineNodeKey<I1, F1>, BeachLineNodeDataType)>,
 }
 
-impl<I1, F1> BeachLine<I1, F1>
+impl<I1, F1> Default for BeachLine<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
 {
-    pub fn default() -> Self {
+    fn default() -> Self {
         Self {
             beach_line_: BTreeMap::default(),
             next_free_: BeachLineIndex::new(0),
             beach_line_vec: VecMap::default(),
         }
     }
+}
 
+impl<I1, F1> BeachLine<I1, F1>
+    where
+        I1: InputType + Neg<Output = I1>,
+        F1: OutputType + Neg<Output = F1>,
+{
     pub(crate) fn len(&self) -> (usize, usize) {
         (self.beach_line_.len(), self.beach_line_vec.len())
     }
@@ -152,7 +158,6 @@ where
             let node = node.0;
             //tln!("erasing beach_line:{:?}", node);
 
-            #[allow(clippy::collapsible_if)]
             if self.beach_line_.remove(&node).is_none() {
                 //#[cfg(feature = "console_debug")]
                 //self.debug_print_all_dump_and_cmp(&node);

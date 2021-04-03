@@ -36,7 +36,7 @@ fn sample_primary_031() -> Result<(), BvError> {
 -6 -8 -2 -11
 -8 -6 -11 -2
 "#;
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
@@ -438,7 +438,7 @@ fn sample_primary_032() -> Result<(), BvError> {
 1
 7 20 7 -20
 "#;
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
@@ -520,7 +520,7 @@ fn sample_primary_033() -> Result<(), BvError> {
 1
 0 0 0 7
 "#;
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
@@ -614,7 +614,7 @@ fn sample_primary_034() -> Result<(), BvError> {
 0 -4 -16 15
 7 20 7 -20
 "#;
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
@@ -748,7 +748,7 @@ fn sample_primary_035() -> Result<(), BvError> {
 80 -58 95 -30
 95 -30 100 0
 "#;
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
@@ -1124,7 +1124,7 @@ fn sample_primary_040() -> Result<(), BvError> {
 1717986916 -858993458
 0
 "#;
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
@@ -1291,7 +1291,7 @@ fn sample_primary_041() -> Result<(), BvError> {
 -8 8 -1 8
 -7 -2 -7 7
 "#;
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
@@ -1502,7 +1502,7 @@ fn sample_primary_042() -> Result<(), BvError> {
 -1 0 4 -1
 3 0 4 1
 "#;
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
@@ -1614,7 +1614,7 @@ fn sample_primary_043() -> Result<(), BvError> {
 -5 3 -2 2
 -5 5 -2 2
 "#;
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
@@ -1714,7 +1714,7 @@ fn sample_primary_044() -> Result<(), BvError> {
 -8 -3 -4 -3
 -2 7 -1 3
 "#;
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
@@ -1808,7 +1808,7 @@ fn sample_primary_045() -> Result<(), BvError> {
 37 47 61 50
 39 37 41 35
 "#;
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
@@ -1923,7 +1923,7 @@ fn sample_primary_046() -> Result<(), BvError> {
 1
 0 0 2 -7
 "#;
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
@@ -1990,7 +1990,7 @@ fn sample_primary_047() -> Result<(), BvError> {
 -48 -29 -46 -78
 -46 -46 -45 -42
 "#;
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;

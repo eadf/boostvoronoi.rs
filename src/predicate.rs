@@ -155,12 +155,11 @@ where
     }
 }
 
-#[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, PartialEq, Eq)]
 enum Orientation {
-    RIGHT,     // = -1,
-    COLLINEAR, // = 0,
-    LEFT,      // = 1
+    Right,     // = -1,
+    Collinear, // = 0,
+    Left,      // = 1
 }
 
 #[derive(Default)]
@@ -184,11 +183,11 @@ where
     /// Return orientation based on the sign of the determinant.
     fn eval_f(value: f64) -> Orientation {
         if value.is_zero() {
-            return Orientation::COLLINEAR;
+            return Orientation::Collinear;
         }
         match value < 0.0 {
-            true => Orientation::RIGHT,
-            false => Orientation::LEFT,
+            true => Orientation::Right,
+            false => Orientation::Left,
         }
     }
 
@@ -196,11 +195,11 @@ where
     /// Return orientation based on the sign of the determinant.
     fn eval_bf(value: f64) -> Orientation {
         if value.is_zero() {
-            return Orientation::COLLINEAR;
+            return Orientation::Collinear;
         }
         match value.is_sign_negative() {
-            true => Orientation::RIGHT,
-            false => Orientation::LEFT,
+            true => Orientation::Right,
+            false => Orientation::Left,
         }
     }
 
@@ -296,7 +295,7 @@ where
                 return lhs.y0() < rhs.y0();
             }
             return OrientationTest::<I1, F1>::eval_3(&lhs.point1(), &lhs.point0(), &rhs.point1())
-                == Orientation::LEFT;
+                == Orientation::Left;
         }
     }
 
@@ -468,7 +467,7 @@ where
                 left_site.point0(),
                 left_site.point1(),
                 new_point,
-            ) == Orientation::LEFT;
+            ) == Orientation::Left;
         }
 
         let dist1 = Self::find_distance_to_segment_arc(left_site, new_point);
@@ -528,7 +527,7 @@ where
         let segment_end: &Point<I1> = right_site.point1();
         let eval: Orientation =
             OrientationTest::<I1, F1>::eval_3(segment_start, segment_end, new_point);
-        if eval != Orientation::RIGHT {
+        if eval != Orientation::Right {
             return if !right_site.is_inverse() {
                 KPredicateResult::LESS
             } else {
@@ -555,7 +554,7 @@ where
                 i1_to_i64(new_point.x) - i1_to_i64(site_point.x),
                 i1_to_i64(new_point.y) - i1_to_i64(site_point.y),
             );
-            if orientation == Orientation::LEFT {
+            if orientation == Orientation::Left {
                 if !right_site.is_inverse() {
                     return if reverse_order {
                         KPredicateResult::LESS
@@ -648,58 +647,61 @@ where
         let point1: &Point<I1> = NodeComparisonPredicate::<I1, F1>::get_comparison_point(site1);
         let point2: &Point<I1> = NodeComparisonPredicate::<I1, F1>::get_comparison_point(site2);
 
-        #[allow(clippy::comparison_chain)]
-        if point1.x < point2.x {
-            // The second node contains a new site.
-            return DistancePredicate::<I1, F1>::distance_predicate(
-                node1.left_site(),
-                node1.right_site(),
-                point2,
-            );
-        } else if point1.x > point2.x {
-            // The first node contains a new site.
-            return !DistancePredicate::<I1, F1>::distance_predicate(
-                node2.left_site(),
-                node2.right_site(),
-                point1,
-            );
-        } else {
-            // These checks were evaluated experimentally.
-            match site1.sorted_index().cmp(&site2.sorted_index()) {
-                cmp::Ordering::Equal => {
-                    // Both nodes are new (inserted during same site event processing).
-                    let y1 = Self::get_comparison_y(&node1, true);
-                    let y2 = Self::get_comparison_y(&node2, true);
-                    if y1 == y2 {
-                        // This is something not found in the C++ version
-                        // Todo: check if this fix is needed after +is_positive() issue is fixed
-                        node1.get_index().0 < node2.get_index().0
-                    } else {
-                        y1 < y2
+        match point1.x.cmp(&point2.x) {
+            cmp::Ordering::Less => {
+                // The second node contains a new site.
+                return DistancePredicate::<I1, F1>::distance_predicate(
+                    node1.left_site(),
+                    node1.right_site(),
+                    point2,
+                );
+            }
+            cmp::Ordering::Greater => {
+                // The first node contains a new site.
+                return !DistancePredicate::<I1, F1>::distance_predicate(
+                    node2.left_site(),
+                    node2.right_site(),
+                    point1,
+                );
+            }
+            cmp::Ordering::Equal => {
+                // These checks were evaluated experimentally.
+                match site1.sorted_index().cmp(&site2.sorted_index()) {
+                    cmp::Ordering::Equal => {
+                        // Both nodes are new (inserted during same site event processing).
+                        let y1 = Self::get_comparison_y(&node1, true);
+                        let y2 = Self::get_comparison_y(&node2, true);
+                        if y1 == y2 {
+                            // This is something not found in the C++ version
+                            // Todo: check if this fix is needed after +is_positive() issue is fixed
+                            node1.get_index().0 < node2.get_index().0
+                        } else {
+                            y1 < y2
+                        }
                     }
-                }
-                cmp::Ordering::Less => {
-                    let y1 = Self::get_comparison_y(&node1, false);
-                    let y2 = Self::get_comparison_y(&node2, true);
-                    if y1.0 != y2.0 {
-                        return y1.0 < y2.0;
+                    cmp::Ordering::Less => {
+                        let y1 = Self::get_comparison_y(&node1, false);
+                        let y2 = Self::get_comparison_y(&node2, true);
+                        if y1.0 != y2.0 {
+                            return y1.0 < y2.0;
+                        }
+                        if !site1.is_segment() {
+                            y1.1 < 0
+                        } else {
+                            false
+                        }
                     }
-                    if !site1.is_segment() {
-                        y1.1 < 0
-                    } else {
-                        false
-                    }
-                }
-                _ => {
-                    let y1 = Self::get_comparison_y(node1, true);
-                    let y2 = Self::get_comparison_y(node2, false);
-                    if y1.0 != y2.0 {
-                        return y1.0 < y2.0;
-                    }
-                    if !site2.is_segment() {
-                        y2.1 > 0
-                    } else {
-                        true
+                    cmp::Ordering::Greater => {
+                        let y1 = Self::get_comparison_y(node1, true);
+                        let y2 = Self::get_comparison_y(node2, false);
+                        if y1.0 != y2.0 {
+                            return y1.0 < y2.0;
+                        }
+                        if !site2.is_segment() {
+                            y2.1 > 0
+                        } else {
+                            true
+                        }
                     }
                 }
             }
@@ -772,7 +774,7 @@ where
         site3: &VSE::SiteEvent<I1, F1>,
     ) -> bool {
         OrientationTest::<I1, F1>::eval_3(site1.point0(), site2.point0(), site3.point0())
-            == Orientation::RIGHT
+            == Orientation::Right
     }
 
     pub(crate) fn pps(
@@ -788,14 +790,14 @@ where
             let orient2 =
                 OrientationTest::<I1, F1>::eval_3(site1.point0(), site2.point0(), site3.point1());
             if segment_index == 1 && site1.x0() >= site2.x0() {
-                if orient1 != Orientation::RIGHT {
+                if orient1 != Orientation::Right {
                     return false;
                 }
             } else if segment_index == 3 && site2.x0() >= site1.x0() {
-                if orient2 != Orientation::RIGHT {
+                if orient2 != Orientation::Right {
                     return false;
                 }
-            } else if orient1 != Orientation::RIGHT && orient2 != Orientation::RIGHT {
+            } else if orient1 != Orientation::Right && orient2 != Orientation::Right {
                 return false;
             }
         } else {
@@ -819,7 +821,7 @@ where
             }
             if site2.is_inverse() == site3.is_inverse()
                 && OrientationTest::<I1, F1>::eval_3(site2.point0(), site1.point0(), site3.point1())
-                    != Orientation::RIGHT
+                    != Orientation::Right
             {
                 return false;
             }
@@ -996,7 +998,7 @@ where
             RF::RobustFpt::new_2(1_f64 / (line_a * line_a + line_b * line_b).sqrt(), 3_f64);
         let mut t = RF::RobustDif::default();
         tln!("0t:{:?}", t);
-        if OrientationTest::<I1, F1>::eval_f(denom.fpv()) == Orientation::COLLINEAR {
+        if OrientationTest::<I1, F1>::eval_f(denom.fpv()) == Orientation::Collinear {
             t += teta / (RF::RobustFpt::new_1(8_f64) * A);
             tln!("1t:{:?}", t);
             t -= A / (RF::RobustFpt::new_1(2_f64) * teta);
@@ -1136,7 +1138,7 @@ where
             ),
             1_f64,
         );
-        if OrientationTest::<I1, F1>::eval_f(orientation.fpv()) == Orientation::COLLINEAR {
+        if OrientationTest::<I1, F1>::eval_f(orientation.fpv()) == Orientation::Collinear {
             tln!("  LazyCircleFormationFunctor::pss collinear");
             let a = RF::RobustFpt::new_2(a1 * a1 + b1 * b1, 2_f64);
             let c = RF::RobustFpt::new_2(
@@ -2260,20 +2262,18 @@ where
         for (i, aa) in a.iter().enumerate().take(3) {
             cB[i] = aa.clone() * aa + &b[i] * &b[i];
         }
-        #[allow(clippy::needless_range_loop)]
-        for i in 0..3 {
+        for (i, cA_i) in cA.iter_mut().enumerate().take(3) {
             let j = (i + 1) % 3;
             let k = (i + 2) % 3;
-            cA[i] = &a[j] * &b[k] - &a[k] * &b[j];
+            *cA_i = &a[j] * &b[k] - &a[k] * &b[j];
         }
         let denom = sqrt_expr_.eval3(&cA, &cB);
 
         if recompute_c_y {
-            #[allow(clippy::needless_range_loop)]
-            for i in 0..3 {
+            for (i, cA_i) in cA.iter_mut().enumerate().take(3) {
                 let j = (i + 1) % 3;
                 let k = (i + 2) % 3;
-                cA[i] = &b[j] * &c[k] - &b[k] * &c[j];
+                *cA_i = &b[j] * &c[k] - &b[k] * &c[j];
             }
             let c_y = sqrt_expr_.eval3(&cA, &cB);
             c_event.set_y_xf(c_y / denom);

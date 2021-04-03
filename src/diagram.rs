@@ -385,7 +385,7 @@ where
     }
 }
 
-/// Represents Voronoi vertex.
+/// Represents Voronoi vertex aka. Circle event.
 /// Data members:
 ///   1) vertex coordinates
 ///   2) pointer to the incident edge
@@ -474,29 +474,31 @@ where
         self.incident_edge_
     }
 
+    /// returns the x coordinate of the circle event
     #[inline]
     pub fn x(&self) -> F1 {
         self.x_
     }
 
+    /// returns the x coordinate of the circle event
     #[inline]
     pub fn y(&self) -> F1 {
         self.y_
     }
 
-    /// get_color returns the custom edge info. (not the internal bits)
+    /// get_color returns the custom edge info. (does not contain the reserved bits)
     pub fn get_color(&self) -> ColorType {
         self.color_ >> ColorBits::BITS_SHIFT.0
     }
 
-    /// set_color sets the custom edge info. (not the internal bits)
+    /// set_color sets the custom edge info. (does not affect the reserved bits)
     pub fn set_color(&mut self, color: ColorType) -> ColorType {
         self.color_ &= ColorBits::BITMASK.0;
         self.color_ |= color << ColorBits::BITS_SHIFT.0;
         self.color_
     }
 
-    /// or_color sets the custom vertex info together with the previous value. (not the internal bits)
+    /// or_color sets the custom vertex info together with the previous value. (does not affect the reserved bits)
     /// This is a Cell operation, remember to set() the entire cell
     #[inline(always)]
     pub fn or_color(&mut self, color: ColorType) -> ColorType {
@@ -510,7 +512,7 @@ where
     }
 }
 
-/// Half-edge data structure. Represents Voronoi edge.
+/// Half-edge data structure. Represents a Voronoi edge.
 /// Data members:
 ///   1) pointer to the corresponding cell
 ///   2) pointer to the vertex that is the starting
@@ -649,14 +651,13 @@ where
         !self.is_primary()
     }
 
-    /// get_color returns the custom edge info. (not the internal bits)
+    /// get_color returns the custom edge info. (does not contain the reserved bits)
     #[inline(always)]
     pub fn get_color(&self) -> ColorType {
         self.color_ >> ColorBits::BITS_SHIFT.0
     }
 
-    /// set_color sets the custom edge info. (not the internal bits)
-    /// This is a Cell operation, remember to set() the entire cell
+    /// set_color sets the custom edge info. (does not affect the reserved bits)
     #[inline(always)]
     pub fn set_color(&mut self, color: ColorType) -> ColorType {
         self.color_ &= ColorBits::BITMASK.0;
@@ -664,8 +665,7 @@ where
         self.color_
     }
 
-    /// or_color sets the custom edge info together with the previous value. (not the internal bits)
-    /// This is a Cell operation, remember to set() the entire cell
+    /// or_color sets the custom edge info together with the previous value. (does not affect the reserved bits)
     #[inline(always)]
     pub fn or_color(&mut self, color: ColorType) -> ColorType {
         self.set_color(self.get_color() | color)
@@ -1591,7 +1591,6 @@ where
         } else {
             // Update prev/next pointers for the ray edges.
             //let mut cell_it_keys = self.cells_.keys();
-            #[allow(clippy::while_let_on_iterator)]
             for cell_it in 0..self.cells_.len() {
                 if self._cell_is_degenerate(Some(VoronoiCellIndex(cell_it))) {
                     continue;
@@ -1681,17 +1680,16 @@ where
     }
 }
 
-#[allow(clippy::from_over_into)]
-impl<I1, F1> Into<SD::SyncVoronoiDiagram<I1, F1>> for VoronoiDiagram<I1, F1>
+impl<I1, F1> From<VoronoiDiagram<I1, F1>> for SD::SyncVoronoiDiagram<I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
 {
-    fn into(self) -> SD::SyncVoronoiDiagram<I1, F1> {
+    fn from(other: VoronoiDiagram<I1, F1>) -> SD::SyncVoronoiDiagram<I1, F1> {
         SD::SyncVoronoiDiagram {
-            cells: self.cells_.into_iter().map(|x| x.get()).collect(),
-            vertices: self.vertices_.into_iter().map(|x| x.get()).collect(),
-            edges: self.edges_.into_iter().map(|x| x.get()).collect(),
+            cells: other.cells_.into_iter().map(|x| x.get()).collect(),
+            vertices: other.vertices_.into_iter().map(|x| x.get()).collect(),
+            edges: other.edges_.into_iter().map(|x| x.get()).collect(),
         }
     }
 }

@@ -182,7 +182,7 @@ fn main() -> Result<(), BvError> {
         }
         println!("}};");
         println!("-------");
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
         vb.construct()?

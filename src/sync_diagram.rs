@@ -19,7 +19,7 @@ use std::ops::Neg;
 
 ///! See <https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_diagram.htm>
 
-/// Sync version of the VoronoiDiagram.
+/// Sync version of the boostvoronoi::diagram::VoronoiDiagram struct.
 /// This is useful when traversing the diagram in a multi threaded environment.
 #[derive(Default, Debug)]
 pub struct SyncVoronoiDiagram<I1, F1>
@@ -216,6 +216,7 @@ where
         self.edge_get_vertex0(twin)
     }
 
+    #[inline]
     pub fn cell_get(
         &self,
         cell_id: VD::VoronoiCellIndex,
@@ -229,6 +230,7 @@ where
         }
     }
 
+    #[inline]
     /// Returns a reference to all of the vertices
     pub fn vertices(&self) -> &Vec<VD::VoronoiVertex<I1, F1>> {
         &self.vertices

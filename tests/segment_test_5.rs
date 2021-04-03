@@ -26,7 +26,7 @@ fn segment_5_1() -> Result<(), BvError> {
         ];
         let segments = to_segments(&segments);
 
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_segments(segments.iter())?;
         vb.construct()?
     };
@@ -141,7 +141,7 @@ fn segment_5_2() -> Result<(), BvError> {
 
         let segments = to_segments(&segments);
 
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_segments(segments.iter())?;
         vb.construct()?
     };
@@ -169,7 +169,7 @@ fn segment_5_3() -> Result<(), BvError> {
 
         let segments = to_segments(&segments);
 
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_segments(segments.iter())?;
         vb.construct()?
     };
@@ -451,7 +451,7 @@ fn segment_5_4() -> Result<(), BvError> {
 
         let segments = to_segments(&segments);
 
-        let mut vb = Builder::<I1, F1>::new();
+        let mut vb = Builder::<I1, F1>::default();
         vb.with_segments(segments.iter())?;
         vb.construct()?
     };

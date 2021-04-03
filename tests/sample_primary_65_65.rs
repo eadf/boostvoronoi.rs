@@ -109,7 +109,7 @@ fn sample_primary_065() -> Result<(), BvError> {
 -49044 -49020 -49028 -49012
 -49010 -49234 -48949 -49210
 "#;
-        let mut vb = VB::Builder::<I1, F1>::new();
+        let mut vb = VB::Builder::<I1, F1>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
