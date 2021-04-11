@@ -602,7 +602,7 @@ where
     pub fn get_id(&self) -> VoronoiEdgeIndex {
         self.id
     }
-
+    // TODO: add _err access methods returing Result instead of Option
     pub fn cell(&self) -> Option<VoronoiCellIndex> {
         self.cell_
     }

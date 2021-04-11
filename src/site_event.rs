@@ -53,8 +53,8 @@ where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
 {
-    pub(crate) point0_: Point<I1>,
-    pub(crate) point1_: Point<I1>,
+    point0_: Point<I1>,
+    point1_: Point<I1>,
     pub sorted_index_: SiteEventIndexType,
     initial_index_: SiteEventIndexType,
     flags_: VD::ColorType,

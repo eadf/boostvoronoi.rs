@@ -755,17 +755,19 @@ where
         let draw_cell_point = config.draw_flag.contains(DrawFilterFlag::E_CELL_POINT);
         let draw_infinite_edges = config.draw_flag.contains(DrawFilterFlag::INFINITE);
 
-        set_draw_color(Color::Green);
+
         let mut already_drawn = yabf::Yabf::default();
 
         for it in self.diagram.edges().iter().enumerate() {
+            set_draw_color(Color::DarkGreen);
             let edge_id = VoronoiEdgeIndex(it.0);
             let edge = it.1.get();
             if already_drawn.bit(edge_id.0) {
-                // already done this or, rather - it's twin
+                // already done this, or rather - it's twin
                 continue;
             }
-            already_drawn.set_bit(edge_id.0, true);
+            // no point in setting current edge as drawn, the edge id will not repeat
+            // already_drawn.set_bit(edge_id.0, true);
             if let Some(twin) = self.diagram.edge_get_twin(Some(edge_id)) {
                 already_drawn.set_bit(twin.0, true);
             }
@@ -777,20 +779,26 @@ where
             if edge.is_secondary() && (!draw_secondary) {
                 continue;
             }
-            if (!draw_infinite_edges)
-                && ColorFlag::from_bits(edge.get_color())
+            if ColorFlag::from_bits(edge.get_color())
                     .unwrap()
                     .contains(ColorFlag::INFINITE)
             {
-                continue;
+                if !draw_infinite_edges {
+                    continue;
+                } else {
+                    set_draw_color(Color::Green);
+                }
             }
 
-            if (!draw_external)
-                && ColorFlag::from_bits(edge.get_color())
+            if ColorFlag::from_bits(edge.get_color())
                     .unwrap()
                     .contains(ColorFlag::EXTERNAL)
             {
-                continue;
+                if !draw_external {
+                    continue
+                } else {
+                    set_draw_color(Color::Green);
+                }
             }
             if (!draw_cell_point)
                 && ColorFlag::from_bits(edge.get_color())

@@ -14,13 +14,13 @@ num = ">=0.3.1,<0.5.0"
 ordered-float = "^2.1.1"
 fnv = "^1.0.7"
 vec_map = "^0.8.2"
-yabf = {version="^0.0.3",default-features=false}
+yabf = {version="^0.1.0",default-features=false}
 num-traits = "^0.2.14"
 thiserror = "^1.0.24"
 bitflags = "^1.2.1"
 libm = "^0.2.1"
 smallvec = "^1.6.1"
-lazy_static = "1.4.0"
+#lazy_static = "1.4.0" # not used yet
 
 # These features are only for debug purposes, should normally not be used
 [features]

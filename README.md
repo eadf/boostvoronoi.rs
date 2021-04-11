@@ -6,7 +6,7 @@
 
 # Segmented Voronoi for Rust
 [Boost 1.75.0 polygon::voronoi](https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_main.htm) ported to 100% rust.
-This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) works on line segments as well as points, making it useful for calculating centerlines.
+This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) works on line segments as well as points, making it useful for calculating [centerlines](https://crates.io/crates/centerline).
 
 Code still in development, not ready for any purpose.
 
@@ -19,9 +19,11 @@ Gui example:
 ```fish
 cargo run --example fltk_gui
 ```
-Mouse click to place new points. Press and hold 'L' + mouse click to add single line. 
-\
-Press and hold 'S' + mouse click to add strings of lines.
+* Mouse click to place new points. 
+* Press and hold 'L' + mouse click to add single line. 
+* Press and hold 'S' + mouse click to add strings of lines.
+* Use mouse wheel to zoom.
+* Mouse click and drag to pan.
 
 API example:
 ```rust
@@ -41,7 +43,7 @@ let mut vb = Builder::<I1, F1>::new();
 vb.with_vertices(p.iter()).unwrap();
 vb.with_segments(s.iter()).unwrap();
 
-// this will generate a the list of cells, edges and circle events (aka vertices)
+// this will generate the list of cells, edges and circle events (aka vertices)
 let result = vb.construct().unwrap();
 ```
 Edges may become curves when line segments are used as input, see the example code for discretization and interpolation. 

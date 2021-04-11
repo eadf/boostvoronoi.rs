@@ -117,16 +117,9 @@ impl ExtendedInt {
                     + num::cast::<u32, f64>(self.chunks.get(0).unwrap().0).unwrap();
             }
             _ => {
-                //fln!("{:?}",self);
-                //fln!("->p()");
-                // why does not self.chunks.len() match self.size()?
-                //let skip = self.chunks.len()-self.size();
                 for v in self.chunks.iter().rev().take(3) {
-                    //fln!("i={}",i);
                     rv.0 *= sep;
-                    //fln!("{}", rv.0);
                     rv.0 += num::cast::<u32, f64>(v.0).unwrap();
-                    //fln!("{}", rv.0);
                 }
                 rv.1 = ((self.size() - 3) << 5) as i32;
             }
@@ -188,17 +181,13 @@ impl ExtendedInt {
 
     /// return the number of words in 'self.count'
     pub fn size(&self) -> usize {
-        //let rv = self.count.abs() as usize;
-        //assert_eq!(rv,self.chunks.len());
-        //rv
         // TODO replace this with return self.chunks.len() when stable
-        //assert_eq!(self.chunks.len(), self.count.abs()as usize);
-        self.count.abs() as usize
+        //assert_eq!(self.chunks.len(), self.count.abs() as usize);
+        self.chunks.len()
     }
 
     /// this method assumes self is an empty object
     fn add_others(&mut self, e1: &Self, e2: &Self) {
-        //fln!("->add_others {:?} {:?} {:?}", self, e1, e2);
         if e1.count == 0 {
             self.count = e2.count;
             self.chunks = e2.chunks.clone();
@@ -220,7 +209,6 @@ impl ExtendedInt {
     }
 
     fn add_slice(&mut self, c1: &[Wrapping<u32>], sz1: usize, c2: &[Wrapping<u32>], sz2: usize) {
-        //fln!("->add_slice {:?} {:?} {:?}", self, c1, c2);
         if sz1 < sz2 {
             self.add_slice(c2, sz2, c1, sz1);
             return;
@@ -256,18 +244,15 @@ impl ExtendedInt {
 
     /// this method assumes self is an empty object
     fn dif_other(&mut self, e1: &Self, e2: &Self) {
-        //fln!("->dif_other {:?} {:?} {:?}", self, e1, e2);
         if e1.count == 0 {
             self.count = e2.count;
             self.chunks = e2.chunks.clone();
             self.count = -self.count;
-            //fln!("<-dif_other#1 {:?}", self);
             return;
         }
         if e2.count == 0 {
             self.count = e1.count;
             self.chunks = e1.chunks.clone();
-            //fln!("<-dif_other#2 {:?}", self);
             return;
         }
         if (e1.count > 0) ^ (e2.count > 0) {
@@ -278,7 +263,6 @@ impl ExtendedInt {
         if e1.count < 0 {
             self.count = -self.count;
         }
-        //fln!("<-dif_other#3 {:?}", self);
     }
 
     fn dif_slice(
@@ -289,7 +273,6 @@ impl ExtendedInt {
         sz2: usize,
         rec: bool,
     ) {
-        //fln!("->dif_slice {:?} count:{} c1:{:?} sz1:{} c2:{:?} sz2:{} rec:{}", self, self.count, c1, sz1, c2, sz2, rec);
         let mut sz2 = sz2;
         let mut sz1 = sz1;
         if sz1 < sz2 {
@@ -349,7 +332,6 @@ impl ExtendedInt {
         // Todo: remove these asserts when stable
         //assert!(self.count >= 0);
         //assert_eq!(self.chunks.len(), self.count as usize);
-        //fln!("<-dif_slice#1 {:?}", self);
     }
 
     fn mul_other(&mut self, e1: &Self, e2: &Self) {
@@ -357,18 +339,15 @@ impl ExtendedInt {
 
         if e1.count == 0 || e2.count == 0 {
             self.count = 0;
-            //fln!("<-mul_other#1 {:?}", self);
             return;
         }
         self.mul_slice(&e1.chunks, e1.size(), &e2.chunks, e2.size());
         if (e1.count > 0) ^ (e2.count > 0) {
             self.count = -self.count;
         }
-        //fln!("<-mul_other#2 {:?}", self);
     }
 
     fn mul_slice(&mut self, c1: &[Wrapping<u32>], sz1: usize, c2: &[Wrapping<u32>], sz2: usize) {
-        //fln!("->mul_slice {:?} c1:{:?} sz1:{} c2:{:?} sz2:{}", self, c1, sz1, c2, sz2);
 
         let mut cur: u64 = 0;
         let mut nxt: u64;
@@ -385,40 +364,30 @@ impl ExtendedInt {
             nxt = 0;
             for (first, c1_first) in c1.iter().enumerate().take(shift + 1) {
                 if first >= sz1 {
-                    //fln!("mul_slice brk {:?}", self);
                     break;
                 }
                 let second = shift - first;
                 if second >= sz2 {
-                    //fln!("mul_slice cnt {:?}", self);
                     continue;
                 }
 
                 tmp = (c1_first.0 as u64) * (c2[second].0 as u64);
                 cur += tmp & 0xFFFF_FFFF;
                 nxt += tmp >> 32;
-
-                //fln!("shift:{} first:{}, second:{}",shift, first, second);
-                //fln!("cur:{:0>16X}", cur );
-                //fln!("nxt:{:0>16X}", nxt);
             }
 
             self.chunks[shift] = Wrapping((cur & 0xFFFF_FFFF) as u32);
-            //fln!("self.chunks[shift]:{:0>8X}", self.chunks[shift]);
-            //fln!("self.chunks[shift]:{:}\n", self.chunks[shift]);
             cur = nxt + (cur >> 32);
         }
         if cur != 0 {
             //&& (self.count != N)) {
             //assert_eq!(self.count as usize, self.chunks.len());
             self.chunks.push(Wrapping(cur as u32));
-            //self.chunks[self.count as usize] = Wrapping(cur as u32);
             self.count += 1;
         }
         // Todo: remove these asserts when stable
         //assert!(self.count >= 0);
         //assert_eq!(self.chunks.len(), self.count as usize);
-        //fln!("<-mul_slice {:?}", self);
     }
 }
 
@@ -649,15 +618,5 @@ impl ops::Neg for ExtendedInt {
 impl fmt::Debug for ExtendedInt {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:.0}", self.d())
-        /*if self.count == 0 {
-            write!(f, "ExtendedInt:0x0")
-        } else {
-            write!(f, "ExtendedInt:0x")?;
-            for i in self.chunks.iter().rev() {
-                write!(f, "{:0>8X}_", *i)?;
-            }
-            write!(f, " count:{}", self.count)?;
-            Ok(())
-        }*/
     }
 }

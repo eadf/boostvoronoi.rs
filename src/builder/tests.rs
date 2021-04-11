@@ -25,10 +25,10 @@ fn sort_1() {
             assert_eq!(vb.site_events_.len(), 2);
             let s0 = vb.site_events_.get(0).expect("sort_1");
             let s1 = vb.site_events_.get(1).expect("sort_1");
-            assert!(s0.point0_.x == 0 && s0.point0_.y == 100);
-            assert!(s0.point1_.x == 0 && s0.point1_.y == 100);
-            assert!(s1.point0_.x == 10 && s1.point0_.y == 11);
-            assert!(s1.point1_.x == 10 && s1.point1_.y == 11);
+            assert!(s0.point0().x == 0 && s0.point0().y == 100);
+            assert!(s0.point1().x == 0 && s0.point1().y == 100);
+            assert!(s1.point0().x == 10 && s1.point0().y == 11);
+            assert!(s1.point1().x == 10 && s1.point1().y == 11);
             //vb.init_beach_line(&mut site_event_iterator_, &mut output);
         }
     }

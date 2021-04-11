@@ -15,8 +15,6 @@ use crate::BvError;
 use std::marker::PhantomData;
 use std::ops::Neg;
 
-#[allow(unused_imports)]
-
 ///! See <https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_diagram.htm>
 
 /// Sync version of the boostvoronoi::diagram::VoronoiDiagram struct.

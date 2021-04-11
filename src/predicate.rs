@@ -63,21 +63,7 @@ where
     pub(crate) fn is_vertical_2(point1: &Point<I1>, point2: &Point<I1>) -> bool {
         point1.x == point2.x
     }
-    /*
-        /// Compute robust cross_product: a1 * b2 - b1 * a2.
-        /// It was mathematically proven that the result is correct
-        /// with epsilon relative error equal to 1EPS.
-        #[inline(always)]
-        pub(crate) fn robust_cross_product(a1_: I1, b1_: I1, a2_: I1, b2_: I1) -> f64 {
-            let i1_to_i64 = TC1::<I1>::i1_to_i64;
 
-            let a1: i64 = i1_to_i64(a1_);
-            let b1: i64 = i1_to_i64(b1_);
-            let a2: i64 = i1_to_i64(a2_);
-            let b2: i64 = i1_to_i64(b2_);
-            robust_cross_product_f::<i64, f64>(a1, b1, a2, b2)
-        }
-    */
     /// Compute robust cross_product: a1 * b2 - b1 * a2.
     /// It was mathematically proven that the result is correct
     /// with epsilon relative error equal to 1EPS.
@@ -98,6 +84,9 @@ where
     }
 }
 
+/// Compute robust cross_product: a1 * b2 - b1 * a2.
+/// It was mathematically proven that the result is correct
+/// with epsilon relative error equal to 1EPS.
 #[inline]
 fn robust_cross_product_f<T, U>(a1_: T, b1_: T, a2_: T, b2_: T) -> U
 where
@@ -181,6 +170,7 @@ where
 {
     /// Value is a determinant of two vectors (e.g. x1 * y2 - x2 * y1).
     /// Return orientation based on the sign of the determinant.
+    #[inline(always)]
     fn eval_f(value: f64) -> Orientation {
         if value.is_zero() {
             return Orientation::Collinear;
@@ -193,6 +183,7 @@ where
 
     /// Value is a determinant of two vectors (e.g. x1 * y2 - x2 * y1).
     /// Return orientation based on the sign of the determinant.
+    #[inline(always)]
     fn eval_bf(value: f64) -> Orientation {
         if value.is_zero() {
             return Orientation::Collinear;
@@ -203,6 +194,7 @@ where
         }
     }
 
+    #[inline(always)]
     fn eval_3(point1: &Point<I1>, point2: &Point<I1>, point3: &Point<I1>) -> Orientation {
         let i1_to_i64 = TC1::<I1>::i1_to_i64;
         let dx1: i64 = i1_to_i64(point1.x) - i1_to_i64(point2.x);
@@ -213,6 +205,7 @@ where
         Self::eval_bf(cp)
     }
 
+    #[inline(always)]
     fn eval_4(dif_x1_: i64, dif_y1_: i64, dif_x2_: i64, dif_y2_: i64) -> Orientation {
         let a = Predicates::<I1, F1>::robust_cross_product(dif_x1_, dif_y1_, dif_x2_, dif_y2_);
         Self::eval_bf(a)
@@ -233,6 +226,7 @@ where
     I1: InputType + Neg<Output = I1>,
 {
     /// returns true if lhs.x < rhs.x, if lhs.x==rhs.x it returns lhs.y < rhs.y
+    #[inline(always)]
     pub(crate) fn point_comparison_predicate(lhs: &Point<I1>, rhs: &Point<I1>) -> bool {
         if lhs.x == rhs.x {
             lhs.y < rhs.y
@@ -277,18 +271,18 @@ where
             if !rhs.is_segment() {
                 return lhs.y0() < rhs.y0();
             }
-            if Predicates::<I1, F1>::is_vertical_2(&rhs.point0_, &rhs.point1_) {
+            if Predicates::<I1, F1>::is_vertical_2(&rhs.point0(), &rhs.point1()) {
                 return lhs.y0() <= rhs.y0();
             }
             true
         } else {
-            if Predicates::<I1, F1>::is_vertical_2(&rhs.point0_, &rhs.point1_) {
-                if Predicates::<I1, F1>::is_vertical_2(&lhs.point0_, &lhs.point1_) {
+            if Predicates::<I1, F1>::is_vertical_2(&rhs.point0(), &rhs.point1()) {
+                if Predicates::<I1, F1>::is_vertical_2(&lhs.point0(), &lhs.point1()) {
                     return lhs.y0() < rhs.y0();
                 }
                 return false;
             }
-            if Predicates::<I1, F1>::is_vertical_2(&lhs.point0_, &lhs.point1_) {
+            if Predicates::<I1, F1>::is_vertical_2(&lhs.point0(), &lhs.point1()) {
                 return true;
             }
             if lhs.y0() != rhs.y0() {
@@ -339,6 +333,7 @@ where
     }
 
     #[allow(dead_code)]
+    #[inline(always)]
     pub(crate) fn event_comparison_predicate_if(
         lhs: &VSE::SiteEvent<I1, F1>,
         rhs: &VC::CircleEvent,
@@ -477,6 +472,7 @@ where
         dist1 < dist2
     }
 
+    #[inline(always)]
     fn find_distance_to_point_arc(site: &VSE::SiteEvent<I1, F1>, point: &Point<I1>) -> f64 {
         let dx = TC1::<I1>::i1_to_f64(site.x()) - TC1::<I1>::i1_to_f64(point.x);
         let dy = TC1::<I1>::i1_to_f64(site.y()) - TC1::<I1>::i1_to_f64(point.y);
@@ -607,35 +603,13 @@ where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
 {
-    #[inline]
-    pub fn node_comparison_predicate(
-        node1: &VB::BeachLineNodeKey<I1, F1>,
-        node2: &VB::BeachLineNodeKey<I1, F1>,
-    ) -> bool {
-        //let rv =
-        Self::node_comparison_predicate_real(node1, node2)
-        /*
-        let site1: &VSE::SiteEvent<I1, F1> =
-            NodeComparisonPredicate::<I1, F1>::get_comparison_site(node1);
-        let site2: &VSE::SiteEvent<I1, F1> =
-            NodeComparisonPredicate::<I1, F1>::get_comparison_site(node2);
-        let point1: &Point<I1> =
-            NodeComparisonPredicate::<I1, F1>::get_comparison_point(site1);
-        let point2: &Point<I1> =
-            NodeComparisonPredicate::<I1, F1>::get_comparison_point(site2);
-        println!("node_comparison_predicate({}:{:?}, {}:{:?})=={}",
-                 site1.sorted_index(), point1, site2.sorted_index(), point2, if rv {"true"} else {"false"});
-        */
-        //rv
-    }
-
     /// Compares nodes in the balanced binary search tree. Nodes are
     /// compared based on the y coordinates of the arcs intersection points.
     /// Nodes with less y coordinate of the intersection point go first.
     /// Comparison is only called during the new site events processing.
     /// That's why one of the nodes will always lie on the sweepline and may
     /// be represented as a straight horizontal line.
-    pub fn node_comparison_predicate_real(
+    pub fn node_comparison_predicate(
         node1: &VB::BeachLineNodeKey<I1, F1>,
         node2: &VB::BeachLineNodeKey<I1, F1>,
     ) -> bool {
@@ -768,6 +742,7 @@ where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
 {
+    #[inline(always)]
     pub(crate) fn ppp(
         site1: &VSE::SiteEvent<I1, F1>,
         site2: &VSE::SiteEvent<I1, F1>,
@@ -806,6 +781,7 @@ where
         true
     }
 
+    #[inline(always)]
     pub(crate) fn pss(
         site1: &VSE::SiteEvent<I1, F1>,
         site2: &VSE::SiteEvent<I1, F1>,
@@ -905,7 +881,6 @@ where
                 .sqrt(),
             num::cast::<f32, f64>(5.0f32).unwrap(),
         );
-        //dbg!(c_x.dif().fpv(),c_y.dif().fpv() ,lower_x.dif().fpv() ,dif_y2,inv_orientation.fpv());
 
         c_event.set_3_raw(
             c_x.dif().fpv() * inv_orientation.fpv(),
@@ -1608,14 +1583,12 @@ where
                         return false;
                     }
                     LazyCircleFormationFunctor::<I1, F1>::ppp(site1, site2, site3, circle);
-                    //Self::circle_formation_predicate_test(site1, site2, site3, circle,"ppp".to_string());
                 } else {
                     // (point, point, segment) sites.
                     if !CircleExistencePredicate::<I1, F1>::pps(site1, site2, site3, 3) {
                         return false;
                     }
                     LazyCircleFormationFunctor::<I1, F1>::pps(site1, site2, site3, 3, circle);
-                    //Self::circle_formation_predicate_test(site1, site2, site3, circle,"pps".to_string());
                 }
             } else if !site3.is_segment() {
                 // (point, segment, point) sites.
@@ -1623,14 +1596,12 @@ where
                     return false;
                 }
                 LazyCircleFormationFunctor::<I1, F1>::pps(site1, site3, site2, 2, circle);
-                //Self::circle_formation_predicate_test(site1, site2, site3, circle,"pps".to_string());
             } else {
                 // (point, segment, segment) sites.
                 if !CircleExistencePredicate::<I1, F1>::pss(site1, site2, site3, 1) {
                     return false;
                 }
                 LazyCircleFormationFunctor::<I1, F1>::pss(site1, site2, site3, 1, circle);
-                //Self::circle_formation_predicate_test(site1, site2, site3, circle,"pss".to_string());
             }
         } else if !site2.is_segment() {
             if !site3.is_segment() {
@@ -1639,14 +1610,12 @@ where
                     return false;
                 }
                 LazyCircleFormationFunctor::<I1, F1>::pps(site2, site3, site1, 1, circle);
-                //Self::circle_formation_predicate_test(site1, site2, site3, circle,"pss".to_string());
             } else {
                 // (segment, point, segment) sites.
                 if !CircleExistencePredicate::<I1, F1>::pss(site2, site1, site3, 2) {
                     return false;
                 }
                 LazyCircleFormationFunctor::<I1, F1>::pss(site2, site1, site3, 2, circle);
-                //Self::circle_formation_predicate_test(site1, site2, site3, circle,"pss".to_string());
             }
         } else if !site3.is_segment() {
             // (segment, segment, point) sites.
@@ -1654,14 +1623,12 @@ where
                 return false;
             }
             LazyCircleFormationFunctor::<I1, F1>::pss(site3, site1, site2, 3, circle);
-            //Self::circle_formation_predicate_test(site1, site2, site3, circle,"pss".to_string());
         } else {
             // (segment, segment, segment) sites.
             if !CircleExistencePredicate::<I1, F1>::sss(site1, site2, site3) {
                 return false;
             }
             LazyCircleFormationFunctor::<I1, F1>::sss(site1, site2, site3, circle);
-            //Self::circle_formation_predicate_test(site1, site2, site3, circle,"sss".to_string());
         }
 
         if Self::lies_outside_vertical_segment(&circle, site1)
@@ -1672,66 +1639,6 @@ where
         }
         true
     }
-
-    /*
-    /// Just a test
-    /// Only site1 and site2 can make a site-point-vertex
-    /// point, segment, segment can use site 1 - point 0
-    /// segment, point, segment can use site 2 - point 1
-    ///
-    #[allow(dead_code)]
-    pub(crate) fn circle_formation_predicate_test(
-        site1: &VSE::SiteEvent<I1, F1>,
-        _site2: &VSE::SiteEvent<I1, F1>,
-        _site3: &VSE::SiteEvent<I1, F1>,
-        circle: &VC::CircleEventType,
-        text:String,
-    ) {
-        if circle.is_site_point() {
-            return
-        }
-        let (x,y) = {
-            let c = circle.0.get();
-            (super::TypeConverter4::<I1,F1,i64,f64>::f64_to_f32(c.raw_x()),
-             super::TypeConverter4::<I1,F1,i64,f64>::f64_to_f32(c.raw_y()))
-        };
-        if approx::ulps_eq!(x, super::TypeConverter2::<I1,F1>::i1_to_f32(site1.point0_.x)) &&
-           approx::ulps_eq!(y,super::TypeConverter2::<I1,F1>::i1_to_f32(site1.point0_.y))
-        {
-            tln!("{} makes a site-vertex site-1-0", text);
-            return
-        }
-        if approx::ulps_eq!(x, super::TypeConverter2::<I1,F1>::i1_to_f32(site1.point1_.x)) &&
-            approx::ulps_eq!(y,super::TypeConverter2::<I1,F1>::i1_to_f32(site1.point1_.y))
-        {
-            tln!("{} makes a site-vertex site-1-1", text);
-            return
-        }
-        if approx::ulps_eq!(x, super::TypeConverter2::<I1,F1>::i1_to_f32(_site2.point0_.x)) &&
-            approx::ulps_eq!(y,super::TypeConverter2::<I1,F1>::i1_to_f32(_site2.point0_.y))
-        {
-            tln!("{} makes a site-vertex site-2-0", text);
-            return
-        }
-        if approx::ulps_eq!(x, super::TypeConverter2::<I1,F1>::i1_to_f32(_site2.point1_.x)) &&
-            approx::ulps_eq!(y,super::TypeConverter2::<I1,F1>::i1_to_f32(_site2.point1_.y))
-        {
-            tln!("{} makes a site-vertex site-2-1", text);
-            return
-        }
-        if approx::ulps_eq!(x, super::TypeConverter2::<I1,F1>::i1_to_f32(_site3.point0_.x)) &&
-            approx::ulps_eq!(y,super::TypeConverter2::<I1,F1>::i1_to_f32(_site3.point0_.y))
-        {
-            tln!("{} makes a site-vertex site-3-0", text);
-            return
-        }
-        if approx::ulps_eq!(x, super::TypeConverter2::<I1,F1>::i1_to_f32(_site3.point1_.x)) &&
-            approx::ulps_eq!(y,super::TypeConverter2::<I1,F1>::i1_to_f32(_site3.point1_.y))
-        {
-            tln!("{} makes a site-vertex site-3-1", text);
-            return
-        }
-    }*/
 }
 
 #[derive(Default)]
