@@ -348,7 +348,6 @@ impl ExtendedInt {
     }
 
     fn mul_slice(&mut self, c1: &[Wrapping<u32>], sz1: usize, c2: &[Wrapping<u32>], sz2: usize) {
-
         let mut cur: u64 = 0;
         let mut nxt: u64;
         let mut tmp: u64;

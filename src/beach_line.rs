@@ -98,9 +98,9 @@ where
 }
 
 impl<I1, F1> BeachLine<I1, F1>
-    where
-        I1: InputType + Neg<Output = I1>,
-        F1: OutputType + Neg<Output = F1>,
+where
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
 {
     pub(crate) fn len(&self) -> (usize, usize) {
         (self.beach_line_.len(), self.beach_line_vec.len())

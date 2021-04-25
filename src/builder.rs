@@ -86,9 +86,9 @@ where
 }
 
 impl<I1, F1> Default for Builder<I1, F1>
-    where
-        I1: InputType + Neg<Output = I1>,
-        F1: OutputType + Neg<Output = F1>,
+where
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
 {
     fn default() -> Self {
         Self {
@@ -112,10 +112,7 @@ where
     F1: OutputType + Neg<Output = F1>,
 {
     /// todo replace with default
-    #[deprecated(
-    since = "0.9.0",
-    note = "Please use the default function instead"
-    )]
+    #[deprecated(since = "0.9.0", note = "Please use the default function instead")]
     pub fn new() -> Builder<I1, F1> {
         Self::default()
     }

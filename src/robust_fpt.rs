@@ -591,14 +591,13 @@ impl ops::Mul<f64> for RobustDif {
     type Output = RobustDif;
 
     fn mul(self, _rhs: f64) -> Self {
+        let rhs = RobustFpt::new_1(_rhs);
         if is_pos_f(_rhs) {
-            let rhs = RobustFpt::new_1(_rhs);
             Self {
                 positive_sum_: self.positive_sum_ * rhs,
                 negative_sum_: self.negative_sum_ * rhs,
             }
         } else {
-            let rhs = RobustFpt::new_1(_rhs);
             Self {
                 positive_sum_: self.negative_sum_ * rhs,
                 negative_sum_: self.positive_sum_ * rhs,
@@ -655,18 +654,19 @@ impl ops::MulAssign<RobustDif> for RobustDif {
     }
 }
 
+/*
+TODO: This must be wrong, but also - it's not used
 impl ops::DivAssign<f64> for RobustDif {
     fn div_assign(&mut self, _rhs: f64) {
-        let rhs = if is_neg_f(_rhs) {
+        if is_neg_f(_rhs) {
             self.swap();
-            RobustFpt::new_1(-_rhs)
-        } else {
-            RobustFpt::new_1(-_rhs)
-        };
+        }
+        let rhs = RobustFpt::new_1(-_rhs);
+
         self.positive_sum_ /= rhs;
         self.negative_sum_ /= rhs;
     }
-}
+}*/
 
 impl fmt::Debug for RobustDif {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
