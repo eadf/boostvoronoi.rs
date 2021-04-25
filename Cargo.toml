@@ -12,7 +12,6 @@ keywords = ["voronoi", "sweepline", "geometry"]
 [dependencies]
 num = ">=0.3.1,<0.5.0"
 ordered-float = "^2.1.1"
-fnv = "^1.0.7"
 vec_map = "^0.8.2"
 yabf = {version="^0.1.0",default-features=false}
 num-traits = "^0.2.14"
@@ -40,7 +39,7 @@ path = "example/main.rs"
 
 [dev-dependencies]
 geo = "^0.17.1"
-fltk = "^0.16.5"
+fltk = "^1.0.1"
 criterion = "^0.3.4"
 approx = "^0.4.0"
 

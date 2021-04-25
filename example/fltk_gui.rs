@@ -8,16 +8,8 @@ use boostvoronoi::{InputType, OutputType};
 
 use std::ops::Neg;
 
-use fltk::app::event_key_down;
-use fltk::app::{event_x, event_y, redraw};
-use fltk::button::RoundButton;
-use fltk::dialog::FileDialogType;
-use fltk::enums::Key;
-use fltk::menu::MenuButton;
-use fltk::*;
-use fltk::{app, draw::*, frame::*};
+use fltk::{app, button, dialog, draw, enums, frame, group, menu, prelude::*, window};
 
-use fltk::group::Pack;
 use geo::prelude::Intersects;
 use ordered_float::OrderedFloat;
 use std::cell::{RefCell, RefMut};
@@ -119,101 +111,103 @@ fn main() -> Result<(), BvError> {
         .center_screen()
         .with_label("Boost voronoi ported to Rust");
 
-    let mut frame = Frame::new(5, 5, FW, FH, "");
-    frame.set_color(Color::Black);
-    frame.set_frame(FrameType::DownBox);
+    let mut frame = frame::Frame::new(5, 5, FW, FH, "");
+    frame.set_color(enums::Color::Black);
+    frame.set_frame(enums::FrameType::DownBox);
 
-    let mut pack = Pack::new(5 + FW, 5, 170, WH, "");
+    let mut pack = group::Pack::new(5 + FW, 5, 170, WH, "");
     pack.set_spacing(5);
 
-    let mut menu_but = MenuButton::default().with_size(170, 25).with_label("Menu");
-    menu_but.set_frame(FrameType::PlasticUpBox);
+    let mut menu_but = menu::MenuButton::default()
+        .with_size(170, 25)
+        .with_label("Menu");
+    menu_but.set_frame(enums::FrameType::PlasticUpBox);
 
-    let mut input_points_button = RoundButton::default()
+    let mut input_points_button = button::RoundButton::default()
         .with_size(180, 25)
         .with_label("input points");
     input_points_button.toggle(true);
-    input_points_button.set_frame(FrameType::PlasticUpBox);
+    input_points_button.set_frame(enums::FrameType::PlasticUpBox);
 
-    let mut input_segments_button = RoundButton::default()
+    let mut input_segments_button = button::RoundButton::default()
         .with_size(180, 25)
         .with_label("input segments");
     input_segments_button.toggle(true);
-    input_segments_button.set_frame(FrameType::PlasticUpBox);
+    input_segments_button.set_frame(enums::FrameType::PlasticUpBox);
 
-    let mut external_button = RoundButton::default()
+    let mut external_button = button::RoundButton::default()
         .with_size(180, 25)
         .with_label("externals");
     external_button.toggle(true);
-    external_button.set_frame(FrameType::PlasticUpBox);
+    external_button.set_frame(enums::FrameType::PlasticUpBox);
 
-    let mut vertices_button = RoundButton::default()
+    let mut vertices_button = button::RoundButton::default()
         .with_size(180, 25)
         .with_label("vertices (all)");
     vertices_button.toggle(true);
-    vertices_button.set_frame(FrameType::PlasticUpBox);
+    vertices_button.set_frame(enums::FrameType::PlasticUpBox);
 
-    let mut site_vertices_button = RoundButton::default()
+    let mut site_vertices_button = button::RoundButton::default()
         .with_size(180, 25)
         .with_label("site vertices");
     site_vertices_button.toggle(true);
-    site_vertices_button.set_frame(FrameType::PlasticUpBox);
+    site_vertices_button.set_frame(enums::FrameType::PlasticUpBox);
 
-    let mut edges_button = RoundButton::default()
+    let mut edges_button = button::RoundButton::default()
         .with_size(180, 25)
         .with_label("edges (all)");
     edges_button.toggle(true);
-    edges_button.set_frame(FrameType::PlasticUpBox);
+    edges_button.set_frame(enums::FrameType::PlasticUpBox);
 
-    let mut infinite_button = RoundButton::default()
+    let mut infinite_button = button::RoundButton::default()
         .with_size(180, 25)
         .with_label("infinite edges");
     infinite_button.toggle(true);
-    infinite_button.set_frame(FrameType::PlasticUpBox);
+    infinite_button.set_frame(enums::FrameType::PlasticUpBox);
 
-    let mut curved_button = RoundButton::default()
+    let mut curved_button = button::RoundButton::default()
         .with_size(180, 25)
         .with_label("arc edges");
     curved_button.toggle(true);
-    curved_button.set_frame(FrameType::PlasticUpBox);
+    curved_button.set_frame(enums::FrameType::PlasticUpBox);
 
-    let mut curved_as_lines_button = RoundButton::default()
+    let mut curved_as_lines_button = button::RoundButton::default()
         .with_size(180, 25)
         .with_label("arc as lines");
     curved_as_lines_button.toggle(false);
-    curved_as_lines_button.set_frame(FrameType::PlasticUpBox);
+    curved_as_lines_button.set_frame(enums::FrameType::PlasticUpBox);
 
-    let mut primary_button = RoundButton::default()
+    let mut primary_button = button::RoundButton::default()
         .with_size(180, 25)
         .with_label("primary edges");
     primary_button.toggle(true);
-    primary_button.set_frame(FrameType::PlasticUpBox);
+    primary_button.set_frame(enums::FrameType::PlasticUpBox);
 
-    let mut secondary_button = RoundButton::default()
+    let mut secondary_button = button::RoundButton::default()
         .with_size(180, 25)
         .with_label("secondary edges");
     secondary_button.toggle(true);
-    secondary_button.set_frame(FrameType::PlasticUpBox);
+    secondary_button.set_frame(enums::FrameType::PlasticUpBox);
 
-    /*let mut e_segment_cell_button = RoundButton::default()
+    /*let mut e_segment_cell_button = button::RoundButton::default()
             .with_size(180, 25)
             .with_label("cell segment edges");
         e_segment_cell_button.toggle(true);
         e_segment_cell_button.set_frame(FrameType::PlasticUpBox);
 
-        let mut e_point_cell_button = RoundButton::default()
+        let mut e_point_cell_button = button::RoundButton::default()
             .with_size(180, 25)
             .with_label("cell point edges");
         e_point_cell_button.toggle(true);
         e_point_cell_button.set_frame(FrameType::PlasticUpBox);
 
-        let mut v_segment_cell_button = RoundButton::default()
+        let mut v_segment_cell_button = button::RoundButton::default()
             .with_size(180, 25)
             .with_label("cell segment vertices");
         v_segment_cell_button.toggle(true);
         v_segment_cell_button.set_frame(FrameType::PlasticUpBox);
 
-        let mut v_point_cell_button = RoundButton::default()
+        let mut v_point_cell_button = button::RoundButton::default()
             .with_size(180, 25)
             .with_label("cell point vertices");
         v_point_cell_button.toggle(true);
@@ -221,10 +215,10 @@ fn main() -> Result<(), BvError> {
     */
     pack.end();
 
-    wind.set_color(Color::White);
+    wind.set_color(enums::Color::White);
     wind.end();
     wind.show();
-    let offs = Offscreen::new(frame.width(), frame.height()).unwrap();
+    let offs = draw::Offscreen::new(frame.width(), frame.height()).unwrap();
     #[cfg(not(target_os = "macos"))]
     {
         offs.begin();
@@ -247,28 +241,28 @@ fn main() -> Result<(), BvError> {
 
     menu_but.add_emit(
         "From file",
-        Shortcut::None,
+        enums::Shortcut::None,
         menu::MenuFlag::Normal,
         sender,
         GuiMessage::MenuChoice(Example::File),
     );
     menu_but.add_emit(
         "Simple",
-        Shortcut::None,
+        enums::Shortcut::None,
         menu::MenuFlag::Normal,
         sender,
         GuiMessage::MenuChoice(Example::Simple),
     );
     menu_but.add_emit(
         "Complex",
-        Shortcut::None,
+        enums::Shortcut::None,
         menu::MenuFlag::Normal,
         sender,
         GuiMessage::MenuChoice(Example::Complex),
     );
     menu_but.add_emit(
         "Clean",
-        Shortcut::None,
+        enums::Shortcut::None,
         menu::MenuFlag::Normal,
         sender,
         GuiMessage::MenuChoice(Example::Clean),
@@ -301,13 +295,13 @@ fn main() -> Result<(), BvError> {
 
     let shared_data_c = Rc::clone(&shared_data_rc);
     // This is called whenever the window is drawn and redrawn
-    wind.draw(move || {
+    wind.draw(move |_| {
         if let Ok(data_b) = shared_data_c.try_borrow() {
             // todo, move the actual drawing away from draw() function, only keep the offscreen blit.
             offs_rc.borrow_mut().begin();
 
-            set_draw_color(Color::White);
-            draw_rectf(0, 0, FW, FH);
+            draw::set_draw_color(enums::Color::White);
+            draw::draw_rectf(0, 0, FW, FH);
             let _ = data_b.visualizer.draw(&data_b);
             offs_rc.borrow_mut().end();
 
@@ -317,8 +311,8 @@ fn main() -> Result<(), BvError> {
                 // this will almost never be called
                 let data_b = shared_data_c.borrow();
                 offs_rc.borrow_mut().begin();
-                set_draw_color(Color::Yellow);
-                draw_rectf(5, 5, FW, FH);
+                draw::set_draw_color(enums::Color::Yellow);
+                draw::draw_rectf(5, 5, FW, FH);
                 let _ = data_b.visualizer.draw(&data_b);
                 offs_rc.borrow_mut().end();
             }
@@ -328,11 +322,15 @@ fn main() -> Result<(), BvError> {
     let shared_data_c = Rc::clone(&shared_data_rc);
     let mut mouse_drag: Option<(i32, i32)> = None;
 
-    wind.handle(move |ev| match ev {
+    wind.handle(move |_, ev| match ev {
         enums::Event::MouseWheel => {
             let event = &app::event_coords();
             let mut shared_data_bm = shared_data_c.borrow_mut();
-            let event_dy = app::event_dy();
+            let event_dy = match app::event_dy() {
+                app::MouseWheel::Up => 3,
+                app::MouseWheel::Down => -3,
+                _ => 0,
+            };
             let reverse_middle = shared_data_bm
                 .visualizer
                 .affine
@@ -356,7 +354,7 @@ fn main() -> Result<(), BvError> {
             shared_data_bm.visualizer.affine.to_offset[1] += (event.1 as f64) - new_middle[1];
 
             //println!("mouse wheel at dy:{:?} scale:{:?}", event_dy, shared_data_bm.visualizer.affine.scale);
-            redraw();
+            app::redraw();
             true
         }
         enums::Event::Drag => {
@@ -369,7 +367,7 @@ fn main() -> Result<(), BvError> {
                 shared_data_bm.visualizer.affine.to_offset[0] += (event.0 - md.0) as f64;
                 shared_data_bm.visualizer.affine.to_offset[1] += (event.1 - md.1) as f64;
                 mouse_drag = Some(*event);
-                redraw();
+                app::redraw();
             }
             true
         }
@@ -378,12 +376,14 @@ fn main() -> Result<(), BvError> {
             //let  ke = &app::event_key();
             if mouse_drag.is_some() {
                 mouse_drag = None;
-            } else if event_key_down(Key::from_char('L')) || event_key_down(Key::from_char('S')) {
+            } else if app::event_key_down(enums::Key::from_char('L'))
+                || app::event_key_down(enums::Key::from_char('S'))
+            {
                 let mut shared_data_bm = shared_data_c.borrow_mut();
                 let point = shared_data_bm
                     .visualizer
                     .affine
-                    .reverse_transform(event_x() as f64, event_y() as f64);
+                    .reverse_transform(app::event_x() as f64, app::event_y() as f64);
                 if point.is_err() {
                     println!("{:?}", point.err().unwrap());
                     return false;
@@ -400,25 +400,25 @@ fn main() -> Result<(), BvError> {
 
                         let _ = shared_data_bm.visualizer.build();
 
-                        if event_key_down(Key::from_char('L')) {
+                        if app::event_key_down(enums::Key::from_char('L')) {
                             shared_data_bm.last_click = None;
                         } else {
                             shared_data_bm.last_click = Some(point);
                         }
-                        redraw();
+                        app::redraw();
                     }
                 } else {
                     shared_data_bm.last_click = Some(point);
                 }
             } else {
-                if event_x() < FW {
+                if app::event_x() < FW {
                     println!("mouse at {:?}", event);
                     let mut shared_data_bm = shared_data_c.borrow_mut();
                     {
                         let point = shared_data_bm
                             .visualizer
                             .affine
-                            .reverse_transform(event_x() as f64, event_y() as f64);
+                            .reverse_transform(app::event_x() as f64, app::event_y() as f64);
                         if point.is_err() {
                             println!("{:?}", point.err().unwrap());
                             return false;
@@ -429,19 +429,19 @@ fn main() -> Result<(), BvError> {
                     let _ = shared_data_bm.visualizer.build();
 
                     shared_data_bm.last_click = None;
-                    redraw();
+                    app::redraw();
                 }
             }
             true
         }
         enums::Event::KeyDown => {
-            if event_key_down(Key::from_char('C')) {
+            if app::event_key_down(enums::Key::from_char('C')) {
                 let mut shared_data_bm = shared_data_c.borrow_mut();
                 shared_data_bm.last_click = None;
                 shared_data_bm.visualizer.segment_data_.clear();
                 shared_data_bm.visualizer.point_data_.clear();
                 shared_data_bm.visualizer.diagram.clear();
-                redraw();
+                app::redraw();
             }
             false
         }
@@ -466,14 +466,14 @@ fn main() -> Result<(), BvError> {
                     }
                     let _ = shared_data_bm.visualizer.build();
                     let _ = shared_data_bm.visualizer.re_calculate_affine();
-                    redraw();
+                    app::redraw();
                 }
                 GuiMessage::Filter(flag) => {
                     shared_data_bm.draw_flag ^= flag;
                 }
             }
             shared_data_bm.last_message = Some(msg);
-            redraw();
+            app::redraw();
         }
     }
     Ok(())
@@ -635,9 +635,9 @@ where
     }
 
     fn draw(&self, config: &SharedData) -> Result<(), BvError> {
-        set_line_style(LineStyle::Solid, 1);
+        draw::set_line_style(draw::LineStyle::Solid, 1);
 
-        draw::set_draw_color(Color::Red);
+        draw::set_draw_color(enums::Color::Red);
         if config.draw_flag.contains(DrawFilterFlag::INPUT_POINT) {
             self.draw_input_points(&self.affine);
         }
@@ -645,11 +645,11 @@ where
             self.draw_input_segments(&self.affine);
         }
         if config.draw_flag.contains(DrawFilterFlag::EDGES) {
-            draw::set_draw_color(Color::Green);
+            draw::set_draw_color(enums::Color::Green);
             self.draw_edges(&config, &self.affine);
         }
         if config.draw_flag.contains(DrawFilterFlag::VERTICES) {
-            set_draw_color(Color::Blue);
+            draw::set_draw_color(enums::Color::Blue);
             self.draw_vertices(&config, &self.affine);
         }
         Ok(())
@@ -755,11 +755,10 @@ where
         let draw_cell_point = config.draw_flag.contains(DrawFilterFlag::E_CELL_POINT);
         let draw_infinite_edges = config.draw_flag.contains(DrawFilterFlag::INFINITE);
 
-
         let mut already_drawn = yabf::Yabf::default();
 
         for it in self.diagram.edges().iter().enumerate() {
-            set_draw_color(Color::DarkGreen);
+            draw::set_draw_color(enums::Color::DarkGreen);
             let edge_id = VoronoiEdgeIndex(it.0);
             let edge = it.1.get();
             if already_drawn.bit(edge_id.0) {
@@ -780,24 +779,24 @@ where
                 continue;
             }
             if ColorFlag::from_bits(edge.get_color())
-                    .unwrap()
-                    .contains(ColorFlag::INFINITE)
+                .unwrap()
+                .contains(ColorFlag::INFINITE)
             {
                 if !draw_infinite_edges {
                     continue;
                 } else {
-                    set_draw_color(Color::Green);
+                    draw::set_draw_color(enums::Color::Green);
                 }
             }
 
             if ColorFlag::from_bits(edge.get_color())
-                    .unwrap()
-                    .contains(ColorFlag::EXTERNAL)
+                .unwrap()
+                .contains(ColorFlag::EXTERNAL)
             {
                 if !draw_external {
-                    continue
+                    continue;
                 } else {
-                    set_draw_color(Color::Green);
+                    draw::set_draw_color(enums::Color::Green);
                 }
             }
             if (!draw_cell_point)
@@ -1424,7 +1423,7 @@ where
                 )
             }
             Example::File => {
-                let mut chooser = dialog::NativeFileChooser::new(FileDialogType::BrowseDir);
+                let mut chooser = dialog::NativeFileChooser::new(dialog::FileDialogType::BrowseDir);
 
                 let _ = chooser.set_directory(std::path::Path::new("examples"));
                 let _ = chooser.set_title("select your input data");
