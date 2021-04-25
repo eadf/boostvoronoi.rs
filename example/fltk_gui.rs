@@ -222,8 +222,8 @@ fn main() -> Result<(), BvError> {
     #[cfg(not(target_os = "macos"))]
     {
         offs.begin();
-        set_draw_color(Color::White);
-        draw_rectf(0, 0, FW, FH);
+        draw::set_draw_color(enums::Color::White);
+        draw::draw_rectf(0, 0, FW, FH);
         offs.end();
     }
     let offs = Rc::from(RefCell::from(offs));
