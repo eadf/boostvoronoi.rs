@@ -2,10 +2,10 @@
 [![Documentation](https://docs.rs/boostvoronoi/badge.svg)](https://docs.rs/boostvoronoi)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Clippy/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Clippy/badge.svg)
-[![dependency status](https://deps.rs/crate/boostvoronoi/0.8.1/status.svg)](https://deps.rs/crate/boostvoronoi/0.8.1)
+[![dependency status](https://deps.rs/crate/boostvoronoi/0.8.2/status.svg)](https://deps.rs/crate/boostvoronoi/0.8.2)
 
 # Segmented Voronoi for Rust
-[Boost 1.75.0 polygon::voronoi](https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_main.htm) ported to 100% rust.
+[Boost 1.75.0 polygon::voronoi](https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_main.htm) ported to 100% rust (nothing voronoi related changed in 1.76)
 This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) works on line segments as well as points, making it useful for calculating [centerlines](https://crates.io/crates/centerline).
 
 Code still in development, not ready for any purpose.
