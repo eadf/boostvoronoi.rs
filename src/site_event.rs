@@ -67,7 +67,7 @@ where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut rv = String::new();
 
         if self.is_point() {

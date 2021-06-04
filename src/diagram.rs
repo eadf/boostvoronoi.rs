@@ -135,7 +135,7 @@ where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut rv = String::new();
 
         rv.push_str(
@@ -410,7 +410,7 @@ where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut rv = String::new();
 
         rv.push_str(
@@ -545,7 +545,7 @@ where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut rv = String::new();
 
         rv.push_str(
@@ -801,15 +801,15 @@ where
         }
     }
 
-    pub fn cell_iter(&self) -> core::slice::Iter<CellType<I1, F1>> {
+    pub fn cell_iter(&self) -> core::slice::Iter<'_, CellType<I1, F1>> {
         self.cells_.iter()
     }
 
-    pub fn vertex_iter(&self) -> core::slice::Iter<VertexType<I1, F1>> {
+    pub fn vertex_iter(&self) -> core::slice::Iter<'_, VertexType<I1, F1>> {
         self.vertices_.iter()
     }
 
-    pub fn edge_iter(&self) -> std::slice::Iter<EdgeType<I1, F1>> {
+    pub fn edge_iter(&self) -> std::slice::Iter<'_, EdgeType<I1, F1>> {
         self.edges_.iter()
     }
 
@@ -1085,7 +1085,7 @@ where
     pub fn edge_rot_next_iterator(
         &self,
         edge_id: Option<VoronoiEdgeIndex>,
-    ) -> EdgeRotNextIterator<I1, F1> {
+    ) -> EdgeRotNextIterator<'_, I1, F1> {
         EdgeRotNextIterator::new(self, edge_id)
     }
 
@@ -1096,7 +1096,7 @@ where
     pub fn edge_rot_prev_iterator(
         &self,
         edge_id: Option<VoronoiEdgeIndex>,
-    ) -> EdgeRotPrevIterator<I1, F1> {
+    ) -> EdgeRotPrevIterator<'_, I1, F1> {
         EdgeRotPrevIterator::new(self, edge_id)
     }
 

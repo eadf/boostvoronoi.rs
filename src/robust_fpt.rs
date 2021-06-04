@@ -191,7 +191,7 @@ impl RobustFpt {
 }
 
 impl fmt::Debug for RobustFpt {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_fmt(format_args!("{:.12}[{:.12}]", self.fpv_, self.re_))
     }
 }
@@ -669,7 +669,7 @@ impl ops::DivAssign<f64> for RobustDif {
 }*/
 
 impl fmt::Debug for RobustDif {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_fmt(format_args!(
             "({:?},{:?})",
             self.positive_sum_, self.negative_sum_

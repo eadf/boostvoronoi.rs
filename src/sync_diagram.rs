@@ -47,7 +47,7 @@ where
     pub fn edge_rot_next_iterator(
         &self,
         edge_id: Option<VD::VoronoiEdgeIndex>,
-    ) -> EdgeRotNextIterator<I1, F1> {
+    ) -> EdgeRotNextIterator<'_, I1, F1> {
         EdgeRotNextIterator::new(self, edge_id)
     }
 

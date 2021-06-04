@@ -917,6 +917,7 @@ where
         }
     }
 
+    #[allow(clippy::branches_sharing_code)] // false positive
     fn pps(
         site1: &VSE::SiteEvent<I1, F1>,
         site2: &VSE::SiteEvent<I1, F1>,
@@ -1113,6 +1114,7 @@ where
             ),
             1_f64,
         );
+        #[allow(clippy::branches_sharing_code)] // false positive
         if OrientationTest::<I1, F1>::eval_f(orientation.fpv()) == Orientation::Collinear {
             tln!("  LazyCircleFormationFunctor::pss collinear");
             let a = RF::RobustFpt::new_2(a1 * a1 + b1 * b1, 2_f64);

@@ -15,10 +15,12 @@
 #![deny(unused_qualifications)]
 #![deny(unused_results)]
 #![deny(unused_imports)]
-#![allow(renamed_and_removed_lints)]
-#![allow(clippy::unknown_clippy_lints)]
+#![deny(bare_trait_objects)]
+#![deny(ellipsis_inclusive_range_patterns)]
+#![deny(elided_lifetimes_in_paths)]
+//#![allow(renamed_and_removed_lints)]
+//#![allow(clippy::unknown_clippy_lints)]
 #![feature(map_first_last)]
-
 use core::fmt::Debug;
 use extended_exp_fpt as EX;
 use extended_int as EI;
@@ -81,7 +83,7 @@ impl<T> Debug for Point<T>
 where
     T: InputType + Display + Hash,
 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut rv = String::new();
 
         rv.push_str(format!("({:.12},{:.12})", self.x, self.y,).as_str());
