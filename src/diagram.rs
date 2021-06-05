@@ -32,7 +32,7 @@ pub type SourceIndex = usize;
 ///! See <https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_diagram.htm>
 
 /// Typed container for cell indices
-#[derive(Copy, Clone, PartialEq, Eq, Default)]
+#[derive(Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub struct VoronoiCellIndex(pub usize);
 
 impl fmt::Debug for VoronoiCellIndex {
@@ -42,7 +42,7 @@ impl fmt::Debug for VoronoiCellIndex {
 }
 
 /// Typed container for edge indices
-#[derive(Copy, Clone, PartialEq, Eq, Default)]
+#[derive(Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub struct VoronoiEdgeIndex(pub usize);
 
 impl fmt::Debug for VoronoiEdgeIndex {
@@ -52,7 +52,7 @@ impl fmt::Debug for VoronoiEdgeIndex {
 }
 
 /// Typed container for vertex indices
-#[derive(Copy, Clone, PartialEq, Eq, Default)]
+#[derive(Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub struct VoronoiVertexIndex(pub usize);
 
 impl fmt::Debug for VoronoiVertexIndex {
