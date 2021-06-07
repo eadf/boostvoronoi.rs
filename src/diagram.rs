@@ -242,18 +242,89 @@ where
     pub fn get_incident_edge(&self) -> Option<VoronoiEdgeIndex> {
         self.incident_edge_
     }
+
+}
+
+/// Iterator over edges of a Cell
+/// Do *NOT* use this while altering the std::cell::Cell values of next, prev or twin edges.
+pub struct EdgeNextIterator<'s, I1, F1>
+    where
+        I1: InputType + Neg<Output = I1>,
+        F1: OutputType + Neg<Output = F1>,
+{
+    diagram: &'s VoronoiDiagram<I1, F1>,
+    start_edge: VoronoiEdgeIndex,
+    next_edge: Option<VoronoiEdgeIndex>,
+    #[doc(hidden)]
+    _pdi: PhantomData<I1>,
+    #[doc(hidden)]
+    _pdf: PhantomData<F1>,
+}
+
+impl<'s, I1, F1> EdgeNextIterator<'s, I1, F1>
+    where
+        I1: InputType + Neg<Output = I1>,
+        F1: OutputType + Neg<Output = F1>,
+{
+    pub(crate) fn new(
+        diagram: &'s VoronoiDiagram<I1, F1>,
+        starting_edge: Option<VoronoiEdgeIndex>,
+    ) -> Self {
+        if let Some(starting_edge) = starting_edge {
+            Self {
+                diagram,
+                start_edge: starting_edge,
+                next_edge: Some(starting_edge),
+                _pdf: PhantomData,
+                _pdi: PhantomData,
+            }
+        } else {
+            Self {
+                diagram,
+                // Value does not matter next edge is None
+                start_edge: VoronoiEdgeIndex(0),
+                next_edge: None,
+                _pdf: PhantomData,
+                _pdi: PhantomData,
+            }
+        }
+    }
+}
+
+impl<'s, I1, F1> Iterator for EdgeNextIterator<'s, I1, F1>
+    where
+        I1: InputType + Neg<Output = I1>,
+        F1: OutputType + Neg<Output = F1>,
+{
+    type Item = VoronoiEdgeIndex;
+    fn next(&mut self) -> Option<VoronoiEdgeIndex> {
+        let rv = self.next_edge;
+        let new_next_edge = self.diagram._edge_get_next(self.next_edge);
+
+        self.next_edge = if let Some(nne) = new_next_edge {
+            if nne.0 == self.start_edge.0 {
+                // Break the loop when we see starting edge again
+                None
+            } else {
+                Some(nne)
+            }
+        } else {
+            None
+        };
+        rv
+    }
 }
 
 /// Iterator over edges pointing away from the vertex indicated by the initial edge.
 /// edge.vertex()
-/// Do *NOT* use this when altering next, prev or twin edges.
+/// Do *NOT* use this when altering the std::cell::Cell values of next, prev or twin edges.
 pub struct EdgeRotNextIterator<'s, I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
 {
     diagram: &'s VoronoiDiagram<I1, F1>,
-    starting_edge: VoronoiEdgeIndex,
+    start_edge: VoronoiEdgeIndex,
     next_edge: Option<VoronoiEdgeIndex>,
     #[doc(hidden)]
     _pdi: PhantomData<I1>,
@@ -273,7 +344,7 @@ where
         if let Some(starting_edge) = starting_edge {
             Self {
                 diagram,
-                starting_edge,
+                start_edge: starting_edge,
                 next_edge: Some(starting_edge),
                 _pdf: PhantomData,
                 _pdi: PhantomData,
@@ -282,7 +353,7 @@ where
             Self {
                 diagram,
                 // Value does not matter next edge is None
-                starting_edge: VoronoiEdgeIndex(0),
+                start_edge: VoronoiEdgeIndex(0),
                 next_edge: None,
                 _pdf: PhantomData,
                 _pdi: PhantomData,
@@ -301,7 +372,7 @@ where
         let rv = self.next_edge;
         let new_next_edge = self.diagram.edge_rot_next(self.next_edge);
         self.next_edge = if let Some(nne) = new_next_edge {
-            if nne.0 == self.starting_edge.0 {
+            if nne.0 == self.start_edge.0 {
                 // Break the loop when we see starting edge again
                 None
             } else {
@@ -316,14 +387,14 @@ where
 
 /// Iterator over edges pointing away from the vertex indicated by the initial edge.
 /// edge.vertex()
-/// Do *NOT* use this when altering next, prev or twin edges.
+/// Do *NOT* use this when altering the std::cell::Cell values of next, prev or twin edges.
 pub struct EdgeRotPrevIterator<'s, I1, F1>
 where
     I1: InputType + Neg<Output = I1>,
     F1: OutputType + Neg<Output = F1>,
 {
     diagram: &'s VoronoiDiagram<I1, F1>,
-    starting_edge: VoronoiEdgeIndex,
+    start_edge: VoronoiEdgeIndex,
     next_edge: Option<VoronoiEdgeIndex>,
     #[doc(hidden)]
     _pdi: PhantomData<I1>,
@@ -344,7 +415,7 @@ where
         if let Some(starting_edge) = starting_edge {
             Self {
                 diagram,
-                starting_edge,
+                start_edge: starting_edge,
                 next_edge: Some(starting_edge),
                 _pdf: PhantomData,
                 _pdi: PhantomData,
@@ -353,7 +424,7 @@ where
             Self {
                 diagram,
                 // Value does not matter next edge is None
-                starting_edge: VoronoiEdgeIndex(0),
+                start_edge: VoronoiEdgeIndex(0),
                 next_edge: None,
                 _pdf: PhantomData,
                 _pdi: PhantomData,
@@ -372,7 +443,7 @@ where
         let rv = self.next_edge;
         let new_next_edge = self.diagram.edge_rot_prev(self.next_edge);
         self.next_edge = if let Some(nne) = new_next_edge {
-            if nne.0 == self.starting_edge.0 {
+            if nne.0 == self.start_edge.0 {
                 // Break the loop when we see starting edge again
                 None
             } else {
@@ -611,14 +682,17 @@ where
         self.vertex_
     }
 
+    /// Returns the twin edge
     pub fn twin(&self) -> Option<VoronoiEdgeIndex> {
         self.twin_
     }
 
+    /// returns the next edge (counter clockwise winding)
     pub fn next(&self) -> Option<VoronoiEdgeIndex> {
         self.next_ccw_
     }
 
+    /// returns the previous edge (counter clockwise winding)
     pub fn prev(&self) -> Option<VoronoiEdgeIndex> {
         self.prev_ccw_
     }
@@ -916,6 +990,13 @@ where
             return cell.get().is_degenerate();
         }
         false
+    }
+
+    /// Returns an edge iterator. This iterates over the edges belonging to this cell starting with
+    /// the incident edge.
+    pub fn cell_edge_iterator(&self, cell_id: Option<VoronoiCellIndex>) -> EdgeNextIterator<'_, I1, F1> {
+        let incident_edge = self._cell_get_incident_edge(cell_id);
+        EdgeNextIterator::<'_, I1, F1>::new(self, incident_edge)
     }
 
     #[inline]
