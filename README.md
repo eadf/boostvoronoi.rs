@@ -2,7 +2,7 @@
 [![Documentation](https://docs.rs/boostvoronoi/badge.svg)](https://docs.rs/boostvoronoi)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Clippy/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Clippy/badge.svg)
-[![dependency status](https://deps.rs/crate/boostvoronoi/0.8.2/status.svg)](https://deps.rs/crate/boostvoronoi/0.8.2)
+[![dependency status](https://deps.rs/crate/boostvoronoi/0.8.3/status.svg)](https://deps.rs/crate/boostvoronoi/0.8.3)
 
 # Segmented Voronoi for Rust
 ![Rusty voronoi](img/title.png)
