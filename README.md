@@ -9,7 +9,7 @@
 
 
 [Boost 1.75.0 polygon::voronoi](https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_main.htm) ported to 100% rust (nothing voronoi related changed in 1.76)
-This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) works on line segments as well as points, making it useful for calculating [centerlines (like the image above)](https://github.com/eadf/toxicblend.rs).
+This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) works on line segments as well as points, making it useful for calculating [centerlines (like the image above, made by this library)](https://github.com/eadf/toxicblend.rs).
 
 Code still in development, not ready for any purpose.
 
@@ -43,11 +43,11 @@ let mut vb = Builder::<I1, F1>::new();
 
 // you will have to keep track of the input geometry. it will be referenced as
 // input geometry indices in the output.
-vb.with_vertices(p.iter()).unwrap();
-vb.with_segments(s.iter()).unwrap();
+vb.with_vertices(p.iter())?;
+vb.with_segments(s.iter())?;
 
 // this will generate the list of cells, edges and circle events (aka vertices)
-let result = vb.construct().unwrap();
+let result = vb.construct()?;
 ```
 Edges may become curves when line segments are used as input, see the example code for discretization and interpolation. 
 
