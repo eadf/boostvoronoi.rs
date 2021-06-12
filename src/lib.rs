@@ -18,8 +18,6 @@
 #![deny(bare_trait_objects)]
 #![deny(ellipsis_inclusive_range_patterns)]
 #![deny(elided_lifetimes_in_paths)]
-//#![allow(renamed_and_removed_lints)]
-//#![allow(clippy::unknown_clippy_lints)]
 #![feature(map_first_last)]
 use core::fmt::Debug;
 use extended_exp_fpt as EX;
@@ -43,7 +41,7 @@ pub mod extended_int;
 pub mod file_reader;
 pub mod predicate;
 pub mod robust_fpt;
-pub mod site_event;
+mod site_event;
 pub mod sync_diagram;
 pub mod visual_utils;
 
@@ -56,6 +54,7 @@ pub(crate) fn format_id(value: Option<usize>) -> String {
     }
 }
 
+/// A feature gated print(), will only be active when the feature "console_debug" is selected.
 #[macro_export]
 macro_rules! t {
     ($($arg:tt)*) => ({
@@ -64,6 +63,7 @@ macro_rules! t {
     });
 }
 
+/// A feature gated println(), will only be active when the feature "console_debug" is selected.
 #[macro_export]
 macro_rules! tln {
     ($($arg:tt)*) => ({
@@ -193,6 +193,7 @@ pub enum BvError {
     BvError(#[from] std::io::Error),
 }
 
+/// This is the integer input type of the algorithm. Typically i32 or i64.
 pub trait InputType:
     Display
     + Ord
@@ -227,6 +228,7 @@ impl<I1> InputType for I1 where
 {
 }
 
+/// This is the floating point output type of the algorithm. Typically f32 or f64.
 pub trait OutputType:
     Float
     + PartialOrd
@@ -258,6 +260,7 @@ impl<F1> OutputType for F1 where
 {
 }
 
+/// Functions for converting the integer input type to other types (i32 i64 etc.)
 #[derive(Default)]
 pub struct TypeConverter1<I1>
 where
@@ -302,6 +305,7 @@ where
     }
 }
 
+/// Functions for converting the integer and float input type to other types.
 #[derive(Default)]
 pub struct TypeConverter2<I1, F1>
 where

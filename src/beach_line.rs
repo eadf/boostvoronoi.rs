@@ -9,6 +9,7 @@
 
 // Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
+//! The data structures needed for the beachline.
 mod tests;
 
 use super::circle_event as VC;

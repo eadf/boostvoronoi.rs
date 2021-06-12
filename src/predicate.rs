@@ -9,6 +9,8 @@
 
 // Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
+//! Predicate utilities
+
 mod tests;
 
 use super::beach_line as VB;

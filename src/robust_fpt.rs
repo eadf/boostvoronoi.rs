@@ -9,45 +9,8 @@
 
 // Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
-//! Geometry predicates with floating-point variables usually require
-//! high-precision predicates to retrieve the correct result.
-//! Epsilon robust predicates give the result within some epsilon relative
-//! error, but are a lot faster than high-precision predicates.
-//! To make algorithm robust and efficient epsilon robust predicates are
-//! used at the first step. In case of the undefined result high-precision
-//! arithmetic is used to produce required robustness. This approach
-//! requires exact computation of epsilon intervals within which epsilon
-//! robust predicates have undefined value.
-//! There are two ways to measure an error of floating-point calculations:
-//! relative error and ULPs (units in the last place).
-//! Let EPS be machine epsilon, then next inequalities have place:
-//! 1 EPS <= 1 ULP <= 2 EPS (1), 0.5 ULP <= 1 EPS <= 1 ULP (2).
-//! ULPs are good for measuring rounding errors and comparing values.
-//! Relative errors are good for computation of general relative
-//! error of formulas or expressions. So to calculate epsilon
-//! interval within which epsilon robust predicates have undefined result
-//! next schema is used:
-//!     1) Compute rounding errors of initial variables using ULPs;
-//!     2) Transform ULPs to epsilons using upper bound of the (1);
-//!     3) Compute relative error of the formula using epsilon arithmetic;
-//!     4) Transform epsilon to ULPs using upper bound of the (2);
-//! In case two values are inside undefined ULP range use high-precision
-//! arithmetic to produce the correct result, else output the result.
-//! Look at almost_equal function to see how two floating-point variables
-//! are checked to fit in the ULP range.
-//! If A has relative error of r(A) and B has relative error of r(B) then:
-//!     1) r(A + B) <= max(r(A), r(B)), for A * B >= 0;
-//!     2) r(A - B) <= B*r(A)+A*r(B)/(A-B), for A * B >= 0;
-//!     2) r(A * B) <= r(A) + r(B);
-//!     3) r(A / B) <= r(A) + r(B);
-//! In addition rounding error should be added, that is always equal to
-//! 0.5 ULP or at most 1 epsilon. As you might see from the above formulas
-//! subtraction relative error may be extremely large, that's why
-//! epsilon robust comparator class is used to store floating point values
-//! and compute subtraction as the final step of the evaluation.
-//! For further information about relative errors and ULPs try this link:
-//! http://docs.sun.com/source/806-3568/ncg_goldberg.html
-//!
+//! Module containing robust floating points utilities.
+
 mod extendedint_tests;
 mod robustdif_tests;
 mod robustfpt_tests;
@@ -79,6 +42,45 @@ fn is_neg_f(fpv: f64) -> bool {
     fpv < 0_f64
 }
 
+/// Geometry predicates with floating-point variables usually require
+/// high-precision predicates to retrieve the correct result.
+/// Epsilon robust predicates give the result within some epsilon relative
+/// error, but are a lot faster than high-precision predicates.
+/// To make algorithm robust and efficient epsilon robust predicates are
+/// used at the first step. In case of the undefined result high-precision
+/// arithmetic is used to produce required robustness. This approach
+/// requires exact computation of epsilon intervals within which epsilon
+/// robust predicates have undefined value.
+/// There are two ways to measure an error of floating-point calculations:
+/// relative error and ULPs (units in the last place).
+/// Let EPS be machine epsilon, then next inequalities have place:
+/// 1 EPS <= 1 ULP <= 2 EPS (1), 0.5 ULP <= 1 EPS <= 1 ULP (2).
+/// ULPs are good for measuring rounding errors and comparing values.
+/// Relative errors are good for computation of general relative
+/// error of formulas or expressions. So to calculate epsilon
+/// interval within which epsilon robust predicates have undefined result
+/// next schema is used:
+///     1) Compute rounding errors of initial variables using ULPs;
+///     2) Transform ULPs to epsilons using upper bound of the (1);
+///     3) Compute relative error of the formula using epsilon arithmetic;
+///     4) Transform epsilon to ULPs using upper bound of the (2);
+/// In case two values are inside undefined ULP range use high-precision
+/// arithmetic to produce the correct result, else output the result.
+/// Look at almost_equal function to see how two floating-point variables
+/// are checked to fit in the ULP range.
+/// If A has relative error of r(A) and B has relative error of r(B) then:
+///     1) r(A + B) <= max(r(A), r(B)), for A * B >= 0;
+///     2) r(A - B) <= B*r(A)+A*r(B)/(A-B), for A * B >= 0;
+///     2) r(A * B) <= r(A) + r(B);
+///     3) r(A / B) <= r(A) + r(B);
+/// In addition rounding error should be added, that is always equal to
+/// 0.5 ULP or at most 1 epsilon. As you might see from the above formulas
+/// subtraction relative error may be extremely large, that's why
+/// epsilon robust comparator class is used to store floating point values
+/// and compute subtraction as the final step of the evaluation.
+/// For further information about relative errors and ULPs try this link:
+/// <http://docs.sun.com/source/806-3568/ncg_goldberg.html>
+///
 #[derive(Copy, Clone)]
 pub struct RobustFpt {
     fpv_: f64,
@@ -686,7 +688,7 @@ impl ops::DivAssign<RobustFpt> for RobustDif {
 
 /// Used to compute expressions that operate with sqrts with predefined
 /// relative error. Evaluates expressions of the next type:
-/// sum(i = 1 .. n)(A[i] * sqrt(B[i])), 1 <= n <= 4.
+/// sum(i = 1 .. n)(A\[i\] * sqrt(B\[i\])), 1 <= n <= 4.
 #[allow(non_camel_case_types)]
 pub struct robust_sqrt_expr<
     _fpt: NumCast + Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>,
@@ -716,7 +718,7 @@ impl<
     }
 
     /// Evaluates expression (re = 4 EPS):
-    /// A[0] * sqrt(B[0]).
+    /// A\[0\] * sqrt(B\[0\]).
     pub fn eval1(
         &self,
         a: &[EI::ExtendedInt],
@@ -787,7 +789,7 @@ impl<
     }
 
     /// Evaluates expression (re = 16 EPS):
-    /// A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) + A[2] * sqrt(B[2]).
+    /// A\[0\] * sqrt(B\[0\]) + A\[1\] * sqrt(B\[1\]) + A\[2\] * sqrt(B\[2\]).
     pub fn eval3(
         &self,
         a: &[EI::ExtendedInt],
@@ -855,8 +857,8 @@ impl<
     }
 
     /// Evaluates expression (re = 25 EPS):
-    /// A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) +
-    /// A[2] * sqrt(B[2]) + A[3] * sqrt(B[3]).
+    /// A\[0\] * sqrt(B\[0\]) + A\[1\] * sqrt(B\[1\]) +
+    /// A\[2\] * sqrt(B\[2\]) + A\[3\] * sqrt(B\[3\]).
     pub fn eval4(
         &self,
         a: &[EI::ExtendedInt],
@@ -903,9 +905,9 @@ impl<
         }
     }
 
-    /// Evaluates A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) +
-    ///           A[2] + A[3] * sqrt(B[0] * B[1]).
-    /// B[3] = B[0] * B[1].
+    /// Evaluates A\[0] * sqrt(B\[0\]) + A\[1\] * sqrt(B\[1\]) +
+    ///           A\[2] + A\[3\] * sqrt(B\[0\] * B\[1\]).
+    /// B\[3\] = B\[0\] * B\[1\].
     #[allow(non_snake_case)]
     pub fn sqrt_expr_evaluator_pss3(
         &mut self,
@@ -955,8 +957,8 @@ impl<
         numer / divisor
     }
 
-    /// Evaluates A[3] + A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) +
-    ///           A[2] * sqrt(B[3] * (sqrt(B[0] * B[1]) + B[2])).
+    /// Evaluates A\[3\] + A\[0\] * sqrt(B\[0\]) + A\[1\] * sqrt(B\[1\]) +
+    ///           A\[2\] * sqrt(B\[3\] * (sqrt(B\[0\] * B\[1\]) + B\[2\])).
     #[allow(non_snake_case)]
     pub fn sqrt_expr_evaluator_pss4(
         &mut self,

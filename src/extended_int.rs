@@ -9,6 +9,8 @@
 
 // Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
+//! Utilities for big integers. Supports next set of arithmetic operations: +, -, *.
+
 use super::extended_exp_fpt as EX;
 #[allow(unused_imports)]
 use crate::{t, tln};

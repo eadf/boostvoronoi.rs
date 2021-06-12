@@ -9,6 +9,8 @@
 
 // Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
+//! Utility for reading example files.
+
 use crate::BvError;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -91,10 +93,10 @@ where
 }
 
 /// Reads an example file in the file format used by C++ boost voronoi
-/// [number of points]
-/// [X] [Y] (repeats)
-/// [number of lines]
-/// [X1] [Y1] [X2] [Y2](repeats)
+/// \[number of points\]
+/// \[X\] \[Y\] (repeats)
+/// \[number of lines\]
+/// \[X1\] \[Y1\] \[X2\] \[Y2\](repeats)
 /// This entire module is implemented in about 20 lines of code in C++ boost :/
 #[allow(clippy::type_complexity)]
 pub fn read_boost_input_file<I1>(
@@ -110,10 +112,10 @@ where
 }
 
 /// Reads an example from a buffer using the format used by C++ boost voronoi
-/// [number of points]
-/// [X] [Y] (repeats)
-/// [number of lines]
-/// [X1] [Y1] [X2] [Y2](repeats)
+/// \[number of points\]
+/// \[X\] \[Y\] (repeats)
+/// \[number of lines\]
+/// \[X1\] \[Y1\] \[X2\] \[Y2\](repeats)
 #[allow(clippy::type_complexity)]
 pub fn read_boost_input_buffer<I1, F>(
     reader: BufReader<F>,

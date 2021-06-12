@@ -9,6 +9,8 @@
 
 // Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
+//! Contains the builder code.
+
 use super::beach_line as VB;
 use super::circle_event as VC;
 use super::diagram as VD;
@@ -872,7 +874,7 @@ where
     }
 }
 
-/// helper function: converts a slice of [[integer,integer]] into input data for the Builder.
+/// helper function: converts a slice of \[\[integer,integer\]\] into input data for the Builder.
 pub fn to_points<T1: InputType, T2: InputType>(points: &[[T1; 2]]) -> Vec<Point<T2>> {
     points
         .iter()
@@ -886,7 +888,7 @@ pub fn to_points<T1: InputType, T2: InputType>(points: &[[T1; 2]]) -> Vec<Point<
         .collect()
 }
 
-/// helper function: converts a slice of [[integer,integer,integer,integer]] into input data for the Builder.
+/// helper function: converts a slice of \[\[integer,integer,integer,integer\]\] into input data for the Builder.
 pub fn to_segments<T1: InputType, T2: InputType>(segments: &[[T1; 4]]) -> Vec<Line<T2>> {
     segments
         .iter()
@@ -902,7 +904,7 @@ pub fn to_segments<T1: InputType, T2: InputType>(segments: &[[T1; 4]]) -> Vec<Li
         .collect()
 }
 
-/// helper function: converts a slice of [[integer,integer,integer,integer]] into input data for the Builder.
+/// helper function: converts a slice of \[\[integer,integer,integer,integer\]\] into input data for the Builder.
 pub fn to_segments_offset<T1: InputType, T2: InputType>(
     points: &[[T1; 4]],
     scale_x: f64,

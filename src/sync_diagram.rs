@@ -9,13 +9,14 @@
 
 // Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
+//! A Sync version of the output data.
+//! See <https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_diagram.htm> for diagram description.
+
 use super::diagram as VD;
 pub use super::{InputType, OutputType};
 use crate::BvError;
 use std::marker::PhantomData;
 use std::ops::Neg;
-
-///! See <https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_diagram.htm>
 
 /// Sync version of the boostvoronoi::diagram::VoronoiDiagram struct.
 /// This is useful when traversing the diagram in a multi threaded environment.

@@ -9,6 +9,8 @@
 
 // Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
+//! Graphical utilities.
+
 use super::{InputType, OutputType};
 use crate::BvError;
 
