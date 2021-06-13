@@ -447,7 +447,7 @@ where
         })
     }
 
-    /// transform from dest coordinate system to source coordinate system
+    /// transform from destination coordinate system to source coordinate system
     #[inline(always)]
     pub fn reverse_transform(&self, x: F1, y: F1) -> Result<[I1; 2], BvError> {
         let x = self.reverse_transform_x(x)?;
@@ -455,11 +455,11 @@ where
         Ok([x, y])
     }
 
-    /// transform from dest coordinate system to source coordinate system
+    /// transform from destination coordinate system to source coordinate system
     #[inline(always)]
     pub fn reverse_transform_x(&self, x: F1) -> Result<I1, BvError> {
         super::TypeConverter2::<I1, F1>::try_f1_to_i1(
-            (x - self.to_offset[0]) / self.scale[0] - self.to_center[0],
+            ((x - self.to_offset[0]) / self.scale[0] - self.to_center[0]).round()
         )
     }
 
@@ -467,7 +467,7 @@ where
     #[inline(always)]
     pub fn reverse_transform_y(&self, y: F1) -> Result<I1, BvError> {
         super::TypeConverter2::<I1, F1>::try_f1_to_i1(
-            (y - self.to_offset[1]) / self.scale[1] - self.to_center[1],
+            ((y - self.to_offset[1]) / self.scale[1] - self.to_center[1]).round()
         )
     }
 

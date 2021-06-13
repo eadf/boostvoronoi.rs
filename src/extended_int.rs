@@ -433,7 +433,7 @@ impl<'a, 'b> ops::Add<&'b ExtendedInt> for &'a ExtendedInt {
     ///```
     fn add(self, that: &'b ExtendedInt) -> ExtendedInt {
         let mut rv = ExtendedInt::default();
-        rv.add_others(&self, that);
+        rv.add_others(self, that);
         rv
     }
 }
@@ -493,7 +493,7 @@ impl<'a, 'b> ops::Sub<&'b ExtendedInt> for &'a ExtendedInt {
     ///```
     fn sub(self, that: &'b ExtendedInt) -> ExtendedInt {
         let mut rv = ExtendedInt::default();
-        rv.dif_other(&self, &that);
+        rv.dif_other(self, that);
         rv
     }
 }
@@ -513,7 +513,7 @@ impl<'b> ops::Sub<&'b ExtendedInt> for ExtendedInt {
     ///```
     fn sub(self, that: &'b ExtendedInt) -> ExtendedInt {
         let mut rv = ExtendedInt::default();
-        rv.dif_other(&self, &that);
+        rv.dif_other(&self, that);
         rv
     }
 }
@@ -553,7 +553,7 @@ impl<'a, 'b> ops::Mul<&'b ExtendedInt> for &'a ExtendedInt {
     ///```
     fn mul(self, that: &'b ExtendedInt) -> ExtendedInt {
         let mut rv = ExtendedInt::default();
-        rv.mul_other(&self, &that);
+        rv.mul_other(self, that);
         rv
     }
 }
@@ -573,7 +573,7 @@ impl<'b> ops::Mul<&'b ExtendedInt> for ExtendedInt {
     ///```
     fn mul(self, that: &'b ExtendedInt) -> ExtendedInt {
         let mut rv = ExtendedInt::default();
-        rv.mul_other(&self, &that);
+        rv.mul_other(&self, that);
         rv
     }
 }
