@@ -94,14 +94,7 @@ struct SharedData {
     last_click: Option<Point<i32>>,
 }
 
-///! This example intends to visualize the half edge output of the voronoi algorithm
-///!
-///! As an experiment I added (semi-useful) filters for :
-///!    cell segment edges = edges only belonging to cells defined by segments
-///!    cell point edges = edges only belonging to cells defined by points
-///!    cell segment vertices = vertices only belonging to cells defined by segments
-///!    cell point vertices = vertices only belonging to cells defined by points
-///!
+///! This example intends to visualize the half edge output of the voronoi algorithm.
 ///! Read all about the half edge data structure here:
 ///! <https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_diagram.htm>
 fn main() -> Result<(), BvError> {
@@ -189,30 +182,26 @@ fn main() -> Result<(), BvError> {
     secondary_button.toggle(true);
     secondary_button.set_frame(enums::FrameType::PlasticUpBox);
 
-    /*let mut e_segment_cell_button = button::RoundButton::default()
-            .with_size(180, 25)
-            .with_label("cell segment edges");
-        e_segment_cell_button.toggle(true);
-        e_segment_cell_button.set_frame(FrameType::PlasticUpBox);
+    let mut pack_x = group::Pack::default()
+        .with_size(180, 25)
+        .below_of(&secondary_button, 25);
+    pack_x.set_type(group::PackType::Horizontal);
+    let _ = frame::Frame::default().with_size(10, 25).with_label(" x:");
+    let mut x_label = frame::Frame::default()
+        .with_size(170, 25)
+        .with_label("????");
+    pack_x.end();
 
-        let mut e_point_cell_button = button::RoundButton::default()
-            .with_size(180, 25)
-            .with_label("cell point edges");
-        e_point_cell_button.toggle(true);
-        e_point_cell_button.set_frame(FrameType::PlasticUpBox);
+    let mut pack_y = group::Pack::default()
+        .with_size(180, 25)
+        .below_of(&pack_x, 25);
+    pack_y.set_type(group::PackType::Horizontal);
+    let _ = frame::Frame::default().with_size(10, 25).with_label(" y:");
+    let mut y_label = frame::Frame::default()
+        .with_size(170, 25)
+        .with_label("?????");
+    pack_y.end();
 
-        let mut v_segment_cell_button = button::RoundButton::default()
-            .with_size(180, 25)
-            .with_label("cell segment vertices");
-        v_segment_cell_button.toggle(true);
-        v_segment_cell_button.set_frame(FrameType::PlasticUpBox);
-
-        let mut v_point_cell_button = button::RoundButton::default()
-            .with_size(180, 25)
-            .with_label("cell point vertices");
-        v_point_cell_button.toggle(true);
-        v_point_cell_button.set_frame(FrameType::PlasticUpBox);
-    */
     pack.end();
 
     wind.set_color(enums::Color::White);
@@ -268,10 +257,6 @@ fn main() -> Result<(), BvError> {
         GuiMessage::MenuChoice(Example::Clean),
     );
 
-    //e_segment_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::E_CELL_SEGMENT));
-    //e_point_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::E_CELL_POINT));
-    //v_segment_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::V_CELL_SEGMENT));
-    //v_point_cell_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::V_CELL_POINT));
     external_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::EXTERNAL));
     infinite_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::INFINITE));
     primary_button.emit(sender, GuiMessage::Filter(DrawFilterFlag::PRIMARY));
@@ -448,6 +433,24 @@ fn main() -> Result<(), BvError> {
         enums::Event::KeyUp => {
             let mut shared_data_bm = shared_data_c.borrow_mut();
             shared_data_bm.last_click = None;
+            false
+        }
+        enums::Event::Move => {
+            // only update coordinate when hovering over the graphics
+            if app::event_x() < FW {
+                let shared_data_b = shared_data_c.borrow();
+                let point = shared_data_b
+                    .visualizer
+                    .affine
+                    .reverse_transform(app::event_x() as f64, app::event_y() as f64);
+                if let Ok(point) = point {
+                    x_label.set_label(&point[0].to_string());
+                    y_label.set_label(&point[1].to_string());
+                } else {
+                    x_label.set_label("x=?");
+                    y_label.set_label("y=?");
+                }
+            }
             false
         }
         _ => false,
