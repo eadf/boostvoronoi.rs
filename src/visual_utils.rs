@@ -79,9 +79,9 @@ where
         // Compute x-coordinates of the endpoints of the edge
         // in the transformed space.
         let projection_start =
-            sqr_segment_length * Self::get_point_projection(&affine, &discretization[0], &segment);
+            sqr_segment_length * Self::get_point_projection(affine, &discretization[0], segment);
         let projection_end =
-            sqr_segment_length * Self::get_point_projection(&affine, &discretization[1], &segment);
+            sqr_segment_length * Self::get_point_projection(affine, &discretization[1], segment);
 
         // Compute parabola parameters in the transformed space.
         // Parabola has next representation:

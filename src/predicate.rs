@@ -273,24 +273,24 @@ where
             if !rhs.is_segment() {
                 return lhs.y0() < rhs.y0();
             }
-            if Predicates::<I1, F1>::is_vertical_2(&rhs.point0(), &rhs.point1()) {
+            if Predicates::<I1, F1>::is_vertical_2(rhs.point0(), rhs.point1()) {
                 return lhs.y0() <= rhs.y0();
             }
             true
         } else {
-            if Predicates::<I1, F1>::is_vertical_2(&rhs.point0(), &rhs.point1()) {
-                if Predicates::<I1, F1>::is_vertical_2(&lhs.point0(), &lhs.point1()) {
+            if Predicates::<I1, F1>::is_vertical_2(rhs.point0(), rhs.point1()) {
+                if Predicates::<I1, F1>::is_vertical_2(lhs.point0(), lhs.point1()) {
                     return lhs.y0() < rhs.y0();
                 }
                 return false;
             }
-            if Predicates::<I1, F1>::is_vertical_2(&lhs.point0(), &lhs.point1()) {
+            if Predicates::<I1, F1>::is_vertical_2(lhs.point0(), lhs.point1()) {
                 return true;
             }
             if lhs.y0() != rhs.y0() {
                 return lhs.y0() < rhs.y0();
             }
-            return OrientationTest::<I1, F1>::eval_3(&lhs.point1(), &lhs.point0(), &rhs.point1())
+            return OrientationTest::<I1, F1>::eval_3(lhs.point1(), lhs.point0(), rhs.point1())
                 == Orientation::Left;
         }
     }
@@ -645,8 +645,8 @@ where
                 match site1.sorted_index().cmp(&site2.sorted_index()) {
                     cmp::Ordering::Equal => {
                         // Both nodes are new (inserted during same site event processing).
-                        let y1 = Self::get_comparison_y(&node1, true);
-                        let y2 = Self::get_comparison_y(&node2, true);
+                        let y1 = Self::get_comparison_y(node1, true);
+                        let y2 = Self::get_comparison_y(node2, true);
                         if y1 == y2 {
                             // This is something not found in the C++ version
                             // Todo: check if this fix is needed after +is_positive() issue is fixed
@@ -656,8 +656,8 @@ where
                         }
                     }
                     cmp::Ordering::Less => {
-                        let y1 = Self::get_comparison_y(&node1, false);
-                        let y2 = Self::get_comparison_y(&node2, true);
+                        let y1 = Self::get_comparison_y(node1, false);
+                        let y2 = Self::get_comparison_y(node2, true);
                         if y1.0 != y2.0 {
                             return y1.0 < y2.0;
                         }
@@ -911,7 +911,7 @@ where
                 site1,
                 site2,
                 site3,
-                &c_event,
+                c_event,
                 recompute_c_x,
                 recompute_c_y,
                 recompute_lower_x,
@@ -1372,7 +1372,7 @@ where
                 site2,
                 site3,
                 point_index,
-                &c_event,
+                c_event,
                 recompute_c_x,
                 recompute_c_y,
                 recompute_lower_x,
@@ -1521,7 +1521,7 @@ where
                 site1,
                 site2,
                 site3,
-                &c_event,
+                c_event,
                 recompute_c_x,
                 recompute_c_y,
                 recompute_lower_x,
@@ -1635,9 +1635,9 @@ where
             LazyCircleFormationFunctor::<I1, F1>::sss(site1, site2, site3, circle);
         }
 
-        if Self::lies_outside_vertical_segment(&circle, site1)
-            || Self::lies_outside_vertical_segment(&circle, site2)
-            || Self::lies_outside_vertical_segment(&circle, site3)
+        if Self::lies_outside_vertical_segment(circle, site1)
+            || Self::lies_outside_vertical_segment(circle, site2)
+            || Self::lies_outside_vertical_segment(circle, site3)
         {
             return false;
         }

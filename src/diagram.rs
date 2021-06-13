@@ -245,15 +245,14 @@ where
     pub fn get_incident_edge(&self) -> Option<VoronoiEdgeIndex> {
         self.incident_edge_
     }
-
 }
 
 /// Iterator over edges of a Cell
 /// Do *NOT* use this while altering the std::cell::Cell values of next, prev or twin edges.
 pub struct EdgeNextIterator<'s, I1, F1>
-    where
-        I1: InputType + Neg<Output = I1>,
-        F1: OutputType + Neg<Output = F1>,
+where
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
 {
     diagram: &'s VoronoiDiagram<I1, F1>,
     start_edge: VoronoiEdgeIndex,
@@ -265,9 +264,9 @@ pub struct EdgeNextIterator<'s, I1, F1>
 }
 
 impl<'s, I1, F1> EdgeNextIterator<'s, I1, F1>
-    where
-        I1: InputType + Neg<Output = I1>,
-        F1: OutputType + Neg<Output = F1>,
+where
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
 {
     pub(crate) fn new(
         diagram: &'s VoronoiDiagram<I1, F1>,
@@ -295,9 +294,9 @@ impl<'s, I1, F1> EdgeNextIterator<'s, I1, F1>
 }
 
 impl<'s, I1, F1> Iterator for EdgeNextIterator<'s, I1, F1>
-    where
-        I1: InputType + Neg<Output = I1>,
-        F1: OutputType + Neg<Output = F1>,
+where
+    I1: InputType + Neg<Output = I1>,
+    F1: OutputType + Neg<Output = F1>,
 {
     type Item = VoronoiEdgeIndex;
     fn next(&mut self) -> Option<VoronoiEdgeIndex> {
@@ -997,7 +996,10 @@ where
 
     /// Returns an edge iterator. This iterates over the edges belonging to this cell starting with
     /// the incident edge.
-    pub fn cell_edge_iterator(&self, cell_id: Option<VoronoiCellIndex>) -> EdgeNextIterator<'_, I1, F1> {
+    pub fn cell_edge_iterator(
+        &self,
+        cell_id: Option<VoronoiCellIndex>,
+    ) -> EdgeNextIterator<'_, I1, F1> {
         let incident_edge = self._cell_get_incident_edge(cell_id);
         EdgeNextIterator::<'_, I1, F1>::new(self, incident_edge)
     }

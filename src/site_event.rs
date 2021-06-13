@@ -55,7 +55,7 @@ where
 {
     point0_: Point<I1>,
     point1_: Point<I1>,
-    pub sorted_index_: SiteEventIndexType,
+    sorted_index_: SiteEventIndexType,
     initial_index_: SiteEventIndexType,
     flags_: VD::ColorType,
     #[doc(hidden)]
@@ -186,7 +186,8 @@ where
         }
     }
 
-    /// used by test code
+    /// Only used by test code
+    #[allow(dead_code)]
     pub fn new_7(
         x1: I1,
         y1: I1,
@@ -255,6 +256,7 @@ where
     pub fn point0(&self) -> &Point<I1> {
         &self.point0_
     }
+
     #[inline(always)]
     pub fn point1(&self) -> &Point<I1> {
         &self.point1_

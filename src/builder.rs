@@ -243,8 +243,8 @@ where
         self.site_events_.dedup();
 
         // Index sites.
-        for (cur, mut s) in self.site_events_.iter_mut().enumerate() {
-            s.sorted_index_ = cur;
+        for (cur, s) in self.site_events_.iter_mut().enumerate() {
+            s.set_sorted_index(cur);
         }
         #[cfg(feature = "console_debug")]
         {

@@ -26,9 +26,9 @@ where
     F1: OutputType + Neg<Output = F1>,
 {
     let mut site1 = VSE::SiteEvent::<I1, F1>::new_2(Point { x: x1, y: y1 }, si1);
-    site1.sorted_index_ = si1;
+    site1.set_sorted_index(si1);
     let mut site2 = VSE::SiteEvent::<I1, F1>::new_2(Point { x: x2, y: y2 }, si2);
-    site2.sorted_index_ = si2;
+    site2.set_sorted_index(si2);
     VB::BeachLineNodeKey::<I1, F1>::new_2(site1, site2)
 }
 
