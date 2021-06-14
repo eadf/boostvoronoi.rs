@@ -4,28 +4,28 @@ use boostvoronoi::BvError;
 use num_traits::float::FloatConst;
 //use boostvoronoi::InputType;
 
-type I1 = i64;
-type F1 = f64;
+type I = i64;
+type F = f64;
 
 const EXTERNAL: VD::ColorType = 1;
 
 #[allow(dead_code)]
-fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
+fn almost_equal(x1: F, x2: F, y1: F, y2: F) -> bool {
     let delta = 0.001;
-    assert!(F1::abs(x1 - x2) < delta, "{} != {}", x1, x2);
-    assert!(F1::abs(y1 - y2) < delta, "{} != {}", y1, y2);
-    (F1::abs(x1 - x2) < delta) && (F1::abs(y1 - y2) < delta)
+    assert!(F::abs(x1 - x2) < delta, "{} != {}", x1, x2);
+    assert!(F::abs(y1 - y2) < delta, "{} != {}", y1, y2);
+    (F::abs(x1 - x2) < delta) && (F::abs(y1 - y2) < delta)
 }
 
 #[allow(dead_code)]
-fn circle(cx: I1, cy: I1, r: F1, n: I1) -> Vec<[I1; 4]> {
-    let i_2_f = |x| num::cast::<I1, f64>(x).unwrap();
-    let f_2_i = |x| num::cast::<f64, I1>(x).unwrap();
+fn circle(cx: I, cy: I, r: F, n: I) -> Vec<[I; 4]> {
+    let i_2_f = |x| num::cast::<I, f64>(x).unwrap();
+    let f_2_i = |x| num::cast::<f64, I>(x).unwrap();
 
-    let d_angle = f64::PI() * 2.0 / num::cast::<I1, f64>(n).unwrap();
+    let d_angle = f64::PI() * 2.0 / num::cast::<I, f64>(n).unwrap();
     let mut angle = 0_f64;
-    let mut last: [I1; 2] = [cx + f_2_i(angle.cos() * r), cy + f_2_i(angle.sin() * r)];
-    let mut rv = Vec::<[I1; 4]>::new();
+    let mut last: [I; 2] = [cx + f_2_i(angle.cos() * r), cy + f_2_i(angle.sin() * r)];
+    let mut rv = Vec::<[I; 4]>::new();
     for i in 1..n {
         angle = d_angle * i_2_f(i);
         let next = [cx + f_2_i(angle.cos() * r), cy + f_2_i(angle.sin() * r)];
@@ -39,10 +39,10 @@ fn circle(cx: I1, cy: I1, r: F1, n: I1) -> Vec<[I1; 4]> {
 fn main() -> Result<(), BvError> {
     #[allow(unused_variables)]
     let output = {
-        let points: [[I1; 2]; 0] = [];
+        let points: [[I; 2]; 0] = [];
         // problematic polygon from https://github.com/boostorg/polygon/issues/43
         // not even 1.75 C++ boost handles this correctly
-        let segments: [[I1; 4]; 6] = [
+        let segments: [[I; 4]; 6] = [
             [0, 10000000, 700000, 1],
             [700000, 1, 700000, 9000000],
             [700000, 9000000, 9100000, 9000000],
@@ -50,35 +50,35 @@ fn main() -> Result<(), BvError> {
             [9100000, 0, 10000000, 10000000],
             [10000000, 10000000, 0, 10000000],
         ];
-        let segments_1: [[I1; 4]; 2] = [
+        let segments_1: [[I; 4]; 2] = [
             [35058881, -35000000, 31058881, -35000000],
             [31058881, -35000000, 25058881, -35000001],
         ];
-        let segments_1: [[I1; 4]; 2] = [
+        let segments_1: [[I; 4]; 2] = [
             [35058881, -35000000, 35058881, -25732145],
             [35058881, -25732145, 35058882, -19586070],
         ];
 
-        let segments_1: [[I1; 4]; 4] = [
+        let segments_1: [[I; 4]; 4] = [
             [35058881, -35000000, 35058881, -25732145],
             [35058881, -25732145, 35058881, -19586070],
             [35058881, -19586070, -31657205, -35000000],
             [-31657205, -35000000, 35058881, -35000000],
         ];
-        let segments_1: [[I1; 4]; 2] = [
+        let segments_1: [[I; 4]; 2] = [
             [35058881, -35000000, 31058881, -35000000],
             [31058881, -35000000, 25058881, -35000001],
         ];
 
-        let points: [[I1; 2]; 0] = [];
-        let segments: [[I1; 4]; 3] = [
+        let points: [[I; 2]; 0] = [];
+        let segments: [[I; 4]; 3] = [
             [1403829871, 74, 1403829871, 275],
             [1403829871, 275, 1403829741, 275],
             [1403829741, 275, 1403829744, 73],
         ];
 
-        let points: [[I1; 2]; 0] = [];
-        let segments: [[I1; 4]; 20] = [
+        let points: [[I; 2]; 0] = [];
+        let segments: [[I; 4]; 20] = [
             [100, 0, 95, 30],
             [95, 30, 80, 58],
             [80, 58, 58, 80],
@@ -101,24 +101,24 @@ fn main() -> Result<(), BvError> {
             [95, -30, 100, 0],
         ];
 
-        //let points: [[I1; 2]; 2] = [[4, 3], [1, 1]];
-        //let segments: [[I1; 4]; 2] = [[1, 2, 3, 4], [2, 2, 5, 4]];
+        //let points: [[I; 2]; 2] = [[4, 3], [1, 1]];
+        //let segments: [[I; 4]; 2] = [[1, 2, 3, 4], [2, 2, 5, 4]];
         /*
-        let shift:I1 = 35058881;
-        let a:I1 = 0; // nope: -5,-4,-3,-1,0
+        let shift:I = 35058881;
+        let a:I = 0; // nope: -5,-4,-3,-1,0
 
-        let segments: [[I1; 4]; 4] = [
+        let segments: [[I; 4]; 4] = [
             [ a + shift, -35000000, a + shift, -25732145 ],
             [a + shift, -25732145 , a + shift, -19586070],
             [a + shift, -19586070, -66716086 + shift, -35000000],
             [ -66716086 + shift, -35000000 , a + shift, -35000000],
         ];*/
-        //let points: [[I1; 2]; 2] = [[4, 3], [1, 1]];
-        //let segments: [[I1; 4]; 2] = [[1, 2, 3, 4], [2, 2, 5, 4]];
+        //let points: [[I; 2]; 2] = [[4, 3], [1, 1]];
+        //let segments: [[I; 4]; 2] = [[1, 2, 3, 4], [2, 2, 5, 4]];
         //let segments = circle(0,0,100.0,7);
 
-        let points: [[I1; 2]; 0] = [];
-        let segments: [[I1; 4]; 23] = [
+        let points: [[I; 2]; 0] = [];
+        let segments: [[I; 4]; 23] = [
             [-12, 4, -12, -4],
             [-12, -4, -8, -4],
             [-8, -4, -8, -1],
@@ -144,8 +144,8 @@ fn main() -> Result<(), BvError> {
             [2, -8, 2, -16],
         ];
 
-        let points: [[I1; 2]; 0] = [];
-        let segments: [[I1; 4]; 12] = [
+        let points: [[I; 2]; 0] = [];
+        let segments: [[I; 4]; 12] = [
             [-1, 10, 1, 10],
             [10, -1, 10, 1],
             [-1, -10, 1, -10],
@@ -160,8 +160,8 @@ fn main() -> Result<(), BvError> {
             [-8, -6, -11, -2],
         ];
 
-        let _v = VB::to_points::<I1, I1>(&points);
-        let _s = VB::to_segments::<I1, I1>(&segments);
+        let _v = VB::to_points::<I, I>(&points);
+        let _s = VB::to_segments::<I, I>(&segments);
         println!("-------\n{}", points.len());
         for p in points.iter() {
             println!("{} {}", p[0], p[1]);
@@ -182,7 +182,7 @@ fn main() -> Result<(), BvError> {
         }
         println!("}};");
         println!("-------");
-        let mut vb = VB::Builder::<I1, F1>::default();
+        let mut vb = VB::Builder::<I, F>::default();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
         vb.construct()?

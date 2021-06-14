@@ -21,24 +21,24 @@ use std::ops::Neg;
 /// Sync version of the boostvoronoi::diagram::VoronoiDiagram struct.
 /// This is useful when traversing the diagram in a multi threaded environment.
 #[derive(Default, Debug)]
-pub struct SyncVoronoiDiagram<I1, F1>
+pub struct SyncVoronoiDiagram<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    pub cells: Vec<VD::VoronoiCell<I1, F1>>, // indexed by VoronoiCellIndex
-    pub vertices: Vec<VD::VoronoiVertex<I1, F1>>, // indexed by VoronoiVertexIndex
-    pub edges: Vec<VD::VoronoiEdge<I1, F1>>, // indexed by VoronoiEdgeIndex
+    pub cells: Vec<VD::VoronoiCell<I, F>>, // indexed by VoronoiCellIndex
+    pub vertices: Vec<VD::VoronoiVertex<I, F>>, // indexed by VoronoiVertexIndex
+    pub edges: Vec<VD::VoronoiEdge<I, F>>, // indexed by VoronoiEdgeIndex
 }
 
-impl<I1, F1> SyncVoronoiDiagram<I1, F1>
+impl<I, F> SyncVoronoiDiagram<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     /// Returns a reference to the list of cells
     #[inline]
-    pub fn cells(&self) -> &Vec<VD::VoronoiCell<I1, F1>> {
+    pub fn cells(&self) -> &Vec<VD::VoronoiCell<I, F>> {
         &self.cells
     }
 
@@ -47,8 +47,8 @@ where
     ///  'edge_id' will be the first edge returned by the iterator.
     pub fn edge_rot_next_iterator(
         &self,
-        edge_id: Option<VD::VoronoiEdgeIndex>,
-    ) -> EdgeRotNextIterator<'_, I1, F1> {
+        edge_id: Option<VD::EdgeIndex>,
+    ) -> EdgeRotNextIterator<'_, I, F> {
         EdgeRotNextIterator::new(self, edge_id)
     }
 
@@ -57,8 +57,8 @@ where
     /// over the starting point of the half-edge.
     pub fn edge_rot_next(
         &self,
-        edge_id: VD::VoronoiEdgeIndex,
-    ) -> Result<Option<VD::VoronoiEdgeIndex>, BvError> {
+        edge_id: VD::EdgeIndex,
+    ) -> Result<Option<VD::EdgeIndex>, BvError> {
         let prev_id = self.edge_get(edge_id)?.prev();
         if let Some(prev_id) = prev_id {
             let prev = self.edge_get(prev_id)?;
@@ -76,8 +76,8 @@ where
     /// This method returns None at any error
     fn edge_rot_next_no_err(
         &self,
-        edge_id: Option<VD::VoronoiEdgeIndex>,
-    ) -> Option<VD::VoronoiEdgeIndex> {
+        edge_id: Option<VD::EdgeIndex>,
+    ) -> Option<VD::EdgeIndex> {
         self.edges
             .get(self.edges.get(edge_id?.0)?.prev()?.0)?
             .twin()
@@ -88,8 +88,8 @@ where
     /// over the starting point of the half-edge.
     pub fn edge_rot_prev(
         &self,
-        edge_id: VD::VoronoiEdgeIndex,
-    ) -> Result<Option<VD::VoronoiEdgeIndex>, BvError> {
+        edge_id: VD::EdgeIndex,
+    ) -> Result<Option<VD::EdgeIndex>, BvError> {
         if let Some(twin_id) = self.edge_get(edge_id)?.twin() {
             let twin = self.edge_get(twin_id)?;
             Ok(twin.next())
@@ -104,8 +104,8 @@ where
     #[inline]
     pub fn edge_get_next_err(
         &self,
-        edge_id: VD::VoronoiEdgeIndex,
-    ) -> Result<VD::VoronoiEdgeIndex, BvError> {
+        edge_id: VD::EdgeIndex,
+    ) -> Result<VD::EdgeIndex, BvError> {
         if let Some(edge_id) = self.edge_get(edge_id)?.next() {
             Ok(edge_id)
         } else {
@@ -119,8 +119,8 @@ where
     #[inline]
     pub fn edge_get_prev_err(
         &self,
-        edge_id: VD::VoronoiEdgeIndex,
-    ) -> Result<VD::VoronoiEdgeIndex, BvError> {
+        edge_id: VD::EdgeIndex,
+    ) -> Result<VD::EdgeIndex, BvError> {
         if let Some(prev) = self.edge_get(edge_id)?.prev() {
             Ok(prev)
         } else {
@@ -134,8 +134,8 @@ where
     #[inline]
     pub fn edge_get_twin_err(
         &self,
-        edge_id: VD::VoronoiEdgeIndex,
-    ) -> Result<VD::VoronoiEdgeIndex, BvError> {
+        edge_id: VD::EdgeIndex,
+    ) -> Result<VD::EdgeIndex, BvError> {
         if let Some(twin_id) = self.edge_get(edge_id)?.twin() {
             Ok(twin_id)
         } else {
@@ -148,26 +148,26 @@ where
     /// Returns true if the edge is finite (segment, parabolic arc).
     /// Returns false if the edge is infinite (ray, line).
     #[inline]
-    pub fn edge_is_finite(&self, edge_id: VD::VoronoiEdgeIndex) -> Result<bool, BvError> {
+    pub fn edge_is_finite(&self, edge_id: VD::EdgeIndex) -> Result<bool, BvError> {
         Ok(self.edge_get_vertex0(edge_id)?.is_some() && self.edge_get_vertex1(edge_id)?.is_some())
     }
 
     /// Returns true if the edge is infinite (ray, line).
     /// Returns false if the edge is finite (segment, parabolic arc).
     #[inline]
-    pub fn edge_is_infinite(&self, edge_id: VD::VoronoiEdgeIndex) -> Result<bool, BvError> {
+    pub fn edge_is_infinite(&self, edge_id: VD::EdgeIndex) -> Result<bool, BvError> {
         Ok(!self.edge_is_finite(edge_id)?)
     }
 
-    pub fn edges(&self) -> &Vec<VD::VoronoiEdge<I1, F1>> {
+    pub fn edges(&self) -> &Vec<VD::VoronoiEdge<I, F>> {
         &self.edges
     }
 
     #[inline]
     pub fn edge_get(
         &self,
-        edge_id: VD::VoronoiEdgeIndex,
-    ) -> Result<&VD::VoronoiEdge<I1, F1>, BvError> {
+        edge_id: VD::EdgeIndex,
+    ) -> Result<&VD::VoronoiEdge<I, F>, BvError> {
         if let Some(edge) = self.edges.get(edge_id.0) {
             Ok(edge)
         } else {
@@ -180,8 +180,8 @@ where
     #[inline]
     pub fn edge_get_mut(
         &mut self,
-        edge_id: VD::VoronoiEdgeIndex,
-    ) -> Result<&mut VD::VoronoiEdge<I1, F1>, BvError> {
+        edge_id: VD::EdgeIndex,
+    ) -> Result<&mut VD::VoronoiEdge<I, F>, BvError> {
         if let Some(edge) = self.edges.get_mut(edge_id.0) {
             Ok(edge)
         } else {
@@ -195,8 +195,8 @@ where
     #[inline]
     pub fn edge_get_vertex0(
         &self,
-        edge_id: VD::VoronoiEdgeIndex,
-    ) -> Result<Option<VD::VoronoiVertexIndex>, BvError> {
+        edge_id: VD::EdgeIndex,
+    ) -> Result<Option<VD::VertexIndex>, BvError> {
         Ok(self.edge_get(edge_id)?.vertex0())
     }
 
@@ -204,8 +204,8 @@ where
     #[inline]
     pub fn edge_get_vertex1(
         &self,
-        edge_id: VD::VoronoiEdgeIndex,
-    ) -> Result<Option<VD::VoronoiVertexIndex>, BvError> {
+        edge_id: VD::EdgeIndex,
+    ) -> Result<Option<VD::VertexIndex>, BvError> {
         let twin = self.edge_get(edge_id)?.twin().map_or(
             Err(BvError::IdError {
                 txt: format!("the edge {} does not have any twin", edge_id.0),
@@ -218,8 +218,8 @@ where
     #[inline]
     pub fn cell_get(
         &self,
-        cell_id: VD::VoronoiCellIndex,
-    ) -> Result<&VD::VoronoiCell<I1, F1>, BvError> {
+        cell_id: VD::CellIndex,
+    ) -> Result<&VD::VoronoiCell<I, F>, BvError> {
         if let Some(cell) = self.cells.get(cell_id.0) {
             Ok(cell)
         } else {
@@ -231,15 +231,15 @@ where
 
     #[inline]
     /// Returns a reference to all of the vertices
-    pub fn vertices(&self) -> &Vec<VD::VoronoiVertex<I1, F1>> {
+    pub fn vertices(&self) -> &Vec<VD::VoronoiVertex<I, F>> {
         &self.vertices
     }
 
     #[inline]
     pub fn vertex_get(
         &self,
-        vertex_id: VD::VoronoiVertexIndex,
-    ) -> Result<&VD::VoronoiVertex<I1, F1>, BvError> {
+        vertex_id: VD::VertexIndex,
+    ) -> Result<&VD::VoronoiVertex<I, F>, BvError> {
         if let Some(vertex) = self.vertices.get(vertex_id.0) {
             Ok(vertex)
         } else {
@@ -252,8 +252,8 @@ where
     #[inline]
     pub fn vertex_get_mut(
         &mut self,
-        vertex_id: VD::VoronoiVertexIndex,
-    ) -> Result<&mut VD::VoronoiVertex<I1, F1>, BvError> {
+        vertex_id: VD::VertexIndex,
+    ) -> Result<&mut VD::VoronoiVertex<I, F>, BvError> {
         if let Some(vertex) = self.vertices.get_mut(vertex_id.0) {
             Ok(vertex)
         } else {
@@ -266,28 +266,28 @@ where
 
 /// Iterator over edges pointing away from the vertex indicated by the initial edge.
 /// edge.vertex()
-pub struct EdgeRotNextIterator<'s, I1, F1>
+pub struct EdgeRotNextIterator<'s, I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    diagram: &'s SyncVoronoiDiagram<I1, F1>,
-    starting_edge: VD::VoronoiEdgeIndex,
-    next_edge: Option<VD::VoronoiEdgeIndex>,
+    diagram: &'s SyncVoronoiDiagram<I, F>,
+    starting_edge: VD::EdgeIndex,
+    next_edge: Option<VD::EdgeIndex>,
     #[doc(hidden)]
-    _pdi: PhantomData<I1>,
+    _pdi: PhantomData<I>,
     #[doc(hidden)]
-    _pdf: PhantomData<F1>,
+    _pdf: PhantomData<F>,
 }
 
-impl<'s, I1, F1> EdgeRotNextIterator<'s, I1, F1>
+impl<'s, I, F> EdgeRotNextIterator<'s, I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     pub(crate) fn new(
-        diagram: &'s SyncVoronoiDiagram<I1, F1>,
-        starting_edge: Option<VD::VoronoiEdgeIndex>,
+        diagram: &'s SyncVoronoiDiagram<I, F>,
+        starting_edge: Option<VD::EdgeIndex>,
     ) -> Self {
         if let Some(starting_edge) = starting_edge {
             Self {
@@ -301,7 +301,7 @@ where
             Self {
                 diagram,
                 // Value does not matter next edge is None
-                starting_edge: VD::VoronoiEdgeIndex(0),
+                starting_edge: VD::EdgeIndex(0),
                 next_edge: None,
                 _pdf: PhantomData,
                 _pdi: PhantomData,
@@ -310,13 +310,13 @@ where
     }
 }
 
-impl<'s, I1, F1> Iterator for EdgeRotNextIterator<'s, I1, F1>
+impl<'s, I, F> Iterator for EdgeRotNextIterator<'s, I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    type Item = VD::VoronoiEdgeIndex;
-    fn next(&mut self) -> Option<VD::VoronoiEdgeIndex> {
+    type Item = VD::EdgeIndex;
+    fn next(&mut self) -> Option<VD::EdgeIndex> {
         let rv = self.next_edge;
         let new_next_edge = self.diagram.edge_rot_next_no_err(self.next_edge);
         self.next_edge = if let Some(nne) = new_next_edge {

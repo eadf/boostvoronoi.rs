@@ -51,16 +51,16 @@ mod tests;
 /// the corresponding Voronoi edges in the output data structure.
 /// ```
 /// # use boostvoronoi::{Point,Line};
-/// # use boostvoronoi::builder::{Builder};
+/// # use boostvoronoi::builder::Builder;
 ///
-/// type I1 = i32; // this is the integer input type
-/// type F1 = f64; // this is the float output type (circle event coordinates)
+/// type I = i32; // this is the integer input type
+/// type F = f64; // this is the float output type (circle event coordinates)
 ///
 /// // Points should be unique. Points should not intersect lines
 /// let p = vec![Point{x:9_i32, y:10}];
 /// // Lines may only intersect at the endpoints.
 /// let s = vec![Line::new(Point{x:10_i32, y:11}, Point{x:12, y:13})];
-/// let mut vb = Builder::<I1, F1>::new();
+/// let mut vb = Builder::<I, F>::default();
 ///
 /// // you will have to keep track of the input geometry. it will be referenced as
 /// // input geometry indices in the output.
@@ -70,27 +70,27 @@ mod tests;
 /// // this will generate a the list of cells, edges and circle events (aka vertices)
 /// let result = vb.construct().unwrap();
 /// ```
-pub struct Builder<I1, F1>
+pub struct Builder<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    pub(crate) site_events_: Vec<VSE::SiteEvent<I1, F1>>,
+    pub(crate) site_events_: Vec<VSE::SiteEvent<I, F>>,
     circle_events_: VC::CircleEventQueue,
-    end_points_: BinaryHeap<VEP::EndPointPair<I1>>,
-    pub(crate) beach_line_: VB::BeachLine<I1, F1>,
+    end_points_: BinaryHeap<VEP::EndPointPair<I>>,
+    pub(crate) beach_line_: VB::BeachLine<I, F>,
     index_: usize,
+    segments_added_: bool, // make sure eventual vertices are added before segments
     #[cfg(feature = "console_debug")]
-    debug_circle_counter: isize, // Just for debugging purposes
+    debug_circle_counter_: isize, // Just for debugging purposes
     #[cfg(feature = "console_debug")]
-    debug_site_counter: isize, // Just for debugging purposes
-    segments_added: bool, // make sure eventual vertices are added before segments
+    debug_site_counter_: isize, // Just for debugging purposes
 }
 
-impl<I1, F1> Default for Builder<I1, F1>
+impl<I, F> Default for Builder<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     fn default() -> Self {
         Self {
@@ -100,37 +100,37 @@ where
             end_points_: BinaryHeap::new(),
             circle_events_: VC::CircleEventQueue::default(),
             #[cfg(feature = "console_debug")]
-            debug_circle_counter: 0,
+            debug_circle_counter_: 0,
             #[cfg(feature = "console_debug")]
-            debug_site_counter: 0,
-            segments_added: false,
+            debug_site_counter_: 0,
+            segments_added_: false,
         }
     }
 }
 
-impl<I1, F1> Builder<I1, F1>
+impl<I, F> Builder<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     /// todo replace with default
-    #[deprecated(since = "0.9.0", note = "Please use the default function instead")]
-    pub fn new() -> Builder<I1, F1> {
+    #[deprecated(since = "0.8.4", note = "Please use the default function instead")]
+    pub fn new() -> Builder<I, F> {
         Self::default()
     }
 
     pub fn with_vertices<'a, T>(&mut self, vertices: T) -> Result<(), BvError>
     where
-        I1: 'a,
-        T: Iterator<Item = &'a Point<I1>>,
+        I: 'a,
+        T: Iterator<Item = &'a Point<I>>,
     {
-        if self.segments_added {
+        if self.segments_added_ {
             return Err(BvError::VerticesGoesFirst {
                 txt: "Vertices should be added before segments".to_string(),
             });
         }
         for v in vertices {
-            let mut s = VSE::SiteEvent::<I1, F1>::new_3(*v, *v, self.index_);
+            let mut s = VSE::SiteEvent::<I, F>::new_3(*v, *v, self.index_);
             s.or_source_category(&VD::ColorBits::SINGLE_POINT);
             self.site_events_.push(s);
             self.index_ += 1;
@@ -140,40 +140,40 @@ where
 
     pub fn with_segments<'a, T>(&mut self, segments: T) -> Result<(), BvError>
     where
-        I1: 'a,
-        T: Iterator<Item = &'a Line<I1>>,
+        I: 'a,
+        T: Iterator<Item = &'a Line<I>>,
     {
         type Cb = VD::ColorBits;
         for s in segments {
             let p1 = s.start;
             let p2 = s.end;
-            let mut s1 = VSE::SiteEvent::<I1, F1>::new_3(p1, p1, self.index_);
+            let mut s1 = VSE::SiteEvent::<I, F>::new_3(p1, p1, self.index_);
             s1.or_source_category(&Cb::SEGMENT_START_POINT);
             let mut s2 = VSE::SiteEvent::new_3(p2, p2, self.index_);
             s2.or_source_category(&Cb::SEGMENT_END_POINT);
 
             self.site_events_.push(s1);
             self.site_events_.push(s2);
-            let s3 = if VP::PointComparisonPredicate::<I1>::point_comparison_predicate(&p1, &p2) {
-                let mut s3 = VSE::SiteEvent::<I1, F1>::new_3(p1, p2, self.index_);
+            let s3 = if VP::PointComparisonPredicate::<I>::point_comparison_predicate(&p1, &p2) {
+                let mut s3 = VSE::SiteEvent::<I, F>::new_3(p1, p2, self.index_);
                 s3.or_source_category(&Cb::INITIAL_SEGMENT);
                 s3
             } else {
-                let mut s3 = VSE::SiteEvent::<I1, F1>::new_3(p2, p1, self.index_);
+                let mut s3 = VSE::SiteEvent::<I, F>::new_3(p2, p1, self.index_);
                 s3.or_source_category(&Cb::REVERSE_SEGMENT);
                 s3
             };
             self.site_events_.push(s3);
             self.index_ += 1;
         }
-        self.segments_added = true;
+        self.segments_added_ = true;
         Ok(())
     }
 
     /// Run sweepline algorithm and fill output data structure.
-    pub fn construct(&mut self) -> Result<VD::VoronoiDiagram<I1, F1>, BvError> {
-        let mut output: VD::VoronoiDiagram<I1, F1> =
-            VD::VoronoiDiagram::<I1, F1>::new(self.site_events_.len());
+    pub fn construct(&mut self) -> Result<VD::VoronoiDiagram<I, F>, BvError> {
+        let mut output: VD::VoronoiDiagram<I, F> =
+            VD::VoronoiDiagram::<I, F>::new(self.site_events_.len());
 
         let mut site_event_iterator_: VSE::SiteEventIndexType = self.init_sites_queue();
 
@@ -195,8 +195,8 @@ where
                     i,self.circle_events_.len(),
                     output.num_vertices(),
                     self.beach_line_.len().0,
-                    self.debug_site_counter,
-                    self.debug_circle_counter,
+                    self.debug_site_counter_,
+                    self.debug_circle_counter_,
                 );
                 tln!("################################################");
                 if i >= 8 {
@@ -205,16 +205,12 @@ where
                     print!("");
                 }
                 i += 1;
-
-                //if self.debug_site_counter >= 8 {
-                //    print!("");
-                //}
             }
             if self.circle_events_.is_empty() {
                 self.process_site_event(&mut site_event_iterator_, &mut output)?;
             } else if site_event_iterator_ == self.site_events_.len() {
                 self.process_circle_event(&mut output)?;
-            } else if VP::EventComparisonPredicate::<I1, F1>::event_comparison_predicate_bif(
+            } else if VP::EventComparisonPredicate::<I, F>::event_comparison_predicate_bif(
                 &self.site_events_[site_event_iterator_],
                 &self.circle_events_.peek().unwrap().0.get(),
             ) {
@@ -233,11 +229,10 @@ where
         Ok(output)
     }
 
-    // todo! make pub (crate)
     pub(crate) fn init_sites_queue(&mut self) -> VSE::SiteEventIndexType {
         // Sort site events.
         self.site_events_
-            .sort_by(VP::EventComparisonPredicate::<I1, F1>::event_comparison_predicate_ii);
+            .sort_by(VP::EventComparisonPredicate::<I, F>::event_comparison_predicate_ii);
 
         // Remove duplicates.
         self.site_events_.dedup();
@@ -256,10 +251,10 @@ where
         site_event_iterator_
     }
 
-    pub fn init_beach_line(
+    pub (crate) fn init_beach_line(
         &mut self,
         site_event_iterator_: &mut VSE::SiteEventIndexType,
-        output: &mut VD::VoronoiDiagram<I1, F1>,
+        output: &mut VD::VoronoiDiagram<I, F>,
     ) {
         if self.site_events_.is_empty() {
             return;
@@ -273,11 +268,11 @@ where
             let mut skip = 0;
 
             while *site_event_iterator_ < self.site_events_.len()
-                && VP::Predicates::<I1, F1>::is_vertical_2(
+                && VP::Predicates::<I, F>::is_vertical_2(
                     self.site_events_[*site_event_iterator_].point0(),
                     self.site_events_[0].point0(),
                 )
-                && VP::Predicates::<I1, F1>::is_vertical_1(
+                && VP::Predicates::<I, F>::is_vertical_1(
                     &self.site_events_[*site_event_iterator_],
                 )
             {
@@ -300,7 +295,7 @@ where
     fn init_beach_line_default(
         &mut self,
         site_event_iterator_: &mut VSE::SiteEventIndexType,
-        output: &mut VD::VoronoiDiagram<I1, F1>,
+        output: &mut VD::VoronoiDiagram<I, F>,
     ) {
         // Get the first and the second site event.
         let first = *site_event_iterator_ - 1;
@@ -318,7 +313,7 @@ where
     fn init_beach_line_collinear_sites(
         &mut self,
         site_event_iterator_: &VSE::SiteEventIndexType,
-        output: &mut VD::VoronoiDiagram<I1, F1>,
+        output: &mut VD::VoronoiDiagram<I, F>,
     ) {
         let mut it_first: VSE::SiteEventIndexType = 0;
         let mut it_second: VSE::SiteEventIndexType = 1;
@@ -327,7 +322,7 @@ where
             let second = &self.site_events_[it_second];
 
             // Create a new beach line node.
-            let new_node_key = VB::BeachLineNodeKey::<I1, F1>::new_2(*first, *second);
+            let new_node_key = VB::BeachLineNodeKey::<I, F>::new_2(*first, *second);
 
             // Update the output.
             let edge = output._insert_new_edge_2(*first, *second).0;
@@ -349,12 +344,12 @@ where
         }
     }
 
-    fn deactivate_circle_event(&mut self, value: &Option<VB::BeachLineNodeKey<I1, F1>>) {
+    fn deactivate_circle_event(&mut self, value: &Option<VB::BeachLineNodeKey<I, F>>) {
         if let Some(value) = value {
             let node_data = self.beach_line_.get_node(&value.get_index()).1;
             let node_cell = node_data.get();
             if let Some(node_cell) = node_cell {
-                let cevent: Option<VC::CircleEventIndexType> = node_cell.get_circle_event_id();
+                let cevent: Option<VC::CircleEventIndex> = node_cell.get_circle_event_id();
                 self.circle_events_.deactivate(cevent);
 
                 // TODO! should this be in here?
@@ -368,17 +363,17 @@ where
     pub(crate) fn process_site_event(
         &mut self,
         site_event_iterator_: &mut VSE::SiteEventIndexType,
-        output: &mut VD::VoronoiDiagram<I1, F1>,
+        output: &mut VD::VoronoiDiagram<I, F>,
     ) -> Result<(), BvError> {
         #[cfg(feature = "console_debug")]
         {
             //tln!("->process_site_event");
-            if self.debug_site_counter >= 109 {
+            if self.debug_site_counter_ >= 109 {
                 print!("");
             }
             //self.beach_line_.debug_print_all();
             //}
-            self.debug_site_counter += 1;
+            self.debug_site_counter_ += 1;
         }
         let (mut right_it, last_index) = {
             // Get next site event to process.
@@ -428,7 +423,7 @@ where
 
             // Find the node in the binary search tree with left arc
             // lying above the new site point.
-            let new_key = VB::BeachLineNodeKey::<I1, F1>::new_1(*site_event);
+            let new_key = VB::BeachLineNodeKey::<I, F>::new_1(*site_event);
 
             let right_it = self.beach_line_.lower_bound(new_key);
 
@@ -437,8 +432,8 @@ where
         #[cfg(feature = "console_debug")]
         {
             let debug_range = 999999;
-            if self.debug_circle_counter >= debug_range
-                && self.debug_circle_counter <= debug_range + 2
+            if self.debug_circle_counter_ >= debug_range
+                && self.debug_circle_counter_ <= debug_range + 2
             {
                 self.beach_line_
                     .debug_print_all_compat(&self.circle_events_);
@@ -579,11 +574,11 @@ where
     /// map data structure keeps correct ordering.
     pub(crate) fn process_circle_event(
         &mut self,
-        output: &mut VD::VoronoiDiagram<I1, F1>,
+        output: &mut VD::VoronoiDiagram<I, F>,
     ) -> Result<(), BvError> {
         #[cfg(feature = "console_debug")]
         {
-            self.debug_circle_counter += 1;
+            self.debug_circle_counter_ += 1;
         }
         // Get the topmost circle event.
         let e = self.circle_events_.top().unwrap();
@@ -595,7 +590,7 @@ where
             .is_active(circle_event.get_index().unwrap())
         {
             // todo: remove this panic when stable
-            panic!();
+            return Err(BvError::SomeError {txt:format!("Internal error, the circle event should be active. {}:{}", file!(), line!())})
         }
         let it_first = &self.beach_line_.get_node(&e.1.unwrap());
         let it_last = it_first;
@@ -746,10 +741,10 @@ where
     /// Insert new nodes into the beach line. Update the output.
     fn insert_new_arc(
         &mut self,
-        site_arc1: VSE::SiteEvent<I1, F1>,
-        site_arc2: VSE::SiteEvent<I1, F1>,
-        site_event: VSE::SiteEvent<I1, F1>,
-        output: &mut VD::VoronoiDiagram<I1, F1>,
+        site_arc1: VSE::SiteEvent<I, F>,
+        site_arc2: VSE::SiteEvent<I, F>,
+        site_event: VSE::SiteEvent<I, F>,
+        output: &mut VD::VoronoiDiagram<I, F>,
     ) -> VB::BeachLineIndex {
         tln!(
             "->insert_new_arc(\n  site_arc1:{:?}\n  ,site_arc2:{:?}\n  ,site_event:{:?}",
@@ -758,8 +753,8 @@ where
             site_event
         );
         // Create two new bisectors with opposite directions.
-        let new_left_node = VB::BeachLineNodeKey::<I1, F1>::new_2(site_arc1, site_event);
-        let mut new_right_node = VB::BeachLineNodeKey::<I1, F1>::new_2(site_event, site_arc2);
+        let new_left_node = VB::BeachLineNodeKey::<I, F>::new_2(site_arc1, site_event);
+        let mut new_right_node = VB::BeachLineNodeKey::<I, F>::new_2(site_event, site_arc2);
 
         // Set correct orientation for the first site of the second node.
         if site_event.is_segment() {
@@ -786,7 +781,7 @@ where
             // Update the beach line with temporary bisector, that will
             // disappear after processing site event corresponding to the
             // second endpoint of the segment site.
-            let mut new_node = VB::BeachLineNodeKey::<I1, F1>::new_2(site_event, site_event);
+            let mut new_node = VB::BeachLineNodeKey::<I, F>::new_2(site_event, site_event);
             let _ = new_node.right_site_m().inverse();
 
             #[cfg(feature = "console_debug")]
@@ -821,16 +816,16 @@ where
     /// bisector_node corresponds to the (site2, site3) bisector.
     fn activate_circle_event(
         &mut self,
-        site1: VSE::SiteEvent<I1, F1>,
-        site2: VSE::SiteEvent<I1, F1>,
-        site3: VSE::SiteEvent<I1, F1>,
+        site1: VSE::SiteEvent<I, F>,
+        site2: VSE::SiteEvent<I, F>,
+        site3: VSE::SiteEvent<I, F>,
         bisector_node: VB::BeachLineIndex,
     ) -> Result<(), BvError> {
         // Check if the three input sites create a circle event.
         let c_event = VC::CircleEvent::new_1(bisector_node);
         let c_event = VC::CircleEventC::new_1(c_event);
 
-        if VP::CircleFormationFunctor::<I1, F1>::circle_formation_predicate(
+        if VP::CircleFormationFunctor::<I, F>::circle_formation_predicate(
             &site1, &site2, &site3, &c_event,
         ) {
             // Add the new circle event to the circle events queue.

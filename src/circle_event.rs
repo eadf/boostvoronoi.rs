@@ -22,8 +22,29 @@ use std::ops::Neg;
 use std::rc::Rc;
 use vec_map::VecMap;
 
-// todo! make wrapper
-pub type CircleEventIndexType = usize;
+/// Type-checked placeholder for usize
+/// Hopefully rust zero cost abstractions will flatten this out.
+#[derive(Copy, Clone)]
+pub struct CircleEventIndex(pub usize);
+
+impl CircleEventIndex {
+    fn increment(&mut self) -> &Self {
+        self.0 += 1;
+        self
+    }
+}
+
+impl fmt::Display for CircleEventIndex {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl fmt::Debug for CircleEventIndex {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "BeachLineIndex({})", self.0)
+    }
+}
 
 /// Circle event type.
 /// Occurs when the sweepline sweeps over the rightmost point of the Voronoi
@@ -39,7 +60,7 @@ pub type CircleEventIndexType = usize;
 ///
 #[derive(Copy, Clone)]
 pub struct CircleEvent {
-    index_: Option<CircleEventIndexType>, // the list index inside CircleEventQueue
+    index_: Option<CircleEventIndex>, // the list index inside CircleEventQueue
     center_x_: OrderedFloat<f64>,
     center_y_: OrderedFloat<f64>,
     lower_x_: OrderedFloat<f64>,
@@ -222,11 +243,11 @@ where
         }
     }
 
-    pub(crate) fn get_index(&self) -> Option<CircleEventIndexType> {
+    pub(crate) fn get_index(&self) -> Option<CircleEventIndex> {
         self.index_
     }
 
-    pub(crate) fn set_index(&mut self, index: CircleEventIndexType) -> &mut Self {
+    pub(crate) fn set_index(&mut self, index: CircleEventIndex) -> &mut Self {
         self.index_ = Some(index);
         self
     }
@@ -329,11 +350,11 @@ pub type CircleEventType = Rc<CircleEventC>;
 /// iterators (there is no direct ability to modify its elements).
 /// Instead list is used to store all the circle events and priority queue
 /// of the iterators to the list elements is used to keep the correct circle
-/// events ordering.
+/// events ordering. (todo: this is a comment from c++, convert to rust)
 pub(crate) struct CircleEventQueue {
     c_: BTreeSet<CircleEventType>,
     c_list_: VecMap<CircleEventType>,
-    c_list_next_free_index_: CircleEventIndexType,
+    c_list_next_free_index_: CircleEventIndex,
     inactive_circle_ids_: yabf::Yabf, // Circle events turned inactive
 }
 
@@ -342,7 +363,7 @@ impl Default for CircleEventQueue {
         Self {
             c_: BTreeSet::new(),
             c_list_: VecMap::new(),
-            c_list_next_free_index_: 0,
+            c_list_next_free_index_: CircleEventIndex(0),
             inactive_circle_ids_: yabf::Yabf::default(),
         }
     }
@@ -356,7 +377,7 @@ impl CircleEventQueue {
     #[allow(dead_code)]
     pub(crate) fn len(&self) -> usize {
         //todo! assert_eq!(self.c_.len(), self.c_list_.len());
-        assert!(self.c_list_.len() <= self.c_list_next_free_index_);
+        assert!(self.c_list_.len() <= self.c_list_next_free_index_.0);
         self.c_.len()
     }
 
@@ -402,8 +423,8 @@ impl CircleEventQueue {
     pub(crate) fn pop_and_destroy(&mut self) {
         if let Some(circle) = self.c_.pop_first() {
             if let Some(circle_id) = circle.0.get().index_ {
-                let _ = self.c_list_.remove(circle_id);
-                let _ = self.inactive_circle_ids_.set_bit(circle_id, true);
+                let _ = self.c_list_.remove(circle_id.0);
+                let _ = self.inactive_circle_ids_.set_bit(circle_id.0, true);
             } else {
                 panic!("This should not have happened")
             }
@@ -435,20 +456,20 @@ impl CircleEventQueue {
 
         let _ = self
             .c_list_
-            .insert(self.c_list_next_free_index_, cc.clone());
-        self.c_list_next_free_index_ += 1;
+            .insert(self.c_list_next_free_index_.0, cc.clone());
+        let _ = self.c_list_next_free_index_.increment();
         let _ = self.c_.insert(cc.clone());
         cc
     }
 
-    pub(crate) fn is_active(&self, circle_event_id: CircleEventIndexType) -> bool {
-        !self.inactive_circle_ids_.bit(circle_event_id)
+    pub(crate) fn is_active(&self, circle_event_id: CircleEventIndex) -> bool {
+        !self.inactive_circle_ids_.bit(circle_event_id.0)
     }
 
-    pub(crate) fn deactivate(&mut self, circle_event_id: Option<CircleEventIndexType>) {
+    pub(crate) fn deactivate(&mut self, circle_event_id: Option<CircleEventIndex>) {
         #[cfg(not(feature = "console_debug"))]
         if let Some(circle_event_id) = circle_event_id {
-            let _ = self.inactive_circle_ids_.set_bit(circle_event_id, true);
+            let _ = self.inactive_circle_ids_.set_bit(circle_event_id.0, true);
         }
         #[cfg(feature = "console_debug")]
         if let Some(circle_event_id) = circle_event_id {
@@ -475,7 +496,7 @@ impl CircleEventQueue {
     }
 
     #[cfg(feature = "console_debug")]
-    pub(crate) fn dbg_ce(&self, cei: CircleEventIndexType) {
+    pub(crate) fn dbg_ce(&self, cei: CircleEventIndex) {
         if let Some(ce) = self.c_list_.get(cei) {
             print!("{:?}", ce);
         } else {

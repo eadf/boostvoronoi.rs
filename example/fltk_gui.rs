@@ -1,5 +1,5 @@
 use boostvoronoi::diagram as VD;
-use boostvoronoi::diagram::VoronoiEdgeIndex;
+use boostvoronoi::diagram::EdgeIndex;
 use boostvoronoi::file_reader;
 use boostvoronoi::visual_utils as VU;
 use boostvoronoi::BvError;
@@ -282,7 +282,7 @@ fn main() -> Result<(), BvError> {
     // This is called whenever the window is drawn and redrawn
     wind.draw(move |_| {
         if let Ok(data_b) = shared_data_c.try_borrow() {
-            // todo, move the actual drawing away from draw() function, only keep the offscreen blit.
+            // todo, move the actual drawing away from draw() function, only keep the off-screen blit.
             offs_rc.borrow_mut().begin();
 
             draw::set_draw_color(enums::Color::White);
@@ -483,32 +483,32 @@ fn main() -> Result<(), BvError> {
 }
 
 /// struct to help deal with the voronoi diagram input and output
-pub struct VoronoiVisualizer<I1, F1>
+pub struct VoronoiVisualizer<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    screen_aabb: VU::Aabb2<I1, F1>,
-    diagram: VD::VoronoiDiagram<I1, F1>,
-    points_aabb: VU::Aabb2<I1, F1>,
+    screen_aabb: VU::Aabb2<I, F>,
+    diagram: VD::VoronoiDiagram<I, F>,
+    points_aabb: VU::Aabb2<I, F>,
 
-    point_data_: Vec<boostvoronoi::Point<I1>>,
-    segment_data_: Vec<boostvoronoi::Line<I1>>,
-    affine: VU::SimpleAffine<I1, F1>,
+    point_data_: Vec<boostvoronoi::Point<I>>,
+    segment_data_: Vec<boostvoronoi::Line<I>>,
+    affine: VU::SimpleAffine<I, F>,
 }
 
-impl<I1, F1> VoronoiVisualizer<I1, F1>
+impl<I, F> VoronoiVisualizer<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     pub fn default() -> Self {
         Self {
-            screen_aabb: VU::Aabb2::<I1, F1>::new_from_i32(0, 0, FW, FH),
-            diagram: VD::VoronoiDiagram::<I1, F1>::new(0),
-            points_aabb: VU::Aabb2::<I1, F1>::default(),
-            point_data_: Vec::<boostvoronoi::Point<I1>>::new(),
-            segment_data_: Vec::<boostvoronoi::Line<I1>>::new(),
+            screen_aabb: VU::Aabb2::<I, F>::new_from_i32(0, 0, FW, FH),
+            diagram: VD::VoronoiDiagram::<I, F>::new(0),
+            points_aabb: VU::Aabb2::<I, F>::default(),
+            point_data_: Vec::<boostvoronoi::Point<I>>::new(),
+            segment_data_: Vec::<boostvoronoi::Line<I>>::new(),
             affine: VU::SimpleAffine::default(),
         }
     }
@@ -519,7 +519,7 @@ where
         self.affine = VU::SimpleAffine::new(&self.points_aabb, &self.screen_aabb)?;
 
         // Flip the z axis because fltk uses quadrant 4 when drawing
-        self.affine.scale[1] *= F1::from(-1.0).unwrap();
+        self.affine.scale[1] *= F::from(-1.0).unwrap();
         Ok(())
     }
 
@@ -538,7 +538,7 @@ where
         }
         println!("];");
 
-        let mut vb = VB::Builder::<I1, F1>::default();
+        let mut vb = VB::Builder::<I, F>::default();
         vb.with_vertices(self.point_data_.iter())?;
         vb.with_segments(self.segment_data_.iter())?;
 
@@ -601,7 +601,7 @@ where
     }
 
     // returns true if l intersects with any of the lines in self.segment_data_
-    fn self_intersecting_check(&self, l: &boostvoronoi::Line<I1>) -> bool {
+    fn self_intersecting_check(&self, l: &boostvoronoi::Line<I>) -> bool {
         let l_ = Self::line_i1_to_f64(l);
         for s in self.segment_data_.iter() {
             // allow end point intersection
@@ -673,8 +673,8 @@ where
     }
 
     /// Draw input points and endpoints of the input segments.
-    fn draw_input_points(&self, affine: &VU::SimpleAffine<I1, F1>) {
-        let draw = |point: [F1; 2]| {
+    fn draw_input_points(&self, affine: &VU::SimpleAffine<I, F>) {
+        let draw = |point: [F; 2]| {
             draw::draw_circle(Self::f1_to_f64(point[0]), Self::f1_to_f64(point[1]), 2.0);
         };
 
@@ -689,7 +689,7 @@ where
     }
 
     /// Draw input segments.
-    fn draw_input_segments(&self, affine: &VU::SimpleAffine<I1, F1>) {
+    fn draw_input_segments(&self, affine: &VU::SimpleAffine<I, F>) {
         for i in self.segment_data_.iter() {
             let sp = affine.transform_p(&i.start);
             let ep = affine.transform_p(&i.end);
@@ -703,7 +703,7 @@ where
     }
 
     /// Draw voronoi vertices aka circle events.
-    fn draw_vertices(&self, config: &SharedData, affine: &VU::SimpleAffine<I1, F1>) {
+    fn draw_vertices(&self, config: &SharedData, affine: &VU::SimpleAffine<I, F>) {
         let draw = |x: f64, y: f64| {
             draw::draw_circle(x, y, 1.0);
         };
@@ -748,7 +748,7 @@ where
     }
 
     /// Draw voronoi edges.
-    fn draw_edges(&self, config: &SharedData, affine: &VU::SimpleAffine<I1, F1>) {
+    fn draw_edges(&self, config: &SharedData, affine: &VU::SimpleAffine<I, F>) {
         let draw_external = config.draw_flag.contains(DrawFilterFlag::EXTERNAL);
         let draw_primary = config.draw_flag.contains(DrawFilterFlag::PRIMARY);
         let draw_secondary = config.draw_flag.contains(DrawFilterFlag::SECONDARY);
@@ -762,7 +762,7 @@ where
 
         for it in self.diagram.edges().iter().enumerate() {
             draw::set_draw_color(enums::Color::DarkGreen);
-            let edge_id = VoronoiEdgeIndex(it.0);
+            let edge_id = EdgeIndex(it.0);
             let edge = it.1.get();
             if already_drawn.bit(edge_id.0) {
                 // already done this, or rather - it's twin
@@ -818,7 +818,7 @@ where
             }
 
             // the coordinates in samples must be 'screen' coordinates, i.e. affine transformed
-            let mut samples = Vec::<[F1; 2]>::new();
+            let mut samples = Vec::<[F; 2]>::new();
             if !self.diagram.edge_is_finite(Some(edge_id)).unwrap() {
                 let a = self.clip_infinite_edge(&affine, edge_id, &mut samples);
                 if let Err(err) = a {
@@ -847,7 +847,7 @@ where
                         }
                     }
                     if draw_curved {
-                        self.sample_curved_edge(&affine, VoronoiEdgeIndex(it.0), &mut samples);
+                        self.sample_curved_edge(&affine, EdgeIndex(it.0), &mut samples);
                     } else {
                         continue;
                     }
@@ -880,9 +880,9 @@ where
 
     fn clip_infinite_edge(
         &self,
-        affine: &VU::SimpleAffine<I1, F1>,
-        edge_id: VD::VoronoiEdgeIndex,
-        clipped_edge: &mut Vec<[F1; 2]>,
+        affine: &VU::SimpleAffine<I, F>,
+        edge_id: VD::EdgeIndex,
+        clipped_edge: &mut Vec<[F; 2]>,
     ) -> Result<(), BvError> {
         let edge = self.diagram.get_edge(edge_id);
         //const cell_type& cell1 = *edge.cell();
@@ -896,8 +896,8 @@ where
             .unwrap();
         let cell2 = self.diagram.get_cell(cell2_id).get();
 
-        let mut origin = [F1::default(), F1::default()];
-        let mut direction = [F1::default(), F1::default()];
+        let mut origin = [F::default(), F::default()];
+        let mut direction = [F::default(), F::default()];
         // Infinite edges could not be created by two segment sites.
         if cell1.contains_point() && cell2.contains_point() {
             let p1 = self.retrieve_point(cell1_id);
@@ -942,13 +942,13 @@ where
                 );
         // absolute value is taken in case the affine transform flips one coordinate
         let side = side.abs();
-        let koef = side / Self::max_f1(direction[0].abs(), direction[1].abs());
+        let coefficient = side / Self::max_f1(direction[0].abs(), direction[1].abs());
 
         let vertex0 = edge.get().vertex0();
         if vertex0.is_none() {
             clipped_edge.push([
-                affine.transform_x(origin[0] - direction[0] * koef),
-                affine.transform_y(origin[1] - direction[1] * koef),
+                affine.transform_x(origin[0] - direction[0] * coefficient),
+                affine.transform_y(origin[1] - direction[1] * coefficient),
             ]);
         } else {
             let vertex0 = self.diagram.vertex_get(vertex0).unwrap().get();
@@ -960,8 +960,8 @@ where
         let vertex1 = self.diagram.edge_get_vertex1(Some(edge_id));
         if vertex1.is_none() {
             clipped_edge.push([
-                affine.transform_x(origin[0] + direction[0] * koef),
-                affine.transform_y(origin[1] + direction[1] * koef),
+                affine.transform_x(origin[0] + direction[0] * coefficient),
+                affine.transform_y(origin[1] + direction[1] * coefficient),
             ]);
         } else {
             let vertex1 = self.diagram.vertex_get(vertex1).unwrap().get();
@@ -977,9 +977,9 @@ where
     /// sampled_edge should be 'screen' coordinates, i.e. affine transformed from voronoi output
     fn sample_curved_edge(
         &self,
-        affine: &VU::SimpleAffine<I1, F1>,
-        edge_id: VD::VoronoiEdgeIndex,
-        sampled_edge: &mut Vec<[F1; 2]>,
+        affine: &VU::SimpleAffine<I, F>,
+        edge_id: VD::EdgeIndex,
+        sampled_edge: &mut Vec<[F; 2]>,
     ) {
         let max_dist = Self::f64_to_f1(1E-3)
             * (self.screen_aabb.get_high().unwrap()[0] - self.screen_aabb.get_low().unwrap()[0]);
@@ -999,7 +999,7 @@ where
         } else {
             self.retrieve_segment(cell_id)
         };
-        VU::VoronoiVisualUtils::<I1, F1>::discretize(
+        VU::VoronoiVisualUtils::<I, F>::discretize(
             &point,
             segment,
             max_dist,
@@ -1010,7 +1010,7 @@ where
 
     /// Retrieves a point from the voronoi input in the order it was presented to
     /// the voronoi builder
-    fn retrieve_point(&self, cell_id: VD::VoronoiCellIndex) -> boostvoronoi::Point<I1> {
+    fn retrieve_point(&self, cell_id: VD::CellIndex) -> boostvoronoi::Point<I> {
         let (index, cat) = self.diagram.get_cell(cell_id).get().source_index_2();
         match cat {
             VD::SourceCategory::SinglePoint => self.point_data_[index],
@@ -1025,7 +1025,7 @@ where
 
     /// Retrieves a segment from the voronoi input in the order it was presented to
     /// the voronoi builder
-    fn retrieve_segment(&self, cell_id: VD::VoronoiCellIndex) -> &boostvoronoi::Line<I1> {
+    fn retrieve_segment(&self, cell_id: VD::CellIndex) -> &boostvoronoi::Line<I> {
         let cell = self.diagram.get_cell(cell_id).get();
         let index = cell.source_index() - self.point_data_.len();
         &self.segment_data_[index]
@@ -1406,23 +1406,23 @@ where
             Example::Simple => {
                 rv = "Simple example".to_string();
                 (
-                    Vec::<Point<I1>>::default(),
-                    VB::to_segments::<i32, I1>(&_simple_segments),
+                    Vec::<Point<I>>::default(),
+                    VB::to_segments::<i32, I>(&_simple_segments),
                 )
             }
             Example::Complex => {
                 rv = "Rust logo".to_string();
                 (
-                    Vec::<Point<I1>>::default(),
-                    VB::to_segments::<i32, I1>(&_segments_rust_logo),
+                    Vec::<Point<I>>::default(),
+                    VB::to_segments::<i32, I>(&_segments_rust_logo),
                 )
             }
             Example::Clean => {
                 rv = "Clean".to_string();
                 let clean: [[i32; 4]; 0] = [];
                 (
-                    Vec::<Point<I1>>::default(),
-                    VB::to_segments::<i32, I1>(&clean),
+                    Vec::<Point<I>>::default(),
+                    VB::to_segments::<i32, I>(&clean),
                 )
             }
             Example::File => {
@@ -1434,17 +1434,17 @@ where
                 chooser.show();
                 if let Some(filename) = chooser.filenames().first() {
                     if let Ok(file_parse_result) =
-                        file_reader::read_boost_input_file::<I1>(filename.as_path())
+                        file_reader::read_boost_input_file::<I>(filename.as_path())
                     {
                         rv = filename.to_str().unwrap().to_string();
                         file_parse_result
                     } else {
                         rv = "Failed to read file".to_string();
-                        (Vec::<Point<I1>>::default(), Vec::<Line<I1>>::default())
+                        (Vec::<Point<I>>::default(), Vec::<Line<I>>::default())
                     }
                 } else {
                     rv = "Failed to read file".to_string();
-                    (Vec::<Point<I1>>::default(), Vec::<Line<I1>>::default())
+                    (Vec::<Point<I>>::default(), Vec::<Line<I>>::default())
                 }
             }
         };
@@ -1453,7 +1453,7 @@ where
         rv
     }
 
-    fn line_i1_to_f64(value: &boostvoronoi::Line<I1>) -> geo::Line<f64> {
+    fn line_i1_to_f64(value: &boostvoronoi::Line<I>) -> geo::Line<f64> {
         let ps = geo::Coordinate {
             x: Self::i1_to_f64(value.start.x),
             y: Self::i1_to_f64(value.start.y),
@@ -1466,46 +1466,46 @@ where
     }
 
     #[inline(always)]
-    fn max_f1(a: F1, b: F1) -> F1 {
+    fn max_f1(a: F, b: F) -> F {
         OrderedFloat(a).max(OrderedFloat(b)).into_inner()
     }
 
     #[inline(always)]
-    pub fn i1_to_f1(value: I1) -> F1 {
-        TypeConverter2::<I1, F1>::i1_to_f1(value)
+    pub fn i1_to_f1(value: I) -> F {
+        TypeConverter2::<I, F>::i1_to_f1(value)
     }
     #[inline(always)]
-    pub fn f1_to_i32(value: F1) -> i32 {
-        TypeConverter2::<I1, F1>::f1_to_i32(value)
-    }
-
-    #[inline(always)]
-    pub fn f64_to_f1(value: f64) -> F1 {
-        TypeConverter2::<I1, F1>::f64_to_f1(value)
+    pub fn f1_to_i32(value: F) -> i32 {
+        TypeConverter2::<I, F>::f1_to_i32(value)
     }
 
     #[inline(always)]
-    pub fn f1_to_i1(value: F1) -> I1 {
-        TypeConverter2::<I1, F1>::f1_to_i1(value)
+    pub fn f64_to_f1(value: f64) -> F {
+        TypeConverter2::<I, F>::f64_to_f1(value)
     }
 
     #[inline(always)]
-    pub fn i1_to_f64(value: I1) -> f64 {
-        TypeConverter1::<I1>::i1_to_f64(value)
+    pub fn f1_to_i1(value: F) -> I {
+        TypeConverter2::<I, F>::f1_to_i1(value)
     }
 
     #[inline(always)]
-    pub fn try_f1_to_i32(value: F1) -> Result<i32, BvError> {
-        TypeConverter2::<I1, F1>::try_f1_to_i32(value)
+    pub fn i1_to_f64(value: I) -> f64 {
+        TypeConverter1::<I>::i1_to_f64(value)
     }
 
     #[inline(always)]
-    pub fn f1_to_f64(v: F1) -> f64 {
-        num::cast::<F1, f64>(v).unwrap()
+    pub fn try_f1_to_i32(value: F) -> Result<i32, BvError> {
+        TypeConverter2::<I, F>::try_f1_to_i32(value)
     }
 
     #[inline(always)]
-    pub fn f1_to_f64o(v: F1) -> OrderedFloat<f64> {
-        OrderedFloat(num::cast::<F1, f64>(v).unwrap())
+    pub fn f1_to_f64(v: F) -> f64 {
+        num::cast::<F, f64>(v).unwrap()
+    }
+
+    #[inline(always)]
+    pub fn f1_to_f64o(v: F) -> OrderedFloat<f64> {
+        OrderedFloat(num::cast::<F, f64>(v).unwrap())
     }
 }

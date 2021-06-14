@@ -214,8 +214,8 @@ pub trait InputType:
 {
 }
 
-impl<I1> InputType for I1 where
-    I1: Display
+impl<I> InputType for I where
+    I: Display
         + Ord
         + PartialOrd
         + Eq
@@ -247,8 +247,8 @@ pub trait OutputType:
 {
 }
 
-impl<F1> OutputType for F1 where
-    F1: Float
+impl<F> OutputType for F where
+    F: Float
         + PartialOrd
         + PartialEq
         + NumCast
@@ -259,130 +259,130 @@ impl<F1> OutputType for F1 where
         + Debug
         + Zero
         + std::ops::MulAssign
-        + Neg<Output = F1>
+        + Neg<Output = F>
 {
 }
 
 /// Functions for converting the integer input type to other types (i32 i64 etc.)
 #[derive(Default)]
-pub struct TypeConverter1<I1>
+pub struct TypeConverter1<I>
 where
-    I1: InputType + Neg<Output = I1>,
+    I: InputType + Neg<Output = I>,
 {
     #[doc(hidden)]
-    _pdi: PhantomData<I1>,
+    _pdi: PhantomData<I>,
 }
 
-impl<I1> TypeConverter1<I1>
+impl<I> TypeConverter1<I>
 where
-    I1: InputType + Neg<Output = I1>,
+    I: InputType + Neg<Output = I>,
 {
     #[inline(always)]
-    pub fn i1_to_xi(input: I1) -> EI::ExtendedInt {
-        EI::ExtendedInt::from(num::cast::<I1, i64>(input).unwrap())
+    pub fn i1_to_xi(input: I) -> EI::ExtendedInt {
+        EI::ExtendedInt::from(num::cast::<I, i64>(input).unwrap())
     }
 
     #[inline(always)]
-    pub fn i32_to_i1(input: i32) -> I1 {
-        num::cast::<i32, I1>(input).unwrap()
+    pub fn i32_to_i1(input: i32) -> I {
+        num::cast::<i32, I>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn i1_to_i32(input: I1) -> i32 {
-        num::cast::<I1, i32>(input).unwrap()
+    pub fn i1_to_i32(input: I) -> i32 {
+        num::cast::<I, i32>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn i1_to_i64(input: I1) -> i64 {
-        num::cast::<I1, i64>(input).unwrap()
+    pub fn i1_to_i64(input: I) -> i64 {
+        num::cast::<I, i64>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn i1_to_f32(input: I1) -> f32 {
-        num::cast::<I1, f32>(input).unwrap()
+    pub fn i1_to_f32(input: I) -> f32 {
+        num::cast::<I, f32>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn i1_to_f64(input: I1) -> f64 {
+    pub fn i1_to_f64(input: I) -> f64 {
         NumCast::from(input).unwrap()
     }
 }
 
 /// Functions for converting the integer and float input type to other types.
 #[derive(Default)]
-pub struct TypeConverter2<I1, F1>
+pub struct TypeConverter2<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     #[doc(hidden)]
-    _pdo: PhantomData<F1>,
+    _pdo: PhantomData<F>,
     #[doc(hidden)]
-    _pdi: PhantomData<I1>,
+    _pdi: PhantomData<I>,
 }
 
-impl<I1, F1> TypeConverter2<I1, F1>
+impl<I, F> TypeConverter2<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     #[inline(always)]
-    pub fn i1_to_f1(input: I1) -> F1 {
-        num::cast::<I1, F1>(input).unwrap()
+    pub fn i1_to_f1(input: I) -> F {
+        num::cast::<I, F>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn f1_to_i32(input: F1) -> i32 {
-        num::cast::<F1, i32>(input).unwrap()
+    pub fn f1_to_i32(input: F) -> i32 {
+        num::cast::<F, i32>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn try_f1_to_i32(input: F1) -> Result<i32, BvError> {
-        num::cast::<F1, i32>(input).ok_or(BvError::NumberConversion {
+    pub fn try_f1_to_i32(input: F) -> Result<i32, BvError> {
+        num::cast::<F, i32>(input).ok_or(BvError::NumberConversion {
             txt: format!("Could not convert from float{:?} to int32", input),
         })
     }
 
     #[inline(always)]
-    pub fn i1_to_xi(input: I1) -> EI::ExtendedInt {
-        EI::ExtendedInt::from(num::cast::<I1, i64>(input).unwrap())
+    pub fn i1_to_xi(input: I) -> EI::ExtendedInt {
+        EI::ExtendedInt::from(num::cast::<I, i64>(input).unwrap())
     }
 
     #[inline(always)]
-    pub fn f1_to_i1(input: F1) -> I1 {
-        num::cast::<F1, I1>(input).unwrap()
+    pub fn f1_to_i1(input: F) -> I {
+        num::cast::<F, I>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn try_f1_to_i1(input: F1) -> Result<I1, BvError> {
-        num::cast::<F1, I1>(input).ok_or(BvError::NumberConversion {
+    pub fn try_f1_to_i1(input: F) -> Result<I, BvError> {
+        num::cast::<F, I>(input).ok_or(BvError::NumberConversion {
             txt: format!("Could not convert from float:{:?} to int32", input),
         })
     }
 
     #[inline(always)]
-    pub fn f1_to_f64(input: F1) -> f64 {
-        num::cast::<F1, f64>(input).unwrap()
+    pub fn f1_to_f64(input: F) -> f64 {
+        num::cast::<F, f64>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn f1_to_f32(input: F1) -> f32 {
-        num::cast::<F1, f32>(input).unwrap()
+    pub fn f1_to_f32(input: F) -> f32 {
+        num::cast::<F, f32>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn i32_to_f1(input: i32) -> F1 {
-        num::cast::<i32, F1>(input).unwrap()
+    pub fn i32_to_f1(input: i32) -> F {
+        num::cast::<i32, F>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn f32_to_f1(input: f32) -> F1 {
-        num::cast::<f32, F1>(input).unwrap()
+    pub fn f32_to_f1(input: f32) -> F {
+        num::cast::<f32, F>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn f64_to_f1(input: f64) -> F1 {
-        num::cast::<f64, F1>(input).unwrap()
+    pub fn f64_to_f1(input: f64) -> F {
+        num::cast::<f64, F>(input).unwrap()
     }
 
     #[inline(always)]

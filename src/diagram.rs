@@ -36,31 +36,31 @@ pub type SourceIndex = usize;
 
 /// Typed container for cell indices
 #[derive(Copy, Clone, Hash, PartialEq, Eq, Default)]
-pub struct VoronoiCellIndex(pub usize);
+pub struct CellIndex(pub usize);
 
-impl fmt::Debug for VoronoiCellIndex {
+impl fmt::Debug for CellIndex {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "VoronoiCellIndex({})", self.0)
+        write!(f, "CellIndex({})", self.0)
     }
 }
 
 /// Typed container for edge indices
 #[derive(Copy, Clone, Hash, PartialEq, Eq, Default)]
-pub struct VoronoiEdgeIndex(pub usize);
+pub struct EdgeIndex(pub usize);
 
-impl fmt::Debug for VoronoiEdgeIndex {
+impl fmt::Debug for EdgeIndex {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "VoronoiEdgeIndex({})", self.0)
+        write!(f, "EdgeIndex({})", self.0)
     }
 }
 
 /// Typed container for vertex indices
 #[derive(Copy, Clone, Hash, PartialEq, Eq, Default)]
-pub struct VoronoiVertexIndex(pub usize);
+pub struct VertexIndex(pub usize);
 
-impl fmt::Debug for VoronoiVertexIndex {
+impl fmt::Debug for VertexIndex {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "VoronoiVertexIndex({})", self.0)
+        write!(f, "VertexIndex({})", self.0)
     }
 }
 
@@ -116,27 +116,27 @@ pub enum SourceCategory {
 ///
 /// TODO! fix the name confusion "initial index" & "source index" referring to the same thing.
 #[derive(Copy, Clone)]
-pub struct VoronoiCell<I1, F1>
+pub struct VoronoiCell<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     // sorted_index of the site event
-    id_: VoronoiCellIndex,
+    id_: CellIndex,
     // source_index/initial_index of the site event
     source_index_: SourceIndex,
-    incident_edge_: Option<VoronoiEdgeIndex>,
+    incident_edge_: Option<EdgeIndex>,
     color_: ColorType,
     #[doc(hidden)]
-    _pdi: PhantomData<I1>,
+    _pdi: PhantomData<I>,
     #[doc(hidden)]
-    _pdo: PhantomData<F1>,
+    _pdo: PhantomData<F>,
 }
 
-impl<I1, F1> fmt::Debug for VoronoiCell<I1, F1>
+impl<I, F> fmt::Debug for VoronoiCell<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut rv = String::new();
@@ -155,13 +155,13 @@ where
     }
 }
 
-impl<I1, F1> VoronoiCell<I1, F1>
+impl<I, F> VoronoiCell<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     pub fn new(
-        id: VoronoiCellIndex,
+        id: CellIndex,
         source_index: SourceIndex,
         source_category: ColorType,
     ) -> Self {
@@ -216,7 +216,7 @@ where
         self.internal_color().0 == ColorBits::SEGMENT_END_POINT.0
     }
 
-    /// TODO: this should return VoronoiCellIndex
+    /// TODO: this should return CellIndex
     #[inline(always)]
     pub fn get_id(&self) -> SourceIndex {
         self.id_.0
@@ -242,35 +242,35 @@ where
 
     /// returns a random edge defined by this cell.
     #[inline(always)]
-    pub fn get_incident_edge(&self) -> Option<VoronoiEdgeIndex> {
+    pub fn get_incident_edge(&self) -> Option<EdgeIndex> {
         self.incident_edge_
     }
 }
 
 /// Iterator over edges of a Cell
 /// Do *NOT* use this while altering the std::cell::Cell values of next, prev or twin edges.
-pub struct EdgeNextIterator<'s, I1, F1>
+pub struct EdgeNextIterator<'s, I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    diagram: &'s VoronoiDiagram<I1, F1>,
-    start_edge: VoronoiEdgeIndex,
-    next_edge: Option<VoronoiEdgeIndex>,
+    diagram: &'s VoronoiDiagram<I, F>,
+    start_edge: EdgeIndex,
+    next_edge: Option<EdgeIndex>,
     #[doc(hidden)]
-    _pdi: PhantomData<I1>,
+    _pdi: PhantomData<I>,
     #[doc(hidden)]
-    _pdf: PhantomData<F1>,
+    _pdf: PhantomData<F>,
 }
 
-impl<'s, I1, F1> EdgeNextIterator<'s, I1, F1>
+impl<'s, I, F> EdgeNextIterator<'s, I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     pub(crate) fn new(
-        diagram: &'s VoronoiDiagram<I1, F1>,
-        starting_edge: Option<VoronoiEdgeIndex>,
+        diagram: &'s VoronoiDiagram<I, F>,
+        starting_edge: Option<EdgeIndex>,
     ) -> Self {
         if let Some(starting_edge) = starting_edge {
             Self {
@@ -284,7 +284,7 @@ where
             Self {
                 diagram,
                 // Value does not matter next edge is None
-                start_edge: VoronoiEdgeIndex(0),
+                start_edge: EdgeIndex(0),
                 next_edge: None,
                 _pdf: PhantomData,
                 _pdi: PhantomData,
@@ -293,13 +293,13 @@ where
     }
 }
 
-impl<'s, I1, F1> Iterator for EdgeNextIterator<'s, I1, F1>
+impl<'s, I, F> Iterator for EdgeNextIterator<'s, I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    type Item = VoronoiEdgeIndex;
-    fn next(&mut self) -> Option<VoronoiEdgeIndex> {
+    type Item = EdgeIndex;
+    fn next(&mut self) -> Option<EdgeIndex> {
         let rv = self.next_edge;
         let new_next_edge = self.diagram._edge_get_next(self.next_edge);
 
@@ -320,28 +320,28 @@ where
 /// Iterator over edges pointing away from the vertex indicated by the initial edge.
 /// edge.vertex()
 /// Do *NOT* use this when altering the std::cell::Cell values of next, prev or twin edges.
-pub struct EdgeRotNextIterator<'s, I1, F1>
+pub struct EdgeRotNextIterator<'s, I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    diagram: &'s VoronoiDiagram<I1, F1>,
-    start_edge: VoronoiEdgeIndex,
-    next_edge: Option<VoronoiEdgeIndex>,
+    diagram: &'s VoronoiDiagram<I, F>,
+    start_edge: EdgeIndex,
+    next_edge: Option<EdgeIndex>,
     #[doc(hidden)]
-    _pdi: PhantomData<I1>,
+    _pdi: PhantomData<I>,
     #[doc(hidden)]
-    _pdf: PhantomData<F1>,
+    _pdf: PhantomData<F>,
 }
 
-impl<'s, I1, F1> EdgeRotNextIterator<'s, I1, F1>
+impl<'s, I, F> EdgeRotNextIterator<'s, I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     pub(crate) fn new(
-        diagram: &'s VoronoiDiagram<I1, F1>,
-        starting_edge: Option<VoronoiEdgeIndex>,
+        diagram: &'s VoronoiDiagram<I, F>,
+        starting_edge: Option<EdgeIndex>,
     ) -> Self {
         if let Some(starting_edge) = starting_edge {
             Self {
@@ -355,7 +355,7 @@ where
             Self {
                 diagram,
                 // Value does not matter next edge is None
-                start_edge: VoronoiEdgeIndex(0),
+                start_edge: EdgeIndex(0),
                 next_edge: None,
                 _pdf: PhantomData,
                 _pdi: PhantomData,
@@ -364,13 +364,13 @@ where
     }
 }
 
-impl<'s, I1, F1> Iterator for EdgeRotNextIterator<'s, I1, F1>
+impl<'s, I, F> Iterator for EdgeRotNextIterator<'s, I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    type Item = VoronoiEdgeIndex;
-    fn next(&mut self) -> Option<VoronoiEdgeIndex> {
+    type Item = EdgeIndex;
+    fn next(&mut self) -> Option<EdgeIndex> {
         let rv = self.next_edge;
         let new_next_edge = self.diagram.edge_rot_next(self.next_edge);
         self.next_edge = if let Some(nne) = new_next_edge {
@@ -390,29 +390,29 @@ where
 /// Iterator over edges pointing away from the vertex indicated by the initial edge.
 /// edge.vertex()
 /// Do *NOT* use this when altering the std::cell::Cell values of next, prev or twin edges.
-pub struct EdgeRotPrevIterator<'s, I1, F1>
+pub struct EdgeRotPrevIterator<'s, I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    diagram: &'s VoronoiDiagram<I1, F1>,
-    start_edge: VoronoiEdgeIndex,
-    next_edge: Option<VoronoiEdgeIndex>,
+    diagram: &'s VoronoiDiagram<I, F>,
+    start_edge: EdgeIndex,
+    next_edge: Option<EdgeIndex>,
     #[doc(hidden)]
-    _pdi: PhantomData<I1>,
+    _pdi: PhantomData<I>,
     #[doc(hidden)]
-    _pdf: PhantomData<F1>,
+    _pdf: PhantomData<F>,
 }
 
-impl<'s, I1, F1> EdgeRotPrevIterator<'s, I1, F1>
+impl<'s, I, F> EdgeRotPrevIterator<'s, I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     #[allow(dead_code)]
     pub(crate) fn new(
-        diagram: &'s VoronoiDiagram<I1, F1>,
-        starting_edge: Option<VoronoiEdgeIndex>,
+        diagram: &'s VoronoiDiagram<I, F>,
+        starting_edge: Option<EdgeIndex>,
     ) -> Self {
         if let Some(starting_edge) = starting_edge {
             Self {
@@ -426,7 +426,7 @@ where
             Self {
                 diagram,
                 // Value does not matter next edge is None
-                start_edge: VoronoiEdgeIndex(0),
+                start_edge: EdgeIndex(0),
                 next_edge: None,
                 _pdf: PhantomData,
                 _pdi: PhantomData,
@@ -435,13 +435,13 @@ where
     }
 }
 
-impl<'s, I1, F1> Iterator for EdgeRotPrevIterator<'s, I1, F1>
+impl<'s, I, F> Iterator for EdgeRotPrevIterator<'s, I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    type Item = VoronoiEdgeIndex;
-    fn next(&mut self) -> Option<VoronoiEdgeIndex> {
+    type Item = EdgeIndex;
+    fn next(&mut self) -> Option<EdgeIndex> {
         let rv = self.next_edge;
         let new_next_edge = self.diagram.edge_rot_prev(self.next_edge);
         self.next_edge = if let Some(nne) = new_next_edge {
@@ -464,24 +464,24 @@ where
 ///   2) pointer to the incident edge
 ///   3) mutable color member
 #[derive(Copy, Clone)]
-pub struct VoronoiVertex<I1, F1>
+pub struct VoronoiVertex<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    pub(crate) id_: VoronoiVertexIndex,
-    pub(crate) x_: F1,
-    pub(crate) y_: F1,
-    pub(crate) incident_edge_: Option<VoronoiEdgeIndex>,
+    pub(crate) id_: VertexIndex,
+    pub(crate) x_: F,
+    pub(crate) y_: F,
+    pub(crate) incident_edge_: Option<EdgeIndex>,
     pub(crate) color_: ColorType,
     #[doc(hidden)]
-    _pdi: PhantomData<I1>,
+    _pdi: PhantomData<I>,
 }
 
-impl<I1, F1> fmt::Debug for VoronoiVertex<I1, F1>
+impl<I, F> fmt::Debug for VoronoiVertex<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut rv = String::new();
@@ -501,17 +501,17 @@ where
     }
 }
 
-impl<I1, F1> VoronoiVertex<I1, F1>
+impl<I, F> VoronoiVertex<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     pub fn new_3(
-        id: VoronoiVertexIndex,
-        x: F1,
-        y: F1,
+        id: VertexIndex,
+        x: F,
+        y: F,
         is_site_vertex: bool,
-    ) -> Rc<Cell<VoronoiVertex<I1, F1>>> {
+    ) -> Rc<Cell<VoronoiVertex<I, F>>> {
         let color = if is_site_vertex {
             ColorBits::SITE_VERTEX.0
         } else {
@@ -538,24 +538,24 @@ where
             && CT::UlpComparison::ulp_comparison(y1, y2, ulp) == Ordering::Equal
     }
 
-    pub fn get_id(&self) -> VoronoiVertexIndex {
+    pub fn get_id(&self) -> VertexIndex {
         self.id_
     }
 
     #[inline]
-    pub fn get_incident_edge(&self) -> Option<VoronoiEdgeIndex> {
+    pub fn get_incident_edge(&self) -> Option<EdgeIndex> {
         self.incident_edge_
     }
 
     /// returns the x coordinate of the circle event
     #[inline]
-    pub fn x(&self) -> F1 {
+    pub fn x(&self) -> F {
         self.x_
     }
 
     /// returns the x coordinate of the circle event
     #[inline]
-    pub fn y(&self) -> F1 {
+    pub fn y(&self) -> F {
         self.y_
     }
 
@@ -595,28 +595,28 @@ where
 ///   5) pointer to the CCW prev edge
 ///   6) mutable color member
 #[derive(Copy, Clone)]
-pub struct VoronoiEdge<I1, F1>
+pub struct VoronoiEdge<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    id: VoronoiEdgeIndex,
-    cell_: Option<VoronoiCellIndex>,
-    vertex_: Option<VoronoiVertexIndex>,
-    twin_: Option<VoronoiEdgeIndex>,
-    next_ccw_: Option<VoronoiEdgeIndex>,
-    prev_ccw_: Option<VoronoiEdgeIndex>,
+    id: EdgeIndex,
+    cell_: Option<CellIndex>,
+    vertex_: Option<VertexIndex>,
+    twin_: Option<EdgeIndex>,
+    next_ccw_: Option<EdgeIndex>,
+    prev_ccw_: Option<EdgeIndex>,
     color_: ColorType,
     #[doc(hidden)]
-    _pdi: PhantomData<I1>,
+    _pdi: PhantomData<I>,
     #[doc(hidden)]
-    _pdo: PhantomData<F1>,
+    _pdo: PhantomData<F>,
 }
 
-impl<I1, F1> fmt::Debug for VoronoiEdge<I1, F1>
+impl<I, F> fmt::Debug for VoronoiEdge<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut rv = String::new();
@@ -638,20 +638,20 @@ where
     }
 }
 
-impl<I1, F1> VoronoiEdge<I1, F1>
+impl<I, F> VoronoiEdge<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     const BIT_IS_LINEAR: ColorType = 0x1; // linear is opposite to curved
     const BIT_IS_PRIMARY: ColorType = 0x2; // primary is opposite to secondary
 
     fn new_4(
-        id: VoronoiEdgeIndex,
-        cell: VoronoiCellIndex,
+        id: EdgeIndex,
+        cell: CellIndex,
         is_linear: bool,
         is_primary: bool,
-    ) -> EdgeType<I1, F1> {
+    ) -> EdgeType<I, F> {
         let mut rv = Self {
             id,
             cell_: Some(cell),
@@ -672,30 +672,30 @@ where
         Rc::new(Cell::new(rv))
     }
 
-    pub fn get_id(&self) -> VoronoiEdgeIndex {
+    pub fn get_id(&self) -> EdgeIndex {
         self.id
     }
     // TODO: add _err access methods returing Result instead of Option
-    pub fn cell(&self) -> Option<VoronoiCellIndex> {
+    pub fn cell(&self) -> Option<CellIndex> {
         self.cell_
     }
 
-    pub fn vertex0(&self) -> Option<VoronoiVertexIndex> {
+    pub fn vertex0(&self) -> Option<VertexIndex> {
         self.vertex_
     }
 
     /// Returns the twin edge
-    pub fn twin(&self) -> Option<VoronoiEdgeIndex> {
+    pub fn twin(&self) -> Option<EdgeIndex> {
         self.twin_
     }
 
     /// returns the next edge (counter clockwise winding)
-    pub fn next(&self) -> Option<VoronoiEdgeIndex> {
+    pub fn next(&self) -> Option<EdgeIndex> {
         self.next_ccw_
     }
 
     /// returns the previous edge (counter clockwise winding)
-    pub fn prev(&self) -> Option<VoronoiEdgeIndex> {
+    pub fn prev(&self) -> Option<EdgeIndex> {
         self.prev_ccw_
     }
 
@@ -748,34 +748,34 @@ where
     }
 }
 
-pub type CellType<I1, F1> = Rc<Cell<VoronoiCell<I1, F1>>>;
-pub type EdgeType<I1, F1> = Rc<Cell<VoronoiEdge<I1, F1>>>;
-pub type VertexType<I1, F1> = Rc<Cell<VoronoiVertex<I1, F1>>>;
+pub type CellType<I, F> = Rc<Cell<VoronoiCell<I, F>>>;
+pub type EdgeType<I, F> = Rc<Cell<VoronoiEdge<I, F>>>;
+pub type VertexType<I, F> = Rc<Cell<VoronoiVertex<I, F>>>;
 
 /// Voronoi output data structure.
 /// CCW ordering is used on the faces perimeter and around the vertices.
 /// Mandatory reading: <https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_diagram.htm>
 #[derive(Default, Debug)]
-pub struct VoronoiDiagram<I1, F1>
+pub struct VoronoiDiagram<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    cells_: Vec<CellType<I1, F1>>,      // indexed by VoronoiCellIndex
-    vertices_: Vec<VertexType<I1, F1>>, // indexed by VoronoiVertexIndex
-    edges_: Vec<EdgeType<I1, F1>>,      // indexed by VoronoiEdgeIndex
+    cells_: Vec<CellType<I, F>>,      // indexed by CellIndex
+    vertices_: Vec<VertexType<I, F>>, // indexed by VertexIndex
+    edges_: Vec<EdgeType<I, F>>,      // indexed by EdgeIndex
 }
 
-impl<I1, F1> VoronoiDiagram<I1, F1>
+impl<I, F> VoronoiDiagram<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
     pub fn new(input_size: usize) -> Self {
         Self {
-            cells_: Vec::<CellType<I1, F1>>::with_capacity(input_size),
-            vertices_: Vec::<VertexType<I1, F1>>::with_capacity(input_size),
-            edges_: Vec::<EdgeType<I1, F1>>::with_capacity(input_size * 2),
+            cells_: Vec::<CellType<I, F>>::with_capacity(input_size),
+            vertices_: Vec::<VertexType<I, F>>::with_capacity(input_size),
+            edges_: Vec::<EdgeType<I, F>>::with_capacity(input_size * 2),
         }
     }
 
@@ -786,18 +786,18 @@ where
     }
 
     /// Returns a reference to the list of cells
-    pub fn cells(&self) -> &Vec<CellType<I1, F1>> {
+    pub fn cells(&self) -> &Vec<CellType<I, F>> {
         &self.cells_
     }
 
     /// Returns a reference to all of the vertices
-    pub fn vertices(&self) -> &Vec<VertexType<I1, F1>> {
+    pub fn vertices(&self) -> &Vec<VertexType<I, F>> {
         &self.vertices_
     }
 
     /// Returns an aabb large enough to contain all the vertices
-    pub fn vertices_get_aabb(&self) -> VU::Aabb2<I1, F1> {
-        let mut rv = VU::Aabb2::<I1, F1>::default();
+    pub fn vertices_get_aabb(&self) -> VU::Aabb2<I, F> {
+        let mut rv = VU::Aabb2::<I, F>::default();
         for v in self.vertices_.iter() {
             let v = v.get();
             rv.update_vertex(v.x(), v.y());
@@ -805,22 +805,22 @@ where
         rv
     }
 
-    pub fn edges(&self) -> &Vec<EdgeType<I1, F1>> {
+    pub fn edges(&self) -> &Vec<EdgeType<I, F>> {
         &self.edges_
     }
 
-    pub fn get_cell(&self, cell: VoronoiCellIndex) -> Rc<Cell<VoronoiCell<I1, F1>>> {
+    pub fn get_cell(&self, cell: CellIndex) -> Rc<Cell<VoronoiCell<I, F>>> {
         self.cells_.get(cell.0).unwrap().clone()
     }
 
-    pub fn get_edge(&self, edge: VoronoiEdgeIndex) -> EdgeType<I1, F1> {
+    pub fn get_edge(&self, edge: EdgeIndex) -> EdgeType<I, F> {
         self.edges_.get(edge.0).unwrap().clone()
     }
 
     /// Return the edge represented as an straight line
     /// if the edge does not exists or if it lacks v0 or v1; None will be returned.
     /// TODO: this looks like an into() candidate
-    pub fn edge_as_line(&self, edge: Option<VoronoiEdgeIndex>) -> Option<[F1; 4]> {
+    pub fn edge_as_line(&self, edge: Option<EdgeIndex>) -> Option<[F; 4]> {
         let v0 = self.vertex_get(self.edge_get_vertex0(edge));
         let v1 = self.vertex_get(self.edge_get_vertex1(edge));
         if let Some(v0) = v0 {
@@ -846,7 +846,7 @@ where
 
     /// Mark all edges connected to an 'infinite' edge via primary edges as 'external'
     /// You should only call this on edges that you know are infinite. i.e. lacks one or two vertexes
-    fn color_exterior(&self, edge_id: Option<VoronoiEdgeIndex>, external_color: ColorType) {
+    fn color_exterior(&self, edge_id: Option<EdgeIndex>, external_color: ColorType) {
         if edge_id.is_none() || (self.edge_get_color(edge_id).unwrap() & external_color) != 0 {
             // This edge has already been colored, break recursion
             return;
@@ -877,37 +877,37 @@ where
         }
     }
 
-    pub fn cell_iter(&self) -> core::slice::Iter<'_, CellType<I1, F1>> {
+    pub fn cell_iter(&self) -> core::slice::Iter<'_, CellType<I, F>> {
         self.cells_.iter()
     }
 
-    pub fn vertex_iter(&self) -> core::slice::Iter<'_, VertexType<I1, F1>> {
+    pub fn vertex_iter(&self) -> core::slice::Iter<'_, VertexType<I, F>> {
         self.vertices_.iter()
     }
 
-    pub fn edge_iter(&self) -> std::slice::Iter<'_, EdgeType<I1, F1>> {
+    pub fn edge_iter(&self) -> std::slice::Iter<'_, EdgeType<I, F>> {
         self.edges_.iter()
     }
 
     /// push a new cell on the output. Nothing but id and source category is initialized
     fn _make_new_cell_with_category(
         &mut self,
-        cell_id: VoronoiCellIndex, // same as sorted_index
+        cell_id: CellIndex, // same as sorted_index
         initial_index: SourceIndex,
         sc: ColorBits,
-    ) -> VoronoiCellIndex {
+    ) -> CellIndex {
         // fill cell with temporary blocks- they will be over-written later
         // Todo: fix this dirty hack with Option<>
         while self.cells_.len() < cell_id.0 {
             self.cells_
-                .push(Rc::new(Cell::new(VoronoiCell::<I1, F1>::new(
-                    VoronoiCellIndex(usize::MAX),
+                .push(Rc::new(Cell::new(VoronoiCell::<I, F>::new(
+                    CellIndex(usize::MAX),
                     usize::MAX,
                     ColorBits::TEMPORARY_CELL.0,
                 ))));
         }
         self.cells_
-            .push(Rc::new(Cell::new(VoronoiCell::<I1, F1>::new(
+            .push(Rc::new(Cell::new(VoronoiCell::<I, F>::new(
                 cell_id,
                 initial_index,
                 sc.0,
@@ -944,24 +944,24 @@ where
         self.edges_.reserve((num_sites << 2) + (num_sites << 1));
     }
 
-    pub(crate) fn _process_single_site(&mut self, site: &VSE::SiteEvent<I1, F1>) {
+    pub(crate) fn _process_single_site(&mut self, site: &VSE::SiteEvent<I, F>) {
         let _ = self._make_new_cell_with_category(
-            VoronoiCellIndex(site.sorted_index()),
+            CellIndex(site.sorted_index()),
             site.initial_index(),
             site.source_category(),
         );
     }
 
     #[inline]
-    fn _cell_get(&self, cell_id: Option<VoronoiCellIndex>) -> Option<&CellType<I1, F1>> {
+    fn _cell_get(&self, cell_id: Option<CellIndex>) -> Option<&CellType<I, F>> {
         let _ = cell_id?;
         self.cells_.get(cell_id.unwrap().0)
     }
 
     fn _cell_set_incident_edge(
         &self,
-        cell_id: Option<VoronoiCellIndex>,
-        edge: Option<VoronoiEdgeIndex>,
+        cell_id: Option<CellIndex>,
+        edge: Option<EdgeIndex>,
     ) {
         if cell_id.is_none() {
             return;
@@ -975,8 +975,8 @@ where
 
     fn _cell_get_incident_edge(
         &self,
-        cell_id: Option<VoronoiCellIndex>,
-    ) -> Option<VoronoiEdgeIndex> {
+        cell_id: Option<CellIndex>,
+    ) -> Option<EdgeIndex> {
         let _ = cell_id?;
         if let Some(cell) = self._cell_get(cell_id) {
             return cell.get().incident_edge_;
@@ -984,7 +984,7 @@ where
         None
     }
 
-    fn _cell_is_degenerate(&self, cell_id: Option<VoronoiCellIndex>) -> bool {
+    fn _cell_is_degenerate(&self, cell_id: Option<CellIndex>) -> bool {
         if cell_id.is_none() {
             return false;
         }
@@ -998,20 +998,20 @@ where
     /// the incident edge.
     pub fn cell_edge_iterator(
         &self,
-        cell_id: Option<VoronoiCellIndex>,
-    ) -> EdgeNextIterator<'_, I1, F1> {
+        cell_id: Option<CellIndex>,
+    ) -> EdgeNextIterator<'_, I, F> {
         let incident_edge = self._cell_get_incident_edge(cell_id);
-        EdgeNextIterator::<'_, I1, F1>::new(self, incident_edge)
+        EdgeNextIterator::<'_, I, F>::new(self, incident_edge)
     }
 
     #[inline]
-    pub fn vertex_get(&self, vertex_id: Option<VoronoiVertexIndex>) -> Option<&VertexType<I1, F1>> {
+    pub fn vertex_get(&self, vertex_id: Option<VertexIndex>) -> Option<&VertexType<I, F>> {
         let _ = vertex_id?;
         self.vertices_.get(vertex_id.unwrap().0)
     }
 
     /// OR the previous color field value with this new color value
-    pub fn vertex_or_color(&self, vertex_id: Option<VoronoiVertexIndex>, color: ColorType) {
+    pub fn vertex_or_color(&self, vertex_id: Option<VertexIndex>, color: ColorType) {
         if vertex_id.is_none() {
             return;
         }
@@ -1023,7 +1023,7 @@ where
     }
 
     /// Returns the color field of the vertex.
-    pub fn vertex_get_color(&self, vertex_id: Option<VoronoiVertexIndex>) -> Option<ColorType> {
+    pub fn vertex_get_color(&self, vertex_id: Option<VertexIndex>) -> Option<ColorType> {
         let _ = vertex_id?;
         if let Some(vertexcell) = self.vertex_get(vertex_id) {
             let vertex = vertexcell.get();
@@ -1036,14 +1036,14 @@ where
     /// edge_id is compensated accordingly
     fn _vertex_copy(&self, dest: usize, source: usize) {
         let mut v = self.vertices_[source].get();
-        v.id_ = VoronoiVertexIndex(dest);
+        v.id_ = VertexIndex(dest);
         self.vertices_[dest].set(v);
     }
 
     fn _vertex_set_incident_edge(
         &self,
-        vertex_id: Option<VoronoiVertexIndex>,
-        edge: Option<VoronoiEdgeIndex>,
+        vertex_id: Option<VertexIndex>,
+        edge: Option<EdgeIndex>,
     ) {
         if vertex_id.is_none() {
             return;
@@ -1058,15 +1058,15 @@ where
     /// return one of the edges originating at the vertex
     pub fn vertex_get_incident_edge(
         &self,
-        vertex_id: Option<VoronoiVertexIndex>,
-    ) -> Option<VoronoiEdgeIndex> {
+        vertex_id: Option<VertexIndex>,
+    ) -> Option<EdgeIndex> {
         let _ = vertex_id?;
         self.vertex_get(vertex_id)
             .and_then(|x| x.get().incident_edge_)
     }
 
     /// Set the color of the vertex. This affects only the public bits, not the internal
-    pub fn vertex_set_color(&self, vertex_id: Option<VoronoiVertexIndex>, color: ColorType) {
+    pub fn vertex_set_color(&self, vertex_id: Option<VertexIndex>, color: ColorType) {
         if vertex_id.is_none() {
             return;
         }
@@ -1078,7 +1078,7 @@ where
     }
 
     /// returns true if this vertex coincides with an site point
-    pub fn vertex_is_site_point(&self, vertex_id: Option<VoronoiVertexIndex>) -> Option<bool> {
+    pub fn vertex_is_site_point(&self, vertex_id: Option<VertexIndex>) -> Option<bool> {
         let _ = vertex_id?;
         self.vertex_get(vertex_id)
             .map(|cell| cell.get().is_site_point())
@@ -1086,18 +1086,18 @@ where
 
     fn _edge_new_3(
         &mut self,
-        cell_id: VoronoiCellIndex,
+        cell_id: CellIndex,
         is_linear: bool,
         is_primary: bool,
-    ) -> VoronoiEdgeIndex {
-        let new_edge_id = VoronoiEdgeIndex(self.edges_.len());
+    ) -> EdgeIndex {
+        let new_edge_id = EdgeIndex(self.edges_.len());
         let new_edge = VoronoiEdge::new_4(new_edge_id, cell_id, is_linear, is_primary);
         let _ = self.edges_.insert(new_edge_id.0, new_edge);
         new_edge_id
     }
 
     #[inline]
-    fn _edge_get(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<&EdgeType<I1, F1>> {
+    fn _edge_get(&self, edge_id: Option<EdgeIndex>) -> Option<&EdgeType<I, F>> {
         let _ = edge_id?;
         let rv = self.edges_.get(edge_id.unwrap().0);
         if rv.is_none() {
@@ -1111,13 +1111,13 @@ where
     /// edge_id is compensated accordingly
     fn _edge_copy(&self, dest: usize, source: usize) {
         let mut e = self.edges_[source].get();
-        e.id = VoronoiEdgeIndex(dest);
+        e.id = EdgeIndex(dest);
         self.edges_[dest].set(e);
     }
 
     #[inline]
     /// Returns the color field of the edge.
-    pub fn edge_get_color(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<ColorType> {
+    pub fn edge_get_color(&self, edge_id: Option<EdgeIndex>) -> Option<ColorType> {
         let _ = edge_id?;
         if let Some(edgecell) = self._edge_get(edge_id) {
             let edge = edgecell.get();
@@ -1128,7 +1128,7 @@ where
 
     #[inline]
     /// Sets the color field with new value
-    pub fn edge_set_color(&self, edge_id: Option<VoronoiEdgeIndex>, color: ColorType) {
+    pub fn edge_set_color(&self, edge_id: Option<EdgeIndex>, color: ColorType) {
         if edge_id.is_none() {
             return;
         }
@@ -1141,7 +1141,7 @@ where
 
     #[inline]
     /// OR the previous color field value with this new color value
-    pub fn edge_or_color(&self, edge_id: Option<VoronoiEdgeIndex>, color: ColorType) {
+    pub fn edge_or_color(&self, edge_id: Option<EdgeIndex>, color: ColorType) {
         if edge_id.is_none() {
             return;
         }
@@ -1153,7 +1153,7 @@ where
     }
 
     #[inline]
-    fn _edge_set_twin(&self, edge_id: Option<VoronoiEdgeIndex>, twin_id: Option<VoronoiEdgeIndex>) {
+    fn _edge_set_twin(&self, edge_id: Option<EdgeIndex>, twin_id: Option<EdgeIndex>) {
         if edge_id.is_none() {
             return;
         }
@@ -1170,8 +1170,8 @@ where
     /// Do *NOT* use this when altering next, prev or twin edges.
     pub fn edge_rot_next_iterator(
         &self,
-        edge_id: Option<VoronoiEdgeIndex>,
-    ) -> EdgeRotNextIterator<'_, I1, F1> {
+        edge_id: Option<EdgeIndex>,
+    ) -> EdgeRotNextIterator<'_, I, F> {
         EdgeRotNextIterator::new(self, edge_id)
     }
 
@@ -1181,13 +1181,13 @@ where
     /// Do *NOT* use this when altering next, prev or twin edges.
     pub fn edge_rot_prev_iterator(
         &self,
-        edge_id: Option<VoronoiEdgeIndex>,
-    ) -> EdgeRotPrevIterator<'_, I1, F1> {
+        edge_id: Option<EdgeIndex>,
+    ) -> EdgeRotPrevIterator<'_, I, F> {
         EdgeRotPrevIterator::new(self, edge_id)
     }
 
     #[inline]
-    pub fn edge_get_twin(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<VoronoiEdgeIndex> {
+    pub fn edge_get_twin(&self, edge_id: Option<EdgeIndex>) -> Option<EdgeIndex> {
         let _ = edge_id?;
         if let Some(edgecell) = self._edge_get(edge_id) {
             return edgecell.get().twin();
@@ -1196,7 +1196,7 @@ where
     }
 
     #[inline]
-    pub fn edge_get_next(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<VoronoiEdgeIndex> {
+    pub fn edge_get_next(&self, edge_id: Option<EdgeIndex>) -> Option<EdgeIndex> {
         let _ = edge_id?;
         if let Some(edgecell) = self._edge_get(edge_id) {
             return edgecell.get().next();
@@ -1205,7 +1205,7 @@ where
     }
 
     #[inline]
-    fn _edge_set_cell(&self, edge_id: Option<VoronoiEdgeIndex>, cell_id: Option<VoronoiCellIndex>) {
+    fn _edge_set_cell(&self, edge_id: Option<EdgeIndex>, cell_id: Option<CellIndex>) {
         if edge_id.is_none() {
             return;
         }
@@ -1217,7 +1217,7 @@ where
     }
 
     #[inline]
-    pub fn edge_get_cell(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<VoronoiCellIndex> {
+    pub fn edge_get_cell(&self, edge_id: Option<EdgeIndex>) -> Option<CellIndex> {
         let _ = edge_id?;
         if let Some(edgecell) = self._edge_get(edge_id) {
             return edgecell.get().cell();
@@ -1228,7 +1228,7 @@ where
     /// Returns true if the edge is finite (segment, parabolic arc).
     /// Returns false if the edge is infinite (ray, line).
     #[inline]
-    pub fn edge_is_finite(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<bool> {
+    pub fn edge_is_finite(&self, edge_id: Option<EdgeIndex>) -> Option<bool> {
         let _ = edge_id?;
         Some(self.edge_get_vertex0(edge_id).is_some() && self.edge_get_vertex1(edge_id).is_some())
     }
@@ -1236,13 +1236,13 @@ where
     /// Returns true if the edge is infinite (ray, line).
     /// Returns false if the edge is finite (segment, parabolic arc).
     #[inline]
-    pub fn edge_is_infinite(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<bool> {
+    pub fn edge_is_infinite(&self, edge_id: Option<EdgeIndex>) -> Option<bool> {
         let _ = edge_id?;
         Some(self.edge_get_vertex0(edge_id).is_none() || self.edge_get_vertex1(edge_id).is_none())
     }
 
     /// Remove degenerate edge.
-    fn _remove_edge(&mut self, edge: Option<VoronoiEdgeIndex>) {
+    fn _remove_edge(&mut self, edge: Option<EdgeIndex>) {
         #[cfg(feature = "console_debug")]
         if let Some(edge_id) = edge {
             tln!("removing edge: {}", edge_id.0);
@@ -1286,8 +1286,8 @@ where
         );
     }
 
-    fn _vertex_new_2(&mut self, x: F1, y: F1, is_site_vertex: bool) -> VoronoiVertexIndex {
-        let new_vertex_id = VoronoiVertexIndex(self.vertices_.len());
+    fn _vertex_new_2(&mut self, x: F, y: F, is_site_vertex: bool) -> VertexIndex {
+        let new_vertex_id = VertexIndex(self.vertices_.len());
         let new_edge = VoronoiVertex::new_3(new_vertex_id, x, y, is_site_vertex);
         let _ = self.vertices_.insert(new_vertex_id.0, new_edge);
         new_vertex_id
@@ -1295,8 +1295,8 @@ where
 
     fn _edge_set_vertex0(
         &self,
-        edge_id: Option<VoronoiEdgeIndex>,
-        vertex_id: Option<VoronoiVertexIndex>,
+        edge_id: Option<EdgeIndex>,
+        vertex_id: Option<VertexIndex>,
     ) {
         if edge_id.is_none() {
             return;
@@ -1311,8 +1311,8 @@ where
     #[inline]
     pub fn edge_get_vertex0(
         &self,
-        edge_id: Option<VoronoiEdgeIndex>,
-    ) -> Option<VoronoiVertexIndex> {
+        edge_id: Option<EdgeIndex>,
+    ) -> Option<VertexIndex> {
         let _ = edge_id?;
         self._edge_get(edge_id).and_then(|x| x.get().vertex0())
     }
@@ -1320,15 +1320,15 @@ where
     #[inline]
     pub fn edge_get_vertex1(
         &self,
-        edge_id: Option<VoronoiEdgeIndex>,
-    ) -> Option<VoronoiVertexIndex> {
+        edge_id: Option<EdgeIndex>,
+    ) -> Option<VertexIndex> {
         let _ = edge_id?;
         let twin = self.edge_get_twin(edge_id);
         self.edge_get_vertex0(twin)
     }
 
     #[inline]
-    fn _edge_set_prev(&self, edge_id: Option<VoronoiEdgeIndex>, prev_id: Option<VoronoiEdgeIndex>) {
+    fn _edge_set_prev(&self, edge_id: Option<EdgeIndex>, prev_id: Option<EdgeIndex>) {
         if edge_id.is_none() {
             return;
         }
@@ -1340,7 +1340,7 @@ where
     }
 
     #[inline]
-    fn _edge_set_next(&self, edge_id: Option<VoronoiEdgeIndex>, next_id: Option<VoronoiEdgeIndex>) {
+    fn _edge_set_next(&self, edge_id: Option<EdgeIndex>, next_id: Option<EdgeIndex>) {
         if edge_id.is_none() {
             return;
         }
@@ -1352,7 +1352,7 @@ where
     }
 
     #[inline]
-    fn _edge_get_next(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<VoronoiEdgeIndex> {
+    fn _edge_get_next(&self, edge_id: Option<EdgeIndex>) -> Option<EdgeIndex> {
         let _ = edge_id?;
         self.edges_
             .get(edge_id.unwrap().0)
@@ -1360,7 +1360,7 @@ where
     }
 
     #[inline]
-    fn _edge_get_prev(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<VoronoiEdgeIndex> {
+    fn _edge_get_prev(&self, edge_id: Option<EdgeIndex>) -> Option<EdgeIndex> {
         let _ = edge_id?;
         self.edges_
             .get(edge_id.unwrap().0)
@@ -1368,7 +1368,7 @@ where
     }
 
     #[inline]
-    fn _edge_get_cell(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<VoronoiCellIndex> {
+    fn _edge_get_cell(&self, edge_id: Option<EdgeIndex>) -> Option<CellIndex> {
         let _ = edge_id?;
         self.edges_
             .get(edge_id.unwrap().0)
@@ -1378,7 +1378,7 @@ where
     #[inline]
     /// Returns a pointer to the rotation next edge
     /// over the starting point of the half-edge.
-    pub fn edge_rot_next(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<VoronoiEdgeIndex> {
+    pub fn edge_rot_next(&self, edge_id: Option<EdgeIndex>) -> Option<EdgeIndex> {
         let _ = edge_id?;
         let prev = self._edge_get_prev(edge_id);
         self.edge_get_twin(prev)
@@ -1387,7 +1387,7 @@ where
     #[inline]
     /// Returns a pointer to the rotation previous edge
     /// over the starting point of the half-edge.
-    pub fn edge_rot_prev(&self, edge_id: Option<VoronoiEdgeIndex>) -> Option<VoronoiEdgeIndex> {
+    pub fn edge_rot_prev(&self, edge_id: Option<EdgeIndex>) -> Option<EdgeIndex> {
         let _ = edge_id?;
         let twin = self.edge_get_twin(edge_id);
         self._edge_get_next(twin)
@@ -1398,9 +1398,9 @@ where
     /// Returns a pair of pointers to new half-edges.
     pub(crate) fn _insert_new_edge_2(
         &mut self,
-        site1: VSE::SiteEvent<I1, F1>,
-        site2: VSE::SiteEvent<I1, F1>,
-    ) -> (VoronoiEdgeIndex, VoronoiEdgeIndex) {
+        site1: VSE::SiteEvent<I, F>,
+        site2: VSE::SiteEvent<I, F>,
+    ) -> (EdgeIndex, EdgeIndex) {
         // Get sites' indexes.
         let site1_index = site1.sorted_index();
         let site2_index = site2.sorted_index();
@@ -1409,15 +1409,15 @@ where
         let is_primary = VSE::SiteEvent::is_primary_edge(&site1, &site2);
 
         // Create a new half-edge that belongs to the first site.
-        let edge1_id = self._edge_new_3(VoronoiCellIndex(site1_index), is_linear, is_primary);
+        let edge1_id = self._edge_new_3(CellIndex(site1_index), is_linear, is_primary);
 
         // Create a new half-edge that belongs to the second site.
-        let edge2_id = self._edge_new_3(VoronoiCellIndex(site2_index), is_linear, is_primary);
+        let edge2_id = self._edge_new_3(CellIndex(site2_index), is_linear, is_primary);
 
         // Add the initial cell during the first edge insertion.
         if self.cells_.is_empty() {
             let _ = self._make_new_cell_with_category(
-                VoronoiCellIndex(site1_index),
+                CellIndex(site1_index),
                 site1.initial_index(),
                 site1.source_category(),
             );
@@ -1426,14 +1426,14 @@ where
         // The second site represents a new site during site event
         // processing. Add a new cell to the cell records.
         let _ = self._make_new_cell_with_category(
-            VoronoiCellIndex(site2_index),
+            CellIndex(site2_index),
             site2.initial_index(),
             site2.source_category(),
         );
 
         // Set up pointers to cells. Todo! is this needed? Didn't we do this already?
-        self._edge_set_cell(Some(edge1_id), Some(VoronoiCellIndex(site1_index)));
-        self._edge_set_cell(Some(edge2_id), Some(VoronoiCellIndex(site2_index)));
+        self._edge_set_cell(Some(edge1_id), Some(CellIndex(site1_index)));
+        self._edge_set_cell(Some(edge2_id), Some(CellIndex(site2_index)));
 
         // Set up twin pointers.
         self._edge_set_twin(Some(edge1_id), Some(edge2_id));
@@ -1450,37 +1450,37 @@ where
     /// new Voronoi vertex point. Returns a pair of pointers to a new half-edges.
     pub(crate) fn _insert_new_edge_5(
         &mut self,
-        site1: VSE::SiteEvent<I1, F1>,
-        site3: VSE::SiteEvent<I1, F1>,
+        site1: VSE::SiteEvent<I, F>,
+        site3: VSE::SiteEvent<I, F>,
         circle: VC::CircleEvent,
-        edge12_id: VoronoiEdgeIndex,
-        edge23_id: VoronoiEdgeIndex,
-    ) -> (VoronoiEdgeIndex, VoronoiEdgeIndex) {
+        edge12_id: EdgeIndex,
+        edge23_id: EdgeIndex,
+    ) -> (EdgeIndex, EdgeIndex) {
         //tln!("-> insert_new_edge_5()");
         //dbg!(&site1, &site3, &circle, edge12_id, edge23_id);
         tln!("new vertex@CE{:?}", circle);
 
-        let is_linear = VSE::SiteEvent::<I1, F1>::is_linear_edge(&site1, &site3);
-        let is_primary = VSE::SiteEvent::<I1, F1>::is_primary_edge(&site1, &site3);
+        let is_linear = VSE::SiteEvent::<I, F>::is_linear_edge(&site1, &site3);
+        let is_primary = VSE::SiteEvent::<I, F>::is_primary_edge(&site1, &site3);
 
         // Add a new half-edge.
         let new_edge1_id = self._edge_new_3(
-            VoronoiCellIndex(site1.sorted_index()),
+            CellIndex(site1.sorted_index()),
             is_linear,
             is_primary,
         );
 
         // Add a new half-edge.
         let new_edge2_id = self._edge_new_3(
-            VoronoiCellIndex(site3.sorted_index()),
+            CellIndex(site3.sorted_index()),
             is_linear,
             is_primary,
         );
 
         // Add a new Voronoi vertex.
         let new_vertex_id = self._vertex_new_2(
-            TC2::<I1, F1>::f64_to_f1(circle.raw_x()),
-            TC2::<I1, F1>::f64_to_f1(circle.raw_y()),
+            TC2::<I, F>::f64_to_f1(circle.raw_x()),
+            TC2::<I, F>::f64_to_f1(circle.raw_y()),
             circle.is_site_point(),
         );
 
@@ -1535,9 +1535,9 @@ where
             //let mut edges_to_erase: Vec<usize> = Vec::new();
             while it < edges_end {
                 let is_equal = {
-                    let v1 = self.edge_get_vertex0(Some(VoronoiEdgeIndex(it)));
+                    let v1 = self.edge_get_vertex0(Some(EdgeIndex(it)));
                     let v1 = self.vertex_get(v1);
-                    let v2 = self.edge_get_vertex1(Some(VoronoiEdgeIndex(it)));
+                    let v2 = self.edge_get_vertex1(Some(EdgeIndex(it)));
                     let v2 = self.vertex_get(v2);
                     tln!("looking at edge:{}, v1={:?}, v2={:?}", it, v1, v2);
                     v1.is_some()
@@ -1549,15 +1549,15 @@ where
                 };
 
                 if is_equal {
-                    self._remove_edge(Some(VoronoiEdgeIndex(it)));
+                    self._remove_edge(Some(EdgeIndex(it)));
                 } else {
                     if it != last_edge {
                         //edge_type * e1 = &(*last_edge = *it);
                         self._edge_copy(last_edge, it);
                         //edge_type * e2 = &(*(last_edge + 1) = *(it + 1));
                         self._edge_copy(last_edge + 1, it + 1);
-                        let e1 = Some(VoronoiEdgeIndex(last_edge));
-                        let e2 = Some(VoronoiEdgeIndex(last_edge + 1));
+                        let e1 = Some(EdgeIndex(last_edge));
+                        let e2 = Some(EdgeIndex(last_edge + 1));
 
                         // e1->twin(e2);
                         self._edge_set_twin(e1, e2);
@@ -1593,7 +1593,7 @@ where
         tln!();
 
         // Set up incident edge pointers for cells and vertices.
-        for edge_it in self.edge_iter().enumerate().map(|x| VoronoiEdgeIndex(x.0)) {
+        for edge_it in self.edge_iter().enumerate().map(|x| EdgeIndex(x.0)) {
             let cell = self._edge_get_cell(Some(edge_it));
             self._cell_set_incident_edge(cell, Some(edge_it));
             let vertex = self.edge_get_vertex0(Some(edge_it));
@@ -1616,9 +1616,9 @@ where
         tln!("vertices b4 degenerate {}", self.vertices_.len());
         // Remove degenerate vertices.
         if !self.vertices_.is_empty() {
-            let mut last_vertex_iterator = (0..self.vertices_.len()).map(VoronoiVertexIndex);
+            let mut last_vertex_iterator = (0..self.vertices_.len()).map(VertexIndex);
             let mut last_vertex = last_vertex_iterator.next();
-            for it in (0..self.vertices_.len()).map(VoronoiVertexIndex) {
+            for it in (0..self.vertices_.len()).map(VertexIndex) {
                 let it = Some(it);
                 if self.vertex_get_incident_edge(it).is_some() {
                     if it != last_vertex {
@@ -1652,14 +1652,14 @@ where
                 // Update prev/next pointers for the line edges.
                 let mut edge_it = self.edges_.iter().enumerate().map(|x| x.0);
 
-                let mut edge1 = edge_it.next().map(VoronoiEdgeIndex);
+                let mut edge1 = edge_it.next().map(EdgeIndex);
                 self._edge_set_next(edge1, edge1);
                 self._edge_set_prev(edge1, edge1);
 
-                edge1 = edge_it.next().map(VoronoiEdgeIndex);
+                edge1 = edge_it.next().map(EdgeIndex);
                 let mut edge_it_value = edge_it.next();
                 while edge_it_value.is_some() {
-                    let edge2 = edge_it_value.map(VoronoiEdgeIndex);
+                    let edge2 = edge_it_value.map(EdgeIndex);
                     edge_it_value = edge_it.next();
                     //dbg!(edge1.unwrap(),edge2.unwrap());
 
@@ -1668,7 +1668,7 @@ where
                     self._edge_set_next(edge2, edge1);
                     self._edge_set_prev(edge2, edge1);
 
-                    edge1 = edge_it_value.map(VoronoiEdgeIndex);
+                    edge1 = edge_it_value.map(EdgeIndex);
                     edge_it_value = edge_it.next();
                 }
                 self._edge_set_next(edge1, edge1);
@@ -1678,17 +1678,17 @@ where
             // Update prev/next pointers for the ray edges.
             //let mut cell_it_keys = self.cells_.keys();
             for cell_it in 0..self.cells_.len() {
-                if self._cell_is_degenerate(Some(VoronoiCellIndex(cell_it))) {
+                if self._cell_is_degenerate(Some(CellIndex(cell_it))) {
                     continue;
                 }
                 // Move to the previous edge while
                 // it is possible in the CW direction.
-                let mut left_edge = self._cell_get_incident_edge(Some(VoronoiCellIndex(cell_it)));
+                let mut left_edge = self._cell_get_incident_edge(Some(CellIndex(cell_it)));
 
                 while let Some(new_left_edge) = self._edge_get_prev(left_edge) {
                     left_edge = Some(new_left_edge);
                     // Terminate if this is not a boundary cell.
-                    if left_edge == self._cell_get_incident_edge(Some(VoronoiCellIndex(cell_it))) {
+                    if left_edge == self._cell_get_incident_edge(Some(CellIndex(cell_it))) {
                         break;
                     }
                 }
@@ -1697,7 +1697,7 @@ where
                     continue;
                 }
 
-                let mut right_edge = self._cell_get_incident_edge(Some(VoronoiCellIndex(cell_it)));
+                let mut right_edge = self._cell_get_incident_edge(Some(CellIndex(cell_it)));
                 while let Some(new_right_edge) = self._edge_get_next(right_edge) {
                     right_edge = Some(new_right_edge);
                 }
@@ -1766,12 +1766,12 @@ where
     }
 }
 
-impl<I1, F1> From<VoronoiDiagram<I1, F1>> for SD::SyncVoronoiDiagram<I1, F1>
+impl<I, F> From<VoronoiDiagram<I, F>> for SD::SyncVoronoiDiagram<I, F>
 where
-    I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    fn from(other: VoronoiDiagram<I1, F1>) -> SD::SyncVoronoiDiagram<I1, F1> {
+    fn from(other: VoronoiDiagram<I, F>) -> SD::SyncVoronoiDiagram<I, F> {
         SD::SyncVoronoiDiagram {
             cells: other.cells_.into_iter().map(|x| x.get()).collect(),
             vertices: other.vertices_.into_iter().map(|x| x.get()).collect(),

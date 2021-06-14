@@ -23,7 +23,7 @@ Gui example:
 cargo run --example fltk_gui
 ```
 * Mouse click to place new points. 
-* Press and hold 'L' + mouse click to add single line. 
+* Press and hold 'L' + mouse click to add a single line. 
 * Press and hold 'S' + mouse click to add strings of lines.
 * Use mouse wheel to zoom.
 * Mouse click and drag to pan.
@@ -31,15 +31,15 @@ cargo run --example fltk_gui
 API example:
 ```rust
 use boostvoronoi::{Point,Line};
-use boostvoronoi::builder::{Builder};
-type I1 = i32; // this is the integer input type
-type F1 = f64; // this is the float output type (circle event coordinates)
+use boostvoronoi::builder::Builder;
+type I = i32; // this is the integer input type
+type F = f64; // this is the float output type (circle event coordinates)
 
 // Only unique Points will be used. Points should not intersect lines
 let p = vec![Point{x:9_i32, y:10}];
 // Lines may only intersect at the endpoints.
 let s = vec![Line::new(Point{x:10_i32, y:11}, Point{x:12, y:13})];
-let mut vb = Builder::<I1, F1>::new();
+let mut vb = Builder::<I, F>::default();
 
 // you will have to keep track of the input geometry. it will be referenced as
 // input geometry indices in the output.
@@ -56,7 +56,7 @@ Edges may become curves when line segments are used as input, see the example co
 - [ ] Fix the beach-line key problem
 - [ ] Error handling
 - [X] Evaluate the generic API. Is <I1, F1, I2, F2> really needed?
-- [ ] ~Replace~ Verify the builtin ulp implementation
+- [ ] Verify the builtin ulp implementation
 - [x] Replace num::BigInt with something lighter
 - [ ] Add many more test cases for voronoi_robust_ftp.rs, specially for ulp
 - [x] Remove use of vec_map::VecMap where not absolutely needed.

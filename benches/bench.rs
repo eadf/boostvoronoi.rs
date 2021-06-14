@@ -2,8 +2,8 @@ use boostvoronoi;
 use boostvoronoi::builder::{to_points, to_segments, Builder};
 use criterion::{criterion_group, criterion_main, Criterion};
 
-type I1 = i32;
-type F1 = f64;
+type I = i32;
+type F = f64;
 
 #[cfg(test)]
 fn bench_1(c: &mut Criterion) {
@@ -11,7 +11,7 @@ fn bench_1(c: &mut Criterion) {
         b.iter({
             || {
                 let (_output, _v, _s) = {
-                    let points: [[I1; 2]; 45] = [
+                    let points: [[I; 2]; 45] = [
                         [303, 108],
                         [180, 257],
                         [115, 405],
@@ -58,7 +58,7 @@ fn bench_1(c: &mut Criterion) {
                         [130, 102],
                         [98, 141],
                     ];
-                    let segments: [[I1; 4]; 51] = [
+                    let segments: [[I; 4]; 51] = [
                         [200, 200, 200, 400],
                         [200, 400, 400, 400],
                         [400, 400, 400, 200],
@@ -112,10 +112,10 @@ fn bench_1(c: &mut Criterion) {
                         [617, 342, 675, 292],
                     ];
 
-                    let _v = to_points::<I1, I1>(&points);
-                    let _s = to_segments::<I1, I1>(&segments);
+                    let _v = to_points::<I, I>(&points);
+                    let _s = to_segments::<I, I>(&segments);
 
-                    let mut vb = Builder::<I1, F1>::default();
+                    let mut vb = Builder::<I, F>::default();
                     vb.with_vertices(_v.iter()).expect("bench_1");
                     vb.with_segments(_s.iter()).expect("bench_1");
                     (vb.construct().expect("bench_1"), _v, _s)

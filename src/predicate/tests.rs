@@ -13,29 +13,29 @@ use std::collections::BTreeMap;
 use std::ops::Bound::{Excluded, Included, Unbounded};
 
 #[allow(dead_code)]
-fn new_key<I1, F1>(
+fn new_key<I1, F>(
     x1: I1,
     y1: I1,
     si1: usize,
     x2: I1,
     y2: I1,
     si2: usize,
-) -> VB::BeachLineNodeKey<I1, F1>
+) -> VB::BeachLineNodeKey<I1, F>
 where
     I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    F: OutputType + Neg<Output = F>,
 {
-    let mut site1 = VSE::SiteEvent::<I1, F1>::new_2(Point { x: x1, y: y1 }, si1);
+    let mut site1 = VSE::SiteEvent::<I1, F>::new_2(Point { x: x1, y: y1 }, si1);
     site1.set_sorted_index(si1);
-    let mut site2 = VSE::SiteEvent::<I1, F1>::new_2(Point { x: x2, y: y2 }, si2);
+    let mut site2 = VSE::SiteEvent::<I1, F>::new_2(Point { x: x2, y: y2 }, si2);
     site2.set_sorted_index(si2);
-    VB::BeachLineNodeKey::<I1, F1>::new_2(site1, site2)
+    VB::BeachLineNodeKey::<I1, F>::new_2(site1, site2)
 }
 
 #[allow(clippy::too_many_arguments)]
 #[allow(dead_code)] // this function is used 44 times in this file, still rustc don't think so
-fn node_test<I1, F1>(
-    a_key: &VB::BeachLineNodeKey<I1, F1>,
+fn node_test<I1, F>(
+    a_key: &VB::BeachLineNodeKey<I1, F>,
     x1: I1,
     y1: I1,
     si1: usize,
@@ -46,12 +46,12 @@ fn node_test<I1, F1>(
 ) -> bool
 where
     I1: InputType + Neg<Output = I1>,
-    F1: OutputType + Neg<Output = F1>,
+    F: OutputType + Neg<Output = F>,
 {
-    let test_node = new_key::<I1, F1>(x1, y1, si1, x2, y2, si2);
+    let test_node = new_key::<I1, F>(x1, y1, si1, x2, y2, si2);
 
     let is_less =
-        VP::NodeComparisonPredicate::<I1, F1>::node_comparison_predicate(a_key, &test_node);
+        VP::NodeComparisonPredicate::<I1, F>::node_comparison_predicate(a_key, &test_node);
     dbg!(&a_key, &test_node, is_less, expect);
     expect == is_less
 }
@@ -59,24 +59,24 @@ where
 #[test]
 fn cross_product_1() {
     type I1 = i32;
-    type F1 = f32;
+    type F = f32;
 
     let a1 = -9;
     let a2 = 5;
     let b1 = -9;
     let b2 = 4;
 
-    let x = VP::Predicates::<I1, F1>::robust_cross_product(a1, b1, a2, b2);
+    let x = VP::Predicates::<I1, F>::robust_cross_product(a1, b1, a2, b2);
     assert_eq!(x, 9.0);
 }
 
 #[test]
 fn node_1() {
     type I1 = i32;
-    type F1 = f32;
+    type F = f32;
 
     // test data copy & pasted from c++ debug session
-    let mykey = new_key::<I1, F1>(4, 13, 2, 4, 13, 2);
+    let mykey = new_key::<I1, F>(4, 13, 2, 4, 13, 2);
     assert!(node_test(&mykey, 1, 15, 0, 2, 14, 1, false));
     assert!(node_test(&mykey, 2, 14, 1, 1, 15, 0, true));
 }
@@ -84,90 +84,90 @@ fn node_1() {
 #[test]
 fn node_2() {
     type I1 = i32;
-    type F1 = f32;
+    type F = f32;
 
     // test data copy & pasted from c++ debug session
-    let mykey = new_key::<I1, F1>(9, 17, 5, 9, 17, 5);
-    assert!(node_test::<I1, F1>(&mykey, 1, 15, 0, 2, 14, 1, false));
-    assert!(node_test::<I1, F1>(&mykey, 1, 15, 0, 2, 14, 1, false));
-    assert!(node_test::<I1, F1>(&mykey, 2, 14, 1, 4, 13, 2, false));
-    assert!(node_test::<I1, F1>(&mykey, 4, 13, 2, 8, 9, 4, false));
-    assert!(node_test::<I1, F1>(&mykey, 8, 9, 4, 4, 13, 4, false));
-    assert!(node_test::<I1, F1>(&mykey, 4, 13, 2, 4, 16, 2, false));
-    assert!(node_test::<I1, F1>(&mykey, 4, 16, 3, 1, 15, 3, true));
+    let mykey = new_key::<I1, F>(9, 17, 5, 9, 17, 5);
+    assert!(node_test::<I1, F>(&mykey, 1, 15, 0, 2, 14, 1, false));
+    assert!(node_test::<I1, F>(&mykey, 1, 15, 0, 2, 14, 1, false));
+    assert!(node_test::<I1, F>(&mykey, 2, 14, 1, 4, 13, 2, false));
+    assert!(node_test::<I1, F>(&mykey, 4, 13, 2, 8, 9, 4, false));
+    assert!(node_test::<I1, F>(&mykey, 8, 9, 4, 4, 13, 4, false));
+    assert!(node_test::<I1, F>(&mykey, 4, 13, 2, 4, 16, 2, false));
+    assert!(node_test::<I1, F>(&mykey, 4, 16, 3, 1, 15, 3, true));
 }
 
 #[test]
 fn node_3() {
     type I1 = i32;
-    type F1 = f32;
+    type F = f32;
 
     // test data copy & pasted from c++ debug session
-    let mykey = new_key::<I1, F1>(4, 13, 2, 4, 13, 2);
-    assert!(node_test::<I1, F1>(&mykey, 1, 15, 0, 2, 14, 1, false));
-    assert!(node_test::<I1, F1>(&mykey, 2, 14, 1, 1, 15, 0, true));
+    let mykey = new_key::<I1, F>(4, 13, 2, 4, 13, 2);
+    assert!(node_test::<I1, F>(&mykey, 1, 15, 0, 2, 14, 1, false));
+    assert!(node_test::<I1, F>(&mykey, 2, 14, 1, 1, 15, 0, true));
 
-    let mykey = new_key::<I1, F1>(4, 16, 3, 4, 16, 3);
-    assert!(node_test::<I1, F1>(&mykey, 1, 15, 0, 2, 14, 1, false));
-    assert!(node_test::<I1, F1>(&mykey, 2, 14, 1, 4, 13, 2, false));
-    assert!(node_test::<I1, F1>(&mykey, 4, 13, 2, 2, 14, 1, false));
-    assert!(node_test::<I1, F1>(&mykey, 2, 14, 1, 1, 15, 0, false));
+    let mykey = new_key::<I1, F>(4, 16, 3, 4, 16, 3);
+    assert!(node_test::<I1, F>(&mykey, 1, 15, 0, 2, 14, 1, false));
+    assert!(node_test::<I1, F>(&mykey, 2, 14, 1, 4, 13, 2, false));
+    assert!(node_test::<I1, F>(&mykey, 4, 13, 2, 2, 14, 1, false));
+    assert!(node_test::<I1, F>(&mykey, 2, 14, 1, 1, 15, 0, false));
 
-    let mykey = new_key::<I1, F1>(8, 9, 4, 8, 9, 4);
-    assert!(node_test::<I1, F1>(&mykey, 1, 15, 0, 2, 14, 1, false));
-    assert!(node_test::<I1, F1>(&mykey, 2, 14, 1, 4, 13, 2, false));
-    assert!(node_test::<I1, F1>(&mykey, 4, 13, 2, 4, 16, 3, true));
-    assert!(node_test::<I1, F1>(&mykey, 4, 16, 3, 1, 15, 0, true));
+    let mykey = new_key::<I1, F>(8, 9, 4, 8, 9, 4);
+    assert!(node_test::<I1, F>(&mykey, 1, 15, 0, 2, 14, 1, false));
+    assert!(node_test::<I1, F>(&mykey, 2, 14, 1, 4, 13, 2, false));
+    assert!(node_test::<I1, F>(&mykey, 4, 13, 2, 4, 16, 3, true));
+    assert!(node_test::<I1, F>(&mykey, 4, 16, 3, 1, 15, 0, true));
 
-    let mykey = new_key::<I1, F1>(9, 17, 5, 9, 17, 5);
-    assert!(node_test::<I1, F1>(&mykey, 1, 15, 0, 2, 14, 1, false));
-    assert!(node_test::<I1, F1>(&mykey, 2, 14, 1, 4, 13, 2, false));
-    assert!(node_test::<I1, F1>(&mykey, 4, 13, 2, 8, 9, 4, false));
-    assert!(node_test::<I1, F1>(&mykey, 8, 9, 4, 4, 13, 2, false));
-    assert!(node_test::<I1, F1>(&mykey, 4, 13, 2, 4, 16, 3, false));
-    assert!(node_test::<I1, F1>(&mykey, 4, 16, 3, 1, 15, 0, true));
+    let mykey = new_key::<I1, F>(9, 17, 5, 9, 17, 5);
+    assert!(node_test::<I1, F>(&mykey, 1, 15, 0, 2, 14, 1, false));
+    assert!(node_test::<I1, F>(&mykey, 2, 14, 1, 4, 13, 2, false));
+    assert!(node_test::<I1, F>(&mykey, 4, 13, 2, 8, 9, 4, false));
+    assert!(node_test::<I1, F>(&mykey, 8, 9, 4, 4, 13, 2, false));
+    assert!(node_test::<I1, F>(&mykey, 4, 13, 2, 4, 16, 3, false));
+    assert!(node_test::<I1, F>(&mykey, 4, 16, 3, 1, 15, 0, true));
 
-    let mykey = new_key::<I1, F1>(10, 10, 6, 10, 10, 6);
-    assert!(node_test::<I1, F1>(&mykey, 1, 15, 0, 2, 14, 1, false));
-    assert!(node_test::<I1, F1>(&mykey, 2, 14, 1, 8, 9, 4, false));
-    assert!(node_test::<I1, F1>(&mykey, 8, 9, 4, 4, 13, 2, true));
-    assert!(node_test::<I1, F1>(&mykey, 4, 13, 2, 4, 16, 3, true));
-    assert!(node_test::<I1, F1>(&mykey, 4, 16, 3, 9, 17, 5, true));
-    assert!(node_test::<I1, F1>(&mykey, 9, 17, 5, 4, 16, 3, true));
-    assert!(node_test::<I1, F1>(&mykey, 4, 16, 3, 1, 15, 0, true));
+    let mykey = new_key::<I1, F>(10, 10, 6, 10, 10, 6);
+    assert!(node_test::<I1, F>(&mykey, 1, 15, 0, 2, 14, 1, false));
+    assert!(node_test::<I1, F>(&mykey, 2, 14, 1, 8, 9, 4, false));
+    assert!(node_test::<I1, F>(&mykey, 8, 9, 4, 4, 13, 2, true));
+    assert!(node_test::<I1, F>(&mykey, 4, 13, 2, 4, 16, 3, true));
+    assert!(node_test::<I1, F>(&mykey, 4, 16, 3, 9, 17, 5, true));
+    assert!(node_test::<I1, F>(&mykey, 9, 17, 5, 4, 16, 3, true));
+    assert!(node_test::<I1, F>(&mykey, 4, 16, 3, 1, 15, 0, true));
 
-    let mykey = new_key::<I1, F1>(12, 11, 7, 12, 11, 7);
-    assert!(node_test::<I1, F1>(&mykey, 1, 15, 0, 2, 14, 1, false));
-    assert!(node_test::<I1, F1>(&mykey, 2, 14, 1, 8, 9, 4, false));
-    assert!(node_test::<I1, F1>(&mykey, 8, 9, 4, 10, 10, 6, false));
-    assert!(node_test::<I1, F1>(&mykey, 10, 10, 6, 9, 17, 5, true));
-    assert!(node_test::<I1, F1>(&mykey, 9, 17, 5, 4, 16, 3, true));
-    assert!(node_test::<I1, F1>(&mykey, 4, 16, 3, 1, 15, 0, true));
+    let mykey = new_key::<I1, F>(12, 11, 7, 12, 11, 7);
+    assert!(node_test::<I1, F>(&mykey, 1, 15, 0, 2, 14, 1, false));
+    assert!(node_test::<I1, F>(&mykey, 2, 14, 1, 8, 9, 4, false));
+    assert!(node_test::<I1, F>(&mykey, 8, 9, 4, 10, 10, 6, false));
+    assert!(node_test::<I1, F>(&mykey, 10, 10, 6, 9, 17, 5, true));
+    assert!(node_test::<I1, F>(&mykey, 9, 17, 5, 4, 16, 3, true));
+    assert!(node_test::<I1, F>(&mykey, 4, 16, 3, 1, 15, 0, true));
 }
 
 #[test]
 fn node_4() {
     type I1 = i32;
-    type F1 = f32;
+    type F = f32;
 
     // test data copy & pasted from c++ debug session
-    let mykey = new_key::<I1, F1>(10, 18, 2, 10, 18, 2);
-    let _ = node_test::<I1, F1>(&mykey, 4, 21, 0, 8, 62, 1, true);
-    let _ = node_test::<I1, F1>(&mykey, 8, 62, 1, 4, 21, 0, true);
+    let mykey = new_key::<I1, F>(10, 18, 2, 10, 18, 2);
+    let _ = node_test::<I1, F>(&mykey, 4, 21, 0, 8, 62, 1, true);
+    let _ = node_test::<I1, F>(&mykey, 8, 62, 1, 4, 21, 0, true);
 
-    let mykey = new_key::<I1, F1>(12, 3, 3, 12, 3, 3);
-    let _ = node_test::<I1, F1>(&mykey, 4, 21, 0, 10, 18, 2, true);
-    let _ = node_test::<I1, F1>(&mykey, 10, 18, 2, 4, 21, 0, true);
-    let _ = node_test::<I1, F1>(&mykey, 4, 21, 0, 8, 62, 1, true);
-    let _ = node_test::<I1, F1>(&mykey, 8, 62, 1, 4, 21, 0, true);
+    let mykey = new_key::<I1, F>(12, 3, 3, 12, 3, 3);
+    let _ = node_test::<I1, F>(&mykey, 4, 21, 0, 10, 18, 2, true);
+    let _ = node_test::<I1, F>(&mykey, 10, 18, 2, 4, 21, 0, true);
+    let _ = node_test::<I1, F>(&mykey, 4, 21, 0, 8, 62, 1, true);
+    let _ = node_test::<I1, F>(&mykey, 8, 62, 1, 4, 21, 0, true);
 }
 
 #[test]
 fn distance_predicate_pp() {
     type I1 = i32;
-    type F1 = f32;
-    let pp = super::DistancePredicate::<I1, F1>::pp;
-    let new_site = VSE::SiteEvent::<I1, F1>::new_7;
+    type F = f32;
+    let pp = super::DistancePredicate::<I1, F>::pp;
+    let new_site = VSE::SiteEvent::<I1, F>::new_7;
     let new_point = |x, y| Point::<I1> { x, y };
 
     // test data copy & pasted from c++ debug session
@@ -200,9 +200,9 @@ fn distance_predicate_pp() {
 #[test]
 fn distance_predicate_ps_32() {
     type I1 = i32;
-    type F1 = f32;
-    let ps = super::DistancePredicate::<I1, F1>::ps;
-    let new_site = VSE::SiteEvent::<I1, F1>::new_7;
+    type F = f32;
+    let ps = super::DistancePredicate::<I1, F>::ps;
+    let new_site = VSE::SiteEvent::<I1, F>::new_7;
     let new_point = |x, y| Point::<I1> { x, y };
 
     // test data copy & pasted from c++ debug session
@@ -364,9 +364,9 @@ fn distance_predicate_ps_32() {
 #[test]
 fn distance_predicate_ps_64() {
     type I1 = i32;
-    type F1 = f64;
-    let ps = super::DistancePredicate::<I1, F1>::ps;
-    let new_site = VSE::SiteEvent::<I1, F1>::new_7;
+    type F = f64;
+    let ps = super::DistancePredicate::<I1, F>::ps;
+    let new_site = VSE::SiteEvent::<I1, F>::new_7;
     let new_point = |x, y| Point::<I1> { x, y };
 
     // test data copy & pasted from c++ debug session
@@ -528,9 +528,9 @@ fn distance_predicate_ps_64() {
 #[test]
 fn distance_predicate_ss_32() {
     type I1 = i32;
-    type F1 = f32;
-    let ss = super::DistancePredicate::<I1, F1>::ss;
-    let new_site = VSE::SiteEvent::<I1, F1>::new_7;
+    type F = f32;
+    let ss = super::DistancePredicate::<I1, F>::ss;
+    let new_site = VSE::SiteEvent::<I1, F>::new_7;
     let new_point = |x, y| Point::<I1> { x, y };
 
     // test data copy & pasted from c++ debug session
@@ -610,9 +610,9 @@ fn distance_predicate_ss_32() {
 #[test]
 fn distance_predicate_ss_64() {
     type I1 = i32;
-    type F1 = f64;
-    let ss = super::DistancePredicate::<I1, F1>::ss;
-    let new_site = VSE::SiteEvent::<I1, F1>::new_7;
+    type F = f64;
+    let ss = super::DistancePredicate::<I1, F>::ss;
+    let new_site = VSE::SiteEvent::<I1, F>::new_7;
     let new_point = |x, y| Point::<I1> { x, y };
 
     // test data copy & pasted from c++ debug session

@@ -35,9 +35,9 @@ enum StateMachine {
     ExpectLines,
 }
 
-fn line_to_data<I1>(line: &str) -> Option<InputData<I1>>
+fn line_to_data<I>(line: &str) -> Option<InputData<I>>
 where
-    I1: super::InputType + Neg<Output = I1>,
+    I: super::InputType + Neg<Output = I>,
 {
     let line = line.split(' ').collect::<Vec<&str>>();
     //println!("line split: {:?}", line);
@@ -52,9 +52,9 @@ where
         2 => {
             if let Ok(x1) = line[0].parse::<i32>() {
                 if let Ok(y1) = line[1].parse::<i32>() {
-                    return Some(InputData::Point(super::Point::<I1> {
-                        x: super::TypeConverter1::<I1>::i32_to_i1(x1),
-                        y: super::TypeConverter1::<I1>::i32_to_i1(y1),
+                    return Some(InputData::Point(super::Point::<I> {
+                        x: super::TypeConverter1::<I>::i32_to_i1(x1),
+                        y: super::TypeConverter1::<I>::i32_to_i1(y1),
                     }));
                 } else {
                     println!("failed to parse {}, ignoring line", line[1]);
@@ -68,11 +68,11 @@ where
                 if let Ok(y1) = line[1].parse::<i32>() {
                     if let Ok(x2) = line[2].parse::<i32>() {
                         if let Ok(y2) = line[3].parse::<i32>() {
-                            return Some(InputData::Line(super::Line::<I1>::from([
-                                super::TypeConverter1::<I1>::i32_to_i1(x1),
-                                super::TypeConverter1::<I1>::i32_to_i1(y1),
-                                super::TypeConverter1::<I1>::i32_to_i1(x2),
-                                super::TypeConverter1::<I1>::i32_to_i1(y2),
+                            return Some(InputData::Line(super::Line::<I>::from([
+                                super::TypeConverter1::<I>::i32_to_i1(x1),
+                                super::TypeConverter1::<I>::i32_to_i1(y1),
+                                super::TypeConverter1::<I>::i32_to_i1(x2),
+                                super::TypeConverter1::<I>::i32_to_i1(y2),
                             ])));
                         } else {
                             println!("failed to parse {}, ignoring line", line[3]);
@@ -99,16 +99,16 @@ where
 /// \[X1\] \[Y1\] \[X2\] \[Y2\](repeats)
 /// This entire module is implemented in about 20 lines of code in C++ boost :/
 #[allow(clippy::type_complexity)]
-pub fn read_boost_input_file<I1>(
+pub fn read_boost_input_file<I>(
     filename: &Path,
-) -> Result<(Vec<super::Point<I1>>, Vec<super::Line<I1>>), BvError>
+) -> Result<(Vec<super::Point<I>>, Vec<super::Line<I>>), BvError>
 where
-    I1: super::InputType + Neg<Output = I1>,
+    I: super::InputType + Neg<Output = I>,
 {
     // Open the file in read-only mode
     let file = File::open(filename)?;
     let reader = BufReader::new(file);
-    read_boost_input_buffer::<I1, _>(reader)
+    read_boost_input_buffer::<I, _>(reader)
 }
 
 /// Reads an example from a buffer using the format used by C++ boost voronoi
@@ -117,15 +117,15 @@ where
 /// \[number of lines\]
 /// \[X1\] \[Y1\] \[X2\] \[Y2\](repeats)
 #[allow(clippy::type_complexity)]
-pub fn read_boost_input_buffer<I1, F>(
+pub fn read_boost_input_buffer<I, F>(
     reader: BufReader<F>,
-) -> Result<(Vec<super::Point<I1>>, Vec<super::Line<I1>>), BvError>
+) -> Result<(Vec<super::Point<I>>, Vec<super::Line<I>>), BvError>
 where
-    I1: super::InputType + Neg<Output = I1>,
+    I: super::InputType + Neg<Output = I>,
     F: std::io::Read,
 {
-    let mut points = Vec::<super::Point<I1>>::default();
-    let mut lines = Vec::<super::Line<I1>>::default();
+    let mut points = Vec::<super::Point<I>>::default();
+    let mut lines = Vec::<super::Line<I>>::default();
     let mut state = StateMachine::StartingPoints;
     let mut expected_points = 0;
     let mut expected_lines = 0;
@@ -134,7 +134,7 @@ where
     for (index, line) in reader.lines().enumerate() {
         if let Ok(line) = line {
             //println!("got {:?}, state:{:?}", line, state);
-            if let Some(data) = line_to_data::<I1>(&line) {
+            if let Some(data) = line_to_data::<I>(&line) {
                 if state == StateMachine::StartingPoints {
                     if let InputData::Number(n) = data {
                         expected_points = n;
@@ -155,7 +155,7 @@ where
                     }
                 } else if state == StateMachine::ExpectPoints {
                     if expected_points > points.len() {
-                        if let InputData::Point(super::Point::<I1> { x, y }) = data {
+                        if let InputData::Point(super::Point::<I> { x, y }) = data {
                             points.push(super::Point { x, y });
                             if expected_points == points.len() {
                                 state = StateMachine::StartingLines;
