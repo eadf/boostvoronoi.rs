@@ -188,8 +188,9 @@ fn main() -> Result<(), BvError> {
     pack_x.set_type(group::PackType::Horizontal);
     let _ = frame::Frame::default().with_size(10, 25).with_label(" x:");
     let mut x_label = frame::Frame::default()
-        .with_size(170, 25)
-        .with_label("????");
+        .with_size(160, 25)
+        .with_label("");
+    x_label.set_align(enums::Align::Right | enums::Align::Inside);
     pack_x.end();
 
     let mut pack_y = group::Pack::default()
@@ -198,8 +199,9 @@ fn main() -> Result<(), BvError> {
     pack_y.set_type(group::PackType::Horizontal);
     let _ = frame::Frame::default().with_size(10, 25).with_label(" y:");
     let mut y_label = frame::Frame::default()
-        .with_size(170, 25)
-        .with_label("?????");
+        .with_size(160, 25)
+        .with_label("");
+    y_label.set_align(enums::Align::Right | enums::Align::Inside);
     pack_y.end();
 
     pack.end();
