@@ -1,5 +1,5 @@
 #![allow(unused_imports)]
-use super::super::diagram::VoronoiDiagram;
+use super::super::diagram::Diagram;
 use super::super::site_event as VSE;
 use super::super::BvError;
 use super::super::{Line, Point};

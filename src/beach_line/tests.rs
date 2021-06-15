@@ -65,7 +65,7 @@ fn beachline_2() {
         let coord = |x, y| Point { x, y };
 
         let _v = vec![coord(10, 18), coord(12, 3), coord(4, 21), coord(8, 62)];
-        let mut output: VD::VoronoiDiagram<I, F> = VD::VoronoiDiagram::<I, F>::default();
+        let mut output: VD::Diagram<I, F> = VD::Diagram::<I, F>::default();
 
         let mut b = Builder::<I, F>::default();
         b.with_vertices(_v.iter()).unwrap();
@@ -100,7 +100,7 @@ fn beachline_3() {
 
     {
         let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 50 })];
-        let mut output: VD::VoronoiDiagram<I, F> = VD::VoronoiDiagram::<I, F>::default();
+        let mut output: VD::Diagram<I, F> = VD::Diagram::<I, F>::default();
 
         let mut b = Builder::<I, F>::default();
         b.with_segments(_s.iter()).unwrap();

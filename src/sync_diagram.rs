@@ -21,24 +21,24 @@ use std::ops::Neg;
 /// Sync version of the boostvoronoi::diagram::VoronoiDiagram struct.
 /// This is useful when traversing the diagram in a multi threaded environment.
 #[derive(Default, Debug)]
-pub struct SyncVoronoiDiagram<I, F>
+pub struct SyncDiagram<I, F>
 where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    pub cells: Vec<VD::VoronoiCell<I, F>>, // indexed by VoronoiCellIndex
-    pub vertices: Vec<VD::VoronoiVertex<I, F>>, // indexed by VoronoiVertexIndex
-    pub edges: Vec<VD::VoronoiEdge<I, F>>, // indexed by VoronoiEdgeIndex
+    pub cells: Vec<VD::Cell<I, F>>, // indexed by VoronoiCellIndex
+    pub vertices: Vec<VD::Vertex<I, F>>, // indexed by VoronoiVertexIndex
+    pub edges: Vec<VD::Edge<I, F>>, // indexed by VoronoiEdgeIndex
 }
 
-impl<I, F> SyncVoronoiDiagram<I, F>
+impl<I, F> SyncDiagram<I, F>
 where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
     /// Returns a reference to the list of cells
     #[inline]
-    pub fn cells(&self) -> &Vec<VD::VoronoiCell<I, F>> {
+    pub fn cells(&self) -> &Vec<VD::Cell<I, F>> {
         &self.cells
     }
 
@@ -146,12 +146,12 @@ where
         Ok(!self.edge_is_finite(edge_id)?)
     }
 
-    pub fn edges(&self) -> &Vec<VD::VoronoiEdge<I, F>> {
+    pub fn edges(&self) -> &Vec<VD::Edge<I, F>> {
         &self.edges
     }
 
     #[inline]
-    pub fn edge_get(&self, edge_id: VD::EdgeIndex) -> Result<&VD::VoronoiEdge<I, F>, BvError> {
+    pub fn edge_get(&self, edge_id: VD::EdgeIndex) -> Result<&VD::Edge<I, F>, BvError> {
         if let Some(edge) = self.edges.get(edge_id.0) {
             Ok(edge)
         } else {
@@ -166,7 +166,7 @@ where
     pub fn edge_get_mut(
         &mut self,
         edge_id: VD::EdgeIndex,
-    ) -> Result<&mut VD::VoronoiEdge<I, F>, BvError> {
+    ) -> Result<&mut VD::Edge<I, F>, BvError> {
         if let Some(edge) = self.edges.get_mut(edge_id.0) {
             Ok(edge)
         } else {
@@ -203,7 +203,7 @@ where
     }
 
     #[inline]
-    pub fn cell_get(&self, cell_id: VD::CellIndex) -> Result<&VD::VoronoiCell<I, F>, BvError> {
+    pub fn cell_get(&self, cell_id: VD::CellIndex) -> Result<&VD::Cell<I, F>, BvError> {
         if let Some(cell) = self.cells.get(cell_id.0) {
             Ok(cell)
         } else {
@@ -216,7 +216,7 @@ where
 
     #[inline]
     /// Returns a reference to all of the vertices
-    pub fn vertices(&self) -> &Vec<VD::VoronoiVertex<I, F>> {
+    pub fn vertices(&self) -> &Vec<VD::Vertex<I, F>> {
         &self.vertices
     }
 
@@ -224,7 +224,7 @@ where
     pub fn vertex_get(
         &self,
         vertex_id: VD::VertexIndex,
-    ) -> Result<&VD::VoronoiVertex<I, F>, BvError> {
+    ) -> Result<&VD::Vertex<I, F>, BvError> {
         if let Some(vertex) = self.vertices.get(vertex_id.0) {
             Ok(vertex)
         } else {
@@ -239,7 +239,7 @@ where
     pub fn vertex_get_mut(
         &mut self,
         vertex_id: VD::VertexIndex,
-    ) -> Result<&mut VD::VoronoiVertex<I, F>, BvError> {
+    ) -> Result<&mut VD::Vertex<I, F>, BvError> {
         if let Some(vertex) = self.vertices.get_mut(vertex_id.0) {
             Ok(vertex)
         } else {
@@ -258,7 +258,7 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    diagram: &'s SyncVoronoiDiagram<I, F>,
+    diagram: &'s SyncDiagram<I, F>,
     starting_edge: VD::EdgeIndex,
     next_edge: Option<VD::EdgeIndex>,
     #[doc(hidden)]
@@ -273,7 +273,7 @@ where
     F: OutputType + Neg<Output = F>,
 {
     pub(crate) fn new(
-        diagram: &'s SyncVoronoiDiagram<I, F>,
+        diagram: &'s SyncDiagram<I, F>,
         starting_edge: Option<VD::EdgeIndex>,
     ) -> Self {
         if let Some(starting_edge) = starting_edge {

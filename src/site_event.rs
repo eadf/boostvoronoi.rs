@@ -273,10 +273,12 @@ where
         self.initial_index_
     }
 
+    // todo this looks suspicious
     pub(crate) fn is_inverse(&self) -> bool {
         (self.flags_ & VD::ColorBits::IS_INVERSE_BITMASK.0) != 0
     }
 
+    // todo this looks suspicious
     pub(crate) fn inverse(&mut self) -> &mut Self {
         mem::swap(&mut self.point0_, &mut self.point1_);
         self.flags_ ^= VD::ColorBits::IS_INVERSE_BITMASK.0;

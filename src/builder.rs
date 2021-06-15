@@ -171,9 +171,9 @@ where
     }
 
     /// Run sweepline algorithm and fill output data structure.
-    pub fn construct(&mut self) -> Result<VD::VoronoiDiagram<I, F>, BvError> {
-        let mut output: VD::VoronoiDiagram<I, F> =
-            VD::VoronoiDiagram::<I, F>::new(self.site_events_.len());
+    pub fn construct(&mut self) -> Result<VD::Diagram<I, F>, BvError> {
+        let mut output: VD::Diagram<I, F> =
+            VD::Diagram::<I, F>::new(self.site_events_.len());
 
         let mut site_event_iterator_: VSE::SiteEventIndexType = self.init_sites_queue();
 
@@ -255,7 +255,7 @@ where
     pub(crate) fn init_beach_line(
         &mut self,
         site_event_iterator_: &mut VSE::SiteEventIndexType,
-        output: &mut VD::VoronoiDiagram<I, F>,
+        output: &mut VD::Diagram<I, F>,
     ) {
         if self.site_events_.is_empty() {
             return;
@@ -294,7 +294,7 @@ where
     fn init_beach_line_default(
         &mut self,
         site_event_iterator_: &mut VSE::SiteEventIndexType,
-        output: &mut VD::VoronoiDiagram<I, F>,
+        output: &mut VD::Diagram<I, F>,
     ) {
         // Get the first and the second site event.
         let first = *site_event_iterator_ - 1;
@@ -312,7 +312,7 @@ where
     fn init_beach_line_collinear_sites(
         &mut self,
         site_event_iterator_: &VSE::SiteEventIndexType,
-        output: &mut VD::VoronoiDiagram<I, F>,
+        output: &mut VD::Diagram<I, F>,
     ) {
         let mut it_first: VSE::SiteEventIndexType = 0;
         let mut it_second: VSE::SiteEventIndexType = 1;
@@ -362,7 +362,7 @@ where
     pub(crate) fn process_site_event(
         &mut self,
         site_event_iterator_: &mut VSE::SiteEventIndexType,
-        output: &mut VD::VoronoiDiagram<I, F>,
+        output: &mut VD::Diagram<I, F>,
     ) -> Result<(), BvError> {
         #[cfg(feature = "console_debug")]
         {
@@ -585,7 +585,7 @@ where
     /// map data structure keeps correct ordering.
     pub(crate) fn process_circle_event(
         &mut self,
-        output: &mut VD::VoronoiDiagram<I, F>,
+        output: &mut VD::Diagram<I, F>,
     ) -> Result<(), BvError> {
         #[cfg(feature = "console_debug")]
         {
@@ -755,7 +755,7 @@ where
         site_arc1: VSE::SiteEvent<I, F>,
         site_arc2: VSE::SiteEvent<I, F>,
         site_event: VSE::SiteEvent<I, F>,
-        output: &mut VD::VoronoiDiagram<I, F>,
+        output: &mut VD::Diagram<I, F>,
     ) -> VB::BeachLineIndex {
         tln!(
             "->insert_new_arc(\n  site_arc1:{:?}\n  ,site_arc2:{:?}\n  ,site_event:{:?}",

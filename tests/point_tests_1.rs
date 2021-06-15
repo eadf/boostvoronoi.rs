@@ -1,5 +1,5 @@
 use boostvoronoi::builder::Builder;
-use boostvoronoi::Point;
+use boostvoronoi::{Point, BvError};
 
 type I1 = i32;
 type F1 = f32;
@@ -30,7 +30,7 @@ fn single_point_1() {
 }
 
 #[test]
-fn two_points_1() {
+fn two_points_1() -> Result<(),BvError>{
     let output = {
         let _v = vec![Point { x: 10, y: 11 }, Point { x: 1, y: 3 }];
         let mut vb = Builder::<I1, F1>::default();
@@ -58,9 +58,9 @@ fn two_points_1() {
     assert_eq!(output.edges().get(0).unwrap().get().next().unwrap().0, 0);
     assert_eq!(output.edges().get(0).unwrap().get().prev().unwrap().0, 0);
     let e = output.edges()[0].get();
-    assert!(output.edge_get_vertex1(Some(e.get_id())).is_none());
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), false);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), true);
+    assert!(output.edge_get_vertex1(e.get_id()).is_none());
+    assert_eq!(output.edge_is_finite(e.get_id())?, false);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, true);
 
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
@@ -72,13 +72,14 @@ fn two_points_1() {
     assert_eq!(output.edges().get(1).unwrap().get().next().unwrap().0, 1);
     assert_eq!(output.edges().get(1).unwrap().get().prev().unwrap().0, 1);
     let e = output.edges()[1].get();
-    assert!(output.edge_get_vertex1(Some(e.get_id())).is_none());
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), false);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), true);
+    assert!(output.edge_get_vertex1(e.get_id()).is_none());
+    assert_eq!(output.edge_is_finite(e.get_id())?, false);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, true);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
     assert_eq!(e.is_secondary(), false);
+    Ok(())
 }
 
 #[test]
@@ -757,7 +758,7 @@ fn five_points_1() {
 
 //#[ignore]
 #[test]
-fn eighth_points_1() {
+fn eighth_points_1() -> Result<(),BvError> {
     let output = {
         let _v = vec![
             Point { x: 10, y: 16 },
@@ -857,10 +858,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(0).unwrap().get().next().unwrap().0, 28);
     assert_eq!(output.edges().get(0).unwrap().get().prev().unwrap().0, 12);
     let e = output.edges()[0].get();
-    assert!(output.edge_get_vertex1(Some(e.get_id())).is_none());
+    assert!(output.edge_get_vertex1(e.get_id()).is_none());
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 13);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), false);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), true);
+    assert_eq!(output.edge_is_finite(e.get_id())?, false);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, true);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -871,10 +872,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(1).unwrap().get().next().unwrap().0, 10);
     assert_eq!(output.edges().get(1).unwrap().get().prev().unwrap().0, 10);
     let e = output.edges()[1].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 1);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 1);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 11);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), false);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), true);
+    assert_eq!(output.edge_is_finite(e.get_id())?, false);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, true);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -885,10 +886,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(2).unwrap().get().next().unwrap().0, 4);
     assert_eq!(output.edges().get(2).unwrap().get().prev().unwrap().0, 28);
     let e = output.edges()[2].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 0);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 0);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 29);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -899,10 +900,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(3).unwrap().get().next().unwrap().0, 26);
     assert_eq!(output.edges().get(3).unwrap().get().prev().unwrap().0, 6);
     let e = output.edges()[3].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 7);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 7);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 7);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -913,10 +914,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(4).unwrap().get().next().unwrap().0, 12);
     assert_eq!(output.edges().get(4).unwrap().get().prev().unwrap().0, 2);
     let e = output.edges()[4].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 2);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 2);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 3);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -927,10 +928,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(5).unwrap().get().next().unwrap().0, 7);
     assert_eq!(output.edges().get(5).unwrap().get().prev().unwrap().0, 14);
     let e = output.edges()[5].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 0);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 0);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 15);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -941,10 +942,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(6).unwrap().get().next().unwrap().0, 3);
     assert_eq!(output.edges().get(6).unwrap().get().prev().unwrap().0, 8);
     let e = output.edges()[6].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 0);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 0);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 9);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -955,10 +956,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(7).unwrap().get().next().unwrap().0, 19);
     assert_eq!(output.edges().get(7).unwrap().get().prev().unwrap().0, 5);
     let e = output.edges()[7].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 3);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 3);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 4);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -969,10 +970,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(8).unwrap().get().next().unwrap().0, 6);
     assert_eq!(output.edges().get(8).unwrap().get().prev().unwrap().0, 26);
     let e = output.edges()[8].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 3);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 3);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 27);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -983,10 +984,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(9).unwrap().get().next().unwrap().0, 24);
     assert_eq!(output.edges().get(9).unwrap().get().prev().unwrap().0, 18);
     let e = output.edges()[9].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 6);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 6);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 19);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1000,10 +1001,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(10).unwrap().get().next().unwrap().0, 1);
     assert_eq!(output.edges().get(10).unwrap().get().prev().unwrap().0, 1);
     let e = output.edges()[10].get();
-    assert!(output.edge_get_vertex1(Some(e.get_id())).is_none());
+    assert!(output.edge_get_vertex1(e.get_id()).is_none());
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 0);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), false);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), true);
+    assert_eq!(output.edge_is_finite(e.get_id())?, false);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, true);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1014,10 +1015,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(11).unwrap().get().next().unwrap().0, 13);
     assert_eq!(output.edges().get(11).unwrap().get().prev().unwrap().0, 23);
     let e = output.edges()[11].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 1);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 1);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 22);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), false);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), true);
+    assert_eq!(output.edge_is_finite(e.get_id())?, false);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, true);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1031,10 +1032,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(12).unwrap().get().next().unwrap().0, 0);
     assert_eq!(output.edges().get(12).unwrap().get().prev().unwrap().0, 4);
     let e = output.edges()[12].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 1);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 1);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 5);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1048,10 +1049,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(13).unwrap().get().next().unwrap().0, 15);
     assert_eq!(output.edges().get(13).unwrap().get().prev().unwrap().0, 11);
     let e = output.edges()[13].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 2);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 2);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 10);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1065,10 +1066,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(14).unwrap().get().next().unwrap().0, 5);
     assert_eq!(output.edges().get(14).unwrap().get().prev().unwrap().0, 16);
     let e = output.edges()[14].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 2);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 2);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 17);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1082,10 +1083,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(15).unwrap().get().next().unwrap().0, 23);
     assert_eq!(output.edges().get(15).unwrap().get().prev().unwrap().0, 13);
     let e = output.edges()[15].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 5);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 5);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 12);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1099,10 +1100,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(16).unwrap().get().next().unwrap().0, 14);
     assert_eq!(output.edges().get(16).unwrap().get().prev().unwrap().0, 19);
     let e = output.edges()[16].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 5);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 5);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 18);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1116,10 +1117,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(17).unwrap().get().next().unwrap().0, 21);
     assert_eq!(output.edges().get(17).unwrap().get().prev().unwrap().0, 22);
     let e = output.edges()[17].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 4);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 4);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 23);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1133,10 +1134,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(18).unwrap().get().next().unwrap().0, 9);
     assert_eq!(output.edges().get(18).unwrap().get().prev().unwrap().0, 20);
     let e = output.edges()[18].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 3);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 3);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 21);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1150,10 +1151,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(19).unwrap().get().next().unwrap().0, 16);
     assert_eq!(output.edges().get(19).unwrap().get().prev().unwrap().0, 7);
     let e = output.edges()[19].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 4);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 4);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 6);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1167,10 +1168,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(20).unwrap().get().next().unwrap().0, 18);
     assert_eq!(output.edges().get(20).unwrap().get().prev().unwrap().0, 24);
     let e = output.edges()[20].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 4);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 4);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 25);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1184,10 +1185,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(21).unwrap().get().next().unwrap().0, 31);
     assert_eq!(output.edges().get(21).unwrap().get().prev().unwrap().0, 17);
     let e = output.edges()[21].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 8);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 8);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 16);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1198,10 +1199,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(22).unwrap().get().next().unwrap().0, 17);
     assert_eq!(output.edges().get(22).unwrap().get().prev().unwrap().0, 31);
     let e = output.edges()[22].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 5);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 5);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 30);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), false);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), true);
+    assert_eq!(output.edge_is_finite(e.get_id())?, false);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, true);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1215,10 +1216,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(23).unwrap().get().next().unwrap().0, 11);
     assert_eq!(output.edges().get(23).unwrap().get().prev().unwrap().0, 15);
     let e = output.edges()[23].get();
-    assert!(output.edge_get_vertex1(Some(e.get_id())).is_none());
+    assert!(output.edge_get_vertex1(e.get_id()).is_none());
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 14);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), false);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), true);
+    assert_eq!(output.edge_is_finite(e.get_id())?, false);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, true);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1232,10 +1233,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(24).unwrap().get().next().unwrap().0, 20);
     assert_eq!(output.edges().get(24).unwrap().get().prev().unwrap().0, 9);
     let e = output.edges()[24].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 8);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 8);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 8);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1249,10 +1250,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(25).unwrap().get().next().unwrap().0, 27);
     assert_eq!(output.edges().get(25).unwrap().get().prev().unwrap().0, 30);
     let e = output.edges()[25].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 6);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 6);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 31);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1266,10 +1267,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(26).unwrap().get().next().unwrap().0, 8);
     assert_eq!(output.edges().get(26).unwrap().get().prev().unwrap().0, 3);
     let e = output.edges()[26].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 6);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 6);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 2);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1283,10 +1284,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(27).unwrap().get().next().unwrap().0, 29);
     assert_eq!(output.edges().get(27).unwrap().get().prev().unwrap().0, 25);
     let e = output.edges()[27].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 7);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 7);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 24);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), true);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), false);
+    assert_eq!(output.edge_is_finite(e.get_id())?, true);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, false);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1297,10 +1298,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(28).unwrap().get().next().unwrap().0, 2);
     assert_eq!(output.edges().get(28).unwrap().get().prev().unwrap().0, 0);
     let e = output.edges()[28].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 7);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 7);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 1);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), false);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), true);
+    assert_eq!(output.edge_is_finite(e.get_id())?, false);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, true);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1314,10 +1315,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(29).unwrap().get().next().unwrap().0, 30);
     assert_eq!(output.edges().get(29).unwrap().get().prev().unwrap().0, 27);
     let e = output.edges()[29].get();
-    assert!(output.edge_get_vertex1(Some(e.get_id())).is_none());
+    assert!(output.edge_get_vertex1(e.get_id()).is_none());
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 26);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), false);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), true);
+    assert_eq!(output.edge_is_finite(e.get_id())?, false);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, true);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1328,10 +1329,10 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(30).unwrap().get().next().unwrap().0, 25);
     assert_eq!(output.edges().get(30).unwrap().get().prev().unwrap().0, 29);
     let e = output.edges()[30].get();
-    assert_eq!(output.edge_get_vertex1(Some(e.get_id())).unwrap().0, 8);
+    assert_eq!(output.edge_get_vertex1(e.get_id()).unwrap().0, 8);
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 28);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), false);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), true);
+    assert_eq!(output.edge_is_finite(e.get_id())?, false);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, true);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
@@ -1345,12 +1346,13 @@ fn eighth_points_1() {
     assert_eq!(output.edges().get(31).unwrap().get().next().unwrap().0, 22);
     assert_eq!(output.edges().get(31).unwrap().get().prev().unwrap().0, 21);
     let e = output.edges()[31].get();
-    assert!(output.edge_get_vertex1(Some(e.get_id())).is_none());
+    assert!(output.edge_get_vertex1(e.get_id()).is_none());
     assert_eq!(output.edge_rot_next(Some(e.get_id())).unwrap().0, 20);
-    assert_eq!(output.edge_is_finite(Some(e.get_id())).unwrap(), false);
-    assert_eq!(output.edge_is_infinite(Some(e.get_id())).unwrap(), true);
+    assert_eq!(output.edge_is_finite(e.get_id())?, false);
+    assert_eq!(output.edge_is_infinite(e.get_id())?, true);
     assert_eq!(e.is_linear(), true);
     assert_eq!(e.is_curved(), false);
     assert_eq!(e.is_primary(), true);
     assert_eq!(e.is_secondary(), false);
+    Ok(())
 }

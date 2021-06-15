@@ -1,7 +1,7 @@
 #![allow(unused_imports)]
 use super::super::beach_line as VB;
 use super::super::diagram as VD;
-use super::super::diagram::VoronoiDiagram;
+use super::super::diagram::Diagram;
 use super::super::predicate as VP;
 use super::super::site_event as VSE;
 use super::super::BvError;

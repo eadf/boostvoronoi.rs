@@ -501,7 +501,7 @@ where
     F: OutputType + Neg<Output = F>,
 {
     screen_aabb: VU::Aabb2<I, F>,
-    diagram: VD::VoronoiDiagram<I, F>,
+    diagram: VD::Diagram<I, F>,
     points_aabb: VU::Aabb2<I, F>,
 
     point_data_: Vec<boostvoronoi::Point<I>>,
@@ -517,7 +517,7 @@ where
     pub fn default() -> Self {
         Self {
             screen_aabb: VU::Aabb2::<I, F>::new_from_i32(0, 0, FW, FH),
-            diagram: VD::VoronoiDiagram::<I, F>::new(0),
+            diagram: VD::Diagram::<I, F>::new(0),
             points_aabb: VU::Aabb2::<I, F>::default(),
             point_data_: Vec::<boostvoronoi::Point<I>>::new(),
             segment_data_: Vec::<boostvoronoi::Line<I>>::new(),
@@ -573,8 +573,8 @@ where
 
         // Color infinite edges
         for it in self.diagram.edges().iter() {
-            let edge_id = Some(it.get().get_id());
-            if !self.diagram.edge_is_finite(edge_id).unwrap() {
+            let edge_id = it.get().get_id();
+            if !self.diagram.edge_is_finite(edge_id)? {
                 self.diagram
                     .edge_or_color(edge_id, ColorFlag::INFINITE.bits);
             }
@@ -590,21 +590,22 @@ where
                 } else {
                     ColorFlag::CELL_POINT.bits
                 };
-                self.diagram.edge_or_color(edge_id_o, flag);
+                self.diagram.edge_or_color(edge_id, flag);
                 self.diagram
-                    .vertex_or_color(self.diagram.edge_get_vertex0(edge_id_o), flag);
+                    .vertex_or_color(self.diagram.edge_get_vertex0(edge_id), flag);
                 self.diagram
-                    .vertex_or_color(self.diagram.edge_get_vertex1(edge_id_o), flag);
+                    .vertex_or_color(self.diagram.edge_get_vertex1(edge_id), flag);
 
                 let mut another_edge = self.diagram.get_edge(edge_id).get().next();
                 while another_edge.is_some() && another_edge != edge_id_o {
-                    self.diagram.edge_or_color(another_edge, flag);
+                    let another_edge_uw = another_edge.unwrap();
+                    self.diagram.edge_or_color(another_edge_uw, flag);
                     self.diagram
-                        .vertex_or_color(self.diagram.edge_get_vertex0(another_edge), flag);
+                        .vertex_or_color(self.diagram.edge_get_vertex0(another_edge_uw), flag);
                     self.diagram
-                        .vertex_or_color(self.diagram.edge_get_vertex1(another_edge), flag);
+                        .vertex_or_color(self.diagram.edge_get_vertex1(another_edge_uw), flag);
 
-                    another_edge = self.diagram.get_edge(another_edge.unwrap()).get().next();
+                    another_edge = self.diagram.get_edge(another_edge_uw).get().next();
                 }
             }
         }
@@ -661,7 +662,7 @@ where
         }
         if config.draw_flag.contains(DrawFilterFlag::EDGES) {
             draw::set_draw_color(enums::Color::Green);
-            self.draw_edges(&config, &self.affine);
+            self.draw_edges(&config, &self.affine)?;
         }
         if config.draw_flag.contains(DrawFilterFlag::VERTICES) {
             draw::set_draw_color(enums::Color::Blue);
@@ -760,7 +761,7 @@ where
     }
 
     /// Draw voronoi edges.
-    fn draw_edges(&self, config: &SharedData, affine: &VU::SimpleAffine<I, F>) {
+    fn draw_edges(&self, config: &SharedData, affine: &VU::SimpleAffine<I, F>) ->Result<(),BvError> {
         let draw_external = config.draw_flag.contains(DrawFilterFlag::EXTERNAL);
         let draw_primary = config.draw_flag.contains(DrawFilterFlag::PRIMARY);
         let draw_secondary = config.draw_flag.contains(DrawFilterFlag::SECONDARY);
@@ -831,7 +832,7 @@ where
 
             // the coordinates in samples must be 'screen' coordinates, i.e. affine transformed
             let mut samples = Vec::<[F; 2]>::new();
-            if !self.diagram.edge_is_finite(Some(edge_id)).unwrap() {
+            if !self.diagram.edge_is_finite(edge_id)? {
                 let a = self.clip_infinite_edge(&affine, edge_id, &mut samples);
                 if let Err(err) = a {
                     println!("Ignoring error : {:?}", err);
@@ -840,7 +841,7 @@ where
                 let vertex0 = self.diagram.vertex_get(edge.vertex0()).unwrap().get();
 
                 samples.push(affine.transform(vertex0.x(), vertex0.y()));
-                let vertex1 = self.diagram.edge_get_vertex1(Some(edge_id));
+                let vertex1 = self.diagram.edge_get_vertex1(edge_id);
                 let vertex1 = self.diagram.vertex_get(vertex1).unwrap().get();
 
                 samples.push(affine.transform(vertex1.x(), vertex1.y()));
@@ -859,7 +860,7 @@ where
                         }
                     }
                     if draw_curved {
-                        self.sample_curved_edge(&affine, EdgeIndex(it.0), &mut samples);
+                        self.sample_curved_edge(&affine, EdgeIndex(it.0), &mut samples)?;
                     } else {
                         continue;
                     }
@@ -888,6 +889,7 @@ where
                 }
             }
         }
+        Ok(())
     }
 
     fn clip_infinite_edge(
@@ -899,37 +901,37 @@ where
         let edge = self.diagram.get_edge(edge_id);
         //const cell_type& cell1 = *edge.cell();
         let cell1_id = self.diagram.edge_get_cell(Some(edge_id)).unwrap();
-        let cell1 = self.diagram.get_cell(cell1_id).get();
+        let cell1 = self.diagram.get_cell(cell1_id)?.get();
         //const cell_type& cell2 = *edge.twin()->cell();
         let cell2_id = self
             .diagram
             .edge_get_twin(Some(edge_id))
             .and_then(|e| self.diagram.edge_get_cell(Some(e)))
             .unwrap();
-        let cell2 = self.diagram.get_cell(cell2_id).get();
+        let cell2 = self.diagram.get_cell(cell2_id)?.get();
 
         let mut origin = [F::default(), F::default()];
         let mut direction = [F::default(), F::default()];
         // Infinite edges could not be created by two segment sites.
         if cell1.contains_point() && cell2.contains_point() {
-            let p1 = self.retrieve_point(cell1_id);
-            let p2 = self.retrieve_point(cell2_id);
+            let p1 = self.retrieve_point(cell1_id)?;
+            let p2 = self.retrieve_point(cell2_id)?;
             origin[0] = (Self::i1_to_f1(p1.x) + Self::i1_to_f1(p2.x)) * Self::f64_to_f1(0.5);
             origin[1] = (Self::i1_to_f1(p1.y) + Self::i1_to_f1(p2.y)) * Self::f64_to_f1(0.5);
             direction[0] = Self::i1_to_f1(p1.y) - Self::i1_to_f1(p2.y);
             direction[1] = Self::i1_to_f1(p2.x) - Self::i1_to_f1(p1.x);
         } else {
             origin = if cell1.contains_segment() {
-                let p = self.retrieve_point(cell2_id);
+                let p = self.retrieve_point(cell2_id)?;
                 [Self::i1_to_f1(p.x), Self::i1_to_f1(p.y)]
             } else {
-                let p = self.retrieve_point(cell1_id);
+                let p = self.retrieve_point(cell1_id)?;
                 [Self::i1_to_f1(p.x), Self::i1_to_f1(p.y)]
             };
             let segment = if cell1.contains_segment() {
-                self.retrieve_segment(cell1_id)
+                self.retrieve_segment(cell1_id)?
             } else {
-                self.retrieve_segment(cell2_id)
+                self.retrieve_segment(cell2_id)?
             };
             let dx = segment.end.x - segment.start.x;
             let dy = segment.end.y - segment.start.y;
@@ -969,7 +971,7 @@ where
                 affine.transform_y(vertex0.y()),
             ]);
         }
-        let vertex1 = self.diagram.edge_get_vertex1(Some(edge_id));
+        let vertex1 = self.diagram.edge_get_vertex1(edge_id);
         if vertex1.is_none() {
             clipped_edge.push([
                 affine.transform_x(origin[0] + direction[0] * coefficient),
@@ -992,49 +994,50 @@ where
         affine: &VU::SimpleAffine<I, F>,
         edge_id: VD::EdgeIndex,
         sampled_edge: &mut Vec<[F; 2]>,
-    ) {
+    ) -> Result<(),BvError>{
         let max_dist = Self::f64_to_f1(1E-3)
             * (self.screen_aabb.get_high().unwrap()[0] - self.screen_aabb.get_low().unwrap()[0]);
 
         let cell_id = self.diagram.edge_get_cell(Some(edge_id)).unwrap();
-        let cell = self.diagram.get_cell(cell_id).get();
+        let cell = self.diagram.get_cell(cell_id)?.get();
         let twin_id = self.diagram.edge_get_twin(Some(edge_id)).unwrap();
         let twin_cell_id = self.diagram.edge_get_cell(Some(twin_id)).unwrap();
 
         let point = if cell.contains_point() {
-            self.retrieve_point(cell_id)
+            self.retrieve_point(cell_id)?
         } else {
-            self.retrieve_point(twin_cell_id)
+            self.retrieve_point(twin_cell_id)?
         };
         let segment = if cell.contains_point() {
-            self.retrieve_segment(twin_cell_id)
+            self.retrieve_segment(twin_cell_id)?
         } else {
-            self.retrieve_segment(cell_id)
+            self.retrieve_segment(cell_id)?
         };
         VU::VoronoiVisualUtils::<I, F>::discretize(&point, segment, max_dist, affine, sampled_edge);
+        Ok(())
     }
 
     /// Retrieves a point from the voronoi input in the order it was presented to
     /// the voronoi builder
-    fn retrieve_point(&self, cell_id: VD::CellIndex) -> boostvoronoi::Point<I> {
-        let (index, cat) = self.diagram.get_cell(cell_id).get().source_index_2();
+    fn retrieve_point(&self, cell_id: VD::CellIndex) -> Result<boostvoronoi::Point<I>,BvError> {
+        let (index, cat) = self.diagram.get_cell(cell_id)?.get().source_index_2();
         match cat {
-            VD::SourceCategory::SinglePoint => self.point_data_[index],
+            VD::SourceCategory::SinglePoint => Ok(self.point_data_[index]),
             VD::SourceCategory::SegmentStart => {
-                self.segment_data_[index - self.point_data_.len()].start
+                Ok(self.segment_data_[index - self.point_data_.len()].start)
             }
             VD::SourceCategory::Segment | VD::SourceCategory::SegmentEnd => {
-                self.segment_data_[index - self.point_data_.len()].end
+                Ok(self.segment_data_[index - self.point_data_.len()].end)
             }
         }
     }
 
     /// Retrieves a segment from the voronoi input in the order it was presented to
     /// the voronoi builder
-    fn retrieve_segment(&self, cell_id: VD::CellIndex) -> &boostvoronoi::Line<I> {
-        let cell = self.diagram.get_cell(cell_id).get();
+    fn retrieve_segment(&self, cell_id: VD::CellIndex) -> Result<&boostvoronoi::Line<I>,BvError> {
+        let cell = self.diagram.get_cell(cell_id)?.get();
         let index = cell.source_index() - self.point_data_.len();
-        &self.segment_data_[index]
+        Ok(&self.segment_data_[index])
     }
 
     #[allow(unused_assignments)]
