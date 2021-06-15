@@ -177,21 +177,21 @@ where
 #[derive(thiserror::Error, Debug)]
 pub enum BvError {
     #[error("error: Some error with object id")]
-    IdError { txt: String },
+    IdError(String),
     #[error("error: Some error with a value")]
-    ValueError { txt: String },
+    ValueError(String),
     #[error("error: Some error with the beach-line")]
-    BeachLineError { txt: String },
+    BeachLineError(String),
     #[error("error: given value for the radius is less than 0.0.")]
     RadiusLessThanZero,
     #[error("error: vertices should be added before segments")]
-    VerticesGoesFirst { txt: String },
+    VerticesGoesFirst(String),
     #[error("error: Some error")]
-    SomeError { txt: String },
+    SomeError(String),
     #[error("Suspected self-intersecting input data")]
-    SelfIntersecting { txt: String },
+    SelfIntersecting(String),
     #[error("Could not cast number")]
-    NumberConversion { txt: String },
+    NumberConversion(String),
     #[error(transparent)]
     BvError(#[from] std::io::Error),
 }
@@ -278,32 +278,38 @@ where
     I: InputType + Neg<Output = I>,
 {
     #[inline(always)]
-    pub fn i1_to_xi(input: I) -> EI::ExtendedInt {
+    /// Convert from the input integer type to an extended int
+    pub fn i_to_xi(input: I) -> EI::ExtendedInt {
         EI::ExtendedInt::from(num::cast::<I, i64>(input).unwrap())
     }
 
     #[inline(always)]
-    pub fn i32_to_i1(input: i32) -> I {
+    /// Convert from i32 to the input integer type
+    pub fn i32_to_i(input: i32) -> I {
         num::cast::<i32, I>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn i1_to_i32(input: I) -> i32 {
+    /// Convert from the input integer type to a i32
+    pub fn i_to_i32(input: I) -> i32 {
         num::cast::<I, i32>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn i1_to_i64(input: I) -> i64 {
+    /// Convert from the input integer type to a i64
+    pub fn i_to_i64(input: I) -> i64 {
         num::cast::<I, i64>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn i1_to_f32(input: I) -> f32 {
+    /// Convert from the input integer type to a f32
+    pub fn i_to_f32(input: I) -> f32 {
         num::cast::<I, f32>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn i1_to_f64(input: I) -> f64 {
+    /// Convert from the input integer type to a f64
+    pub fn i_to_f64(input: I) -> f64 {
         NumCast::from(input).unwrap()
     }
 }
@@ -327,61 +333,59 @@ where
     F: OutputType + Neg<Output = F>,
 {
     #[inline(always)]
-    pub fn i1_to_f1(input: I) -> F {
+    /// Convert from the input integer type to the output float type
+    pub fn i_to_f(input: I) -> F {
         num::cast::<I, F>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn f1_to_i32(input: F) -> i32 {
+    /// Convert from the output float type to i32
+    pub fn f_to_i32(input: F) -> i32 {
         num::cast::<F, i32>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn try_f1_to_i32(input: F) -> Result<i32, BvError> {
-        num::cast::<F, i32>(input).ok_or(BvError::NumberConversion {
-            txt: format!("Could not convert from float{:?} to int32", input),
+    /// Try to convert from the output float type to i32
+    pub fn try_f_to_i32(input: F) -> Result<i32, BvError> {
+        num::cast::<F, i32>(input).ok_or_else(|| {
+            BvError::NumberConversion(format!("Could not convert {:?} to int32", input))
         })
     }
 
     #[inline(always)]
-    pub fn i1_to_xi(input: I) -> EI::ExtendedInt {
-        EI::ExtendedInt::from(num::cast::<I, i64>(input).unwrap())
-    }
-
-    #[inline(always)]
-    pub fn f1_to_i1(input: F) -> I {
+    pub fn f_to_i(input: F) -> I {
         num::cast::<F, I>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn try_f1_to_i1(input: F) -> Result<I, BvError> {
-        num::cast::<F, I>(input).ok_or(BvError::NumberConversion {
-            txt: format!("Could not convert from float:{:?} to int32", input),
+    pub fn try_f_to_i(input: F) -> Result<I, BvError> {
+        num::cast::<F, I>(input).ok_or_else(|| {
+            BvError::NumberConversion(format!("Could not convert {:?} to I", input))
         })
     }
 
     #[inline(always)]
-    pub fn f1_to_f64(input: F) -> f64 {
+    pub fn f_to_f64(input: F) -> f64 {
         num::cast::<F, f64>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn f1_to_f32(input: F) -> f32 {
+    pub fn f_to_f32(input: F) -> f32 {
         num::cast::<F, f32>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn i32_to_f1(input: i32) -> F {
+    pub fn i32_to_f(input: i32) -> F {
         num::cast::<i32, F>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn f32_to_f1(input: f32) -> F {
+    pub fn f32_to_f(input: f32) -> F {
         num::cast::<f32, F>(input).unwrap()
     }
 
     #[inline(always)]
-    pub fn f64_to_f1(input: f64) -> F {
+    pub fn f64_to_f(input: f64) -> F {
         num::cast::<f64, F>(input).unwrap()
     }
 

@@ -198,7 +198,7 @@ where
 
     #[inline(always)]
     fn eval_3(point1: &Point<I>, point2: &Point<I>, point3: &Point<I>) -> Orientation {
-        let i1_to_i64 = TC1::<I>::i1_to_i64;
+        let i1_to_i64 = TC1::<I>::i_to_i64;
         let dx1: i64 = i1_to_i64(point1.x) - i1_to_i64(point2.x);
         let dx2: i64 = i1_to_i64(point2.x) - i1_to_i64(point3.x);
         let dy1: i64 = i1_to_i64(point1.y) - i1_to_i64(point2.y);
@@ -322,7 +322,7 @@ where
         lhs: &VSE::SiteEvent<I, F>,
         rhs: &VC::CircleEvent,
     ) -> bool {
-        let lhs = TC1::<I>::i1_to_f64(lhs.x0());
+        let lhs = TC1::<I>::i_to_f64(lhs.x0());
         let rhs = rhs.lower_x().into_inner();
         let ulps = Predicates::<I, F>::ulps();
         let rv = UlpComparison::ulp_comparison(lhs, rhs, ulps) == cmp::Ordering::Less;
@@ -406,7 +406,7 @@ where
     ) -> bool {
         let left_point = left_site.point0();
         let right_point = right_site.point0();
-        let i1_to_i64 = TC1::<I>::i1_to_i64;
+        let i1_to_i64 = TC1::<I>::i_to_i64;
         //dbg!(&left_site, &right_site, &new_point);
         //dbg!(left_point.x, left_point.y);
         //dbg!(right_point.x, right_point.y);
@@ -476,18 +476,18 @@ where
 
     #[inline(always)]
     fn find_distance_to_point_arc(site: &VSE::SiteEvent<I, F>, point: &Point<I>) -> f64 {
-        let dx = TC1::<I>::i1_to_f64(site.x()) - TC1::<I>::i1_to_f64(point.x);
-        let dy = TC1::<I>::i1_to_f64(site.y()) - TC1::<I>::i1_to_f64(point.y);
+        let dx = TC1::<I>::i_to_f64(site.x()) - TC1::<I>::i_to_f64(point.x);
+        let dy = TC1::<I>::i_to_f64(site.y()) - TC1::<I>::i_to_f64(point.y);
         // The relative error is at most 3EPS.
         (dx * dx + dy * dy) / (dx * 2_f64)
     }
 
     fn find_distance_to_segment_arc(site: &VSE::SiteEvent<I, F>, point: &Point<I>) -> f64 {
-        let i1_to_i64 = TC1::<I>::i1_to_i64;
-        let i1_to_f64 = TC1::<I>::i1_to_f64;
+        let i1_to_i64 = TC1::<I>::i_to_i64;
+        let i1_to_f64 = TC1::<I>::i_to_f64;
 
         if Predicates::<I, F>::is_vertical_1(site) {
-            (TC1::<I>::i1_to_f64(site.x()) - TC1::<I>::i1_to_f64(point.x)) * 0.5_f64
+            (TC1::<I>::i_to_f64(site.x()) - TC1::<I>::i_to_f64(point.x)) * 0.5_f64
         } else {
             let segment0: &Point<I> = site.point0();
             let segment1: &Point<I> = site.point1();
@@ -517,8 +517,8 @@ where
         new_point: &Point<I>,
         reverse_order: bool,
     ) -> KPredicateResult {
-        let i1_to_f64 = TC1::<I>::i1_to_f64;
-        let i1_to_i64 = TC1::<I>::i1_to_i64;
+        let i1_to_f64 = TC1::<I>::i_to_f64;
+        let i1_to_i64 = TC1::<I>::i_to_i64;
 
         let site_point: &Point<I> = left_site.point0();
         let segment_start: &Point<I> = right_site.point0();
@@ -686,9 +686,7 @@ where
 
     //private:
     /// Get the newer site.
-    pub(crate) fn get_comparison_site(
-        node: &VB::BeachLineNodeKey<I, F>,
-    ) -> &VSE::SiteEvent<I, F> {
+    pub(crate) fn get_comparison_site(node: &VB::BeachLineNodeKey<I, F>) -> &VSE::SiteEvent<I, F> {
         if node.left_site().sorted_index() > node.right_site().sorted_index() {
             node.left_site()
         } else {
@@ -697,8 +695,7 @@ where
     }
 
     pub(crate) fn get_comparison_point(site: &VSE::SiteEvent<I, F>) -> &Point<I> {
-        if PointComparisonPredicate::<I>::point_comparison_predicate(site.point0(), site.point1())
-        {
+        if PointComparisonPredicate::<I>::point_comparison_predicate(site.point0(), site.point1()) {
             site.point0()
         } else {
             site.point1()
@@ -841,8 +838,8 @@ where
         site3: &VSE::SiteEvent<I, F>,
         c_event: &VC::CircleEventType,
     ) {
-        let i1_to_f64 = TC1::<I>::i1_to_f64;
-        let i1_to_i64 = TC1::<I>::i1_to_i64;
+        let i1_to_f64 = TC1::<I>::i_to_f64;
+        let i1_to_i64 = TC1::<I>::i_to_i64;
 
         let dif_x1 = i1_to_f64(site1.x()) - i1_to_f64(site2.x());
         let dif_x2 = i1_to_f64(site2.x()) - i1_to_f64(site3.x());
@@ -927,8 +924,8 @@ where
         segment_index: usize,
         c_event: &VC::CircleEventType,
     ) {
-        let i1_to_f64 = TC1::<I>::i1_to_f64;
-        let i1_to_i64 = TC1::<I>::i1_to_i64;
+        let i1_to_f64 = TC1::<I>::i_to_f64;
+        let i1_to_i64 = TC1::<I>::i_to_i64;
 
         tln!("->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{})", site1, site2, site3, segment_index);
 
@@ -1070,8 +1067,8 @@ where
         point_index: i32,
         c_event: &VC::CircleEventType,
     ) {
-        let i1_to_f64 = TC1::<I>::i1_to_f64;
-        let i1_to_i64 = TC1::<I>::i1_to_i64;
+        let i1_to_f64 = TC1::<I>::i_to_f64;
+        let i1_to_i64 = TC1::<I>::i_to_i64;
 
         let segm_start1 = site2.point1();
         let segm_end1 = site2.point0();
@@ -1386,8 +1383,8 @@ where
         site3: &VSE::SiteEvent<I, F>,
         c_event: &VC::CircleEventType,
     ) {
-        let i1_to_f64 = TC1::<I>::i1_to_f64;
-        let i1_to_i64 = TC1::<I>::i1_to_i64;
+        let i1_to_f64 = TC1::<I>::i_to_f64;
+        let i1_to_i64 = TC1::<I>::i_to_i64;
 
         let a1 = RF::RobustFpt::new_1(i1_to_f64(site1.x1()) - i1_to_f64(site1.x0()));
         let b1 = RF::RobustFpt::new_1(i1_to_f64(site1.y1()) - i1_to_f64(site1.y0()));
@@ -1557,7 +1554,7 @@ where
         c: &VC::CircleEventType,
         s: &VSE::SiteEvent<I, F>,
     ) -> bool {
-        let i1_to_f64 = TC1::<I>::i1_to_f64;
+        let i1_to_f64 = TC1::<I>::i_to_f64;
 
         if !s.is_segment() || !Predicates::<I, F>::is_vertical_1(s) {
             return false;
@@ -1675,7 +1672,7 @@ where
         recompute_lower_x: bool,
     ) {
         let xi_to_xf = TC2::<I, F>::xi_to_xf;
-        let i1_to_xi = TC2::<I, F>::i1_to_xi;
+        let i1_to_xi = TC1::<I>::i_to_xi;
 
         let dif_x = [
             i1_to_xi(site1.x()) - i1_to_xi(site2.x()),
@@ -1783,7 +1780,7 @@ where
         );
 
         let bi_to_ext = TC2::<I, F>::xi_to_xf;
-        let i1_to_bi = TC2::<I, F>::i1_to_xi;
+        let i1_to_bi = TC1::<I>::i_to_xi;
 
         let sqrt_expr_ = RF::robust_sqrt_expr::<f64>::default();
 
@@ -1918,7 +1915,7 @@ where
         recompute_c_y: bool,
         recompute_lower_x: bool,
     ) {
-        let i1_to_xi = TC2::<I, F>::i1_to_xi;
+        let i1_to_xi = TC1::<I>::i_to_xi;
         let xi_to_xf = TC2::<I, F>::xi_to_xf;
         let mut sqrt_expr_ = RF::robust_sqrt_expr::<f64>::default();
 
@@ -2131,7 +2128,7 @@ where
     ) {
         tln!(">ExactCircleFormationFunctor:sss site1:{:?} site2:{:?}, site3:{:?}, recompute_c_x:{} recompute_c_y:{}, recompute_lower_x:{}", site1, site2, site3, recompute_c_x,recompute_c_y, recompute_lower_x);
 
-        let i1_to_bi = TC2::<I, F>::i1_to_xi;
+        let i1_to_bi = TC1::<I>::i_to_xi;
         let sqrt_expr_ = RF::robust_sqrt_expr::<f64>::default();
 
         let mut cA: [EI::ExtendedInt; 4] = [

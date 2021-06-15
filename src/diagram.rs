@@ -160,11 +160,7 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    pub fn new(
-        id: CellIndex,
-        source_index: SourceIndex,
-        source_category: ColorType,
-    ) -> Self {
+    pub fn new(id: CellIndex, source_index: SourceIndex, source_category: ColorType) -> Self {
         VoronoiCell {
             id_: id,
             source_index_: source_index,
@@ -268,10 +264,7 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    pub(crate) fn new(
-        diagram: &'s VoronoiDiagram<I, F>,
-        starting_edge: Option<EdgeIndex>,
-    ) -> Self {
+    pub(crate) fn new(diagram: &'s VoronoiDiagram<I, F>, starting_edge: Option<EdgeIndex>) -> Self {
         if let Some(starting_edge) = starting_edge {
             Self {
                 diagram,
@@ -339,10 +332,7 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    pub(crate) fn new(
-        diagram: &'s VoronoiDiagram<I, F>,
-        starting_edge: Option<EdgeIndex>,
-    ) -> Self {
+    pub(crate) fn new(diagram: &'s VoronoiDiagram<I, F>, starting_edge: Option<EdgeIndex>) -> Self {
         if let Some(starting_edge) = starting_edge {
             Self {
                 diagram,
@@ -410,10 +400,7 @@ where
     F: OutputType + Neg<Output = F>,
 {
     #[allow(dead_code)]
-    pub(crate) fn new(
-        diagram: &'s VoronoiDiagram<I, F>,
-        starting_edge: Option<EdgeIndex>,
-    ) -> Self {
+    pub(crate) fn new(diagram: &'s VoronoiDiagram<I, F>, starting_edge: Option<EdgeIndex>) -> Self {
         if let Some(starting_edge) = starting_edge {
             Self {
                 diagram,
@@ -646,12 +633,7 @@ where
     const BIT_IS_LINEAR: ColorType = 0x1; // linear is opposite to curved
     const BIT_IS_PRIMARY: ColorType = 0x2; // primary is opposite to secondary
 
-    fn new_4(
-        id: EdgeIndex,
-        cell: CellIndex,
-        is_linear: bool,
-        is_primary: bool,
-    ) -> EdgeType<I, F> {
+    fn new_4(id: EdgeIndex, cell: CellIndex, is_linear: bool, is_primary: bool) -> EdgeType<I, F> {
         let mut rv = Self {
             id,
             cell_: Some(cell),
@@ -899,19 +881,17 @@ where
         // fill cell with temporary blocks- they will be over-written later
         // Todo: fix this dirty hack with Option<>
         while self.cells_.len() < cell_id.0 {
-            self.cells_
-                .push(Rc::new(Cell::new(VoronoiCell::<I, F>::new(
-                    CellIndex(usize::MAX),
-                    usize::MAX,
-                    ColorBits::TEMPORARY_CELL.0,
-                ))));
-        }
-        self.cells_
-            .push(Rc::new(Cell::new(VoronoiCell::<I, F>::new(
-                cell_id,
-                initial_index,
-                sc.0,
+            self.cells_.push(Rc::new(Cell::new(VoronoiCell::<I, F>::new(
+                CellIndex(usize::MAX),
+                usize::MAX,
+                ColorBits::TEMPORARY_CELL.0,
             ))));
+        }
+        self.cells_.push(Rc::new(Cell::new(VoronoiCell::<I, F>::new(
+            cell_id,
+            initial_index,
+            sc.0,
+        ))));
         assert_eq!(self.cells_[cell_id.0].get().get_id(), cell_id.0);
 
         let ccell = &self.cells_[cell_id.0];
@@ -958,11 +938,7 @@ where
         self.cells_.get(cell_id.unwrap().0)
     }
 
-    fn _cell_set_incident_edge(
-        &self,
-        cell_id: Option<CellIndex>,
-        edge: Option<EdgeIndex>,
-    ) {
+    fn _cell_set_incident_edge(&self, cell_id: Option<CellIndex>, edge: Option<EdgeIndex>) {
         if cell_id.is_none() {
             return;
         }
@@ -973,10 +949,7 @@ where
         }
     }
 
-    fn _cell_get_incident_edge(
-        &self,
-        cell_id: Option<CellIndex>,
-    ) -> Option<EdgeIndex> {
+    fn _cell_get_incident_edge(&self, cell_id: Option<CellIndex>) -> Option<EdgeIndex> {
         let _ = cell_id?;
         if let Some(cell) = self._cell_get(cell_id) {
             return cell.get().incident_edge_;
@@ -996,10 +969,7 @@ where
 
     /// Returns an edge iterator. This iterates over the edges belonging to this cell starting with
     /// the incident edge.
-    pub fn cell_edge_iterator(
-        &self,
-        cell_id: Option<CellIndex>,
-    ) -> EdgeNextIterator<'_, I, F> {
+    pub fn cell_edge_iterator(&self, cell_id: Option<CellIndex>) -> EdgeNextIterator<'_, I, F> {
         let incident_edge = self._cell_get_incident_edge(cell_id);
         EdgeNextIterator::<'_, I, F>::new(self, incident_edge)
     }
@@ -1040,11 +1010,7 @@ where
         self.vertices_[dest].set(v);
     }
 
-    fn _vertex_set_incident_edge(
-        &self,
-        vertex_id: Option<VertexIndex>,
-        edge: Option<EdgeIndex>,
-    ) {
+    fn _vertex_set_incident_edge(&self, vertex_id: Option<VertexIndex>, edge: Option<EdgeIndex>) {
         if vertex_id.is_none() {
             return;
         }
@@ -1056,10 +1022,7 @@ where
     }
 
     /// return one of the edges originating at the vertex
-    pub fn vertex_get_incident_edge(
-        &self,
-        vertex_id: Option<VertexIndex>,
-    ) -> Option<EdgeIndex> {
+    pub fn vertex_get_incident_edge(&self, vertex_id: Option<VertexIndex>) -> Option<EdgeIndex> {
         let _ = vertex_id?;
         self.vertex_get(vertex_id)
             .and_then(|x| x.get().incident_edge_)
@@ -1084,12 +1047,7 @@ where
             .map(|cell| cell.get().is_site_point())
     }
 
-    fn _edge_new_3(
-        &mut self,
-        cell_id: CellIndex,
-        is_linear: bool,
-        is_primary: bool,
-    ) -> EdgeIndex {
+    fn _edge_new_3(&mut self, cell_id: CellIndex, is_linear: bool, is_primary: bool) -> EdgeIndex {
         let new_edge_id = EdgeIndex(self.edges_.len());
         let new_edge = VoronoiEdge::new_4(new_edge_id, cell_id, is_linear, is_primary);
         let _ = self.edges_.insert(new_edge_id.0, new_edge);
@@ -1293,11 +1251,7 @@ where
         new_vertex_id
     }
 
-    fn _edge_set_vertex0(
-        &self,
-        edge_id: Option<EdgeIndex>,
-        vertex_id: Option<VertexIndex>,
-    ) {
+    fn _edge_set_vertex0(&self, edge_id: Option<EdgeIndex>, vertex_id: Option<VertexIndex>) {
         if edge_id.is_none() {
             return;
         }
@@ -1309,19 +1263,13 @@ where
     }
 
     #[inline]
-    pub fn edge_get_vertex0(
-        &self,
-        edge_id: Option<EdgeIndex>,
-    ) -> Option<VertexIndex> {
+    pub fn edge_get_vertex0(&self, edge_id: Option<EdgeIndex>) -> Option<VertexIndex> {
         let _ = edge_id?;
         self._edge_get(edge_id).and_then(|x| x.get().vertex0())
     }
 
     #[inline]
-    pub fn edge_get_vertex1(
-        &self,
-        edge_id: Option<EdgeIndex>,
-    ) -> Option<VertexIndex> {
+    pub fn edge_get_vertex1(&self, edge_id: Option<EdgeIndex>) -> Option<VertexIndex> {
         let _ = edge_id?;
         let twin = self.edge_get_twin(edge_id);
         self.edge_get_vertex0(twin)
@@ -1464,23 +1412,15 @@ where
         let is_primary = VSE::SiteEvent::<I, F>::is_primary_edge(&site1, &site3);
 
         // Add a new half-edge.
-        let new_edge1_id = self._edge_new_3(
-            CellIndex(site1.sorted_index()),
-            is_linear,
-            is_primary,
-        );
+        let new_edge1_id = self._edge_new_3(CellIndex(site1.sorted_index()), is_linear, is_primary);
 
         // Add a new half-edge.
-        let new_edge2_id = self._edge_new_3(
-            CellIndex(site3.sorted_index()),
-            is_linear,
-            is_primary,
-        );
+        let new_edge2_id = self._edge_new_3(CellIndex(site3.sorted_index()), is_linear, is_primary);
 
         // Add a new Voronoi vertex.
         let new_vertex_id = self._vertex_new_2(
-            TC2::<I, F>::f64_to_f1(circle.raw_x()),
-            TC2::<I, F>::f64_to_f1(circle.raw_y()),
+            TC2::<I, F>::f64_to_f(circle.raw_x()),
+            TC2::<I, F>::f64_to_f(circle.raw_y()),
             circle.is_site_point(),
         );
 

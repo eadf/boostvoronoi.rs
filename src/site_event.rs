@@ -170,11 +170,7 @@ where
         }
     }
 
-    pub fn new_3(
-        a: Point<I>,
-        b: Point<I>,
-        initial_index_: SiteEventIndexType,
-    ) -> SiteEvent<I, F> {
+    pub fn new_3(a: Point<I>, b: Point<I>, initial_index_: SiteEventIndexType) -> SiteEvent<I, F> {
         Self {
             point0_: a,
             point1_: b,

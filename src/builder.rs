@@ -125,9 +125,9 @@ where
         T: Iterator<Item = &'a Point<I>>,
     {
         if self.segments_added_ {
-            return Err(BvError::VerticesGoesFirst {
-                txt: "Vertices should be added before segments".to_string(),
-            });
+            return Err(BvError::VerticesGoesFirst(
+                "Vertices should be added before segments".to_string(),
+            ));
         }
         for v in vertices {
             let mut s = VSE::SiteEvent::<I, F>::new_3(*v, *v, self.index_);
@@ -212,6 +212,7 @@ where
                 self.process_circle_event(&mut output)?;
             } else if VP::EventComparisonPredicate::<I, F>::event_comparison_predicate_bif(
                 &self.site_events_[site_event_iterator_],
+                // we checked with !is_empty(), unwrap is safe
                 &self.circle_events_.peek().unwrap().0.get(),
             ) {
                 self.process_site_event(&mut site_event_iterator_, &mut output)?;
@@ -251,7 +252,7 @@ where
         site_event_iterator_
     }
 
-    pub (crate) fn init_beach_line(
+    pub(crate) fn init_beach_line(
         &mut self,
         site_event_iterator_: &mut VSE::SiteEventIndexType,
         output: &mut VD::VoronoiDiagram<I, F>,
@@ -272,9 +273,7 @@ where
                     self.site_events_[*site_event_iterator_].point0(),
                     self.site_events_[0].point0(),
                 )
-                && VP::Predicates::<I, F>::is_vertical_1(
-                    &self.site_events_[*site_event_iterator_],
-                )
+                && VP::Predicates::<I, F>::is_vertical_1(&self.site_events_[*site_event_iterator_])
             {
                 *site_event_iterator_ += 1;
                 skip += 1;
@@ -377,7 +376,16 @@ where
         }
         let (mut right_it, last_index) = {
             // Get next site event to process.
-            let site_event = self.site_events_.get(*site_event_iterator_).unwrap();
+            let site_event = self
+                .site_events_
+                .get(*site_event_iterator_)
+                .ok_or_else(|| {
+                    BvError::SomeError(format!(
+                        "Could not get a site event from list. {}{}",
+                        file!(),
+                        line!()
+                    ))
+                })?;
             tln!("processing site:{}", site_event); //dbg!(&site_event);
 
             // Move site iterator.
@@ -387,8 +395,10 @@ where
             // remove temporary nodes from the beach line data structure.
             if !site_event.is_segment() {
                 while !self.end_points_.is_empty()
+                    // we checked with !is_empty(), unwrap is safe
                     && &self.end_points_.peek().unwrap().site == site_event.point0()
                 {
+                    // we checked with !is_empty(), unwrap is safe
                     let b_it = self.end_points_.peek().unwrap();
                     let b_it = b_it.beachline_index;
                     let _ = self.end_points_.pop();
@@ -413,6 +423,7 @@ where
                 let mut last = self.site_events_.get(last_index);
                 while last_index < self.site_events_.len()
                     && last.is_some()
+                    // we checked with is_some(), unwrap is safe
                     && last.unwrap().is_segment()
                     && last.unwrap().point0() == site_event.point0()
                 {
@@ -590,7 +601,11 @@ where
             .is_active(circle_event.get_index().unwrap())
         {
             // todo: remove this panic when stable
-            return Err(BvError::SomeError {txt:format!("Internal error, the circle event should be active. {}:{}", file!(), line!())})
+            return Err(BvError::SomeError(format!(
+                "Internal error, the circle event should be active. {}:{}",
+                file!(),
+                line!()
+            )));
         }
         let it_first = &self.beach_line_.get_node(&e.1.unwrap());
         let it_last = it_first;
@@ -606,9 +621,7 @@ where
         // Get the half-edge corresponding to the second bisector - (B, C).
         let bisector2 = it_first.1.get();
         if bisector2.is_none() {
-            return Err(BvError::SomeError {
-                txt: "bisector2.is_none()".to_string(),
-            });
+            return Err(BvError::SomeError("bisector2.is_none()".to_string()));
         }
         let bisector2 = bisector2.unwrap().edge_id();
 
@@ -618,9 +631,7 @@ where
 
         let bisector1 = it_first.1.get();
         if bisector1.is_none() {
-            return Err(BvError::SomeError {
-                txt: "bisector1.is_none()".to_string(),
-            });
+            return Err(BvError::SomeError("bisector1.is_none()".to_string()));
         }
         let bisector1 = bisector1.unwrap().edge_id();
 
@@ -710,9 +721,9 @@ where
                 if let Some(id) = self.beach_line_.get_left_neighbour(it_first.0) {
                     self.beach_line_.get_node(&id.1)
                 } else {
-                    return Err(BvError::SomeError {
-                        txt: "beach_line_::get_left_neighbour could not find anything".to_string(),
-                    });
+                    return Err(BvError::SomeError(
+                        "beach_line_::get_left_neighbour could not find anything".to_string(),
+                    ));
                 }
             };
 
@@ -846,12 +857,10 @@ where
                             .debug_print_all_compat_node(&b.0, &self.circle_events_);
                     }
                 } else {
-                    return Err(BvError::SomeError {
-                        txt: format!(
-                            "activate_circle_event could not find node by key {}",
-                            bisector_node.0
-                        ),
-                    });
+                    return Err(BvError::SomeError(format!(
+                        "activate_circle_event could not find node by key {}",
+                        bisector_node.0
+                    )));
                 }
             }
         }

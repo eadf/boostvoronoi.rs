@@ -167,12 +167,12 @@ where
                 eprintln!("Tried to remove a non-existent beach_line, this error may occur if the input data is self-intersecting");
                 eprintln!("{:?}", node);
                 self.debug_print_all_dump_and_cmp(&node);
-                return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beach_line, this error may occur if the input data is self-intersecting".to_string()});
+                return Err(BvError::SelfIntersecting ("Tried to remove a non-existent beach_line, this error may occur if the input data is self-intersecting".to_string()));
                 //}
             }
             let _ = self.beach_line_vec.remove(beachline_index.0);
         } else {
-            return Err(BvError::SelfIntersecting {txt:"Tried to remove a non-existent beach_line, this error may occur if the input data is self-intersecting".to_string()});
+            return Err(BvError::SelfIntersecting ("Tried to remove a non-existent beach_line, this error may occur if the input data is self-intersecting".to_string()));
         }
         Ok(())
     }
@@ -236,9 +236,9 @@ where
             let _ = self.beach_line_vec.insert(idx.0, (after, item));
             Ok(self.get_node(&idx))
         } else {
-            Err(BvError::BeachLineError {
-                txt: "Could not find the beach-line key to replace".to_string(),
-            })
+            Err(BvError::BeachLineError(
+                format!("Could not find the beach-line key to replace. {}:{}", file!(), line!())
+            ))
         }
     }
 

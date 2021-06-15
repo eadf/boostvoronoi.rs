@@ -55,18 +55,16 @@ where
     #[inline]
     /// Returns a pointer to the rotation next edge
     /// over the starting point of the half-edge.
-    pub fn edge_rot_next(
-        &self,
-        edge_id: VD::EdgeIndex,
-    ) -> Result<Option<VD::EdgeIndex>, BvError> {
+    pub fn edge_rot_next(&self, edge_id: VD::EdgeIndex) -> Result<Option<VD::EdgeIndex>, BvError> {
         let prev_id = self.edge_get(edge_id)?.prev();
         if let Some(prev_id) = prev_id {
             let prev = self.edge_get(prev_id)?;
             Ok(prev.twin())
         } else {
-            Err(BvError::IdError {
-                txt: format!("The edge id {} does not have any prev edge", edge_id.0),
-            })
+            Err(BvError::IdError(format!(
+                "The edge id {} does not have any prev edge",
+                edge_id.0
+            )))
         }
     }
 
@@ -74,10 +72,7 @@ where
     /// Returns a pointer to the rotation next edge
     /// over the starting point of the half-edge.
     /// This method returns None at any error
-    fn edge_rot_next_no_err(
-        &self,
-        edge_id: Option<VD::EdgeIndex>,
-    ) -> Option<VD::EdgeIndex> {
+    fn edge_rot_next_no_err(&self, edge_id: Option<VD::EdgeIndex>) -> Option<VD::EdgeIndex> {
         self.edges
             .get(self.edges.get(edge_id?.0)?.prev()?.0)?
             .twin()
@@ -86,62 +81,54 @@ where
     #[inline]
     /// Returns a pointer to the rotation previous edge
     /// over the starting point of the half-edge.
-    pub fn edge_rot_prev(
-        &self,
-        edge_id: VD::EdgeIndex,
-    ) -> Result<Option<VD::EdgeIndex>, BvError> {
+    pub fn edge_rot_prev(&self, edge_id: VD::EdgeIndex) -> Result<Option<VD::EdgeIndex>, BvError> {
         if let Some(twin_id) = self.edge_get(edge_id)?.twin() {
             let twin = self.edge_get(twin_id)?;
             Ok(twin.next())
         } else {
-            Err(BvError::IdError {
-                txt: format!("The edge id {} does not have any twin edge", edge_id.0),
-            })
+            Err(BvError::IdError(format!(
+                "The edge id {} does not have any twin edge",
+                edge_id.0
+            )))
         }
     }
 
     /// Returns the next edge or an error
     #[inline]
-    pub fn edge_get_next_err(
-        &self,
-        edge_id: VD::EdgeIndex,
-    ) -> Result<VD::EdgeIndex, BvError> {
+    pub fn edge_get_next_err(&self, edge_id: VD::EdgeIndex) -> Result<VD::EdgeIndex, BvError> {
         if let Some(edge_id) = self.edge_get(edge_id)?.next() {
             Ok(edge_id)
         } else {
-            Err(BvError::ValueError {
-                txt: format!("The edge id {} does not have a next edge", edge_id.0),
-            })
+            Err(BvError::ValueError(format!(
+                "The edge id {} does not have a next edge",
+                edge_id.0
+            )))
         }
     }
 
     /// Returns the previous edge or an BvError if it does not exist
     #[inline]
-    pub fn edge_get_prev_err(
-        &self,
-        edge_id: VD::EdgeIndex,
-    ) -> Result<VD::EdgeIndex, BvError> {
+    pub fn edge_get_prev_err(&self, edge_id: VD::EdgeIndex) -> Result<VD::EdgeIndex, BvError> {
         if let Some(prev) = self.edge_get(edge_id)?.prev() {
             Ok(prev)
         } else {
-            Err(BvError::ValueError {
-                txt: format!("The edge id {} does not have a prev edge", edge_id.0),
-            })
+            Err(BvError::ValueError(format!(
+                "The edge id {} does not have a prev edge",
+                edge_id.0
+            )))
         }
     }
 
     /// Returns the twin edge as a Result or a BvError if it does not exists
     #[inline]
-    pub fn edge_get_twin_err(
-        &self,
-        edge_id: VD::EdgeIndex,
-    ) -> Result<VD::EdgeIndex, BvError> {
+    pub fn edge_get_twin_err(&self, edge_id: VD::EdgeIndex) -> Result<VD::EdgeIndex, BvError> {
         if let Some(twin_id) = self.edge_get(edge_id)?.twin() {
             Ok(twin_id)
         } else {
-            Err(BvError::ValueError {
-                txt: format!("The edge id {} does not have a twin", edge_id.0),
-            })
+            Err(BvError::ValueError(format!(
+                "The edge id {} does not have a twin",
+                edge_id.0
+            )))
         }
     }
 
@@ -164,16 +151,14 @@ where
     }
 
     #[inline]
-    pub fn edge_get(
-        &self,
-        edge_id: VD::EdgeIndex,
-    ) -> Result<&VD::VoronoiEdge<I, F>, BvError> {
+    pub fn edge_get(&self, edge_id: VD::EdgeIndex) -> Result<&VD::VoronoiEdge<I, F>, BvError> {
         if let Some(edge) = self.edges.get(edge_id.0) {
             Ok(edge)
         } else {
-            Err(BvError::IdError {
-                txt: format!("The edge id {} does not exists", edge_id.0),
-            })
+            Err(BvError::IdError(format!(
+                "The edge id {} does not exists",
+                edge_id.0
+            )))
         }
     }
 
@@ -185,9 +170,10 @@ where
         if let Some(edge) = self.edges.get_mut(edge_id.0) {
             Ok(edge)
         } else {
-            Err(BvError::IdError {
-                txt: format!("The edge id {} does not exists", edge_id.0),
-            })
+            Err(BvError::IdError(format!(
+                "The edge id {} does not exists",
+                edge_id.0
+            )))
         }
     }
 
@@ -207,25 +193,24 @@ where
         edge_id: VD::EdgeIndex,
     ) -> Result<Option<VD::VertexIndex>, BvError> {
         let twin = self.edge_get(edge_id)?.twin().map_or(
-            Err(BvError::IdError {
-                txt: format!("the edge {} does not have any twin", edge_id.0),
-            }),
+            Err(BvError::IdError(format!(
+                "the edge {} does not have any twin",
+                edge_id.0
+            ))),
             Ok,
         )?;
         self.edge_get_vertex0(twin)
     }
 
     #[inline]
-    pub fn cell_get(
-        &self,
-        cell_id: VD::CellIndex,
-    ) -> Result<&VD::VoronoiCell<I, F>, BvError> {
+    pub fn cell_get(&self, cell_id: VD::CellIndex) -> Result<&VD::VoronoiCell<I, F>, BvError> {
         if let Some(cell) = self.cells.get(cell_id.0) {
             Ok(cell)
         } else {
-            Err(BvError::IdError {
-                txt: format!("The cell id {} does not exists", cell_id.0),
-            })
+            Err(BvError::IdError(format!(
+                "The cell id {} does not exists",
+                cell_id.0
+            )))
         }
     }
 
@@ -243,9 +228,10 @@ where
         if let Some(vertex) = self.vertices.get(vertex_id.0) {
             Ok(vertex)
         } else {
-            Err(BvError::IdError {
-                txt: format!("The vertex id {} does not exists", vertex_id.0),
-            })
+            Err(BvError::IdError(format!(
+                "The vertex id {} does not exists",
+                vertex_id.0
+            )))
         }
     }
 
@@ -257,9 +243,10 @@ where
         if let Some(vertex) = self.vertices.get_mut(vertex_id.0) {
             Ok(vertex)
         } else {
-            Err(BvError::IdError {
-                txt: format!("The vertex id {} does not exists", vertex_id.0),
-            })
+            Err(BvError::IdError(format!(
+                "The vertex id {} does not exists",
+                vertex_id.0
+            )))
         }
     }
 }

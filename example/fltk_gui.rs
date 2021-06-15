@@ -26,6 +26,9 @@ const FW: i32 = 790;
 const WH: i32 = 800;
 const WW: i32 = FW + 180;
 
+const COORD_X_OFFSET: i32 = 5;
+const COORD_Y_OFFSET: i32 = 5;
+
 bitflags! {
     pub struct ColorFlag: VD::ColorType {
         const EXTERNAL     = 0b00000001;
@@ -94,6 +97,14 @@ struct SharedData {
     last_click: Option<Point<i32>>,
 }
 
+/// The Offscreen is slightly offset from the window.
+/// This method gives the mouse coordinates usable inside the offscreen.
+#[inline]
+fn offscreen_event_coords() -> (i32, i32) {
+    let pos = app::event_coords();
+    (pos.0-COORD_X_OFFSET,pos.1-COORD_Y_OFFSET)
+}
+
 ///! This example intends to visualize the half edge output of the voronoi algorithm.
 ///! Read all about the half edge data structure here:
 ///! <https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_diagram.htm>
@@ -104,11 +115,11 @@ fn main() -> Result<(), BvError> {
         .center_screen()
         .with_label("Boost voronoi ported to Rust");
 
-    let mut frame = frame::Frame::new(5, 5, FW, FH, "");
+    let mut frame = frame::Frame::new(COORD_X_OFFSET, COORD_Y_OFFSET, FW, FH, "");
     frame.set_color(enums::Color::Black);
     frame.set_frame(enums::FrameType::DownBox);
 
-    let mut pack = group::Pack::new(5 + FW, 5, 170, WH, "");
+    let mut pack = group::Pack::new(COORD_X_OFFSET + FW, COORD_Y_OFFSET, 170, WH, "");
     pack.set_spacing(5);
 
     let mut menu_but = menu::MenuButton::default()
@@ -187,9 +198,7 @@ fn main() -> Result<(), BvError> {
         .below_of(&secondary_button, 25);
     pack_x.set_type(group::PackType::Horizontal);
     let _ = frame::Frame::default().with_size(10, 25).with_label(" x:");
-    let mut x_label = frame::Frame::default()
-        .with_size(160, 25)
-        .with_label("");
+    let mut x_label = frame::Frame::default().with_size(160, 25).with_label("");
     x_label.set_align(enums::Align::Right | enums::Align::Inside);
     pack_x.end();
 
@@ -198,9 +207,7 @@ fn main() -> Result<(), BvError> {
         .below_of(&pack_x, 25);
     pack_y.set_type(group::PackType::Horizontal);
     let _ = frame::Frame::default().with_size(10, 25).with_label(" y:");
-    let mut y_label = frame::Frame::default()
-        .with_size(160, 25)
-        .with_label("");
+    let mut y_label = frame::Frame::default().with_size(160, 25).with_label("");
     y_label.set_align(enums::Align::Right | enums::Align::Inside);
     pack_y.end();
 
@@ -311,17 +318,17 @@ fn main() -> Result<(), BvError> {
 
     wind.handle(move |_, ev| match ev {
         enums::Event::MouseWheel => {
-            let event = &app::event_coords();
+            let mouse_position = offscreen_event_coords();
             let mut shared_data_bm = shared_data_c.borrow_mut();
             let event_dy = match app::event_dy() {
                 app::MouseWheel::Up => 3,
                 app::MouseWheel::Down => -3,
                 _ => 0,
             };
-            let reverse_middle = shared_data_bm
-                .visualizer
-                .affine
-                .reverse_transform(event.0 as f64, event.1 as f64);
+            let reverse_middle = shared_data_bm.visualizer.affine.reverse_transform(
+                mouse_position.0 as f64,
+                mouse_position.1 as f64,
+            );
             if reverse_middle.is_err() {
                 println!("{:?}", reverse_middle.err().unwrap());
                 return false;
@@ -337,40 +344,42 @@ fn main() -> Result<(), BvError> {
                 .affine
                 .transform(reverse_middle[0] as f64, reverse_middle[1] as f64);
             // When zooming we want the center of screen remain at the same relative position.
-            shared_data_bm.visualizer.affine.to_offset[0] += (event.0 as f64) - new_middle[0];
-            shared_data_bm.visualizer.affine.to_offset[1] += (event.1 as f64) - new_middle[1];
+            shared_data_bm.visualizer.affine.to_offset[0] += mouse_position.0 as f64 - new_middle[0];
+            shared_data_bm.visualizer.affine.to_offset[1] += mouse_position.1 as f64 - new_middle[1];
 
             //println!("mouse wheel at dy:{:?} scale:{:?}", event_dy, shared_data_bm.visualizer.affine.scale);
             app::redraw();
             true
         }
         enums::Event::Drag => {
-            let event = &app::event_coords();
+            let mouse_position = offscreen_event_coords();
+
             if mouse_drag.is_none() {
-                mouse_drag = Some(*event);
+                mouse_drag = Some(mouse_position);
             } else {
                 let md = mouse_drag.unwrap();
                 let mut shared_data_bm = shared_data_c.borrow_mut();
-                shared_data_bm.visualizer.affine.to_offset[0] += (event.0 - md.0) as f64;
-                shared_data_bm.visualizer.affine.to_offset[1] += (event.1 - md.1) as f64;
-                mouse_drag = Some(*event);
+                shared_data_bm.visualizer.affine.to_offset[0] +=
+                    (mouse_position.0 - md.0) as f64;
+                shared_data_bm.visualizer.affine.to_offset[1] +=
+                    (mouse_position.1 - md.1) as f64;
+                mouse_drag = Some(mouse_position);
                 app::redraw();
             }
             true
         }
         enums::Event::Released => {
-            let event = &app::event_coords();
-            //let  ke = &app::event_key();
+            let mouse_position = offscreen_event_coords();
             if mouse_drag.is_some() {
                 mouse_drag = None;
             } else if app::event_key_down(enums::Key::from_char('L'))
                 || app::event_key_down(enums::Key::from_char('S'))
             {
                 let mut shared_data_bm = shared_data_c.borrow_mut();
-                let point = shared_data_bm
-                    .visualizer
-                    .affine
-                    .reverse_transform(app::event_x() as f64, app::event_y() as f64);
+                let point = shared_data_bm.visualizer.affine.reverse_transform(
+                    mouse_position.0 as f64,
+                    mouse_position.1 as f64,
+                );
                 if point.is_err() {
                     println!("{:?}", point.err().unwrap());
                     return false;
@@ -399,13 +408,13 @@ fn main() -> Result<(), BvError> {
                 }
             } else {
                 if app::event_x() < FW {
-                    println!("mouse at {:?}", event);
                     let mut shared_data_bm = shared_data_c.borrow_mut();
                     {
-                        let point = shared_data_bm
-                            .visualizer
-                            .affine
-                            .reverse_transform(app::event_x() as f64, app::event_y() as f64);
+                        let mouse_position = offscreen_event_coords();
+                        let point = shared_data_bm.visualizer.affine.reverse_transform(
+                            mouse_position.0 as f64,
+                            mouse_position.1 as f64,
+                        );
                         if point.is_err() {
                             println!("{:?}", point.err().unwrap());
                             return false;
@@ -439,18 +448,19 @@ fn main() -> Result<(), BvError> {
         }
         enums::Event::Move => {
             // only update coordinate when hovering over the graphics
-            if app::event_x() < FW {
+            let mouse_position = offscreen_event_coords();
+            if mouse_position.0 < FW {
                 let shared_data_b = shared_data_c.borrow();
-                let point = shared_data_b
-                    .visualizer
-                    .affine
-                    .reverse_transform(app::event_x() as f64, app::event_y() as f64);
+                let point = shared_data_b.visualizer.affine.reverse_transform(
+                    mouse_position.0 as f64,
+                    mouse_position.1 as f64,
+                );
                 if let Ok(point) = point {
                     x_label.set_label(&point[0].to_string());
                     y_label.set_label(&point[1].to_string());
                 } else {
-                    x_label.set_label("x=?");
-                    y_label.set_label("y=?");
+                    x_label.set_label("?");
+                    y_label.set_label("?");
                 }
             }
             false
@@ -1001,13 +1011,7 @@ where
         } else {
             self.retrieve_segment(cell_id)
         };
-        VU::VoronoiVisualUtils::<I, F>::discretize(
-            &point,
-            segment,
-            max_dist,
-            affine,
-            sampled_edge,
-        );
+        VU::VoronoiVisualUtils::<I, F>::discretize(&point, segment, max_dist, affine, sampled_edge);
     }
 
     /// Retrieves a point from the voronoi input in the order it was presented to
@@ -1474,31 +1478,31 @@ where
 
     #[inline(always)]
     pub fn i1_to_f1(value: I) -> F {
-        TypeConverter2::<I, F>::i1_to_f1(value)
+        TypeConverter2::<I, F>::i_to_f(value)
     }
     #[inline(always)]
     pub fn f1_to_i32(value: F) -> i32 {
-        TypeConverter2::<I, F>::f1_to_i32(value)
+        TypeConverter2::<I, F>::f_to_i32(value)
     }
 
     #[inline(always)]
     pub fn f64_to_f1(value: f64) -> F {
-        TypeConverter2::<I, F>::f64_to_f1(value)
+        TypeConverter2::<I, F>::f64_to_f(value)
     }
 
     #[inline(always)]
     pub fn f1_to_i1(value: F) -> I {
-        TypeConverter2::<I, F>::f1_to_i1(value)
+        TypeConverter2::<I, F>::f_to_i(value)
     }
 
     #[inline(always)]
     pub fn i1_to_f64(value: I) -> f64 {
-        TypeConverter1::<I>::i1_to_f64(value)
+        TypeConverter1::<I>::i_to_f64(value)
     }
 
     #[inline(always)]
     pub fn try_f1_to_i32(value: F) -> Result<i32, BvError> {
-        TypeConverter2::<I, F>::try_f1_to_i32(value)
+        TypeConverter2::<I, F>::try_f_to_i32(value)
     }
 
     #[inline(always)]

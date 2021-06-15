@@ -53,8 +53,8 @@ where
             if let Ok(x1) = line[0].parse::<i32>() {
                 if let Ok(y1) = line[1].parse::<i32>() {
                     return Some(InputData::Point(super::Point::<I> {
-                        x: super::TypeConverter1::<I>::i32_to_i1(x1),
-                        y: super::TypeConverter1::<I>::i32_to_i1(y1),
+                        x: super::TypeConverter1::<I>::i32_to_i(x1),
+                        y: super::TypeConverter1::<I>::i32_to_i(y1),
                     }));
                 } else {
                     println!("failed to parse {}, ignoring line", line[1]);
@@ -69,10 +69,10 @@ where
                     if let Ok(x2) = line[2].parse::<i32>() {
                         if let Ok(y2) = line[3].parse::<i32>() {
                             return Some(InputData::Line(super::Line::<I>::from([
-                                super::TypeConverter1::<I>::i32_to_i1(x1),
-                                super::TypeConverter1::<I>::i32_to_i1(y1),
-                                super::TypeConverter1::<I>::i32_to_i1(x2),
-                                super::TypeConverter1::<I>::i32_to_i1(y2),
+                                super::TypeConverter1::<I>::i32_to_i(x1),
+                                super::TypeConverter1::<I>::i32_to_i(y1),
+                                super::TypeConverter1::<I>::i32_to_i(x2),
+                                super::TypeConverter1::<I>::i32_to_i(y2),
                             ])));
                         } else {
                             println!("failed to parse {}, ignoring line", line[3]);
