@@ -7,7 +7,7 @@
 
 // See http://www.boost.org for updates, documentation, and revision history.
 
-// Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
+// Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 use super::beach_line as VB;
 use super::predicate as VP;
@@ -32,7 +32,7 @@ impl<I> EndPointPair<I>
 where
     I: InputType + Neg<Output = I>,
 {
-    pub(crate) fn new_2(first: Point<I>, second: VB::BeachLineIndex) -> Self {
+    pub(crate) fn new(first: Point<I>, second: VB::BeachLineIndex) -> Self {
         Self {
             site: first,
             beachline_index: second,

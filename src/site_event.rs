@@ -7,7 +7,7 @@
 
 // See http://www.boost.org for updates, documentation, and revision history.
 
-// Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
+// Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 mod tests;
 
@@ -68,37 +68,30 @@ where
     F: OutputType + Neg<Output = F>,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut rv = String::new();
-
         if self.is_point() {
-            rv.push_str(
-                format!(
-                    "#{:?}({},{}),ii:{:?},f:{:?}",
-                    self.sorted_index_,
-                    self.point0_.x,
-                    self.point0_.y,
-                    self.initial_index_,
-                    self.flags_
-                )
-                .as_str(),
-            );
+            write!(
+                f,
+                "#{:?}({},{}),ii:{:?},f:{:?}",
+                self.sorted_index_,
+                self.point0_.x,
+                self.point0_.y,
+                self.initial_index_,
+                self.flags_
+            )
         } else {
-            rv.push_str(
-                format!(
-                    "#{:?}({},{}){}({},{}),ii:{:?},f:{:?}",
-                    self.sorted_index_,
-                    self.point0_.x,
-                    self.point0_.y,
-                    if self.is_inverse() { "¿" } else { "-" },
-                    self.point1_.x,
-                    self.point1_.y,
-                    self.initial_index_,
-                    self.flags_
-                )
-                .as_str(),
-            );
+            write!(
+                f,
+                "#{:?}({},{}){}({},{}),ii:{:?},f:{:?}",
+                self.sorted_index_,
+                self.point0_.x,
+                self.point0_.y,
+                if self.is_inverse() { "¿" } else { "-" },
+                self.point1_.x,
+                self.point1_.y,
+                self.initial_index_,
+                self.flags_
+            )
         }
-        write!(f, "{}", rv)
     }
 }
 

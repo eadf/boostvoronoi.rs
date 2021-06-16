@@ -8,8 +8,8 @@
 ![Rusty voronoi](img/title.png)
 
 
-[Boost 1.75.0 polygon::voronoi](https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_main.htm) ported to 100% rust (nothing voronoi related changed in 1.76)
-This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) works on line segments as well as points, making it useful for calculating [centerlines (like the image above, made using this library)](https://github.com/eadf/toxicblend.rs).
+[Boost 1.76.0 polygon::voronoi](https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_main.htm) ported to 100% rust 
+This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) works for line segments as well as points, making it useful for calculating [centerlines (like the image above, made using this library)](https://github.com/eadf/toxicblend.rs).
 
 Code still in development, not ready for any purpose.
 

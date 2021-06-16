@@ -7,7 +7,7 @@
 
 // See http://www.boost.org for updates, documentation, and revision history.
 
-// Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
+// Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 #![deny(non_camel_case_types)]
 #![deny(unused_parens)]
@@ -87,10 +87,7 @@ where
     T: InputType + Display + Hash,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut rv = String::new();
-
-        rv.push_str(format!("({:.12},{:.12})", self.x, self.y,).as_str());
-        write!(f, "{}", rv)
+        write!(f, "({:.12},{:.12})", self.x, self.y,)
     }
 }
 

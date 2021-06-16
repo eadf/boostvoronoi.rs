@@ -7,7 +7,7 @@
 
 // See http://www.boost.org for updates, documentation, and revision history.
 
-// Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
+// Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 //! Contains the builder code.
 
@@ -342,9 +342,9 @@ where
         }
     }
 
-    fn deactivate_circle_event(&mut self, value: &Option<VB::BeachLineNodeKey<I, F>>) {
+    fn deactivate_circle_event(&mut self, value: &Option<VB::BeachLineNodeKey<I, F>>) -> Result<(),BvError> {
         if let Some(value) = value {
-            let node_data = self.beach_line_.get_node(&value.get_index()).1;
+            let node_data = self.beach_line_.get_node(&value.get_index())?.1;
             let node_cell = node_data.get();
             if let Some(node_cell) = node_cell {
                 let cevent: Option<VC::CircleEventIndex> = node_cell.get_circle_event_id();
@@ -356,6 +356,7 @@ where
                 //node_data.set(Some(node_cell));
             }
         }
+        Ok(())
     }
 
     pub(crate) fn process_site_event(
@@ -480,7 +481,7 @@ where
                 //tln!("insert_new_arc right_it.is_none()");
                 let right_it_idx = self.insert_new_arc(site_arc, site_arc, site_event, output);
                 {
-                    let right_it_complete = self.beach_line_.get_node(&right_it_idx);
+                    let right_it_complete = self.beach_line_.get_node(&right_it_idx)?;
                     right_it = Some(right_it_complete.0);
                 }
 
@@ -505,7 +506,7 @@ where
                     let new_key = self.insert_new_arc(
                         *site_arc, *site_arc, site_event, /*right_it,*/ output,
                     );
-                    Some(self.beach_line_.get_node(&new_key).0)
+                    Some(self.beach_line_.get_node(&new_key)?.0)
                 };
                 // tln!("left_it=insert_new_arc :{:?}", left_it.unwrap());
 
@@ -533,7 +534,7 @@ where
                 };
 
                 // Remove the candidate circle from the event queue.
-                self.deactivate_circle_event(&right_it);
+                self.deactivate_circle_event(&right_it)?;
                 //tln!("insert_new_arc else. left_it:{:?}", left_it.unwrap());
 
                 // emulate --left_site
@@ -606,7 +607,7 @@ where
                 line!()
             )));
         }
-        let it_first = &self.beach_line_.get_node(&e.1.unwrap());
+        let it_first = &self.beach_line_.get_node(&e.1.unwrap())?;
         let it_last = it_first;
         #[cfg(feature = "console_debug")]
         {
@@ -626,7 +627,7 @@ where
 
         // Get the half-edge corresponding to the first bisector - (A, B).
         let it_first = self.beach_line_.get_left_neighbour(it_first.0).unwrap();
-        let it_first = &self.beach_line_.get_node(&it_first.1);
+        let it_first = &self.beach_line_.get_node(&it_first.1)?;
 
         let bisector1 = it_first.1.get();
         if bisector1.is_none() {
@@ -718,7 +719,7 @@ where
             //--it_first;
             it_first = {
                 if let Some(id) = self.beach_line_.get_left_neighbour(it_first.0) {
-                    self.beach_line_.get_node(&id.1)
+                    self.beach_line_.get_node(&id.1)?
                 } else {
                     return Err(BvError::InternalError(
                         "beach_line_::get_left_neighbour could not find anything".to_string(),
@@ -738,7 +739,7 @@ where
             .get_right_neighbour_by_id(it_last.0.get_index());
 
         if let Some(it_last) = it_last {
-            let it_last_node = self.beach_line_.get_node(&it_last.get_index()).1;
+            let it_last_node = self.beach_line_.get_node(&it_last.get_index())?.1;
             self.circle_events_
                 .deactivate(it_last_node.get().and_then(|x| x.get_circle_event_id()));
 
@@ -801,7 +802,7 @@ where
             #[cfg(not(feature = "console_debug"))]
             let new_node = self.beach_line_.insert(new_node, None);
             // Update the data structure that holds temporary bisectors.
-            self.end_points_.push(VEP::EndPointPair::new_2(
+            self.end_points_.push(VEP::EndPointPair::new(
                 *site_event.point1(),
                 new_node.get_index(),
             ));
@@ -845,7 +846,7 @@ where
 
             let e = self.circle_events_.associate_and_push(c_event);
             {
-                let b = self.beach_line_.get_node(&bisector_node);
+                let b = self.beach_line_.get_node(&bisector_node)?;
                 if let Some(mut bd) = b.1.get() {
                     let _ = bd.set_circle_event_id(Some(e.0.get().get_index().unwrap())); // make sure it is_some()
                     b.1.set(Some(bd));

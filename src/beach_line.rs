@@ -7,7 +7,7 @@
 
 // See http://www.boost.org for updates, documentation, and revision history.
 
-// Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
+// Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 //! The data structures needed for the beachline.
 mod tests;
@@ -184,14 +184,21 @@ where
     }
 
     /// same as right_it == beach_line_.begin() in c++
-    pub(crate) fn is_at_beginning(&self, right_it: &Option<BeachLineNodeKey<I, F>>) -> Result<bool,BvError> {
+    pub(crate) fn is_at_beginning(
+        &self,
+        right_it: &Option<BeachLineNodeKey<I, F>>,
+    ) -> Result<bool, BvError> {
         // when right_it is None the 'iterator' has passed end
         if right_it.is_none() {
             return Ok(false);
         }
         let peek = self.peek_first();
         if peek.is_none() && right_it.is_none() {
-            return Err(BvError::ValueError(format!("Booth peek and right_it was None. This should not happen. {}:{}", file!(), line!())))
+            return Err(BvError::InternalError(format!(
+                "Booth peek and right_it was None. This should not happen. {}:{}",
+                file!(),
+                line!()
+            )));
         }
         if peek.is_none() {
             return Ok(false);
@@ -205,12 +212,16 @@ where
     pub(crate) fn get_node(
         &self,
         beachline_index: &BeachLineIndex,
-    ) -> (BeachLineNodeKey<I, F>, BeachLineNodeDataType) {
+    ) -> Result<(BeachLineNodeKey<I, F>, BeachLineNodeDataType),BvError> {
         if !self._beach_line_vec.contains_key(beachline_index.0) {
-            panic!("tried to retrieve a beach line node that doesn't exist");
+            return Err(BvError::InternalError(format!(
+                "tried to retrieve a beach line node that doesn't exist. {}:{}",
+                file!(),
+                line!()
+            )));
         }
         let bn = &self._beach_line_vec[beachline_index.0];
-        (bn.0, bn.1.clone())
+        Ok((bn.0, Rc::clone(&bn.1)))
     }
 
     /// same as get_node() but only returns the key
@@ -233,7 +244,7 @@ where
 
             let item = self._beach_line_vec.remove(idx.0).unwrap().1;
             let _ = self._beach_line_vec.insert(idx.0, (after, item));
-            Ok(self.get_node(&idx))
+            self.get_node(&idx)
         } else {
             Err(BvError::BeachLineError(format!(
                 "Could not find the beach-line key to replace. {}:{}",

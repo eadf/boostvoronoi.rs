@@ -7,7 +7,7 @@
 
 // See http://www.boost.org for updates, documentation, and revision history.
 
-// Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
+// Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 //! A std::cell::Cell based version of the output data.
 //! See <https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_diagram.htm> for diagram description.
@@ -139,19 +139,14 @@ where
     F: OutputType + Neg<Output = F>,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut rv = String::new();
-
-        rv.push_str(
-            format!(
-                "(id:{:?} ii:{} ie:{} col:{})",
-                self.id_.0,
-                self.source_index_,
-                super::format_id(self.incident_edge_.map(|x| x.0)),
-                self.color_
-            )
-            .as_str(),
-        );
-        write!(f, "{}", rv)
+        write!(
+            f,
+            "(id:{:?} ii:{} ie:{} col:{})",
+            self.id_.0,
+            self.source_index_,
+            super::format_id(self.incident_edge_.map(|x| x.0)),
+            self.color_
+        )
     }
 }
 
@@ -471,20 +466,15 @@ where
     F: OutputType + Neg<Output = F>,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut rv = String::new();
-
-        rv.push_str(
-            format!(
-                "(id:{} x:{} y:{} ie:{} co:{})",
-                self.id_.0,
-                self.x_,
-                self.y_,
-                super::format_id(self.incident_edge_.map(|x| x.0)),
-                self.color_
-            )
-            .as_str(),
-        );
-        write!(f, "{}", rv)
+        write!(
+            f,
+            "(id:{} x:{} y:{} ie:{} co:{})",
+            self.id_.0,
+            self.x_,
+            self.y_,
+            super::format_id(self.incident_edge_.map(|x| x.0)),
+            self.color_
+        )
     }
 }
 
@@ -878,7 +868,10 @@ where
     #[inline]
     pub fn edge_as_line(&self, edge_id: EdgeIndex) -> Result<[F; 4], BvError> {
         self._edge_as_line(Some(edge_id)).ok_or_else(|| {
-            BvError::IdError(format!("Edge id:{} (probably) does not exists, or some vertex is missing", edge_id.0))
+            BvError::IdError(format!(
+                "Edge id:{} (probably) does not exists, or some vertex is missing",
+                edge_id.0
+            ))
         })
     }
 
@@ -1119,7 +1112,7 @@ where
     }
 
     /// Set the color of the vertex. This affects only the public bits, not the internal
-    pub (crate) fn _vertex_set_color(&self, vertex_id: Option<VertexIndex>, color: ColorType) {
+    pub(crate) fn _vertex_set_color(&self, vertex_id: Option<VertexIndex>, color: ColorType) {
         if let Some(vertex_cell) = self._vertex_get(vertex_id) {
             let mut vertex = vertex_cell.get();
             let _ = vertex.set_color(color);
@@ -1128,7 +1121,11 @@ where
     }
 
     /// Set the color of the vertex. This affects only the public bits, not the internal
-    pub fn vertex_set_color(&self, vertex_id: VertexIndex, color: ColorType) -> Result<(),BvError>{
+    pub fn vertex_set_color(
+        &self,
+        vertex_id: VertexIndex,
+        color: ColorType,
+    ) -> Result<(), BvError> {
         self._vertex_set_color(Some(vertex_id), color);
         Ok(())
     }
@@ -1836,9 +1833,9 @@ where
     /// prints cells and vertices to the console
     /// edges will be printed if the 'edge_filter' returns true for that edge id.
     #[cfg(feature = "console_debug")]
-    pub fn debug_print_all<F>(&self, edge_filter: F)
+    pub fn debug_print_all<FN>(&self, edge_filter: FN)
     where
-        F: Fn(usize) -> bool,
+        FN: Fn(usize) -> bool,
     {
         tln!();
         tln!("output:");

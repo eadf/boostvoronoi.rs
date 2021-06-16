@@ -7,7 +7,7 @@
 
 // See http://www.boost.org for updates, documentation, and revision history.
 
-// Ported from C++ boost 1.75.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
+// Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 use super::beach_line as VB;
 use super::extended_exp_fpt as EX;
@@ -70,16 +70,11 @@ pub struct CircleEvent {
 
 impl fmt::Debug for CircleEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut rv = String::new();
-
-        rv.push_str(
-            format!(
-                "(x:{:.12},y:{:.12},lx:{:.12})",
-                self.center_x_, self.center_y_, self.lower_x_,
-            )
-            .as_str(),
-        );
-        write!(f, "{}", rv)
+        write!(
+            f,
+            "(x:{:.12},y:{:.12},lx:{:.12})",
+            self.center_x_, self.center_y_, self.lower_x_,
+        )
     }
 }
 
@@ -137,10 +132,7 @@ pub struct CircleEventC(pub Cell<CircleEvent>, pub(crate) Option<VB::BeachLineIn
 
 impl fmt::Debug for CircleEventC {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut rv = String::new();
-        let cell = self.0.get();
-        rv.push_str(format!("CE{:?}", cell).as_str());
-        write!(f, "{}", rv)
+        write!(f, "CE{:?}", self.0.get())
     }
 }
 
@@ -473,13 +465,13 @@ impl CircleEventQueue {
         }
         #[cfg(feature = "console_debug")]
         if let Some(circle_event_id) = circle_event_id {
-            if !self.inactive_circle_ids_.bit(circle_event_id) {
-                if self.c_list_.contains_key(circle_event_id) {
-                    println!("deactivate {:?}", self.c_list_[circle_event_id]);
+            if !self.inactive_circle_ids_.bit(circle_event_id.0) {
+                if self.c_list_.contains_key(circle_event_id.0) {
+                    println!("deactivate {:?}", self.c_list_[circle_event_id.0]);
                 } else {
                     println!("circle {} not present", circle_event_id);
                 }
-                let _ = self.inactive_circle_ids_.set_bit(circle_event_id, true);
+                let _ = self.inactive_circle_ids_.set_bit(circle_event_id.0, true);
             }
         }
     }
@@ -497,7 +489,7 @@ impl CircleEventQueue {
 
     #[cfg(feature = "console_debug")]
     pub(crate) fn dbg_ce(&self, cei: CircleEventIndex) {
-        if let Some(ce) = self.c_list_.get(cei) {
+        if let Some(ce) = self.c_list_.get(cei.0) {
             print!("{:?}", ce);
         } else {
             print!("{}: not found", cei);
