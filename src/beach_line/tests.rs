@@ -73,9 +73,9 @@ fn beachline_2() {
         println!("site_event_iterator_:{:?}", site_event_iterator_);
         b.init_beach_line(&mut site_event_iterator_, &mut output);
         {
-            println!("all: size:{}", b.beach_line_.beach_line_.len());
-            assert_eq!(b.beach_line_.beach_line_.len(), 2);
-            for n in b.beach_line_.beach_line_.iter() {
+            println!("all: size:{}", b.beach_line_._beach_line.len());
+            assert_eq!(b.beach_line_._beach_line.len(), 2);
+            for n in b.beach_line_._beach_line.iter() {
                 println!("{:?}", n);
             }
             let site_event = &b.site_events_[2];
@@ -108,9 +108,9 @@ fn beachline_3() {
         println!("site_event_iterator_:{:?}", site_event_iterator_);
         b.init_beach_line(&mut site_event_iterator_, &mut output);
         {
-            println!("all: size:{}", b.beach_line_.beach_line_.len());
-            assert_eq!(b.beach_line_.beach_line_.len(), 3);
-            for n in b.beach_line_.beach_line_.iter() {
+            println!("all: size:{}", b.beach_line_._beach_line.len());
+            assert_eq!(b.beach_line_._beach_line.len(), 3);
+            for n in b.beach_line_._beach_line.iter() {
                 println!("{:?}", n);
             }
             let site_event = &b.site_events_[2];

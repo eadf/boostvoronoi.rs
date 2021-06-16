@@ -102,7 +102,7 @@ struct SharedData {
 #[inline]
 fn offscreen_event_coords() -> (i32, i32) {
     let pos = app::event_coords();
-    (pos.0-COORD_X_OFFSET,pos.1-COORD_Y_OFFSET)
+    (pos.0 - COORD_X_OFFSET, pos.1 - COORD_Y_OFFSET)
 }
 
 ///! This example intends to visualize the half edge output of the voronoi algorithm.
@@ -325,10 +325,10 @@ fn main() -> Result<(), BvError> {
                 app::MouseWheel::Down => -3,
                 _ => 0,
             };
-            let reverse_middle = shared_data_bm.visualizer.affine.reverse_transform(
-                mouse_position.0 as f64,
-                mouse_position.1 as f64,
-            );
+            let reverse_middle = shared_data_bm
+                .visualizer
+                .affine
+                .reverse_transform(mouse_position.0 as f64, mouse_position.1 as f64);
             if reverse_middle.is_err() {
                 println!("{:?}", reverse_middle.err().unwrap());
                 return false;
@@ -344,8 +344,10 @@ fn main() -> Result<(), BvError> {
                 .affine
                 .transform(reverse_middle[0] as f64, reverse_middle[1] as f64);
             // When zooming we want the center of screen remain at the same relative position.
-            shared_data_bm.visualizer.affine.to_offset[0] += mouse_position.0 as f64 - new_middle[0];
-            shared_data_bm.visualizer.affine.to_offset[1] += mouse_position.1 as f64 - new_middle[1];
+            shared_data_bm.visualizer.affine.to_offset[0] +=
+                mouse_position.0 as f64 - new_middle[0];
+            shared_data_bm.visualizer.affine.to_offset[1] +=
+                mouse_position.1 as f64 - new_middle[1];
 
             //println!("mouse wheel at dy:{:?} scale:{:?}", event_dy, shared_data_bm.visualizer.affine.scale);
             app::redraw();
@@ -359,10 +361,8 @@ fn main() -> Result<(), BvError> {
             } else {
                 let md = mouse_drag.unwrap();
                 let mut shared_data_bm = shared_data_c.borrow_mut();
-                shared_data_bm.visualizer.affine.to_offset[0] +=
-                    (mouse_position.0 - md.0) as f64;
-                shared_data_bm.visualizer.affine.to_offset[1] +=
-                    (mouse_position.1 - md.1) as f64;
+                shared_data_bm.visualizer.affine.to_offset[0] += (mouse_position.0 - md.0) as f64;
+                shared_data_bm.visualizer.affine.to_offset[1] += (mouse_position.1 - md.1) as f64;
                 mouse_drag = Some(mouse_position);
                 app::redraw();
             }
@@ -376,10 +376,10 @@ fn main() -> Result<(), BvError> {
                 || app::event_key_down(enums::Key::from_char('S'))
             {
                 let mut shared_data_bm = shared_data_c.borrow_mut();
-                let point = shared_data_bm.visualizer.affine.reverse_transform(
-                    mouse_position.0 as f64,
-                    mouse_position.1 as f64,
-                );
+                let point = shared_data_bm
+                    .visualizer
+                    .affine
+                    .reverse_transform(mouse_position.0 as f64, mouse_position.1 as f64);
                 if point.is_err() {
                     println!("{:?}", point.err().unwrap());
                     return false;
@@ -411,10 +411,10 @@ fn main() -> Result<(), BvError> {
                     let mut shared_data_bm = shared_data_c.borrow_mut();
                     {
                         let mouse_position = offscreen_event_coords();
-                        let point = shared_data_bm.visualizer.affine.reverse_transform(
-                            mouse_position.0 as f64,
-                            mouse_position.1 as f64,
-                        );
+                        let point = shared_data_bm
+                            .visualizer
+                            .affine
+                            .reverse_transform(mouse_position.0 as f64, mouse_position.1 as f64);
                         if point.is_err() {
                             println!("{:?}", point.err().unwrap());
                             return false;
@@ -451,10 +451,10 @@ fn main() -> Result<(), BvError> {
             let mouse_position = offscreen_event_coords();
             if mouse_position.0 < FW {
                 let shared_data_b = shared_data_c.borrow();
-                let point = shared_data_b.visualizer.affine.reverse_transform(
-                    mouse_position.0 as f64,
-                    mouse_position.1 as f64,
-                );
+                let point = shared_data_b
+                    .visualizer
+                    .affine
+                    .reverse_transform(mouse_position.0 as f64, mouse_position.1 as f64);
                 if let Ok(point) = point {
                     x_label.set_label(&point[0].to_string());
                     y_label.set_label(&point[1].to_string());
@@ -573,40 +573,10 @@ where
 
         // Color infinite edges
         for it in self.diagram.edges().iter() {
-            let edge_id = it.get().get_id();
+            let edge_id = it.get().id();
             if !self.diagram.edge_is_finite(edge_id)? {
                 self.diagram
-                    .edge_or_color(edge_id, ColorFlag::INFINITE.bits);
-            }
-        }
-
-        // Color edges and vertices based upon how their cell is created, by a segment or a point
-        for it in self.diagram.cells().iter() {
-            let is_segment = it.get().contains_segment();
-            let edge_id_o = it.get().get_incident_edge();
-            if let Some(edge_id) = edge_id_o {
-                let flag = if is_segment {
-                    ColorFlag::CELL_SEGMENT.bits
-                } else {
-                    ColorFlag::CELL_POINT.bits
-                };
-                self.diagram.edge_or_color(edge_id, flag);
-                self.diagram
-                    .vertex_or_color(self.diagram.edge_get_vertex0(edge_id), flag);
-                self.diagram
-                    .vertex_or_color(self.diagram.edge_get_vertex1(edge_id), flag);
-
-                let mut another_edge = self.diagram.get_edge(edge_id).get().next();
-                while another_edge.is_some() && another_edge != edge_id_o {
-                    let another_edge_uw = another_edge.unwrap();
-                    self.diagram.edge_or_color(another_edge_uw, flag);
-                    self.diagram
-                        .vertex_or_color(self.diagram.edge_get_vertex0(another_edge_uw), flag);
-                    self.diagram
-                        .vertex_or_color(self.diagram.edge_get_vertex1(another_edge_uw), flag);
-
-                    another_edge = self.diagram.get_edge(another_edge_uw).get().next();
-                }
+                    .edge_or_color(edge_id, ColorFlag::INFINITE.bits)?;
             }
         }
 
@@ -761,7 +731,11 @@ where
     }
 
     /// Draw voronoi edges.
-    fn draw_edges(&self, config: &SharedData, affine: &VU::SimpleAffine<I, F>) ->Result<(),BvError> {
+    fn draw_edges(
+        &self,
+        config: &SharedData,
+        affine: &VU::SimpleAffine<I, F>,
+    ) -> Result<(), BvError> {
         let draw_external = config.draw_flag.contains(DrawFilterFlag::EXTERNAL);
         let draw_primary = config.draw_flag.contains(DrawFilterFlag::PRIMARY);
         let draw_secondary = config.draw_flag.contains(DrawFilterFlag::SECONDARY);
@@ -783,9 +757,8 @@ where
             }
             // no point in setting current edge as drawn, the edge id will not repeat
             // already_drawn.set_bit(edge_id.0, true);
-            if let Some(twin) = self.diagram.edge_get_twin(Some(edge_id)) {
-                already_drawn.set_bit(twin.0, true);
-            }
+            let twin = self.diagram.edge_get_twin(edge_id)?;
+            already_drawn.set_bit(twin.0, true);
 
             //#[allow(unused_assignments)]
             if (!draw_primary) && edge.is_primary() {
@@ -832,16 +805,17 @@ where
 
             // the coordinates in samples must be 'screen' coordinates, i.e. affine transformed
             let mut samples = Vec::<[F; 2]>::new();
-            if !self.diagram.edge_is_finite(edge_id)? {
+            if self.diagram.edge_is_infinite(edge_id)? {
                 let a = self.clip_infinite_edge(&affine, edge_id, &mut samples);
                 if let Err(err) = a {
                     println!("Ignoring error : {:?}", err);
                 }
             } else {
-                let vertex0 = self.diagram.vertex_get(edge.vertex0()).unwrap().get();
+                // edge is finite, so vertex0 & vertex1 must exists -> unwrap is safe
+                let vertex0 = self.diagram.vertex_get(edge.vertex0().unwrap())?.get();
 
                 samples.push(affine.transform(vertex0.x(), vertex0.y()));
-                let vertex1 = self.diagram.edge_get_vertex1(edge_id);
+                let vertex1 = self.diagram.edge_get_vertex1(edge_id)?.unwrap();
                 let vertex1 = self.diagram.vertex_get(vertex1).unwrap().get();
 
                 samples.push(affine.transform(vertex1.x(), vertex1.y()));
@@ -898,16 +872,15 @@ where
         edge_id: VD::EdgeIndex,
         clipped_edge: &mut Vec<[F; 2]>,
     ) -> Result<(), BvError> {
-        let edge = self.diagram.get_edge(edge_id);
+        let edge = self.diagram.get_edge(edge_id)?;
         //const cell_type& cell1 = *edge.cell();
-        let cell1_id = self.diagram.edge_get_cell(Some(edge_id)).unwrap();
+        let cell1_id = self.diagram.edge_get_cell(edge_id)?;
         let cell1 = self.diagram.get_cell(cell1_id)?.get();
         //const cell_type& cell2 = *edge.twin()->cell();
-        let cell2_id = self
-            .diagram
-            .edge_get_twin(Some(edge_id))
-            .and_then(|e| self.diagram.edge_get_cell(Some(e)))
-            .unwrap();
+        let cell2_id = {
+            let twin = self.diagram.edge_get_twin(edge_id)?;
+            self.diagram.edge_get_cell(twin)?
+        };
         let cell2 = self.diagram.get_cell(cell2_id)?.get();
 
         let mut origin = [F::default(), F::default()];
@@ -958,30 +931,29 @@ where
         let side = side.abs();
         let coefficient = side / Self::max_f1(direction[0].abs(), direction[1].abs());
 
-        let vertex0 = edge.get().vertex0();
-        if vertex0.is_none() {
-            clipped_edge.push([
-                affine.transform_x(origin[0] - direction[0] * coefficient),
-                affine.transform_y(origin[1] - direction[1] * coefficient),
-            ]);
-        } else {
-            let vertex0 = self.diagram.vertex_get(vertex0).unwrap().get();
+        if let Some(vertex0) = edge.get().vertex0() {
+            let vertex0 = self.diagram.vertex_get(vertex0)?.get();
             clipped_edge.push([
                 affine.transform_x(vertex0.x()),
                 affine.transform_y(vertex0.y()),
             ]);
-        }
-        let vertex1 = self.diagram.edge_get_vertex1(edge_id);
-        if vertex1.is_none() {
-            clipped_edge.push([
-                affine.transform_x(origin[0] + direction[0] * coefficient),
-                affine.transform_y(origin[1] + direction[1] * coefficient),
-            ]);
         } else {
-            let vertex1 = self.diagram.vertex_get(vertex1).unwrap().get();
+            clipped_edge.push([
+                affine.transform_x(origin[0] - direction[0] * coefficient),
+                affine.transform_y(origin[1] - direction[1] * coefficient),
+            ]);
+        }
+
+        if let Some(vertex1) = self.diagram.edge_get_vertex1(edge_id)? {
+            let vertex1 = self.diagram.vertex_get(vertex1)?.get();
             clipped_edge.push([
                 affine.transform_x(vertex1.x()),
                 affine.transform_y(vertex1.y()),
+            ]);
+        } else {
+            clipped_edge.push([
+                affine.transform_x(origin[0] + direction[0] * coefficient),
+                affine.transform_y(origin[1] + direction[1] * coefficient),
             ]);
         }
         Ok(())
@@ -994,14 +966,14 @@ where
         affine: &VU::SimpleAffine<I, F>,
         edge_id: VD::EdgeIndex,
         sampled_edge: &mut Vec<[F; 2]>,
-    ) -> Result<(),BvError>{
+    ) -> Result<(), BvError> {
         let max_dist = Self::f64_to_f1(1E-3)
             * (self.screen_aabb.get_high().unwrap()[0] - self.screen_aabb.get_low().unwrap()[0]);
 
-        let cell_id = self.diagram.edge_get_cell(Some(edge_id)).unwrap();
+        let cell_id = self.diagram.edge_get_cell(edge_id)?;
         let cell = self.diagram.get_cell(cell_id)?.get();
-        let twin_id = self.diagram.edge_get_twin(Some(edge_id)).unwrap();
-        let twin_cell_id = self.diagram.edge_get_cell(Some(twin_id)).unwrap();
+        let twin_id = self.diagram.edge_get_twin(edge_id)?;
+        let twin_cell_id = self.diagram.edge_get_cell(twin_id)?;
 
         let point = if cell.contains_point() {
             self.retrieve_point(cell_id)?
@@ -1019,7 +991,7 @@ where
 
     /// Retrieves a point from the voronoi input in the order it was presented to
     /// the voronoi builder
-    fn retrieve_point(&self, cell_id: VD::CellIndex) -> Result<boostvoronoi::Point<I>,BvError> {
+    fn retrieve_point(&self, cell_id: VD::CellIndex) -> Result<boostvoronoi::Point<I>, BvError> {
         let (index, cat) = self.diagram.get_cell(cell_id)?.get().source_index_2();
         match cat {
             VD::SourceCategory::SinglePoint => Ok(self.point_data_[index]),
@@ -1034,7 +1006,7 @@ where
 
     /// Retrieves a segment from the voronoi input in the order it was presented to
     /// the voronoi builder
-    fn retrieve_segment(&self, cell_id: VD::CellIndex) -> Result<&boostvoronoi::Line<I>,BvError> {
+    fn retrieve_segment(&self, cell_id: VD::CellIndex) -> Result<&boostvoronoi::Line<I>, BvError> {
         let cell = self.diagram.get_cell(cell_id)?.get();
         let index = cell.source_index() - self.point_data_.len();
         Ok(&self.segment_data_[index])

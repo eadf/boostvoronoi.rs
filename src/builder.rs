@@ -172,8 +172,7 @@ where
 
     /// Run sweepline algorithm and fill output data structure.
     pub fn construct(&mut self) -> Result<VD::Diagram<I, F>, BvError> {
-        let mut output: VD::Diagram<I, F> =
-            VD::Diagram::<I, F>::new(self.site_events_.len());
+        let mut output: VD::Diagram<I, F> = VD::Diagram::<I, F>::new(self.site_events_.len());
 
         let mut site_event_iterator_: VSE::SiteEventIndexType = self.init_sites_queue();
 
@@ -380,7 +379,7 @@ where
                 .site_events_
                 .get(*site_event_iterator_)
                 .ok_or_else(|| {
-                    BvError::SomeError(format!(
+                    BvError::InternalError(format!(
                         "Could not get a site event from list. {}{}",
                         file!(),
                         line!()
@@ -494,7 +493,7 @@ where
                     site_event,
                     right_it_idx,
                 )?;
-            } else if self.beach_line_.is_at_beginning(&right_it) {
+            } else if self.beach_line_.is_at_beginning(&right_it)? {
                 let right_it_some = right_it.unwrap();
 
                 // The above arc corresponds to the first site of the first node.
@@ -601,7 +600,7 @@ where
             .is_active(circle_event.get_index().unwrap())
         {
             // todo: remove this panic when stable
-            return Err(BvError::SomeError(format!(
+            return Err(BvError::InternalError(format!(
                 "Internal error, the circle event should be active. {}:{}",
                 file!(),
                 line!()
@@ -621,7 +620,7 @@ where
         // Get the half-edge corresponding to the second bisector - (B, C).
         let bisector2 = it_first.1.get();
         if bisector2.is_none() {
-            return Err(BvError::SomeError("bisector2.is_none()".to_string()));
+            return Err(BvError::InternalError("bisector2.is_none()".to_string()));
         }
         let bisector2 = bisector2.unwrap().edge_id();
 
@@ -631,7 +630,7 @@ where
 
         let bisector1 = it_first.1.get();
         if bisector1.is_none() {
-            return Err(BvError::SomeError("bisector1.is_none()".to_string()));
+            return Err(BvError::InternalError("bisector1.is_none()".to_string()));
         }
         let bisector1 = bisector1.unwrap().edge_id();
 
@@ -721,7 +720,7 @@ where
                 if let Some(id) = self.beach_line_.get_left_neighbour(it_first.0) {
                     self.beach_line_.get_node(&id.1)
                 } else {
-                    return Err(BvError::SomeError(
+                    return Err(BvError::InternalError(
                         "beach_line_::get_left_neighbour could not find anything".to_string(),
                     ));
                 }
@@ -857,7 +856,7 @@ where
                             .debug_print_all_compat_node(&b.0, &self.circle_events_);
                     }
                 } else {
-                    return Err(BvError::SomeError(format!(
+                    return Err(BvError::InternalError(format!(
                         "activate_circle_event could not find node by key {}",
                         bisector_node.0
                     )));

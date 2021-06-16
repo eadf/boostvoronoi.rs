@@ -187,7 +187,7 @@ pub enum BvError {
     #[error("error: vertices should be added before segments")]
     VerticesGoesFirst(String),
     #[error("error: Some error")]
-    SomeError(String),
+    InternalError(String),
     #[error("Suspected self-intersecting input data")]
     SelfIntersecting(String),
     #[error("Could not cast number")]
@@ -359,9 +359,8 @@ where
 
     #[inline(always)]
     pub fn try_f_to_i(input: F) -> Result<I, BvError> {
-        num::cast::<F, I>(input).ok_or_else(|| {
-            BvError::NumberConversion(format!("Could not convert {:?} to I", input))
-        })
+        num::cast::<F, I>(input)
+            .ok_or_else(|| BvError::NumberConversion(format!("Could not convert {:?} to I", input)))
     }
 
     #[inline(always)]

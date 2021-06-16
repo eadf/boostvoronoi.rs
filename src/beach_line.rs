@@ -76,9 +76,9 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    pub(crate) beach_line_: BTreeMap<BeachLineNodeKey<I, F>, BeachLineIndex>,
-    pub(crate) next_free_: BeachLineIndex,
-    pub(crate) beach_line_vec: VecMap<(BeachLineNodeKey<I, F>, BeachLineNodeDataType)>,
+    pub(crate) _beach_line: BTreeMap<BeachLineNodeKey<I, F>, BeachLineIndex>,
+    pub(crate) _next_free: BeachLineIndex,
+    pub(crate) _beach_line_vec: VecMap<(BeachLineNodeKey<I, F>, BeachLineNodeDataType)>,
 }
 
 impl<I, F> Default for BeachLine<I, F>
@@ -88,9 +88,9 @@ where
 {
     fn default() -> Self {
         Self {
-            beach_line_: BTreeMap::default(),
-            next_free_: BeachLineIndex(0),
-            beach_line_vec: VecMap::default(),
+            _beach_line: BTreeMap::default(),
+            _next_free: BeachLineIndex(0),
+            _beach_line_vec: VecMap::default(),
         }
     }
 }
@@ -101,7 +101,7 @@ where
     F: OutputType + Neg<Output = F>,
 {
     pub(crate) fn len(&self) -> (usize, usize) {
-        (self.beach_line_.len(), self.beach_line_vec.len())
+        (self._beach_line.len(), self._beach_line_vec.len())
     }
 
     /// updates the node_index of the key, inserts it into the list and
@@ -112,12 +112,12 @@ where
         mut key: BeachLineNodeKey<I, F>,
         data: Option<BeachLineNodeData>,
     ) -> BeachLineNodeKey<I, F> {
-        key.node_index_ = self.next_free_;
+        key.node_index_ = self._next_free;
 
         let node = Rc::new(Cell::new(data));
-        let _ = self.beach_line_vec.insert(self.next_free_.0, (key, node));
-        let _ = self.beach_line_.insert(key, key.node_index_);
-        let _ = self.next_free_.increment();
+        let _ = self._beach_line_vec.insert(self._next_free.0, (key, node));
+        let _ = self._beach_line.insert(key, key.node_index_);
+        let _ = self._next_free.increment();
         key
     }
 
@@ -130,11 +130,11 @@ where
         data: Option<BeachLineNodeData>,
         _ce: &VC::CircleEventQueue,
     ) -> BeachLineNodeKey<I, F> {
-        key.node_index_ = self.next_free_;
+        key.node_index_ = self._next_free;
 
         let node = Rc::new(Cell::new(data));
-        let _ = self.beach_line_vec.insert(self.next_free_.0, (key, node));
-        let _prev_value = self.beach_line_.insert(key, key.node_index_);
+        let _ = self._beach_line_vec.insert(self._next_free.0, (key, node));
+        let _prev_value = self._beach_line.insert(key, key.node_index_);
         if _prev_value.is_some() {
             eprintln!("+++++++++++++++++++++++++++++++++++++++++");
             eprintln!(
@@ -143,7 +143,7 @@ where
             );
             eprintln!("with {:?}", _prev_value.unwrap());
         }
-        let _ = self.next_free_.increment();
+        let _ = self._next_free.increment();
         t!("inserted beach_line:");
         #[cfg(feature = "console_debug")]
         self.debug_print_all_compat_node(&key, _ce);
@@ -152,11 +152,11 @@ where
 
     /// removes a beach-line item from the beach-line priority queue
     pub(crate) fn erase(&mut self, beachline_index: BeachLineIndex) -> Result<(), BvError> {
-        if let Some(node) = self.beach_line_vec.get(beachline_index.0) {
+        if let Some(node) = self._beach_line_vec.get(beachline_index.0) {
             let node = node.0;
             //tln!("erasing beach_line:{:?}", node);
 
-            if self.beach_line_.remove(&node).is_none() {
+            if self._beach_line.remove(&node).is_none() {
                 //#[cfg(feature = "console_debug")]
                 //self.debug_print_all_dump_and_cmp(&node);
                 // We know the item should be in self.beach_line_ if it is in self.beach_line_vec
@@ -170,7 +170,7 @@ where
                 return Err(BvError::SelfIntersecting ("Tried to remove a non-existent beach_line, this error may occur if the input data is self-intersecting".to_string()));
                 //}
             }
-            let _ = self.beach_line_vec.remove(beachline_index.0);
+            let _ = self._beach_line_vec.remove(beachline_index.0);
         } else {
             return Err(BvError::SelfIntersecting ("Tried to remove a non-existent beach_line, this error may occur if the input data is self-intersecting".to_string()));
         }
@@ -178,27 +178,26 @@ where
     }
 
     pub fn clear(&mut self) {
-        self.beach_line_.clear();
-        self.next_free_ = BeachLineIndex(0);
-        self.beach_line_vec.clear();
+        self._beach_line.clear();
+        self._next_free = BeachLineIndex(0);
+        self._beach_line_vec.clear();
     }
 
     /// same as right_it == beach_line_.begin() in c++
-    pub(crate) fn is_at_beginning(&self, right_it: &Option<BeachLineNodeKey<I, F>>) -> bool {
+    pub(crate) fn is_at_beginning(&self, right_it: &Option<BeachLineNodeKey<I, F>>) -> Result<bool,BvError> {
         // when right_it is None the 'iterator' has passed end
         if right_it.is_none() {
-            return false;
+            return Ok(false);
         }
         let peek = self.peek_first();
         if peek.is_none() && right_it.is_none() {
-            panic!("wtf?");
-            //return false;
+            return Err(BvError::ValueError(format!("Booth peek and right_it was None. This should not happen. {}:{}", file!(), line!())))
         }
         if peek.is_none() {
-            return false;
+            return Ok(false);
         }
-
-        peek.unwrap().0 == right_it.unwrap()
+        // we checked is_some, unwrap is safe
+        Ok(peek.unwrap().0 == right_it.unwrap())
     }
 
     /// mapping: BeachLineNodeIndexType->(BeachLineNodeKey,BeachLineNodeDataType)
@@ -207,16 +206,16 @@ where
         &self,
         beachline_index: &BeachLineIndex,
     ) -> (BeachLineNodeKey<I, F>, BeachLineNodeDataType) {
-        if !self.beach_line_vec.contains_key(beachline_index.0) {
+        if !self._beach_line_vec.contains_key(beachline_index.0) {
             panic!("tried to retrieve a beach line node that doesn't exist");
         }
-        let bn = &self.beach_line_vec[beachline_index.0];
+        let bn = &self._beach_line_vec[beachline_index.0];
         (bn.0, bn.1.clone())
     }
 
     /// same as get_node() but only returns the key
     pub(crate) fn get_node_key(&self, beachline_index: BeachLineIndex) -> BeachLineNodeKey<I, F> {
-        self.beach_line_vec[beachline_index.0].0
+        self._beach_line_vec[beachline_index.0].0
     }
 
     /// swaps the 'before' key for the 'after' key
@@ -227,18 +226,20 @@ where
         before: BeachLineNodeKey<I, F>,
         after: BeachLineNodeKey<I, F>,
     ) -> Result<(BeachLineNodeKey<I, F>, BeachLineNodeDataType), BvError> {
-        if let Some(idx) = self.beach_line_.get(&before).copied() {
+        if let Some(idx) = self._beach_line.get(&before).copied() {
             //let idx = *idx;
-            let _ = self.beach_line_.remove(&before);
-            let _ = self.beach_line_.insert(after, idx);
+            let _ = self._beach_line.remove(&before);
+            let _ = self._beach_line.insert(after, idx);
 
-            let item = self.beach_line_vec.remove(idx.0).unwrap().1;
-            let _ = self.beach_line_vec.insert(idx.0, (after, item));
+            let item = self._beach_line_vec.remove(idx.0).unwrap().1;
+            let _ = self._beach_line_vec.insert(idx.0, (after, item));
             Ok(self.get_node(&idx))
         } else {
-            Err(BvError::BeachLineError(
-                format!("Could not find the beach-line key to replace. {}:{}", file!(), line!())
-            ))
+            Err(BvError::BeachLineError(format!(
+                "Could not find the beach-line key to replace. {}:{}",
+                file!(),
+                line!()
+            )))
         }
     }
 
@@ -248,7 +249,7 @@ where
         &self,
         position: BeachLineNodeKey<I, F>,
     ) -> Option<(BeachLineNodeKey<I, F>, BeachLineIndex)> {
-        self.beach_line_
+        self._beach_line
             .range((Unbounded, Excluded(&position)))
             .next_back()
             .map(|rv| (*rv.0, *rv.1))
@@ -261,7 +262,7 @@ where
         &self,
         position: BeachLineIndex,
     ) -> Option<(BeachLineNodeKey<I, F>, BeachLineIndex)> {
-        self.beach_line_vec
+        self._beach_line_vec
             .get(position.0)
             .and_then(|x| self.get_left_neighbour(x.0))
     }
@@ -272,7 +273,7 @@ where
         &self,
         position: BeachLineNodeKey<I, F>,
     ) -> Option<BeachLineNodeKey<I, F>> {
-        self.beach_line_
+        self._beach_line
             .range((Excluded(&position), Unbounded))
             .next()
             .map(|rv| *rv.0)
@@ -284,7 +285,7 @@ where
         &self,
         position: BeachLineIndex,
     ) -> Option<BeachLineNodeKey<I, F>> {
-        self.beach_line_vec
+        self._beach_line_vec
             .get(position.0)
             .and_then(|x| self.get_right_neighbour(x.0))
     }
@@ -293,7 +294,7 @@ where
     /// before position (i.e., either it is equivalent or goes after).
     /// Returns None if no  data is found
     pub fn lower_bound(&self, key: BeachLineNodeKey<I, F>) -> Option<BeachLineNodeKey<I, F>> {
-        self.beach_line_
+        self._beach_line
             .range((Included(&key), Unbounded))
             .next()
             .map(|rv| *rv.0)
@@ -301,7 +302,7 @@ where
 
     /// returns a copy of the last element (key,value)
     pub(crate) fn peek_last(&self) -> Option<(BeachLineNodeKey<I, F>, BeachLineIndex)> {
-        self.beach_line_
+        self._beach_line
             .range((Unbounded::<BeachLineNodeKey<I, F>>, Unbounded))
             .next_back()
             .map(|x| (*x.0, *x.1))
@@ -309,7 +310,7 @@ where
 
     /// returns a copy of the first element (key,value)
     pub(crate) fn peek_first(&self) -> Option<(BeachLineNodeKey<I, F>, BeachLineIndex)> {
-        self.beach_line_
+        self._beach_line
             .range((Unbounded::<BeachLineNodeKey<I, F>>, Unbounded))
             .next()
             .map(|x| (*x.0, *x.1))
@@ -318,7 +319,7 @@ where
     #[allow(dead_code)]
     #[cfg(feature = "console_debug")]
     pub(crate) fn debug_cmp_all(&self, key: BeachLineNodeKey<I, F>) {
-        for (i, v) in self.beach_line_.iter().enumerate() {
+        for (i, v) in self._beach_line.iter().enumerate() {
             print!("#{}:", i);
             let _rv = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(v.0, &key);
         }
@@ -328,8 +329,8 @@ where
     #[allow(dead_code)]
     pub(crate) fn debug_print_all(&self) {
         tln!();
-        tln!("beach_line.len()={}", self.beach_line_.len());
-        for (i, (node, id)) in self.beach_line_.iter().enumerate() {
+        tln!("beach_line.len()={}", self._beach_line.len());
+        for (i, (node, id)) in self._beach_line.iter().enumerate() {
             t!(
                 "beach_line{} L:{:?},R:{:?}",
                 i,
@@ -356,8 +357,8 @@ where
 
     #[cfg(feature = "console_debug")]
     pub(crate) fn debug_print_all_compat(&self, ce: &VC::CircleEventQueue) {
-        tln!("-----beach_line----{}", self.beach_line_.len());
-        for (i, (node, _id)) in self.beach_line_.iter().enumerate() {
+        tln!("-----beach_line----{}", self._beach_line.len());
+        for (i, (node, _id)) in self._beach_line.iter().enumerate() {
             t!("#{}:", i);
             self.debug_print_all_compat_node(&node, ce);
         }
@@ -365,14 +366,14 @@ where
     }
 
     pub(crate) fn debug_print_all_dump_and_cmp(&self, key: &BeachLineNodeKey<I, F>) {
-        println!("-----beach_line----{}", self.beach_line_.len());
+        println!("-----beach_line----{}", self._beach_line.len());
         println!("Looking for {:?} in the beach_line", key);
-        let found = self.beach_line_.get(key);
+        let found = self._beach_line.get(key);
         println!(
             "Found {:?} cmp1=node.partial_cmp(key).unwrap() cmp2=key.partial_cmp(node).unwrap()",
             found
         );
-        for (i, (node, _id)) in self.beach_line_.iter().enumerate() {
+        for (i, (node, _id)) in self._beach_line.iter().enumerate() {
             let cmp1 = node.partial_cmp(key);
             let cmp2 = key.partial_cmp(node);
 
@@ -390,8 +391,8 @@ where
             };
         }
         println!();
-        let mut it1 = self.beach_line_.iter().enumerate();
-        for it2_v in self.beach_line_.iter().enumerate().skip(1) {
+        let mut it1 = self._beach_line.iter().enumerate();
+        for it2_v in self._beach_line.iter().enumerate().skip(1) {
             let it1_v = it1.next().unwrap();
             print!(
                 "key(#{}).partial_cmp(key(#{})) == {:?}",
@@ -410,8 +411,8 @@ where
 
     #[cfg(feature = "console_debug")]
     pub(crate) fn debug_print_all_cmp(&self) {
-        let mut it1 = self.beach_line_.iter().enumerate();
-        for it2_v in self.beach_line_.iter().enumerate().skip(1) {
+        let mut it1 = self._beach_line.iter().enumerate();
+        for it2_v in self._beach_line.iter().enumerate().skip(1) {
             let it1_v = it1.next().unwrap();
             t!(
                 "key(#{}).partial_cmp(key(#{})) == {:?}",
@@ -464,11 +465,11 @@ where
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut rv = String::new();
 
-        for (index, node) in self.beach_line_.iter().enumerate() {
+        for (index, node) in self._beach_line.iter().enumerate() {
             rv.push_str(format!("{}: {:?}", index, node).as_str());
             rv.push('\n');
         }
-        for i in self.beach_line_vec.iter() {
+        for i in self._beach_line_vec.iter() {
             rv.push_str(format!("{:?}", i).as_str());
             rv.push('\n');
         }

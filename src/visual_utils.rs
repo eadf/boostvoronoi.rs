@@ -417,10 +417,8 @@ where
                         ];
 
                         let dest_aabb_center = [
-                            (d_low[0] + d_high[0])
-                                / super::TypeConverter2::<I, F>::i32_to_f(2_i32),
-                            (d_low[1] + d_high[1])
-                                / super::TypeConverter2::<I, F>::i32_to_f(2_i32),
+                            (d_low[0] + d_high[0]) / super::TypeConverter2::<I, F>::i32_to_f(2_i32),
+                            (d_low[1] + d_high[1]) / super::TypeConverter2::<I, F>::i32_to_f(2_i32),
                         ];
                         let dest_aabb_size = [
                             (d_high[0] - d_low[0]).max(min_dim),
@@ -442,7 +440,7 @@ where
                 }
             }
         }
-        Err(BvError::SomeError(
+        Err(BvError::InternalError(
             "could not get dimension of the AABB".to_string(),
         ))
     }

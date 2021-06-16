@@ -283,148 +283,148 @@ fn sample_primary_031() -> Result<(), BvError> {
     assert_eq!(output.edges().len(), 168);
     let v = output.vertices()[0].get();
     assert!(almost_equal(v.x(), -11.0000000, v.y(), -1.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 11);
+    assert_eq!(v.get_incident_edge()?.0, 11);
     let v = output.vertices()[1].get();
     assert!(almost_equal(v.x(), -12.5000000, v.y(), 0.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 13);
+    assert_eq!(v.get_incident_edge()?.0, 13);
     let v = output.vertices()[2].get();
     assert!(almost_equal(v.x(), -11.0000000, v.y(), 1.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 17);
+    assert_eq!(v.get_incident_edge()?.0, 17);
     let v = output.vertices()[3].get();
     assert!(almost_equal(v.x(), -10.4285714, v.y(), -1.5714286));
-    assert_eq!(v.get_incident_edge().unwrap().0, 19);
+    assert_eq!(v.get_incident_edge()?.0, 19);
     let v = output.vertices()[4].get();
     assert!(almost_equal(v.x(), -10.4285714, v.y(), 1.5714286));
-    assert_eq!(v.get_incident_edge().unwrap().0, 21);
+    assert_eq!(v.get_incident_edge()?.0, 21);
     let v = output.vertices()[5].get();
     assert!(almost_equal(v.x(), -1.5714286, v.y(), -10.4285714));
-    assert_eq!(v.get_incident_edge().unwrap().0, 47);
+    assert_eq!(v.get_incident_edge()?.0, 47);
     let v = output.vertices()[6].get();
     assert!(almost_equal(v.x(), -1.5714286, v.y(), 10.4285714));
-    assert_eq!(v.get_incident_edge().unwrap().0, 49);
+    assert_eq!(v.get_incident_edge()?.0, 49);
     let v = output.vertices()[7].get();
     assert!(almost_equal(v.x(), -1.0000000, v.y(), -11.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 51);
+    assert_eq!(v.get_incident_edge()?.0, 51);
     let v = output.vertices()[8].get();
     assert!(almost_equal(v.x(), -1.0000000, v.y(), 11.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 53);
+    assert_eq!(v.get_incident_edge()?.0, 53);
     let v = output.vertices()[9].get();
     assert!(almost_equal(v.x(), -4.9500000, v.y(), -1.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 57);
+    assert_eq!(v.get_incident_edge()?.0, 57);
     let v = output.vertices()[10].get();
     assert!(almost_equal(v.x(), -4.9500000, v.y(), 1.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 59);
+    assert_eq!(v.get_incident_edge()?.0, 59);
     let v = output.vertices()[11].get();
     assert!(almost_equal(v.x(), -4.8923311, v.y(), -1.5766889));
-    assert_eq!(v.get_incident_edge().unwrap().0, 61);
+    assert_eq!(v.get_incident_edge()?.0, 61);
     let v = output.vertices()[12].get();
     assert!(almost_equal(v.x(), -4.8923311, v.y(), 1.5766889));
-    assert_eq!(v.get_incident_edge().unwrap().0, 63);
+    assert_eq!(v.get_incident_edge()?.0, 63);
     let v = output.vertices()[13].get();
     assert!(almost_equal(v.x(), -4.0000000, v.y(), -3.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 65);
+    assert_eq!(v.get_incident_edge()?.0, 65);
     let v = output.vertices()[14].get();
     assert!(almost_equal(v.x(), -4.0000000, v.y(), 3.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 67);
+    assert_eq!(v.get_incident_edge()?.0, 67);
     let v = output.vertices()[15].get();
     assert!(almost_equal(v.x(), -3.5714286, v.y(), -3.5714286));
-    assert_eq!(v.get_incident_edge().unwrap().0, 73);
+    assert_eq!(v.get_incident_edge()?.0, 73);
     let v = output.vertices()[16].get();
     assert!(almost_equal(v.x(), -3.5714286, v.y(), 3.5714286));
-    assert_eq!(v.get_incident_edge().unwrap().0, 75);
+    assert_eq!(v.get_incident_edge()?.0, 75);
     let v = output.vertices()[17].get();
     assert!(almost_equal(v.x(), -3.0000000, v.y(), -4.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 77);
+    assert_eq!(v.get_incident_edge()?.0, 77);
     let v = output.vertices()[18].get();
     assert!(almost_equal(v.x(), -3.0000000, v.y(), 4.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 79);
+    assert_eq!(v.get_incident_edge()?.0, 79);
     let v = output.vertices()[19].get();
     assert!(almost_equal(v.x(), 1.0000000, v.y(), -11.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 83);
+    assert_eq!(v.get_incident_edge()?.0, 83);
     let v = output.vertices()[20].get();
     assert!(almost_equal(v.x(), 1.0000000, v.y(), 11.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 87);
+    assert_eq!(v.get_incident_edge()?.0, 87);
     let v = output.vertices()[21].get();
     assert!(almost_equal(v.x(), 1.5714286, v.y(), -10.4285714));
-    assert_eq!(v.get_incident_edge().unwrap().0, 93);
+    assert_eq!(v.get_incident_edge()?.0, 93);
     let v = output.vertices()[22].get();
     assert!(almost_equal(v.x(), 1.5714286, v.y(), 10.4285714));
-    assert_eq!(v.get_incident_edge().unwrap().0, 95);
+    assert_eq!(v.get_incident_edge()?.0, 95);
     let v = output.vertices()[23].get();
     assert!(almost_equal(v.x(), 0.0000000, v.y(), -12.5000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 97);
+    assert_eq!(v.get_incident_edge()?.0, 97);
     let v = output.vertices()[24].get();
     assert!(almost_equal(v.x(), 0.0000000, v.y(), 12.5000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 99);
+    assert_eq!(v.get_incident_edge()?.0, 99);
     let v = output.vertices()[25].get();
     assert!(almost_equal(v.x(), -1.5766889, v.y(), -4.8923311));
-    assert_eq!(v.get_incident_edge().unwrap().0, 101);
+    assert_eq!(v.get_incident_edge()?.0, 101);
     let v = output.vertices()[26].get();
     assert!(almost_equal(v.x(), -1.5766889, v.y(), 4.8923311));
-    assert_eq!(v.get_incident_edge().unwrap().0, 103);
+    assert_eq!(v.get_incident_edge()?.0, 103);
     let v = output.vertices()[27].get();
     assert!(almost_equal(v.x(), -1.0000000, v.y(), -4.9500000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 105);
+    assert_eq!(v.get_incident_edge()?.0, 105);
     let v = output.vertices()[28].get();
     assert!(almost_equal(v.x(), -1.0000000, v.y(), 4.9500000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 107);
+    assert_eq!(v.get_incident_edge()?.0, 107);
     let v = output.vertices()[29].get();
     assert!(almost_equal(v.x(), 1.0000000, v.y(), -4.9500000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 113);
+    assert_eq!(v.get_incident_edge()?.0, 113);
     let v = output.vertices()[30].get();
     assert!(almost_equal(v.x(), 1.0000000, v.y(), 4.9500000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 115);
+    assert_eq!(v.get_incident_edge()?.0, 115);
     let v = output.vertices()[31].get();
     assert!(almost_equal(v.x(), 1.5766889, v.y(), -4.8923311));
-    assert_eq!(v.get_incident_edge().unwrap().0, 117);
+    assert_eq!(v.get_incident_edge()?.0, 117);
     let v = output.vertices()[32].get();
     assert!(almost_equal(v.x(), 1.5766889, v.y(), 4.8923311));
-    assert_eq!(v.get_incident_edge().unwrap().0, 119);
+    assert_eq!(v.get_incident_edge()?.0, 119);
     let v = output.vertices()[33].get();
     assert!(almost_equal(v.x(), 3.0000000, v.y(), -4.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 121);
+    assert_eq!(v.get_incident_edge()?.0, 121);
     let v = output.vertices()[34].get();
     assert!(almost_equal(v.x(), 3.0000000, v.y(), 4.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 123);
+    assert_eq!(v.get_incident_edge()?.0, 123);
     let v = output.vertices()[35].get();
     assert!(almost_equal(v.x(), 3.5714286, v.y(), -3.5714286));
-    assert_eq!(v.get_incident_edge().unwrap().0, 133);
+    assert_eq!(v.get_incident_edge()?.0, 133);
     let v = output.vertices()[36].get();
     assert!(almost_equal(v.x(), 3.5714286, v.y(), 3.5714286));
-    assert_eq!(v.get_incident_edge().unwrap().0, 135);
+    assert_eq!(v.get_incident_edge()?.0, 135);
     let v = output.vertices()[37].get();
     assert!(almost_equal(v.x(), 4.0000000, v.y(), -3.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 137);
+    assert_eq!(v.get_incident_edge()?.0, 137);
     let v = output.vertices()[38].get();
     assert!(almost_equal(v.x(), 4.0000000, v.y(), 3.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 139);
+    assert_eq!(v.get_incident_edge()?.0, 139);
     let v = output.vertices()[39].get();
     assert!(almost_equal(v.x(), 4.9500000, v.y(), -1.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 145);
+    assert_eq!(v.get_incident_edge()?.0, 145);
     let v = output.vertices()[40].get();
     assert!(almost_equal(v.x(), 4.9500000, v.y(), 1.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 149);
+    assert_eq!(v.get_incident_edge()?.0, 149);
     let v = output.vertices()[41].get();
     assert!(almost_equal(v.x(), 4.8923311, v.y(), -1.5766889));
-    assert_eq!(v.get_incident_edge().unwrap().0, 151);
+    assert_eq!(v.get_incident_edge()?.0, 151);
     let v = output.vertices()[42].get();
     assert!(almost_equal(v.x(), 4.8923311, v.y(), 1.5766889));
-    assert_eq!(v.get_incident_edge().unwrap().0, 153);
+    assert_eq!(v.get_incident_edge()?.0, 153);
     let v = output.vertices()[43].get();
     assert!(almost_equal(v.x(), 10.4285714, v.y(), -1.5714286));
-    assert_eq!(v.get_incident_edge().unwrap().0, 159);
+    assert_eq!(v.get_incident_edge()?.0, 159);
     let v = output.vertices()[44].get();
     assert!(almost_equal(v.x(), 10.4285714, v.y(), 1.5714286));
-    assert_eq!(v.get_incident_edge().unwrap().0, 161);
+    assert_eq!(v.get_incident_edge()?.0, 161);
     let v = output.vertices()[45].get();
     assert!(almost_equal(v.x(), 11.0000000, v.y(), -1.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 163);
+    assert_eq!(v.get_incident_edge()?.0, 163);
     let v = output.vertices()[46].get();
     assert!(almost_equal(v.x(), 11.0000000, v.y(), 1.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 165);
+    assert_eq!(v.get_incident_edge()?.0, 165);
     let v = output.vertices()[47].get();
     assert!(almost_equal(v.x(), 12.5000000, v.y(), 0.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 167);
+    assert_eq!(v.get_incident_edge()?.0, 167);
     Ok(())
 }
 
@@ -490,22 +490,22 @@ fn sample_primary_032() -> Result<(), BvError> {
     assert_eq!(output.edges().len(), 22);
     let v = output.vertices()[0].get();
     assert!(almost_equal(v.x(), -9.9826087, v.y(), 3.8304348));
-    assert_eq!(v.get_incident_edge().unwrap().0, 5);
+    assert_eq!(v.get_incident_edge()?.0, 5);
     let v = output.vertices()[1].get();
     assert!(almost_equal(v.x(), -14.7857143, v.y(), -20.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 11);
+    assert_eq!(v.get_incident_edge()?.0, 11);
     let v = output.vertices()[2].get();
     assert!(almost_equal(v.x(), 0.9166506, v.y(), 2.0138916));
-    assert_eq!(v.get_incident_edge().unwrap().0, 13);
+    assert_eq!(v.get_incident_edge()?.0, 13);
     let v = output.vertices()[3].get();
     assert!(almost_equal(v.x(), -4.6426618, v.y(), 17.5617267));
-    assert_eq!(v.get_incident_edge().unwrap().0, 15);
+    assert_eq!(v.get_incident_edge()?.0, 15);
     let v = output.vertices()[4].get();
     assert!(almost_equal(v.x(), -5.0434783, v.y(), 20.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 19);
+    assert_eq!(v.get_incident_edge()?.0, 19);
     let v = output.vertices()[5].get();
     assert!(almost_equal(v.x(), -63.6869919, v.y(), -41.3943089));
-    assert_eq!(v.get_incident_edge().unwrap().0, 21);
+    assert_eq!(v.get_incident_edge()?.0, 21);
     Ok(())
 }
 
@@ -579,28 +579,28 @@ fn sample_primary_033() -> Result<(), BvError> {
     assert_eq!(output.edges().len(), 28);
     let v = output.vertices()[0].get();
     assert!(almost_equal(v.x(), -6.0000000, v.y(), 0.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 11);
+    assert_eq!(v.get_incident_edge()?.0, 11);
     let v = output.vertices()[1].get();
     assert!(almost_equal(v.x(), -5.5000000, v.y(), 0.5227744));
-    assert_eq!(v.get_incident_edge().unwrap().0, 13);
+    assert_eq!(v.get_incident_edge()?.0, 13);
     let v = output.vertices()[2].get();
     assert!(almost_equal(v.x(), -4.5000000, v.y(), 1.5278640));
-    assert_eq!(v.get_incident_edge().unwrap().0, 15);
+    assert_eq!(v.get_incident_edge()?.0, 15);
     let v = output.vertices()[3].get();
     assert!(almost_equal(v.x(), -3.5000000, v.y(), 2.5358984));
-    assert_eq!(v.get_incident_edge().unwrap().0, 17);
+    assert_eq!(v.get_incident_edge()?.0, 17);
     let v = output.vertices()[4].get();
     assert!(almost_equal(v.x(), -1.6666667, v.y(), 7.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 21);
+    assert_eq!(v.get_incident_edge()?.0, 21);
     let v = output.vertices()[5].get();
     assert!(almost_equal(v.x(), -3.5000000, v.y(), 12.5000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 23);
+    assert_eq!(v.get_incident_edge()?.0, 23);
     let v = output.vertices()[6].get();
     assert!(almost_equal(v.x(), -4.5000000, v.y(), 16.5000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 25);
+    assert_eq!(v.get_incident_edge()?.0, 25);
     let v = output.vertices()[7].get();
     assert!(almost_equal(v.x(), -5.5000000, v.y(), 21.5000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 27);
+    assert_eq!(v.get_incident_edge()?.0, 27);
     Ok(())
 }
 
@@ -684,40 +684,40 @@ fn sample_primary_034() -> Result<(), BvError> {
     assert_eq!(output.edges().len(), 40);
     let v = output.vertices()[0].get();
     assert!(almost_equal(v.x(), -16.0000000, v.y(), 15.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 5);
+    assert_eq!(v.get_incident_edge()?.0, 5);
     let v = output.vertices()[1].get();
     assert!(almost_equal(v.x(), -0.0000000, v.y(), -4.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 11);
+    assert_eq!(v.get_incident_edge()?.0, 11);
     let v = output.vertices()[2].get();
     assert!(almost_equal(v.x(), -2.5741126, v.y(), 5.3969379));
-    assert_eq!(v.get_incident_edge().unwrap().0, 13);
+    assert_eq!(v.get_incident_edge()?.0, 13);
     let v = output.vertices()[3].get();
     assert!(almost_equal(v.x(), 2.0000000, v.y(), 8.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 17);
+    assert_eq!(v.get_incident_edge()?.0, 17);
     let v = output.vertices()[4].get();
     assert!(almost_equal(v.x(), -14.7857143, v.y(), -20.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 23);
+    assert_eq!(v.get_incident_edge()?.0, 23);
     let v = output.vertices()[5].get();
     assert!(almost_equal(v.x(), 3.4760263, v.y(), -4.5793377));
-    assert_eq!(v.get_incident_edge().unwrap().0, 25);
+    assert_eq!(v.get_incident_edge()?.0, 25);
     let v = output.vertices()[6].get();
     assert!(almost_equal(v.x(), 4.4828759, v.y(), 7.5861873));
-    assert_eq!(v.get_incident_edge().unwrap().0, 27);
+    assert_eq!(v.get_incident_edge()?.0, 27);
     let v = output.vertices()[7].get();
     assert!(almost_equal(v.x(), 3.3301305, v.y(), 11.4203355));
-    assert_eq!(v.get_incident_edge().unwrap().0, 29);
+    assert_eq!(v.get_incident_edge()?.0, 29);
     let v = output.vertices()[8].get();
     assert!(almost_equal(v.x(), -2.5389358, v.y(), 20.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 33);
+    assert_eq!(v.get_incident_edge()?.0, 33);
     let v = output.vertices()[9].get();
     assert!(almost_equal(v.x(), -23.5569106, v.y(), -23.8373984));
-    assert_eq!(v.get_incident_edge().unwrap().0, 35);
+    assert_eq!(v.get_incident_edge()?.0, 35);
     let v = output.vertices()[10].get();
     assert!(almost_equal(v.x(), -8.2749004, v.y(), 34.8645418));
-    assert_eq!(v.get_incident_edge().unwrap().0, 37);
+    assert_eq!(v.get_incident_edge()?.0, 37);
     let v = output.vertices()[11].get();
     assert!(almost_equal(v.x(), -151.4715447, v.y(), -99.0813008));
-    assert_eq!(v.get_incident_edge().unwrap().0, 39);
+    assert_eq!(v.get_incident_edge()?.0, 39);
     Ok(())
 }
 
@@ -1020,91 +1020,91 @@ fn sample_primary_035() -> Result<(), BvError> {
     assert_eq!(output.edges().len(), 136);
     let v = output.vertices()[0].get();
     assert!(almost_equal(v.x(), -99.0000000, v.y(), -0.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 5);
+    assert_eq!(v.get_incident_edge()?.0, 5);
     let v = output.vertices()[1].get();
     assert!(almost_equal(v.x(), -95.0000000, v.y(), -30.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 13);
+    assert_eq!(v.get_incident_edge()?.0, 13);
     let v = output.vertices()[2].get();
     assert!(almost_equal(v.x(), -95.0000000, v.y(), 30.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 17);
+    assert_eq!(v.get_incident_edge()?.0, 17);
     let v = output.vertices()[3].get();
     assert!(almost_equal(v.x(), -80.0000000, v.y(), -58.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 25);
+    assert_eq!(v.get_incident_edge()?.0, 25);
     let v = output.vertices()[4].get();
     assert!(almost_equal(v.x(), -80.0000000, v.y(), 58.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 29);
+    assert_eq!(v.get_incident_edge()?.0, 29);
     let v = output.vertices()[5].get();
     assert!(almost_equal(v.x(), -58.0000000, v.y(), -80.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 37);
+    assert_eq!(v.get_incident_edge()?.0, 37);
     let v = output.vertices()[6].get();
     assert!(almost_equal(v.x(), -58.0000000, v.y(), 80.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 41);
+    assert_eq!(v.get_incident_edge()?.0, 41);
     let v = output.vertices()[7].get();
     assert!(almost_equal(v.x(), -30.0000000, v.y(), -95.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 49);
+    assert_eq!(v.get_incident_edge()?.0, 49);
     let v = output.vertices()[8].get();
     assert!(almost_equal(v.x(), -30.0000000, v.y(), 95.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 53);
+    assert_eq!(v.get_incident_edge()?.0, 53);
     let v = output.vertices()[9].get();
     assert!(almost_equal(v.x(), -0.0000000, v.y(), -99.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 61);
+    assert_eq!(v.get_incident_edge()?.0, 61);
     let v = output.vertices()[10].get();
     assert!(almost_equal(v.x(), -0.0000000, v.y(), 99.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 65);
+    assert_eq!(v.get_incident_edge()?.0, 65);
     let v = output.vertices()[11].get();
     assert!(almost_equal(v.x(), 30.0000000, v.y(), -95.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 73);
+    assert_eq!(v.get_incident_edge()?.0, 73);
     let v = output.vertices()[12].get();
     assert!(almost_equal(v.x(), 30.0000000, v.y(), 95.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 77);
+    assert_eq!(v.get_incident_edge()?.0, 77);
     let v = output.vertices()[13].get();
     assert!(almost_equal(v.x(), 58.0000000, v.y(), -80.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 85);
+    assert_eq!(v.get_incident_edge()?.0, 85);
     let v = output.vertices()[14].get();
     assert!(almost_equal(v.x(), 58.0000000, v.y(), 80.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 89);
+    assert_eq!(v.get_incident_edge()?.0, 89);
     let v = output.vertices()[15].get();
     assert!(almost_equal(v.x(), 80.0000000, v.y(), -58.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 97);
+    assert_eq!(v.get_incident_edge()?.0, 97);
     let v = output.vertices()[16].get();
     assert!(almost_equal(v.x(), 80.0000000, v.y(), 58.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 101);
+    assert_eq!(v.get_incident_edge()?.0, 101);
     let v = output.vertices()[17].get();
     assert!(almost_equal(v.x(), -2.0439806, v.y(), 0.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 103);
+    assert_eq!(v.get_incident_edge()?.0, 103);
     let v = output.vertices()[18].get();
     assert!(almost_equal(v.x(), -1.8724422, v.y(), 0.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 105);
+    assert_eq!(v.get_incident_edge()?.0, 105);
     let v = output.vertices()[19].get();
     assert!(almost_equal(v.x(), 95.0000000, v.y(), -30.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 113);
+    assert_eq!(v.get_incident_edge()?.0, 113);
     let v = output.vertices()[20].get();
     assert!(almost_equal(v.x(), 95.0000000, v.y(), 30.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 117);
+    assert_eq!(v.get_incident_edge()?.0, 117);
     let v = output.vertices()[21].get();
     assert!(almost_equal(v.x(), -0.0000000, v.y(), -2.0439806));
-    assert_eq!(v.get_incident_edge().unwrap().0, 119);
+    assert_eq!(v.get_incident_edge()?.0, 119);
     let v = output.vertices()[22].get();
     assert!(almost_equal(v.x(), 0.0000000, v.y(), 2.0439806));
-    assert_eq!(v.get_incident_edge().unwrap().0, 121);
+    assert_eq!(v.get_incident_edge()?.0, 121);
     let v = output.vertices()[23].get();
     assert!(almost_equal(v.x(), 0.0000000, v.y(), 1.8724422));
-    assert_eq!(v.get_incident_edge().unwrap().0, 123);
+    assert_eq!(v.get_incident_edge()?.0, 123);
     let v = output.vertices()[24].get();
     assert!(almost_equal(v.x(), -0.0000000, v.y(), -1.8724422));
-    assert_eq!(v.get_incident_edge().unwrap().0, 125);
+    assert_eq!(v.get_incident_edge()?.0, 125);
     let v = output.vertices()[25].get();
     assert!(almost_equal(v.x(), -0.0000000, v.y(), 0.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 127);
+    assert_eq!(v.get_incident_edge()?.0, 127);
     let v = output.vertices()[26].get();
     assert!(almost_equal(v.x(), 1.8724422, v.y(), 0.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 129);
+    assert_eq!(v.get_incident_edge()?.0, 129);
     let v = output.vertices()[27].get();
     assert!(almost_equal(v.x(), 6.9786032, v.y(), 0.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 131);
+    assert_eq!(v.get_incident_edge()?.0, 131);
     let v = output.vertices()[28].get();
     assert!(almost_equal(v.x(), 100.0000000, v.y(), 0.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 135);
+    assert_eq!(v.get_incident_edge()?.0, 135);
     Ok(())
 }
 
@@ -1211,7 +1211,7 @@ fn sample_primary_040() -> Result<(), BvError> {
         v.y(),
         1503238551.5000000
     ));
-    assert_eq!(v.get_incident_edge().unwrap().0, 11);
+    assert_eq!(v.get_incident_edge()?.0, 11);
     let v = output.vertices()[1].get();
     assert!(almost_equal(
         v.x(),
@@ -1219,7 +1219,7 @@ fn sample_primary_040() -> Result<(), BvError> {
         v.y(),
         -644245093.5000000
     ));
-    assert_eq!(v.get_incident_edge().unwrap().0, 19);
+    assert_eq!(v.get_incident_edge()?.0, 19);
     let v = output.vertices()[2].get();
     assert!(almost_equal(
         v.x(),
@@ -1227,7 +1227,7 @@ fn sample_primary_040() -> Result<(), BvError> {
         v.y(),
         -214748364.4999999
     ));
-    assert_eq!(v.get_incident_edge().unwrap().0, 21);
+    assert_eq!(v.get_incident_edge()?.0, 21);
     let v = output.vertices()[3].get();
     assert!(almost_equal(
         v.x(),
@@ -1235,7 +1235,7 @@ fn sample_primary_040() -> Result<(), BvError> {
         v.y(),
         -1073741822.5000000
     ));
-    assert_eq!(v.get_incident_edge().unwrap().0, 23);
+    assert_eq!(v.get_incident_edge()?.0, 23);
     let v = output.vertices()[4].get();
     assert!(almost_equal(
         v.x(),
@@ -1243,7 +1243,7 @@ fn sample_primary_040() -> Result<(), BvError> {
         v.y(),
         1503238551.5000000
     ));
-    assert_eq!(v.get_incident_edge().unwrap().0, 25);
+    assert_eq!(v.get_incident_edge()?.0, 25);
     let v = output.vertices()[5].get();
     assert!(almost_equal(
         v.x(),
@@ -1251,7 +1251,7 @@ fn sample_primary_040() -> Result<(), BvError> {
         v.y(),
         -978298104.9444439
     ));
-    assert_eq!(v.get_incident_edge().unwrap().0, 27);
+    assert_eq!(v.get_incident_edge()?.0, 27);
     let v = output.vertices()[6].get();
     assert!(almost_equal(
         v.x(),
@@ -1259,7 +1259,7 @@ fn sample_primary_040() -> Result<(), BvError> {
         v.y(),
         644245093.5000000
     ));
-    assert_eq!(v.get_incident_edge().unwrap().0, 29);
+    assert_eq!(v.get_incident_edge()?.0, 29);
     let v = output.vertices()[7].get();
     assert!(almost_equal(
         v.x(),
@@ -1267,7 +1267,7 @@ fn sample_primary_040() -> Result<(), BvError> {
         v.y(),
         -1360072975.1666667
     ));
-    assert_eq!(v.get_incident_edge().unwrap().0, 33);
+    assert_eq!(v.get_incident_edge()?.0, 33);
     let v = output.vertices()[8].get();
     assert!(almost_equal(
         v.x(),
@@ -1275,7 +1275,7 @@ fn sample_primary_040() -> Result<(), BvError> {
         v.y(),
         644245093.5000000
     ));
-    assert_eq!(v.get_incident_edge().unwrap().0, 35);
+    assert_eq!(v.get_incident_edge()?.0, 35);
     Ok(())
 }
 
@@ -1417,79 +1417,79 @@ fn sample_primary_041() -> Result<(), BvError> {
     assert_eq!(output.edges().len(), 84);
     let v = output.vertices()[0].get();
     assert!(almost_equal(v.x(), -57.5000000, v.y(), -2.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 7);
+    assert_eq!(v.get_incident_edge()?.0, 7);
     let v = output.vertices()[1].get();
     assert!(almost_equal(v.x(), -8.0000000, v.y(), 7.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 11);
+    assert_eq!(v.get_incident_edge()?.0, 11);
     let v = output.vertices()[2].get();
     assert!(almost_equal(v.x(), -6.0000000, v.y(), 1.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 17);
+    assert_eq!(v.get_incident_edge()?.0, 17);
     let v = output.vertices()[3].get();
     assert!(almost_equal(v.x(), -6.0000000, v.y(), 3.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 19);
+    assert_eq!(v.get_incident_edge()?.0, 19);
     let v = output.vertices()[4].get();
     assert!(almost_equal(v.x(), -6.0000000, v.y(), 7.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 21);
+    assert_eq!(v.get_incident_edge()?.0, 21);
     let v = output.vertices()[5].get();
     assert!(almost_equal(v.x(), -5.8284271, v.y(), 0.8284271));
-    assert_eq!(v.get_incident_edge().unwrap().0, 27);
+    assert_eq!(v.get_incident_edge()?.0, 27);
     let v = output.vertices()[6].get();
     assert!(almost_equal(v.x(), -5.0000000, v.y(), 1.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 29);
+    assert_eq!(v.get_incident_edge()?.0, 29);
     let v = output.vertices()[7].get();
     assert!(almost_equal(v.x(), -5.2426407, v.y(), 3.7573593));
-    assert_eq!(v.get_incident_edge().unwrap().0, 35);
+    assert_eq!(v.get_incident_edge()?.0, 35);
     let v = output.vertices()[8].get();
     assert!(almost_equal(v.x(), -5.2426407, v.y(), 6.2426407));
-    assert_eq!(v.get_incident_edge().unwrap().0, 37);
+    assert_eq!(v.get_incident_edge()?.0, 37);
     let v = output.vertices()[9].get();
     assert!(almost_equal(v.x(), -5.0000000, v.y(), -2.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 39);
+    assert_eq!(v.get_incident_edge()?.0, 39);
     let v = output.vertices()[10].get();
     assert!(almost_equal(v.x(), -4.0000000, v.y(), 3.5000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 41);
+    assert_eq!(v.get_incident_edge()?.0, 41);
     let v = output.vertices()[11].get();
     assert!(almost_equal(v.x(), -4.0000000, v.y(), 6.5000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 43);
+    assert_eq!(v.get_incident_edge()?.0, 43);
     let v = output.vertices()[12].get();
     assert!(almost_equal(v.x(), -2.0000000, v.y(), 3.5000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 53);
+    assert_eq!(v.get_incident_edge()?.0, 53);
     let v = output.vertices()[13].get();
     assert!(almost_equal(v.x(), -2.0000000, v.y(), 6.5000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 55);
+    assert_eq!(v.get_incident_edge()?.0, 55);
     let v = output.vertices()[14].get();
     assert!(almost_equal(v.x(), -0.5000000, v.y(), 0.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 61);
+    assert_eq!(v.get_incident_edge()?.0, 61);
     let v = output.vertices()[15].get();
     assert!(almost_equal(v.x(), -1.0000000, v.y(), 1.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 63);
+    assert_eq!(v.get_incident_edge()?.0, 63);
     let v = output.vertices()[16].get();
     assert!(almost_equal(v.x(), -1.0000000, v.y(), 3.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 65);
+    assert_eq!(v.get_incident_edge()?.0, 65);
     let v = output.vertices()[17].get();
     assert!(almost_equal(v.x(), -1.5358984, v.y(), 3.5358984));
-    assert_eq!(v.get_incident_edge().unwrap().0, 67);
+    assert_eq!(v.get_incident_edge()?.0, 67);
     let v = output.vertices()[18].get();
     assert!(almost_equal(v.x(), -1.5358984, v.y(), 6.4641016));
-    assert_eq!(v.get_incident_edge().unwrap().0, 69);
+    assert_eq!(v.get_incident_edge()?.0, 69);
     let v = output.vertices()[19].get();
     assert!(almost_equal(v.x(), -1.0000000, v.y(), 7.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 71);
+    assert_eq!(v.get_incident_edge()?.0, 71);
     let v = output.vertices()[20].get();
     assert!(almost_equal(v.x(), -1.0000000, v.y(), 9.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 73);
+    assert_eq!(v.get_incident_edge()?.0, 73);
     let v = output.vertices()[21].get();
     assert!(almost_equal(v.x(), -2.0000000, v.y(), 10.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 77);
+    assert_eq!(v.get_incident_edge()?.0, 77);
     let v = output.vertices()[22].get();
     assert!(almost_equal(v.x(), -8.0000000, v.y(), 25.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 79);
+    assert_eq!(v.get_incident_edge()?.0, 79);
     let v = output.vertices()[23].get();
     assert!(almost_equal(v.x(), -1.0000000, v.y(), -10.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 81);
+    assert_eq!(v.get_incident_edge()?.0, 81);
     let v = output.vertices()[24].get();
     assert!(almost_equal(v.x(), -0.5000000, v.y(), -11.5000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 83);
+    assert_eq!(v.get_incident_edge()?.0, 83);
     Ok(())
 }
 
@@ -1571,37 +1571,37 @@ fn sample_primary_042() -> Result<(), BvError> {
     assert_eq!(output.edges().len(), 38);
     let v = output.vertices()[0].get();
     assert!(almost_equal(v.x(), -3.2631579, v.y(), -1.6842105));
-    assert_eq!(v.get_incident_edge().unwrap().0, 9);
+    assert_eq!(v.get_incident_edge()?.0, 9);
     let v = output.vertices()[1].get();
     assert!(almost_equal(v.x(), -2.3684211, v.y(), 2.3421053));
-    assert_eq!(v.get_incident_edge().unwrap().0, 11);
+    assert_eq!(v.get_incident_edge()?.0, 11);
     let v = output.vertices()[2].get();
     assert!(almost_equal(v.x(), 1.7543219, v.y(), 1.2456781));
-    assert_eq!(v.get_incident_edge().unwrap().0, 17);
+    assert_eq!(v.get_incident_edge()?.0, 17);
     let v = output.vertices()[3].get();
     assert!(almost_equal(v.x(), 3.3567892, v.y(), -0.3567892));
-    assert_eq!(v.get_incident_edge().unwrap().0, 19);
+    assert_eq!(v.get_incident_edge()?.0, 19);
     let v = output.vertices()[4].get();
     assert!(almost_equal(v.x(), -2.3000000, v.y(), -6.5000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 25);
+    assert_eq!(v.get_incident_edge()?.0, 25);
     let v = output.vertices()[5].get();
     assert!(almost_equal(v.x(), 4.1783946, v.y(), -0.1080271));
-    assert_eq!(v.get_incident_edge().unwrap().0, 27);
+    assert_eq!(v.get_incident_edge()?.0, 27);
     let v = output.vertices()[6].get();
     assert!(almost_equal(v.x(), 0.8858048, v.y(), 4.1141952));
-    assert_eq!(v.get_incident_edge().unwrap().0, 29);
+    assert_eq!(v.get_incident_edge()?.0, 29);
     let v = output.vertices()[7].get();
     assert!(almost_equal(v.x(), 0.1363636, v.y(), 5.6818182));
-    assert_eq!(v.get_incident_edge().unwrap().0, 31);
+    assert_eq!(v.get_incident_edge()?.0, 31);
     let v = output.vertices()[8].get();
     assert!(almost_equal(v.x(), 5.0000000, v.y(), 0.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 33);
+    assert_eq!(v.get_incident_edge()?.0, 33);
     let v = output.vertices()[9].get();
     assert!(almost_equal(v.x(), 0.3965572, v.y(), 6.0345072));
-    assert_eq!(v.get_incident_edge().unwrap().0, 35);
+    assert_eq!(v.get_incident_edge()?.0, 35);
     let v = output.vertices()[10].get();
     assert!(almost_equal(v.x(), -1.0000000, v.y(), -26.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 37);
+    assert_eq!(v.get_incident_edge()?.0, 37);
     Ok(())
 }
 
@@ -1677,31 +1677,31 @@ fn sample_primary_043() -> Result<(), BvError> {
     assert_eq!(output.edges().len(), 32);
     let v = output.vertices()[0].get();
     assert!(almost_equal(v.x(), -15.0000000, v.y(), 0.5000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 11);
+    assert_eq!(v.get_incident_edge()?.0, 11);
     let v = output.vertices()[1].get();
     assert!(almost_equal(v.x(), -6.0000000, v.y(), 4.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 13);
+    assert_eq!(v.get_incident_edge()?.0, 13);
     let v = output.vertices()[2].get();
     assert!(almost_equal(v.x(), -5.4153374, v.y(), 1.7539877));
-    assert_eq!(v.get_incident_edge().unwrap().0, 15);
+    assert_eq!(v.get_incident_edge()?.0, 15);
     let v = output.vertices()[3].get();
     assert!(almost_equal(v.x(), -4.7639320, v.y(), 3.7082039));
-    assert_eq!(v.get_incident_edge().unwrap().0, 17);
+    assert_eq!(v.get_incident_edge()?.0, 17);
     let v = output.vertices()[4].get();
     assert!(almost_equal(v.x(), -4.6645399, v.y(), 2.1661350));
-    assert_eq!(v.get_incident_edge().unwrap().0, 21);
+    assert_eq!(v.get_incident_edge()?.0, 21);
     let v = output.vertices()[5].get();
     assert!(almost_equal(v.x(), -3.4301347, v.y(), 1.8575337));
-    assert_eq!(v.get_incident_edge().unwrap().0, 23);
+    assert_eq!(v.get_incident_edge()?.0, 23);
     let v = output.vertices()[6].get();
     assert!(almost_equal(v.x(), -2.0000000, v.y(), 2.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 27);
+    assert_eq!(v.get_incident_edge()?.0, 27);
     let v = output.vertices()[7].get();
     assert!(almost_equal(v.x(), -2.5698653, v.y(), 0.2904041));
-    assert_eq!(v.get_incident_edge().unwrap().0, 29);
+    assert_eq!(v.get_incident_edge()?.0, 29);
     let v = output.vertices()[8].get();
     assert!(almost_equal(v.x(), 1.2500000, v.y(), -3.5625000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 31);
+    assert_eq!(v.get_incident_edge()?.0, 31);
     Ok(())
 }
 
@@ -1777,25 +1777,25 @@ fn sample_primary_044() -> Result<(), BvError> {
     assert_eq!(output.edges().len(), 28);
     let v = output.vertices()[0].get();
     assert!(almost_equal(v.x(), -12.2500000, v.y(), -4.7500000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 7);
+    assert_eq!(v.get_incident_edge()?.0, 7);
     let v = output.vertices()[1].get();
     assert!(almost_equal(v.x(), -8.0000000, v.y(), -4.6568542));
-    assert_eq!(v.get_incident_edge().unwrap().0, 9);
+    assert_eq!(v.get_incident_edge()?.0, 9);
     let v = output.vertices()[2].get();
     assert!(almost_equal(v.x(), -4.0000000, v.y(), -3.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 13);
+    assert_eq!(v.get_incident_edge()?.0, 13);
     let v = output.vertices()[3].get();
     assert!(almost_equal(v.x(), -10.0000000, v.y(), 5.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 19);
+    assert_eq!(v.get_incident_edge()?.0, 19);
     let v = output.vertices()[4].get();
     assert!(almost_equal(v.x(), -8.0000000, v.y(), 3.6365995));
-    assert_eq!(v.get_incident_edge().unwrap().0, 21);
+    assert_eq!(v.get_incident_edge()?.0, 21);
     let v = output.vertices()[5].get();
     assert!(almost_equal(v.x(), -5.6846584, v.y(), 1.8288354));
-    assert_eq!(v.get_incident_edge().unwrap().0, 25);
+    assert_eq!(v.get_incident_edge()?.0, 25);
     let v = output.vertices()[6].get();
     assert!(almost_equal(v.x(), -4.0000000, v.y(), 0.7500000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 27);
+    assert_eq!(v.get_incident_edge()?.0, 27);
     Ok(())
 }
 
@@ -1877,40 +1877,40 @@ fn sample_primary_045() -> Result<(), BvError> {
     assert_eq!(output.edges().len(), 40);
     let v = output.vertices()[0].get();
     assert!(almost_equal(v.x(), 37.3588820, v.y(), 35.3588820));
-    assert_eq!(v.get_incident_edge().unwrap().0, 13);
+    assert_eq!(v.get_incident_edge()?.0, 13);
     let v = output.vertices()[1].get();
     assert!(almost_equal(v.x(), 39.0430183, v.y(), 33.0430183));
-    assert_eq!(v.get_incident_edge().unwrap().0, 17);
+    assert_eq!(v.get_incident_edge()?.0, 17);
     let v = output.vertices()[2].get();
     assert!(almost_equal(v.x(), 37.2324883, v.y(), 41.8464977));
-    assert_eq!(v.get_incident_edge().unwrap().0, 19);
+    assert_eq!(v.get_incident_edge()?.0, 19);
     let v = output.vertices()[3].get();
     assert!(almost_equal(v.x(), 37.6341463, v.y(), 41.9268293));
-    assert_eq!(v.get_incident_edge().unwrap().0, 21);
+    assert_eq!(v.get_incident_edge()?.0, 21);
     let v = output.vertices()[4].get();
     assert!(almost_equal(v.x(), 41.7105263, v.y(), 30.8947368));
-    assert_eq!(v.get_incident_edge().unwrap().0, 23);
+    assert_eq!(v.get_incident_edge()?.0, 23);
     let v = output.vertices()[5].get();
     assert!(almost_equal(v.x(), 35.6273058, v.y(), 57.9815538));
-    assert_eq!(v.get_incident_edge().unwrap().0, 25);
+    assert_eq!(v.get_incident_edge()?.0, 25);
     let v = output.vertices()[6].get();
     assert!(almost_equal(v.x(), 43.4560969, v.y(), 41.4560969));
-    assert_eq!(v.get_incident_edge().unwrap().0, 27);
+    assert_eq!(v.get_incident_edge()?.0, 27);
     let v = output.vertices()[7].get();
     assert!(almost_equal(v.x(), 46.4342645, v.y(), 40.4342645));
-    assert_eq!(v.get_incident_edge().unwrap().0, 29);
+    assert_eq!(v.get_incident_edge()?.0, 29);
     let v = output.vertices()[8].get();
     assert!(almost_equal(v.x(), 64.1250000, v.y(), 25.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 33);
+    assert_eq!(v.get_incident_edge()?.0, 33);
     let v = output.vertices()[9].get();
     assert!(almost_equal(v.x(), 55.3487783, v.y(), 95.2097735));
-    assert_eq!(v.get_incident_edge().unwrap().0, 35);
+    assert_eq!(v.get_incident_edge()?.0, 35);
     let v = output.vertices()[10].get();
     assert!(almost_equal(v.x(), 56.7744479, v.y(), 97.8422713));
-    assert_eq!(v.get_incident_edge().unwrap().0, 37);
+    assert_eq!(v.get_incident_edge()?.0, 37);
     let v = output.vertices()[11].get();
     assert!(almost_equal(v.x(), 70.5000000, v.y(), 16.5000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 39);
+    assert_eq!(v.get_incident_edge()?.0, 39);
     Ok(())
 }
 
@@ -1968,16 +1968,16 @@ fn sample_primary_046() -> Result<(), BvError> {
     assert_eq!(output.edges().len(), 16);
     let v = output.vertices()[0].get();
     assert!(almost_equal(v.x(), 2.3000793, v.y(), -3.9000397));
-    assert_eq!(v.get_incident_edge().unwrap().0, 9);
+    assert_eq!(v.get_incident_edge()?.0, 9);
     let v = output.vertices()[1].get();
     assert!(almost_equal(v.x(), 4.2000000, v.y(), 1.2000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 11);
+    assert_eq!(v.get_incident_edge()?.0, 11);
     let v = output.vertices()[2].get();
     assert!(almost_equal(v.x(), 5.5000000, v.y(), -6.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 13);
+    assert_eq!(v.get_incident_edge()?.0, 13);
     let v = output.vertices()[3].get();
     assert!(almost_equal(v.x(), 6.5000000, v.y(), -6.0000000));
-    assert_eq!(v.get_incident_edge().unwrap().0, 15);
+    assert_eq!(v.get_incident_edge()?.0, 15);
     Ok(())
 }
 
@@ -2047,27 +2047,27 @@ fn sample_primary_047() -> Result<(), BvError> {
     assert_eq!(output.edges().len(), 28);
     let v = output.vertices()[0].get();
     assert!(almost_equal(v.x(), -46.6461377, v.y(), -45.8384656));
-    assert_eq!(v.get_incident_edge().unwrap().0, 9);
+    assert_eq!(v.get_incident_edge()?.0, 9);
     let v = output.vertices()[1].get();
     assert!(almost_equal(v.x(), -46.2216040, v.y(), -41.6945990));
-    assert_eq!(v.get_incident_edge().unwrap().0, 13);
+    assert_eq!(v.get_incident_edge()?.0, 13);
     let v = output.vertices()[2].get();
     assert!(almost_equal(v.x(), -41.0643516, v.y(), -49.5692893));
-    assert_eq!(v.get_incident_edge().unwrap().0, 17);
+    assert_eq!(v.get_incident_edge()?.0, 17);
     let v = output.vertices()[3].get();
     assert!(almost_equal(v.x(), -40.4680851, v.y(), -47.3829787));
-    assert_eq!(v.get_incident_edge().unwrap().0, 19);
+    assert_eq!(v.get_incident_edge()?.0, 19);
     let v = output.vertices()[4].get();
     assert!(almost_equal(v.x(), -38.6595745, v.y(), -43.5851064));
-    assert_eq!(v.get_incident_edge().unwrap().0, 21);
+    assert_eq!(v.get_incident_edge()?.0, 21);
     let v = output.vertices()[5].get();
     assert!(almost_equal(v.x(), -31.0032271, v.y(), -32.6474673));
-    assert_eq!(v.get_incident_edge().unwrap().0, 23);
+    assert_eq!(v.get_incident_edge()?.0, 23);
     let v = output.vertices()[6].get();
     assert!(almost_equal(v.x(), -24.6490787, v.y(), -28.0469012));
-    assert_eq!(v.get_incident_edge().unwrap().0, 25);
+    assert_eq!(v.get_incident_edge()?.0, 25);
     let v = output.vertices()[7].get();
     assert!(almost_equal(v.x(), -6.5209380, v.y(), -76.3886097));
-    assert_eq!(v.get_incident_edge().unwrap().0, 27);
+    assert_eq!(v.get_incident_edge()?.0, 27);
     Ok(())
 }

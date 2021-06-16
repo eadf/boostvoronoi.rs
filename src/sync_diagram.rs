@@ -26,9 +26,9 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    pub cells: Vec<VD::Cell<I, F>>, // indexed by VoronoiCellIndex
-    pub vertices: Vec<VD::Vertex<I, F>>, // indexed by VoronoiVertexIndex
-    pub edges: Vec<VD::Edge<I, F>>, // indexed by VoronoiEdgeIndex
+    pub cells: Vec<VD::Cell<I, F>>,      // indexed by CellIndex
+    pub vertices: Vec<VD::Vertex<I, F>>, // indexed by VertexIndex
+    pub edges: Vec<VD::Edge<I, F>>,      // indexed by EdgeIndex
 }
 
 impl<I, F> SyncDiagram<I, F>
@@ -56,10 +56,10 @@ where
     /// Returns a pointer to the rotation next edge
     /// over the starting point of the half-edge.
     pub fn edge_rot_next(&self, edge_id: VD::EdgeIndex) -> Result<Option<VD::EdgeIndex>, BvError> {
-        let prev_id = self.edge_get(edge_id)?.prev();
+        let prev_id = self.edge_get(edge_id)?._prev();
         if let Some(prev_id) = prev_id {
             let prev = self.edge_get(prev_id)?;
-            Ok(prev.twin())
+            Ok(prev._twin())
         } else {
             Err(BvError::IdError(format!(
                 "The edge id {} does not have any prev edge",
@@ -74,17 +74,17 @@ where
     /// This method returns None at any error
     fn edge_rot_next_no_err(&self, edge_id: Option<VD::EdgeIndex>) -> Option<VD::EdgeIndex> {
         self.edges
-            .get(self.edges.get(edge_id?.0)?.prev()?.0)?
-            .twin()
+            .get(self.edges.get(edge_id?.0)?._prev()?.0)?
+            ._twin()
     }
 
     #[inline]
     /// Returns a pointer to the rotation previous edge
     /// over the starting point of the half-edge.
     pub fn edge_rot_prev(&self, edge_id: VD::EdgeIndex) -> Result<Option<VD::EdgeIndex>, BvError> {
-        if let Some(twin_id) = self.edge_get(edge_id)?.twin() {
+        if let Some(twin_id) = self.edge_get(edge_id)?._twin() {
             let twin = self.edge_get(twin_id)?;
-            Ok(twin.next())
+            Ok(twin._next())
         } else {
             Err(BvError::IdError(format!(
                 "The edge id {} does not have any twin edge",
@@ -96,7 +96,7 @@ where
     /// Returns the next edge or an error
     #[inline]
     pub fn edge_get_next_err(&self, edge_id: VD::EdgeIndex) -> Result<VD::EdgeIndex, BvError> {
-        if let Some(edge_id) = self.edge_get(edge_id)?.next() {
+        if let Some(edge_id) = self.edge_get(edge_id)?._next() {
             Ok(edge_id)
         } else {
             Err(BvError::ValueError(format!(
@@ -109,7 +109,7 @@ where
     /// Returns the previous edge or an BvError if it does not exist
     #[inline]
     pub fn edge_get_prev_err(&self, edge_id: VD::EdgeIndex) -> Result<VD::EdgeIndex, BvError> {
-        if let Some(prev) = self.edge_get(edge_id)?.prev() {
+        if let Some(prev) = self.edge_get(edge_id)?._prev() {
             Ok(prev)
         } else {
             Err(BvError::ValueError(format!(
@@ -122,7 +122,7 @@ where
     /// Returns the twin edge as a Result or a BvError if it does not exists
     #[inline]
     pub fn edge_get_twin_err(&self, edge_id: VD::EdgeIndex) -> Result<VD::EdgeIndex, BvError> {
-        if let Some(twin_id) = self.edge_get(edge_id)?.twin() {
+        if let Some(twin_id) = self.edge_get(edge_id)?._twin() {
             Ok(twin_id)
         } else {
             Err(BvError::ValueError(format!(
@@ -152,29 +152,16 @@ where
 
     #[inline]
     pub fn edge_get(&self, edge_id: VD::EdgeIndex) -> Result<&VD::Edge<I, F>, BvError> {
-        if let Some(edge) = self.edges.get(edge_id.0) {
-            Ok(edge)
-        } else {
-            Err(BvError::IdError(format!(
-                "The edge id {} does not exists",
-                edge_id.0
-            )))
-        }
+        self.edges
+            .get(edge_id.0)
+            .ok_or_else(|| BvError::IdError(format!("The edge id {} does not exists", edge_id.0)))
     }
 
     #[inline]
-    pub fn edge_get_mut(
-        &mut self,
-        edge_id: VD::EdgeIndex,
-    ) -> Result<&mut VD::Edge<I, F>, BvError> {
-        if let Some(edge) = self.edges.get_mut(edge_id.0) {
-            Ok(edge)
-        } else {
-            Err(BvError::IdError(format!(
-                "The edge id {} does not exists",
-                edge_id.0
-            )))
-        }
+    pub fn edge_get_mut(&mut self, edge_id: VD::EdgeIndex) -> Result<&mut VD::Edge<I, F>, BvError> {
+        self.edges
+            .get_mut(edge_id.0)
+            .ok_or_else(|| BvError::IdError(format!("The edge id {} does not exists", edge_id.0)))
     }
 
     /// Returns the vertex0 of the edge
@@ -192,7 +179,7 @@ where
         &self,
         edge_id: VD::EdgeIndex,
     ) -> Result<Option<VD::VertexIndex>, BvError> {
-        let twin = self.edge_get(edge_id)?.twin().map_or(
+        let twin = self.edge_get(edge_id)?._twin().map_or(
             Err(BvError::IdError(format!(
                 "the edge {} does not have any twin",
                 edge_id.0
@@ -204,14 +191,9 @@ where
 
     #[inline]
     pub fn cell_get(&self, cell_id: VD::CellIndex) -> Result<&VD::Cell<I, F>, BvError> {
-        if let Some(cell) = self.cells.get(cell_id.0) {
-            Ok(cell)
-        } else {
-            Err(BvError::IdError(format!(
-                "The cell id {} does not exists",
-                cell_id.0
-            )))
-        }
+        self.cells
+            .get(cell_id.0)
+            .ok_or_else(|| BvError::IdError(format!("The cell id {} does not exists", cell_id.0)))
     }
 
     #[inline]
@@ -221,18 +203,10 @@ where
     }
 
     #[inline]
-    pub fn vertex_get(
-        &self,
-        vertex_id: VD::VertexIndex,
-    ) -> Result<&VD::Vertex<I, F>, BvError> {
-        if let Some(vertex) = self.vertices.get(vertex_id.0) {
-            Ok(vertex)
-        } else {
-            Err(BvError::IdError(format!(
-                "The vertex id {} does not exists",
-                vertex_id.0
-            )))
-        }
+    pub fn vertex_get(&self, vertex_id: VD::VertexIndex) -> Result<&VD::Vertex<I, F>, BvError> {
+        self.vertices.get(vertex_id.0).ok_or_else(|| {
+            BvError::IdError(format!("The vertex id {} does not exists", vertex_id.0))
+        })
     }
 
     #[inline]
@@ -240,14 +214,9 @@ where
         &mut self,
         vertex_id: VD::VertexIndex,
     ) -> Result<&mut VD::Vertex<I, F>, BvError> {
-        if let Some(vertex) = self.vertices.get_mut(vertex_id.0) {
-            Ok(vertex)
-        } else {
-            Err(BvError::IdError(format!(
-                "The vertex id {} does not exists",
-                vertex_id.0
-            )))
-        }
+        self.vertices.get_mut(vertex_id.0).ok_or_else(|| {
+            BvError::IdError(format!("The vertex id {} does not exists", vertex_id.0))
+        })
     }
 }
 

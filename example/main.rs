@@ -194,7 +194,7 @@ fn main() -> Result<(), BvError> {
             i,
             v.get().x(),
             v.get().y(),
-            v.get().get_incident_edge().unwrap().0
+            v.get().get_incident_edge()?.0
         );
     }
 
@@ -206,8 +206,8 @@ fn main() -> Result<(), BvError> {
     println!("edges:{}", output.edges().len());
     for (i, e) in output.edges().iter().enumerate() {
         let e = e.get();
-        println!("Edge:#{}=>{:?}", e.get_id().0, &e);
-        assert_eq!(i, e.get_id().0);
+        println!("Edge:#{}=>{:?}", e.id().0, &e);
+        assert_eq!(i, e.id().0);
     }
     Ok(())
 }
