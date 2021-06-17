@@ -186,8 +186,7 @@ impl RobustFpt {
             //fpv_: Self::get_sqrt(self.fpv_),
             fpv_: self.fpv_.sqrt(),
             // self.re_ * 0.5 + ROUNDING_ERROR
-            re_: self.re_ * OrderedFloat(num::cast::<f32, f64>(0.5f32).unwrap())
-                + OrderedFloat(ROUNDING_ERROR),
+            re_: self.re_ * OrderedFloat(0.5f64) + OrderedFloat(ROUNDING_ERROR),
         }
     }
 }
@@ -694,7 +693,7 @@ pub struct robust_sqrt_expr<
     _fpt: NumCast + Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>,
 > {
     #[doc(hidden)]
-    _pdf: PhantomData<_fpt>,
+    pdf_: PhantomData<_fpt>,
 }
 
 #[allow(non_camel_case_types)]
@@ -703,7 +702,7 @@ impl<
     > Default for robust_sqrt_expr<_fpt>
 {
     fn default() -> Self {
-        Self { _pdf: PhantomData }
+        Self { pdf_: PhantomData }
     }
 }
 

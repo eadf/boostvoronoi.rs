@@ -26,9 +26,9 @@ where
     F: OutputType + Neg<Output = F>,
 {
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
     #[doc(hidden)]
-    _pdo: PhantomData<F>,
+    pdo_: PhantomData<F>,
 }
 
 impl<I, F> VoronoiVisualUtils<I, F>
@@ -185,9 +185,9 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    min_max: Option<([F; 2], [F; 2])>,
+    min_max_: Option<([F; 2], [F; 2])>,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
 }
 
 impl<I, F> Default for Aabb2<I, F>
@@ -198,8 +198,8 @@ where
     #[inline]
     fn default() -> Self {
         Self {
-            min_max: None,
-            _pdi: PhantomData,
+            min_max_: None,
+            pdi_: PhantomData,
         }
     }
 }
@@ -241,11 +241,11 @@ where
 
     #[inline]
     pub fn update_vertex(&mut self, x: F, y: F) {
-        if self.min_max.is_none() {
-            self.min_max = Some(([x, y], [x, y]));
+        if self.min_max_.is_none() {
+            self.min_max_ = Some(([x, y], [x, y]));
             return;
         }
-        let (mut aabb_min, mut aabb_max) = self.min_max.take().unwrap();
+        let (mut aabb_min, mut aabb_max) = self.min_max_.take().unwrap();
 
         if x < aabb_min[0] {
             aabb_min[0] = x;
@@ -259,7 +259,7 @@ where
         if y > aabb_max[1] {
             aabb_max[1] = y;
         }
-        self.min_max = Some((aabb_min, aabb_max));
+        self.min_max_ = Some((aabb_min, aabb_max));
     }
 
     #[inline(always)]
@@ -270,7 +270,7 @@ where
 
     #[inline(always)]
     pub fn get_high(&self) -> Option<[F; 2]> {
-        if let Some((_, high)) = self.min_max {
+        if let Some((_, high)) = self.min_max_ {
             return Some(high);
         }
         None
@@ -278,7 +278,7 @@ where
 
     #[inline(always)]
     pub fn get_low(&self) -> Option<[F; 2]> {
-        if let Some((low, _)) = self.min_max {
+        if let Some((low, _)) = self.min_max_ {
             return Some(low);
         }
         None
@@ -287,7 +287,7 @@ where
     /// grows the aabb uniformly by some percent.
     /// method does nothing if not initialized
     pub fn grow_percent(&mut self, percent: i32) {
-        if self.min_max.is_some() {
+        if self.min_max_.is_some() {
             let size_x = self.get_high().unwrap()[0] - self.get_low().unwrap()[0];
             let size_y = self.get_high().unwrap()[1] - self.get_low().unwrap()[1];
             let size = if size_x > size_y { size_x } else { size_y };
@@ -319,7 +319,7 @@ where
     /// ```
     #[inline]
     pub fn contains_point(&self, point: &Point<I>) -> Option<bool> {
-        if let Some(min_max) = self.min_max {
+        if let Some(min_max) = self.min_max_ {
             let x = super::TypeConverter2::<I, F>::i_to_f(point.x);
             let y = super::TypeConverter2::<I, F>::i_to_f(point.y);
 
@@ -343,7 +343,7 @@ where
     /// ```
     #[inline]
     pub fn contains_line(&self, line: &Line<I>) -> Option<bool> {
-        if self.min_max.is_some() {
+        if self.min_max_.is_some() {
             // unwrap is safe now
             Some(
                 self.contains_point(&line.start).unwrap()
@@ -366,14 +366,14 @@ where
 {
     /// The offsets used to center the 'source' coordinate system. Typically the input geometry
     /// in this case.
-    to_center: [F; 2],
+    to_center_: [F; 2],
     /// A zoom scale
     pub scale: [F; 2],
     /// The offsets needed to center coordinates of interest on the 'dest' coordinate system.
     /// i.e. the screen coordinate system.
     pub to_offset: [F; 2],
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
 }
 
 impl<I, F> Default for SimpleAffine<I, F>
@@ -384,10 +384,10 @@ where
     #[inline]
     fn default() -> Self {
         Self {
-            to_center: [F::zero(), F::zero()],
+            to_center_: [F::zero(), F::zero()],
             scale: [F::one(), F::one()],
             to_offset: [F::zero(), F::zero()],
-            _pdi: PhantomData,
+            pdi_: PhantomData,
         }
     }
 }
@@ -431,18 +431,20 @@ where
                         let scale = dest_aabb_size / source_aabb_size;
 
                         return Ok(Self {
-                            to_center: source_aabb_center,
+                            to_center_: source_aabb_center,
                             scale: [scale, scale],
                             to_offset: dest_aabb_center,
-                            _pdi: PhantomData,
+                            pdi_: PhantomData,
                         });
                     }
                 }
             }
         }
-        Err(BvError::InternalError(
-            "could not get dimension of the AABB".to_string(),
-        ))
+        Err(BvError::InternalError(format!(
+            "could not get dimension of the AABB. {}:{}",
+            file!(),
+            line!()
+        )))
     }
 
     /// transform from destination coordinate system to source coordinate system
@@ -457,7 +459,7 @@ where
     #[inline(always)]
     pub fn reverse_transform_x(&self, x: F) -> Result<I, BvError> {
         super::TypeConverter2::<I, F>::try_f_to_i(
-            ((x - self.to_offset[0]) / self.scale[0] - self.to_center[0]).round(),
+            ((x - self.to_offset[0]) / self.scale[0] - self.to_center_[0]).round(),
         )
     }
 
@@ -465,7 +467,7 @@ where
     #[inline(always)]
     pub fn reverse_transform_y(&self, y: F) -> Result<I, BvError> {
         super::TypeConverter2::<I, F>::try_f_to_i(
-            ((y - self.to_offset[1]) / self.scale[1] - self.to_center[1]).round(),
+            ((y - self.to_offset[1]) / self.scale[1] - self.to_center_[1]).round(),
         )
     }
 
@@ -479,14 +481,14 @@ where
     /// float x coordinate
     #[inline(always)]
     pub fn transform_x(&self, x: F) -> F {
-        (x + self.to_center[0]) * self.scale[0] + self.to_offset[0]
+        (x + self.to_center_[0]) * self.scale[0] + self.to_offset[0]
     }
 
     /// transform from source coordinate system to dest coordinate system
     /// float y coordinate
     #[inline(always)]
     pub fn transform_y(&self, y: F) -> F {
-        (y + self.to_center[1]) * self.scale[1] + self.to_offset[1]
+        (y + self.to_center_[1]) * self.scale[1] + self.to_offset[1]
     }
 
     /// transform from source coordinate system to dest coordinate system
@@ -505,7 +507,7 @@ where
     /// /// integer x coordinate
     #[inline(always)]
     pub fn transform_ix(&self, x: I) -> F {
-        (super::TypeConverter2::<I, F>::i_to_f(x) + self.to_center[0]) * self.scale[0]
+        (super::TypeConverter2::<I, F>::i_to_f(x) + self.to_center_[0]) * self.scale[0]
             + self.to_offset[0]
     }
 
@@ -513,7 +515,7 @@ where
     /// integer y coordinate
     #[inline(always)]
     pub fn transform_iy(&self, y: I) -> F {
-        (super::TypeConverter2::<I, F>::i_to_f(y) + self.to_center[1]) * self.scale[1]
+        (super::TypeConverter2::<I, F>::i_to_f(y) + self.to_center_[1]) * self.scale[1]
             + self.to_offset[1]
     }
 }

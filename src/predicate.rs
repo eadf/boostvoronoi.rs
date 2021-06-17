@@ -46,9 +46,9 @@ where
     F: OutputType + Neg<Output = F>,
 {
     #[doc(hidden)]
-    _pdo: PhantomData<F>,
+    pdf_: PhantomData<F>,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
 }
 
 impl<I, F> Predicates<I, F>
@@ -115,7 +115,7 @@ where
         + Zero
         + Neg<Output = U>,
 {
-    // Why can't *all* integers implement is_negative()?
+    // Why can't *all* integers implement is_negative()? E.g u64 would just always return false.
     // It would make it easier to implement generic code
     let a1: T = if a1_ < T::zero() { -a1_ } else { a1_ };
     let b1: T = if b1_ < T::zero() { -b1_ } else { b1_ };
@@ -160,9 +160,9 @@ where
     F: OutputType + Neg<Output = F>,
 {
     #[doc(hidden)]
-    _pdo: PhantomData<F>,
+    pdf_: PhantomData<F>,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
 }
 
 impl<I, F> OrientationTest<I, F>
@@ -220,7 +220,7 @@ where
     I: InputType + Neg<Output = I>,
 {
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
 }
 
 impl<I> PointComparisonPredicate<I>
@@ -245,21 +245,15 @@ where
     F: OutputType + Neg<Output = F>,
 {
     #[doc(hidden)]
-    _pdo: PhantomData<F>,
+    pdf_: PhantomData<F>,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
-    #[doc(hidden)]
-    _pdbi: PhantomData<i64>,
-    #[doc(hidden)]
-    _pdbf: PhantomData<f64>,
+    pdi_: PhantomData<I>,
 }
 
 impl<I, F> EventComparisonPredicate<I, F>
 where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
-    i64: InputType + Neg<Output = i64>,
-    f64: OutputType + Neg<Output = f64>,
 {
     /// boolean predicate between two sites (bool int int)
     pub(crate) fn event_comparison_predicate_bii(
@@ -364,9 +358,9 @@ where
     F: OutputType + Neg<Output = F>,
 {
     #[doc(hidden)]
-    _pdo: PhantomData<F>,
+    pdo_: PhantomData<F>,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
 }
 
 impl<I, F> DistancePredicate<I, F>
@@ -595,9 +589,9 @@ where
     F: OutputType + Neg<Output = F>,
 {
     #[doc(hidden)]
-    _pdo: PhantomData<F>,
+    pdf_: PhantomData<F>,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
 }
 
 impl<I, F> NodeComparisonPredicate<I, F>
@@ -731,9 +725,9 @@ where
     F: OutputType + Neg<Output = F>,
 {
     #[doc(hidden)]
-    _pdo: PhantomData<F>,
+    pdf_: PhantomData<F>,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
 }
 
 impl<I, F> CircleExistencePredicate<I, F>
@@ -821,9 +815,9 @@ where
     F: OutputType + Neg<Output = F>,
 {
     #[doc(hidden)]
-    _pdo: PhantomData<F>,
+    pdf_: PhantomData<F>,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
 }
 
 #[allow(non_snake_case)]
@@ -916,6 +910,7 @@ where
         }
     }
 
+    #[allow(unknown_lints)]
     #[allow(clippy::branches_sharing_code)] // false positive
     fn pps(
         site1: &VSE::SiteEvent<I, F>,
@@ -1113,6 +1108,7 @@ where
             ),
             1_f64,
         );
+        #[allow(unknown_lints)] // for +stable
         #[allow(clippy::branches_sharing_code)] // false positive
         if OrientationTest::<I, F>::eval_f(orientation.fpv()) == Orientation::Collinear {
             tln!("  LazyCircleFormationFunctor::pss collinear");
@@ -1540,9 +1536,9 @@ where
     F: OutputType + Neg<Output = F>,
 {
     #[doc(hidden)]
-    _pdo: PhantomData<F>,
+    pdf_: PhantomData<F>,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
 }
 
 impl<I, F> CircleFormationFunctor<I, F>
@@ -1649,13 +1645,10 @@ where
     F: OutputType + Neg<Output = F>,
 {
     #[doc(hidden)]
-    _pdo: PhantomData<F>,
+    pdf_: PhantomData<F>,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
 }
-
-//type FptType = f64;
-//type EFptType = f64;
 
 impl<I, F> ExactCircleFormationFunctor<I, F>
 where

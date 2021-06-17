@@ -200,7 +200,7 @@ where
                 tln!("################################################");
                 if i >= 8 {
                     self.beach_line_
-                        .debug_print_all_compat(&self.circle_events_);
+                        .debug_print_all_compat(&self.circle_events_)?;
                     print!("");
                 }
                 i += 1;
@@ -219,7 +219,7 @@ where
                 self.process_circle_event(&mut output)?;
             }
 
-            self.circle_events_.pop_inactive_at_top();
+            self.circle_events_.pop_inactive_at_top()?;
         }
 
         self.beach_line_.clear();
@@ -342,7 +342,10 @@ where
         }
     }
 
-    fn deactivate_circle_event(&mut self, value: &Option<VB::BeachLineNodeKey<I, F>>) -> Result<(),BvError> {
+    fn deactivate_circle_event(
+        &mut self,
+        value: &Option<VB::BeachLineNodeKey<I, F>>,
+    ) -> Result<(), BvError> {
         if let Some(value) = value {
             let node_data = self.beach_line_.get_node(&value.get_index())?.1;
             let node_cell = node_data.get();
@@ -396,27 +399,27 @@ where
             if !site_event.is_segment() {
                 while !self.end_points_.is_empty()
                     // we checked with !is_empty(), unwrap is safe
-                    && &self.end_points_.peek().unwrap().site == site_event.point0()
+                    && self.end_points_.peek().unwrap().site() == site_event.point0()
                 {
                     // we checked with !is_empty(), unwrap is safe
                     let b_it = self.end_points_.peek().unwrap();
-                    let b_it = b_it.beachline_index;
+                    let b_it = *b_it.beachline_index();
                     let _ = self.end_points_.pop();
                     #[cfg(feature = "console_debug")]
                     {
                         self.beach_line_
-                            .debug_print_all_compat(&self.circle_events_);
+                            .debug_print_all_compat(&self.circle_events_)?;
                         print!("erasing beach_line:");
                         self.beach_line_.debug_print_all_compat_node(
-                            &self.beach_line_.get_node(&b_it).0,
+                            &self.beach_line_.get_node(&b_it)?.0,
                             &self.circle_events_,
-                        );
+                        )?;
                     }
                     self.beach_line_.erase(b_it)?;
                     #[cfg(feature = "console_debug")]
                     {
                         self.beach_line_
-                            .debug_print_all_compat(&self.circle_events_);
+                            .debug_print_all_compat(&self.circle_events_)?;
                     }
                 }
             } else {
@@ -447,7 +450,7 @@ where
                 && self.debug_circle_counter_ <= debug_range + 2
             {
                 self.beach_line_
-                    .debug_print_all_compat(&self.circle_events_);
+                    .debug_print_all_compat(&self.circle_events_)?;
                 //print!("right_it:"); self.beach_line_.debug_print_all_compat_node(&right_it);
             }
         }
@@ -479,7 +482,7 @@ where
 
                 // Insert new nodes into the beach line. Update the output.
                 //tln!("insert_new_arc right_it.is_none()");
-                let right_it_idx = self.insert_new_arc(site_arc, site_arc, site_event, output);
+                let right_it_idx = self.insert_new_arc(site_arc, site_arc, site_event, output)?;
                 {
                     let right_it_complete = self.beach_line_.get_node(&right_it_idx)?;
                     right_it = Some(right_it_complete.0);
@@ -505,7 +508,7 @@ where
                 left_it = {
                     let new_key = self.insert_new_arc(
                         *site_arc, *site_arc, site_event, /*right_it,*/ output,
-                    );
+                    )?;
                     Some(self.beach_line_.get_node(&new_key)?.0)
                 };
                 // tln!("left_it=insert_new_arc :{:?}", left_it.unwrap());
@@ -548,7 +551,7 @@ where
                 let site1 = *(left_it.unwrap().left_site());
 
                 // Insert new nodes into the beach line. Update the output.
-                let new_node_it = self.insert_new_arc(site_arc1, site_arc2, site_event, output);
+                let new_node_it = self.insert_new_arc(site_arc1, site_arc2, site_event, output)?;
 
                 // Add candidate circles to the circle event queue.
                 // There could be up to two circle events formed by
@@ -592,7 +595,13 @@ where
             self.debug_circle_counter_ += 1;
         }
         // Get the topmost circle event.
-        let e = self.circle_events_.top().unwrap();
+        let e = self.circle_events_.top()?.ok_or_else(|| {
+            BvError::InternalError(format!(
+                "No topmost circle event found. {}:{}",
+                file!(),
+                line!()
+            ))
+        })?;
         let circle_event = e.0.get();
         tln!("processing:CE{:?}", circle_event);
 
@@ -600,7 +609,6 @@ where
             .circle_events_
             .is_active(circle_event.get_index().unwrap())
         {
-            // todo: remove this panic when stable
             return Err(BvError::InternalError(format!(
                 "Internal error, the circle event should be active. {}:{}",
                 file!(),
@@ -613,7 +621,7 @@ where
         {
             t!("it_first:");
             self.beach_line_
-                .debug_print_all_compat_node(&it_first.0, &self.circle_events_);
+                .debug_print_all_compat_node(&it_first.0, &self.circle_events_)?;
         }
         // Get the C site.
         let site3 = it_first.0.right_site();
@@ -658,13 +666,13 @@ where
             #[cfg(feature = "console_debug")]
             {
                 self.beach_line_
-                    .debug_print_all_compat(&self.circle_events_);
+                    .debug_print_all_compat(&self.circle_events_)?;
                 t!("replace key ");
                 self.beach_line_
-                    .debug_print_all_compat_node(&it_first_key_before, &self.circle_events_);
+                    .debug_print_all_compat_node(&it_first_key_before, &self.circle_events_)?;
                 t!("b4:   ");
                 self.beach_line_
-                    .debug_print_all_compat_node(&it_first_key_before, &self.circle_events_);
+                    .debug_print_all_compat_node(&it_first_key_before, &self.circle_events_)?;
             }
             let rv = self
                 .beach_line_
@@ -672,7 +680,7 @@ where
             #[cfg(feature = "console_debug")]
             {
                 self.beach_line_
-                    .debug_print_all_compat(&self.circle_events_);
+                    .debug_print_all_compat(&self.circle_events_)?;
                 self.beach_line_.debug_print_all_cmp();
                 tln!();
             }
@@ -695,21 +703,21 @@ where
         #[cfg(feature = "console_debug")]
         {
             self.beach_line_
-                .debug_print_all_compat(&self.circle_events_);
+                .debug_print_all_compat(&self.circle_events_)?;
             t!("erasing beach_line:");
             self.beach_line_
-                .debug_print_all_compat_node(&it_last.0, &self.circle_events_);
+                .debug_print_all_compat_node(&it_last.0, &self.circle_events_)?;
         }
         // Remove the (B, C) bisector node from the beach line.
         self.beach_line_.erase(it_last.0.get_index())?;
         #[cfg(feature = "console_debug")]
         self.beach_line_
-            .debug_print_all_compat(&self.circle_events_);
+            .debug_print_all_compat(&self.circle_events_)?;
 
         let it_last = (it_first.0, it_first.0.get_index());
 
         // Pop the topmost circle event from the event queue.
-        self.circle_events_.pop_and_destroy();
+        self.circle_events_.pop_and_destroy()?;
 
         // Check new triplets formed by the neighboring arcs
         // to the left for potential circle events.
@@ -756,7 +764,7 @@ where
         site_arc2: VSE::SiteEvent<I, F>,
         site_event: VSE::SiteEvent<I, F>,
         output: &mut VD::Diagram<I, F>,
-    ) -> VB::BeachLineIndex {
+    ) -> Result<VB::BeachLineIndex, BvError> {
         tln!(
             "->insert_new_arc(\n  site_arc1:{:?}\n  ,site_arc2:{:?}\n  ,site_event:{:?}",
             site_arc1,
@@ -786,7 +794,7 @@ where
             new_right_node,
             Some(VB::BeachLineNodeData::new_1(edges.1)),
             &self.circle_events_,
-        );
+        )?;
 
         if site_event.is_segment() {
             // Update the beach line with temporary bisector, that will
@@ -798,9 +806,9 @@ where
             #[cfg(feature = "console_debug")]
             let new_node = self
                 .beach_line_
-                .insert(new_node, None, &self.circle_events_);
+                .insert(new_node, None, &self.circle_events_)?;
             #[cfg(not(feature = "console_debug"))]
-            let new_node = self.beach_line_.insert(new_node, None);
+            let new_node = self.beach_line_.insert(new_node, None)?;
             // Update the data structure that holds temporary bisectors.
             self.end_points_.push(VEP::EndPointPair::new(
                 *site_event.point1(),
@@ -811,15 +819,17 @@ where
 
         #[cfg(not(feature = "console_debug"))]
         {
-            self.beach_line_
-                .insert(new_left_node, Some(new_node_data))
-                .get_index()
+            Ok(self
+                .beach_line_
+                .insert(new_left_node, Some(new_node_data))?
+                .get_index())
         }
         #[cfg(feature = "console_debug")]
         {
-            self.beach_line_
-                .insert(new_left_node, Some(new_node_data), &self.circle_events_)
-                .get_index()
+            Ok(self
+                .beach_line_
+                .insert(new_left_node, Some(new_node_data), &self.circle_events_)?
+                .get_index())
         }
     }
 
@@ -854,7 +864,7 @@ where
                     {
                         t!("with bisector_node: ");
                         self.beach_line_
-                            .debug_print_all_compat_node(&b.0, &self.circle_events_);
+                            .debug_print_all_compat_node(&b.0, &self.circle_events_)?;
                     }
                 } else {
                     return Err(BvError::InternalError(format!(

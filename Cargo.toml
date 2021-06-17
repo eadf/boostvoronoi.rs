@@ -42,6 +42,9 @@ path = "example/fltk_gui.rs"
 name = "main"
 path = "example/main.rs"
 
+[build-dependencies]
+version_check = "0.9"
+
 [dev-dependencies]
 geo = ">=0.17.1,<=0.18"
 fltk = "1.0"

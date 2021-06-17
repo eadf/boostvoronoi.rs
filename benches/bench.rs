@@ -10,6 +10,7 @@ fn bench_1(c: &mut Criterion) {
     c.bench_function("bench_1", |b| {
         b.iter({
             || {
+                // same test as large_segment_1()
                 let (_output, _v, _s) = {
                     let points: [[I; 2]; 45] = [
                         [303, 108],

@@ -479,7 +479,8 @@ fn main() -> Result<(), BvError> {
                         let w = &mut wind;
                         w.set_label(new_title.as_str());
                     }
-                    let _ = shared_data_bm.visualizer.build();
+                    // todo: handle error
+                    let _ = shared_data_bm.visualizer.build()?;
                     let _ = shared_data_bm.visualizer.re_calculate_affine();
                     app::redraw();
                 }
@@ -556,6 +557,7 @@ where
 
         // Construct voronoi diagram.
         self.diagram = vb.construct()?;
+        println!("Result: found {} vertices", self.diagram.vertices().len());
         self.points_aabb = {
             let mut aabb = VU::Aabb2::default();
             for p in self.point_data_.iter() {

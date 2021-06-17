@@ -10,7 +10,7 @@
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 //! A std::cell::Cell based version of the output data.
-//! See <https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_diagram.htm> for diagram description.
+//! See <https://www.boost.org/doc/libs/1_76_0/libs/polygon/doc/voronoi_diagram.htm> for diagram description.
 
 use super::circle_event as VC;
 use super::ctypes as CT;
@@ -32,7 +32,7 @@ use std::rc::Rc;
 
 pub type SourceIndex = usize;
 
-///! See <https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_diagram.htm>
+///! See <https://www.boost.org/doc/libs/1_76_0/libs/polygon/doc/voronoi_diagram.htm>
 
 /// Typed container for cell indices
 #[derive(Copy, Clone, Hash, PartialEq, Eq, Default)]
@@ -110,7 +110,7 @@ pub enum SourceCategory {
 /// Represents Voronoi cell.
 /// Data members:
 ///   1) index of the source within the initial input set
-///   2) pointer to the incident edge
+///   2) id of the incident edge
 ///   3) mutable color member
 /// Cell may contain point or segment site inside.
 ///
@@ -128,9 +128,9 @@ where
     incident_edge_: Option<EdgeIndex>,
     color_: ColorType,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
     #[doc(hidden)]
-    _pdo: PhantomData<F>,
+    pdf_: PhantomData<F>,
 }
 
 impl<I, F> fmt::Debug for Cell<I, F>
@@ -161,8 +161,8 @@ where
             source_index_: source_index,
             incident_edge_: None,
             color_: source_category,
-            _pdi: PhantomData,
-            _pdo: PhantomData,
+            pdi_: PhantomData,
+            pdf_: PhantomData,
         }
     }
 
@@ -245,13 +245,13 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    diagram: &'s Diagram<I, F>,
-    start_edge: EdgeIndex,
-    next_edge: Option<EdgeIndex>,
+    diagram_: &'s Diagram<I, F>,
+    start_edge_: EdgeIndex,
+    next_edge_: Option<EdgeIndex>,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
     #[doc(hidden)]
-    _pdf: PhantomData<F>,
+    pdf_: PhantomData<F>,
 }
 
 impl<'s, I, F> EdgeNextIterator<'s, I, F>
@@ -262,20 +262,20 @@ where
     pub(crate) fn new(diagram: &'s Diagram<I, F>, starting_edge: Option<EdgeIndex>) -> Self {
         if let Some(starting_edge) = starting_edge {
             Self {
-                diagram,
-                start_edge: starting_edge,
-                next_edge: Some(starting_edge),
-                _pdf: PhantomData,
-                _pdi: PhantomData,
+                diagram_: diagram,
+                start_edge_: starting_edge,
+                next_edge_: Some(starting_edge),
+                pdf_: PhantomData,
+                pdi_: PhantomData,
             }
         } else {
             Self {
-                diagram,
+                diagram_: diagram,
                 // Value does not matter next edge is None
-                start_edge: EdgeIndex(0),
-                next_edge: None,
-                _pdf: PhantomData,
-                _pdi: PhantomData,
+                start_edge_: EdgeIndex(0),
+                next_edge_: None,
+                pdf_: PhantomData,
+                pdi_: PhantomData,
             }
         }
     }
@@ -288,11 +288,11 @@ where
 {
     type Item = EdgeIndex;
     fn next(&mut self) -> Option<EdgeIndex> {
-        let rv = self.next_edge;
-        let new_next_edge = self.diagram._edge_get_next(self.next_edge);
+        let rv = self.next_edge_;
+        let new_next_edge = self.diagram_._edge_get_next(self.next_edge_);
 
-        self.next_edge = if let Some(nne) = new_next_edge {
-            if nne.0 == self.start_edge.0 {
+        self.next_edge_ = if let Some(nne) = new_next_edge {
+            if nne.0 == self.start_edge_.0 {
                 // Break the loop when we see starting edge again
                 None
             } else {
@@ -313,13 +313,13 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    diagram: &'s Diagram<I, F>,
+    diagram_: &'s Diagram<I, F>,
     start_edge: EdgeIndex,
     next_edge: Option<EdgeIndex>,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
     #[doc(hidden)]
-    _pdf: PhantomData<F>,
+    pdf_: PhantomData<F>,
 }
 
 impl<'s, I, F> EdgeRotNextIterator<'s, I, F>
@@ -330,20 +330,20 @@ where
     pub(crate) fn new(diagram: &'s Diagram<I, F>, starting_edge: Option<EdgeIndex>) -> Self {
         if let Some(starting_edge) = starting_edge {
             Self {
-                diagram,
+                diagram_: diagram,
                 start_edge: starting_edge,
                 next_edge: Some(starting_edge),
-                _pdf: PhantomData,
-                _pdi: PhantomData,
+                pdf_: PhantomData,
+                pdi_: PhantomData,
             }
         } else {
             Self {
-                diagram,
+                diagram_: diagram,
                 // Value does not matter; next edge is None
                 start_edge: EdgeIndex(0),
                 next_edge: None,
-                _pdf: PhantomData,
-                _pdi: PhantomData,
+                pdf_: PhantomData,
+                pdi_: PhantomData,
             }
         }
     }
@@ -357,7 +357,7 @@ where
     type Item = EdgeIndex;
     fn next(&mut self) -> Option<EdgeIndex> {
         let rv = self.next_edge;
-        let new_next_edge = self.diagram._edge_rot_next(self.next_edge);
+        let new_next_edge = self.diagram_._edge_rot_next(self.next_edge);
         self.next_edge = if let Some(nne) = new_next_edge {
             if nne.0 == self.start_edge.0 {
                 // Break the loop when we see starting edge again
@@ -380,13 +380,13 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    diagram: &'s Diagram<I, F>,
+    diagram_: &'s Diagram<I, F>,
     start_edge: EdgeIndex,
     next_edge: Option<EdgeIndex>,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
     #[doc(hidden)]
-    _pdf: PhantomData<F>,
+    pdf_: PhantomData<F>,
 }
 
 impl<'s, I, F> EdgeRotPrevIterator<'s, I, F>
@@ -398,20 +398,20 @@ where
     pub(crate) fn new(diagram: &'s Diagram<I, F>, starting_edge: Option<EdgeIndex>) -> Self {
         if let Some(starting_edge) = starting_edge {
             Self {
-                diagram,
+                diagram_: diagram,
                 start_edge: starting_edge,
                 next_edge: Some(starting_edge),
-                _pdf: PhantomData,
-                _pdi: PhantomData,
+                pdf_: PhantomData,
+                pdi_: PhantomData,
             }
         } else {
             Self {
-                diagram,
+                diagram_: diagram,
                 // Value does not matter next edge is None
                 start_edge: EdgeIndex(0),
                 next_edge: None,
-                _pdf: PhantomData,
-                _pdi: PhantomData,
+                pdf_: PhantomData,
+                pdi_: PhantomData,
             }
         }
     }
@@ -425,7 +425,7 @@ where
     type Item = EdgeIndex;
     fn next(&mut self) -> Option<EdgeIndex> {
         let rv = self.next_edge;
-        let new_next_edge = self.diagram.edge_rot_prev(self.next_edge);
+        let new_next_edge = self.diagram_.edge_rot_prev(self.next_edge);
         self.next_edge = if let Some(nne) = new_next_edge {
             if nne.0 == self.start_edge.0 {
                 // Break the loop when we see starting edge again
@@ -443,7 +443,7 @@ where
 /// Represents Voronoi vertex aka. Circle event.
 /// Data members:
 ///   1) vertex coordinates
-///   2) pointer to the incident edge
+///   2) id of the incident edge
 ///   3) mutable color member
 #[derive(Copy, Clone)]
 pub struct Vertex<I, F>
@@ -457,7 +457,7 @@ where
     pub(crate) incident_edge_: Option<EdgeIndex>,
     pub(crate) color_: ColorType,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
 }
 
 impl<I, F> fmt::Debug for Vertex<I, F>
@@ -500,7 +500,7 @@ where
             y_: y,
             incident_edge_: None,
             color_: color,
-            _pdi: PhantomData,
+            pdi_: PhantomData,
         }))
     }
 
@@ -571,12 +571,12 @@ where
 
 /// Half-edge data structure. Represents a Voronoi edge.
 /// Data members:
-///   1) pointer to the corresponding cell
-///   2) pointer to the vertex that is the starting
-///      point of the half-edge
-///   3) pointer to the twin edge
-///   4) pointer to the CCW next edge
-///   5) pointer to the CCW prev edge
+///   1) id of the corresponding cell
+///   2) id of to the vertex that is the starting
+///      point of the half-edge (optional)
+///   3) id of to the twin edge
+///   4) id of of the CCW next edge
+///   5) id of to the CCW prev edge
 ///   6) mutable color member
 #[derive(Copy, Clone)]
 pub struct Edge<I, F>
@@ -584,17 +584,17 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    _id: EdgeIndex,
-    _cell: Option<CellIndex>,
-    _vertex: Option<VertexIndex>,
-    _twin: Option<EdgeIndex>,
-    _next_ccw: Option<EdgeIndex>,
-    _prev_ccw: Option<EdgeIndex>,
-    _color: ColorType,
+    id_: EdgeIndex,
+    cell_: Option<CellIndex>,
+    vertex_: Option<VertexIndex>,
+    twin_: Option<EdgeIndex>,
+    next_ccw_: Option<EdgeIndex>,
+    prev_ccw_: Option<EdgeIndex>,
+    color_: ColorType,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
     #[doc(hidden)]
-    _pdo: PhantomData<F>,
+    pdf_: PhantomData<F>,
 }
 
 impl<I, F> fmt::Debug for Edge<I, F>
@@ -603,22 +603,17 @@ where
     F: OutputType + Neg<Output = F>,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut rv = String::new();
-
-        rv.push_str(
-            format!(
-                "id:{} cell:{} v0:{} t:{} n:{} p:{} c:{}",
-                self._id.0,
-                super::format_id(self._cell.map(|c| c.0)),
-                super::format_id(self._vertex.map(|v| v.0)),
-                super::format_id(self._twin.map(|e| e.0)),
-                super::format_id(self._next_ccw.map(|e| e.0)),
-                super::format_id(self._prev_ccw.map(|e| e.0)),
-                self._color
-            )
-            .as_str(),
-        );
-        write!(f, "{}", rv)
+        write!(
+            f,
+            "id:{} cell:{} v0:{} t:{} n:{} p:{} c:{}",
+            self.id_.0,
+            super::format_id(self.cell_.map(|c| c.0)),
+            super::format_id(self.vertex_.map(|v| v.0)),
+            super::format_id(self.twin_.map(|e| e.0)),
+            super::format_id(self.next_ccw_.map(|e| e.0)),
+            super::format_id(self.prev_ccw_.map(|e| e.0)),
+            self.color_
+        )
     }
 }
 
@@ -633,53 +628,54 @@ where
 
     fn new(id: EdgeIndex, cell: CellIndex, is_linear: bool, is_primary: bool) -> EdgeType<I, F> {
         let mut rv = Self {
-            _id: id,
-            _cell: Some(cell),
-            _vertex: None,
-            _twin: None,
-            _next_ccw: None,
-            _prev_ccw: None,
-            _color: 0,
-            _pdi: PhantomData,
-            _pdo: PhantomData,
+            id_: id,
+            cell_: Some(cell),
+            vertex_: None,
+            twin_: None,
+            next_ccw_: None,
+            prev_ccw_: None,
+            color_: 0,
+            pdi_: PhantomData,
+            pdf_: PhantomData,
         };
         if is_linear {
-            rv._color |= Self::BIT_IS_LINEAR;
+            rv.color_ |= Self::BIT_IS_LINEAR;
         }
         if is_primary {
-            rv._color |= Self::BIT_IS_PRIMARY;
+            rv.color_ |= Self::BIT_IS_PRIMARY;
         }
         Rc::from(cell::Cell::from(rv))
     }
 
     pub fn id(&self) -> EdgeIndex {
-        self._id
+        self.id_
     }
 
     pub(crate) fn _cell(&self) -> Option<CellIndex> {
-        self._cell
+        self.cell_
     }
 
+    /// Returns the cell index of this edge, or a BvError
     pub fn cell(&self) -> Result<CellIndex, BvError> {
-        self._cell.ok_or_else(|| {
+        self.cell_.ok_or_else(|| {
             BvError::ValueError("Edge didn't have any valid cell associated to it.".to_string())
         })
     }
 
-    /// returns vertex0, it is perfectly ok for an edge to not contain a vertex0 so no
+    /// Returns vertex0, it is perfectly ok for an edge to not contain a vertex0 so no
     /// Result<..> is needed here.
     pub fn vertex0(&self) -> Option<VertexIndex> {
-        self._vertex
+        self.vertex_
     }
 
     /// Returns the twin edge
     pub(crate) fn _twin(&self) -> Option<EdgeIndex> {
-        self._twin
+        self.twin_
     }
 
-    /// Returns the twin edge
+    /// Returns the twin edge or an error
     pub fn twin(&self) -> Result<EdgeIndex, BvError> {
-        self._twin.ok_or_else(|| {
+        self.twin_.ok_or_else(|| {
             BvError::ValueError(
                 "Edge didn't have any valid twin edge associated to it.".to_string(),
             )
@@ -688,21 +684,24 @@ where
 
     /// returns the next edge (counter clockwise winding)
     pub(crate) fn _next(&self) -> Option<EdgeIndex> {
-        self._next_ccw
+        self.next_ccw_
     }
 
-    /// returns the next edge (counter clockwise winding)
+    /// returns the next edge (counter clockwise winding) or an error
     pub fn next(&self) -> Result<EdgeIndex, BvError> {
-        self._next_ccw.ok_or_else(|| {
-            BvError::ValueError(
-                "Edge didn't have any valid next edge associated to it.".to_string(),
-            )
+        self.next_ccw_.ok_or_else(|| {
+            BvError::ValueError(format!(
+                "Edge {} didn't have any valid next edge associated to it. {}:{}",
+                self.id_.0,
+                file!(),
+                line!()
+            ))
         })
     }
 
     /// returns the previous edge (counter clockwise winding)
     pub(crate) fn _prev(&self) -> Option<EdgeIndex> {
-        self._prev_ccw
+        self.prev_ccw_
     }
 
     /// returns the previous edge (counter clockwise winding)
@@ -716,7 +715,7 @@ where
     /// Returns false if the edge is curved (parabolic arc).
     #[inline]
     pub fn is_linear(&self) -> bool {
-        (self._color & Self::BIT_IS_LINEAR) != 0
+        (self.color_ & Self::BIT_IS_LINEAR) != 0
     }
 
     /// Returns true if the edge is curved (parabolic arc).
@@ -730,7 +729,7 @@ where
     /// Returns true else.
     #[inline]
     pub fn is_primary(&self) -> bool {
-        (self._color & Self::BIT_IS_PRIMARY) != 0
+        (self.color_ & Self::BIT_IS_PRIMARY) != 0
     }
 
     /// Returns true if edge goes through the endpoint of the segment.
@@ -743,15 +742,15 @@ where
     /// get_color returns the custom edge info. (does not contain the reserved bits)
     #[inline(always)]
     pub fn get_color(&self) -> ColorType {
-        self._color >> ColorBits::BITS_SHIFT.0
+        self.color_ >> ColorBits::BITS_SHIFT.0
     }
 
     /// set_color sets the custom edge info. (does not affect the reserved bits)
     #[inline(always)]
     pub fn set_color(&mut self, color: ColorType) -> ColorType {
-        self._color &= ColorBits::BITMASK.0;
-        self._color |= color << ColorBits::BITS_SHIFT.0;
-        self._color
+        self.color_ &= ColorBits::BITMASK.0;
+        self.color_ |= color << ColorBits::BITS_SHIFT.0;
+        self.color_
     }
 
     /// or_color sets the custom edge info together with the previous value. (does not affect the reserved bits)
@@ -767,7 +766,7 @@ pub type VertexType<I, F> = Rc<cell::Cell<Vertex<I, F>>>;
 
 /// Voronoi output data structure.
 /// CCW ordering is used on the faces perimeter and around the vertices.
-/// Mandatory reading: <https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_diagram.htm>
+/// Mandatory reading: <https://www.boost.org/doc/libs/1_76_0/libs/polygon/doc/voronoi_diagram.htm>
 #[derive(Default, Debug)]
 pub struct Diagram<I, F>
 where
@@ -1162,6 +1161,7 @@ where
         let rv = self.edges_.get(edge_id.unwrap().0);
         if rv.is_none() {
             dbg!(edge_id.unwrap().0);
+            // todo: remove this panic and raise error?
             panic!();
         }
         rv
@@ -1171,7 +1171,7 @@ where
     /// edge_id is compensated accordingly
     pub(crate) fn _edge_copy(&self, dest: usize, source: usize) {
         let mut e = self.edges_[source].get();
-        e._id = EdgeIndex(dest);
+        e.id_ = EdgeIndex(dest);
         self.edges_[dest].set(e);
     }
 
@@ -1243,7 +1243,7 @@ where
         }
         if let Some(edgecell) = self._edge_get(edge_id) {
             let mut edge = edgecell.get();
-            edge._twin = twin_id;
+            edge.twin_ = twin_id;
             edgecell.set(edge);
         }
     }
@@ -1315,7 +1315,7 @@ where
         }
         if let Some(edgecell) = self._edge_get(edge_id) {
             let mut edge = edgecell.get();
-            edge._cell = cell_id;
+            edge.cell_ = cell_id;
             edgecell.set(edge);
         }
     }
@@ -1425,7 +1425,7 @@ where
         }
         if let Some(edgecell) = self._edge_get(edge_id) {
             let mut edge = edgecell.get();
-            edge._vertex = vertex_id;
+            edge.vertex_ = vertex_id;
             edgecell.set(edge);
         }
     }
@@ -1462,7 +1462,7 @@ where
         }
         if let Some(edgecell) = self._edge_get(edge_id) {
             let mut edge = edgecell.get();
-            edge._prev_ccw = prev_id;
+            edge.prev_ccw_ = prev_id;
             edgecell.set(edge);
         }
     }
@@ -1474,7 +1474,7 @@ where
         }
         if let Some(edgecell) = self._edge_get(edge_id) {
             let mut edge = edgecell.get();
-            edge._next_ccw = next_id;
+            edge.next_ccw_ = next_id;
             edgecell.set(edge);
         }
     }
@@ -1882,8 +1882,8 @@ where
         tln!("edges {} {}", text, self.edges_.len());
         for (i, e) in self.edges_.iter().enumerate() {
             let e = e.get();
-            tln!("edge{} ({:?})", e._id.0, &e);
-            assert_eq!(i, e._id.0);
+            tln!("edge{} ({:?})", e.id_.0, &e);
+            assert_eq!(i, e.id_.0);
         }
     }
 }
@@ -1894,10 +1894,10 @@ where
     F: OutputType + Neg<Output = F>,
 {
     fn from(other: Diagram<I, F>) -> SD::SyncDiagram<I, F> {
-        SD::SyncDiagram {
-            cells: other.cells_.into_iter().map(|x| x.get()).collect(),
-            vertices: other.vertices_.into_iter().map(|x| x.get()).collect(),
-            edges: other.edges_.into_iter().map(|x| x.get()).collect(),
-        }
+        SD::SyncDiagram::new(
+            other.cells_.into_iter().map(|x| x.get()).collect(),
+            other.vertices_.into_iter().map(|x| x.get()).collect(),
+            other.edges_.into_iter().map(|x| x.get()).collect(),
+        )
     }
 }

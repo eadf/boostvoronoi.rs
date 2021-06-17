@@ -18,7 +18,8 @@
 #![deny(bare_trait_objects)]
 #![deny(ellipsis_inclusive_range_patterns)]
 #![deny(elided_lifetimes_in_paths)]
-#![feature(map_first_last)]
+#![cfg_attr(feature = "map_first_last", feature(map_first_last))]
+
 use core::fmt::Debug;
 use extended_exp_fpt as EX;
 use extended_int as EI;
@@ -267,7 +268,7 @@ where
     I: InputType + Neg<Output = I>,
 {
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
 }
 
 impl<I> TypeConverter1<I>
@@ -319,9 +320,9 @@ where
     F: OutputType + Neg<Output = F>,
 {
     #[doc(hidden)]
-    _pdo: PhantomData<F>,
+    pdf_: PhantomData<F>,
     #[doc(hidden)]
-    _pdi: PhantomData<I>,
+    pdi_: PhantomData<I>,
 }
 
 impl<I, F> TypeConverter2<I, F>

@@ -59,7 +59,7 @@ where
     initial_index_: SiteEventIndexType,
     flags_: VD::ColorType,
     #[doc(hidden)]
-    _pdo: PhantomData<F>,
+    pdf_: PhantomData<F>,
 }
 
 impl<I, F> fmt::Debug for SiteEvent<I, F>
@@ -137,6 +137,7 @@ where
     I: InputType + Neg<Output = I>,
     O: OutputType + Neg<Output = O>,
 {
+    /// todo: does sorted_index_ AND initial_index_ need to be part of the hash?
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.point0_.hash(state);
         self.point1_.hash(state);
@@ -151,27 +152,27 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    pub fn new_2(a: Point<I>, initial_index_: SiteEventIndexType) -> SiteEvent<I, F> {
+    pub fn new_2(a: Point<I>, initial_index: SiteEventIndexType) -> SiteEvent<I, F> {
         Self {
             point0_: a,
             point1_: a,
             sorted_index_: 0,
-            initial_index_,
+            initial_index_: initial_index,
             flags_: VD::ColorBits::SINGLE_POINT.0,
             #[doc(hidden)]
-            _pdo: PhantomData,
+            pdf_: PhantomData,
         }
     }
 
-    pub fn new_3(a: Point<I>, b: Point<I>, initial_index_: SiteEventIndexType) -> SiteEvent<I, F> {
+    pub fn new_3(a: Point<I>, b: Point<I>, initial_index: SiteEventIndexType) -> SiteEvent<I, F> {
         Self {
             point0_: a,
             point1_: b,
             sorted_index_: 0,
-            initial_index_,
+            initial_index_: initial_index,
             flags_: 0,
             #[doc(hidden)]
-            _pdo: PhantomData,
+            pdf_: PhantomData,
         }
     }
 
@@ -192,7 +193,7 @@ where
             sorted_index_: sorted_index,
             initial_index_: initial_index,
             flags_: flags,
-            _pdo: PhantomData,
+            pdf_: PhantomData,
         }
     }
     /*

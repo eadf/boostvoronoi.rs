@@ -24,8 +24,8 @@ pub(crate) struct EndPointPair<I>
 where
     I: InputType + Neg<Output = I>,
 {
-    pub(crate) site: Point<I>,
-    pub(crate) beachline_index: VB::BeachLineIndex,
+    site_: Point<I>,
+    beachline_index_: VB::BeachLineIndex,
 }
 
 impl<I> EndPointPair<I>
@@ -34,9 +34,19 @@ where
 {
     pub(crate) fn new(first: Point<I>, second: VB::BeachLineIndex) -> Self {
         Self {
-            site: first,
-            beachline_index: second,
+            site_: first,
+            beachline_index_: second,
         }
+    }
+
+    /// Returns a reference to the site point
+    pub(crate) fn site(&self) -> &Point<I> {
+        &self.site_
+    }
+
+    /// Returns a reference to the beachline index
+    pub(crate) fn beachline_index(&self) -> &VB::BeachLineIndex {
+        &self.beachline_index_
     }
 }
 
@@ -54,9 +64,10 @@ where
     I: InputType + Neg<Output = I>,
 {
     fn cmp(&self, other: &Self) -> Ordering {
-        if VP::PointComparisonPredicate::<I>::point_comparison_predicate(&self.site, &other.site) {
+        if VP::PointComparisonPredicate::<I>::point_comparison_predicate(&self.site_, &other.site_)
+        {
             Ordering::Greater
-        } else if self.site == other.site {
+        } else if self.site_ == other.site_ {
             Ordering::Equal
         } else {
             Ordering::Less
@@ -69,7 +80,7 @@ where
     I: InputType + Neg<Output = I>,
 {
     fn eq(&self, other: &Self) -> bool {
-        self.site.eq(&other.site)
+        self.site_.eq(&other.site_)
     }
 }
 

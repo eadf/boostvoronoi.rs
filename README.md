@@ -1,3 +1,5 @@
+![Rusty voronoi](img/title.png)
+
 [![Crates.io](https://meritbadge.herokuapp.com/boostvoronoi)](https://crates.io/crates/boostvoronoi)
 [![Documentation](https://docs.rs/boostvoronoi/badge.svg)](https://docs.rs/boostvoronoi)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)
@@ -5,16 +7,15 @@
 [![dependency status](https://deps.rs/crate/boostvoronoi/0.8.4/status.svg)](https://deps.rs/crate/boostvoronoi/0.8.4)
 
 # Segmented Voronoi for Rust
-![Rusty voronoi](img/title.png)
 
 
-[Boost 1.76.0 polygon::voronoi](https://www.boost.org/doc/libs/1_75_0/libs/polygon/doc/voronoi_main.htm) ported to 100% rust 
-This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) works for line segments as well as points, making it useful for calculating [centerlines (like the image above, made using this library)](https://github.com/eadf/toxicblend.rs).
+[Boost 1.76.0 polygon::voronoi](https://www.boost.org/doc/libs/1_76_0/libs/polygon/doc/voronoi_main.htm) ported to 100% rust.
+This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) works for line segments as well as points, making it useful for calculating centerlines [(like the title image above)](https://github.com/eadf/toxicblend.rs).
 
 Code still in development, not ready for any purpose.
 
-# Note
-The code uses ```#![feature(map_first_last)]``` i.e. rust nightly.
+The code uses ```#![feature(map_first_last)]``` if run on +nightly, this is only emulated on +stable.
+So +nightly should be somewhat faster.
 
 ![Rusty voronoi](img/img.png)
 
@@ -54,7 +55,7 @@ Edges may become curves when line segments are used as input, see the example co
 ## Todo
 - [x] Fix the degenerate vertex key problem
 - [ ] Fix the beach-line key problem
-- [ ] Error handling
+- [x] Error handling
 - [X] Evaluate the generic API. Is <I1, F1, I2, F2> really needed?
 - [ ] Verify the builtin ulp implementation
 - [x] Replace num::BigInt with something lighter

@@ -141,9 +141,9 @@ fn large_segment_1() -> Result<(), BvError> {
         let _s = to_segments::<I1, I1>(&segments);
 
         let mut vb = Builder::<I1, F1>::default();
-        vb.with_vertices(_v.iter()).expect("large_segment_1");
-        vb.with_segments(_s.iter()).expect("large_segment_1");
-        (vb.construct().expect("large_segment_1"), _v, _s)
+        vb.with_vertices(_v.iter())?;
+        vb.with_segments(_s.iter())?;
+        (vb.construct()?, _v, _s)
     };
     assert_eq!(output.cells().len(), 161);
     let cell = output.cells()[0].get();

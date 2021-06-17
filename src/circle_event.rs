@@ -13,6 +13,7 @@ use super::beach_line as VB;
 use super::extended_exp_fpt as EX;
 
 use super::OutputType;
+use crate::BvError;
 use ordered_float::OrderedFloat;
 use std::cell::Cell;
 use std::cmp::Ordering;
@@ -42,7 +43,7 @@ impl fmt::Display for CircleEventIndex {
 
 impl fmt::Debug for CircleEventIndex {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "BeachLineIndex({})", self.0)
+        write!(f, "CircleEventIndex({})", self.0)
     }
 }
 
@@ -65,7 +66,7 @@ pub struct CircleEvent {
     center_y_: OrderedFloat<f64>,
     lower_x_: OrderedFloat<f64>,
     beach_line_index_: Option<VB::BeachLineIndex>, //beach_line_iterator in C++
-    is_site_point: bool,
+    is_site_point_: bool,
 }
 
 impl fmt::Debug for CircleEvent {
@@ -86,13 +87,14 @@ impl Default for CircleEvent {
             center_y_: OrderedFloat(0_f64),
             lower_x_: OrderedFloat(0_f64),
             beach_line_index_: None,
-            is_site_point: false,
+            is_site_point_: false,
         }
     }
 }
 
 impl PartialEq for CircleEvent {
     fn eq(&self, other: &Self) -> bool {
+        //println!("eq self.idx:{:?}, other.idx:{:?}", self.index_, other.index_);
         self.center_x_ == other.center_x_
             && self.center_y_ == other.center_y_
             && self.lower_x_ == other.lower_x_
@@ -114,15 +116,32 @@ impl PartialOrd for CircleEvent {
 impl Ord for CircleEvent {
     fn cmp(&self, other: &Self) -> Ordering {
         if self.lower_x() != other.lower_x() {
-            return if self.lower_x() < other.lower_x() {
+            if self.lower_x() < other.lower_x() {
                 Ordering::Less
             } else {
                 Ordering::Greater
-            };
+            }
         } else if self.y() < other.y() {
-            return Ordering::Less;
+            Ordering::Less
+        } else if self.y() == other.y() {
+            //println!("cmp self.lx():{:.12}, other.lx:{:.12} si:{:?}", self.lower_x(), other.lower_x(), self._index);
+            //println!("cmp self.y():{:.12}, other.y:{:.12} oi:{:?}", self.y(), other.y(), self._index);
+            //println!("cmp self.idx:{:?}, other.idx:{:?}", self.index_, other.index_);
+            if let Some(self_index) = self.index_ {
+                if let Some(other_index) = other.index_ {
+                    self_index.0.cmp(&other_index.0)
+                } else {
+                    //todo: fix
+                    Ordering::Greater
+                }
+            } else {
+                //todo: fix
+                Ordering::Greater
+            }
+        } else {
+            //todo: fix
+            Ordering::Greater
         }
-        Ordering::Greater
     }
 }
 
@@ -184,12 +203,12 @@ impl CircleEventC {
 
     pub(crate) fn set_is_site_point(&self) {
         let mut selfc = self.0.get();
-        selfc.is_site_point = true;
+        selfc.is_site_point_ = true;
         self.0.set(selfc)
     }
     #[allow(dead_code)]
     pub(crate) fn is_site_point(&self) -> bool {
-        self.0.get().is_site_point
+        self.0.get().is_site_point_
     }
 }
 
@@ -231,7 +250,7 @@ where
             lower_x_: OrderedFloat(0_f64),
             beach_line_index_: Some(bech_line_index),
             index_: None,
-            is_site_point: false,
+            is_site_point_: false,
         }
     }
 
@@ -272,6 +291,7 @@ where
         self.center_y_
     }
 
+    /// convert self.y() to ExtendedExponentFpt
     #[allow(dead_code)]
     pub(crate) fn y_as_ext(&self) -> EX::ExtendedExponentFpt<f64> {
         EX::ExtendedExponentFpt::<f64>::from(self.center_y_.into_inner())
@@ -330,7 +350,7 @@ where
 
     #[inline(always)]
     pub(crate) fn is_site_point(&self) -> bool {
-        self.is_site_point
+        self.is_site_point_
     }
 }
 
@@ -342,95 +362,149 @@ pub type CircleEventType = Rc<CircleEventC>;
 /// iterators (there is no direct ability to modify its elements).
 /// Instead list is used to store all the circle events and priority queue
 /// of the iterators to the list elements is used to keep the correct circle
-/// events ordering. (todo: this is a comment from c++, convert to rust)
+/// events ordering. (todo: this comment text is from c++, convert to rust)
 pub(crate) struct CircleEventQueue {
-    c_: BTreeSet<CircleEventType>,
-    c_list_: VecMap<CircleEventType>,
-    c_list_next_free_index_: CircleEventIndex,
-    inactive_circle_ids_: yabf::Yabf, // Circle events turned inactive
+    _c: BTreeSet<CircleEventType>,
+    // todo: replace with ahash?
+    _c_list: VecMap<CircleEventType>,
+    _c_list_next_free_index: CircleEventIndex,
+    _inactive_circle_ids: yabf::Yabf, // Circle events turned inactive
 }
 
 impl Default for CircleEventQueue {
     fn default() -> CircleEventQueue {
         Self {
-            c_: BTreeSet::new(),
-            c_list_: VecMap::new(),
-            c_list_next_free_index_: CircleEventIndex(0),
-            inactive_circle_ids_: yabf::Yabf::default(),
+            _c: BTreeSet::new(),
+            _c_list: VecMap::new(),
+            _c_list_next_free_index: CircleEventIndex(0),
+            _inactive_circle_ids: yabf::Yabf::default(),
         }
     }
 }
 
 impl CircleEventQueue {
+    #[inline]
     pub(crate) fn is_empty(&self) -> bool {
-        self.c_.is_empty()
+        self._c.is_empty()
     }
 
-    #[allow(dead_code)]
-    pub(crate) fn len(&self) -> usize {
-        //todo! assert_eq!(self.c_.len(), self.c_list_.len());
-        assert!(self.c_list_.len() <= self.c_list_next_free_index_.0);
-        self.c_.len()
-    }
-
+    /// the real first() for +nightly builds
+    #[inline(always)]
+    #[cfg(feature = "map_first_last")]
     pub(crate) fn peek(&self) -> Option<&CircleEventType> {
-        // Todo: maybe iterate until a non-removed event is found
-        self.c_.first()
+        self._c.first()
     }
 
-    pub(crate) fn pop_inactive_at_top(&mut self) {
-        let size_b4 = self.c_.len();
+    /// simulated first() for +stable builds
+    #[cfg(not(feature = "map_first_last"))]
+    #[inline]
+    pub(crate) fn peek(&self) -> Option<&CircleEventType> {
+        // super inefficient implementation of 'first()'
+        self._c.iter().next()
+    }
+
+    /// the real pop_firs() for +nightly builds
+    #[inline(always)]
+    #[cfg(feature = "map_first_last")]
+    fn pop_first(&mut self) -> Option<CircleEventType> {
+        self._c.pop_first()
+    }
+
+    /// simulated pop_firs() for +stable builds
+    #[cfg(not(feature = "map_first_last"))]
+    #[inline]
+    fn pop_first(&mut self) -> Option<CircleEventType> {
+        //println!("->pop_first {}", self._c.len());
+        // super inefficient implementation of 'pop_first()'
+        let item = self._c.iter().next();
+        //println!("{:?}", item);
+        let item = item.cloned();
+        //println!("{:?}", item);
+        if let Some(item) = item {
+            //println!("->pop_first {} {:?}", self._c.len(), item);
+            assert!(self._c.remove(&item));
+            //println!("<-pop_first {}", self._c.len());
+            Some(item)
+        } else {
+            //println!("<-pop_first nop {}", self._c.len());
+            None
+        }
+    }
+
+    pub(crate) fn pop_inactive_at_top(&mut self) -> Result<(), BvError> {
+        //let size_b4 = self.c_.len();
 
         while !self.is_empty() {
-            if let Some(peek) = self.c_.first() {
+            if let Some(peek) = self.peek() {
                 if let Some(peek) = peek.0.get().get_index() {
                     //dbg!(peek);
                     if !self.is_active(peek) {
-                        self.pop_and_destroy();
+                        self.pop_and_destroy()?;
                         continue;
                     }
                 } else {
-                    panic!("there should be no id-less circle events in the heap");
+                    return Err(BvError::InternalError(format!(
+                        "Circle event had no id {}:{}",
+                        file!(),
+                        line!()
+                    )));
                 }
             }
             break;
         }
-        if size_b4 != self.c_.len() {
-            /*dbg!(
+        /*if size_b4 != self.c_.len() {
+            dbg!(
                 "popped some circle events",
                 size_b4,
                 self.c_list_.len(),
                 self.c_.len(),
                 self.inactive_circle_ids_.len()
-            );*/
+            );
+        }*/
+        // todo: remove this when stable
+        if self._c_list.len() != self._c.len() {
+            return Err(BvError::InternalError(format!(
+                "The two circle event lists should always be of the same size. {}:{}",
+                file!(),
+                line!()
+            )));
         }
-        if self.c_list_.len() != self.c_.len() {
-            assert_eq!(self.c_list_.len(), self.c_.len());
-        }
+        Ok(())
     }
 
     ///
     /// was named pop in C++, but it was never used to actually get the item, only to destroy it
     ///
-    pub(crate) fn pop_and_destroy(&mut self) {
-        if let Some(circle) = self.c_.pop_first() {
+    pub(crate) fn pop_and_destroy(&mut self) -> Result<(), BvError> {
+        if let Some(circle) = self.pop_first() {
             if let Some(circle_id) = circle.0.get().index_ {
-                let _ = self.c_list_.remove(circle_id.0);
-                let _ = self.inactive_circle_ids_.set_bit(circle_id.0, true);
+                let _ = self._c_list.remove(circle_id.0);
+                let _ = self._inactive_circle_ids.set_bit(circle_id.0, true);
             } else {
-                panic!("This should not have happened")
+                return Err(BvError::InternalError(format!(
+                    "circle event lists corruption, circle event id {:?} not found {}:{}",
+                    circle.0.get().index_,
+                    file!(),
+                    line!()
+                )));
             }
         }
-        if self.c_list_.len() != self.c_.len() {
-            assert_eq!(self.c_list_.len(), self.c_.len());
+        // todo: remove this when stable
+        if self._c_list.len() != self._c.len() {
+            return Err(BvError::InternalError(format!(
+                "The two circle event lists should always be of the same size. {}:{}",
+                file!(),
+                line!()
+            )));
         }
+        Ok(())
     }
 
     #[allow(dead_code)]
     pub(crate) fn clear(&mut self) {
-        self.c_.clear();
-        self.c_list_.clear();
-        self.inactive_circle_ids_ = yabf::Yabf::default()
+        self._c.clear();
+        self._c_list.clear();
+        self._inactive_circle_ids = yabf::Yabf::default()
     }
 
     /// Take ownership of the circle event,
@@ -442,57 +516,69 @@ impl CircleEventQueue {
         //assert!(!self.c_.contains(&cc)); // todo: is this supposed to happen?
         {
             let mut c = cc.0.get();
-            let _ = c.set_index(self.c_list_next_free_index_);
+            let _ = c.set_index(self._c_list_next_free_index);
             cc.0.set(c);
         }
 
         let _ = self
-            .c_list_
-            .insert(self.c_list_next_free_index_.0, cc.clone());
-        let _ = self.c_list_next_free_index_.increment();
-        let _ = self.c_.insert(cc.clone());
+            ._c_list
+            .insert(self._c_list_next_free_index.0, cc.clone());
+        let _ = self._c_list_next_free_index.increment();
+        let _ = self._c.insert(cc.clone());
         cc
     }
 
     pub(crate) fn is_active(&self, circle_event_id: CircleEventIndex) -> bool {
-        !self.inactive_circle_ids_.bit(circle_event_id.0)
+        !self._inactive_circle_ids.bit(circle_event_id.0)
     }
 
     pub(crate) fn deactivate(&mut self, circle_event_id: Option<CircleEventIndex>) {
         #[cfg(not(feature = "console_debug"))]
         if let Some(circle_event_id) = circle_event_id {
-            let _ = self.inactive_circle_ids_.set_bit(circle_event_id.0, true);
+            let _ = self._inactive_circle_ids.set_bit(circle_event_id.0, true);
         }
         #[cfg(feature = "console_debug")]
         if let Some(circle_event_id) = circle_event_id {
-            if !self.inactive_circle_ids_.bit(circle_event_id.0) {
-                if self.c_list_.contains_key(circle_event_id.0) {
-                    println!("deactivate {:?}", self.c_list_[circle_event_id.0]);
+            if !self._inactive_circle_ids.bit(circle_event_id.0) {
+                if self._c_list.contains_key(circle_event_id.0) {
+                    println!("deactivate {:?}", self._c_list[circle_event_id.0]);
                 } else {
                     println!("circle {} not present", circle_event_id);
                 }
-                let _ = self.inactive_circle_ids_.set_bit(circle_event_id.0, true);
+                let _ = self._inactive_circle_ids.set_bit(circle_event_id.0, true);
             }
         }
     }
 
-    pub(crate) fn top(&self) -> Option<&CircleEventType> {
-        let c = self.c_.first();
+    pub(crate) fn top(&self) -> Result<Option<&CircleEventType>, BvError> {
+        let c = self.peek();
         if let Some(cc) = c {
             let id = cc.0.get().index_.unwrap();
             if !self.is_active(id) {
-                panic!("Tried to use an inactive circle event");
+                return Err(BvError::InternalError(format!(
+                    "Tried to use an inactive circle event {}, {}:{}",
+                    id.0,
+                    file!(),
+                    line!()
+                )));
             }
         }
-        c
+        Ok(c)
     }
 
     #[cfg(feature = "console_debug")]
     pub(crate) fn dbg_ce(&self, cei: CircleEventIndex) {
-        if let Some(ce) = self.c_list_.get(cei.0) {
+        if let Some(ce) = self._c_list.get(cei.0) {
             print!("{:?}", ce);
         } else {
             print!("{}: not found", cei);
         }
+    }
+
+    /// Returns the number of circle events (both active and inactive)
+    /// Only used by test code.
+    #[allow(dead_code)]
+    pub(crate) fn len(&self) -> usize {
+        self._c.len()
     }
 }
