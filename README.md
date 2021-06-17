@@ -14,9 +14,6 @@ This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortu
 
 Code still in development, not ready for any purpose.
 
-The code uses ```#![feature(map_first_last)]``` if run on +nightly, this is only emulated on +stable.
-So +nightly should be somewhat faster.
-
 ![Rusty voronoi](img/img.png)
 
 Gui example:
@@ -51,6 +48,10 @@ vb.with_segments(s.iter())?;
 let result = vb.construct()?;
 ```
 Edges may become curves when line segments are used as input, see the example code for discretization and interpolation. 
+
+## Rust toolchain
+The code uses ```#![feature(map_first_last)]``` if run on +nightly, this is only emulated on +stable.
+So +nightly should be somewhat faster.
 
 ## Todo
 - [x] Fix the degenerate vertex key problem
