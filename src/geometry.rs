@@ -35,7 +35,7 @@ where
     }
 }
 
-/// Converts to boostvoronoi::geometry::Point from [T;2]
+/// Converts to boostvoronoi::geometry::Point from \[T;2\]
 /// ```
 /// # use boostvoronoi::geometry::*;
 /// let c = [1,2];
@@ -52,7 +52,7 @@ impl<T: InputType> From<[T; 2]> for Point<T> {
     }
 }
 
-/// Converts to boostvoronoi::geometry::Point from &[T;2]
+/// Converts to boostvoronoi::geometry::Point from &\[T;2\]
 /// ```
 /// # use boostvoronoi::geometry::*;
 /// let c = [1,2];
@@ -244,7 +244,7 @@ where
     }
 }
 
-/// A really simple 2d line container type - integer only
+/// A really simple 2d line type - integer only
 #[derive(Copy, Clone, cmp::PartialEq, cmp::Eq, Hash, Debug)]
 pub struct Line<T: InputType> {
     pub start: Point<T>,
@@ -270,7 +270,7 @@ impl<T: InputType> Line<T> {
     }
 }
 
-/// Converts to Line from [T;4]
+/// Converts to Line from \[T;4\]
 /// ```
 /// # use boostvoronoi::geometry::Line;
 /// let a = [0,1,2,3];
@@ -296,7 +296,7 @@ impl<T: InputType> From<[T; 4]> for Line<T>
     }
 }
 
-/// Converts to [T;4] from boostvoronoi::geometry::Line
+/// Converts to \[T;4\] from boostvoronoi::geometry::Line
 /// ```
 /// # use boostvoronoi::geometry::*;
 /// let l = Line::from([0,1,2,3]);
@@ -317,7 +317,7 @@ impl<T: InputType> From<Line<T>> for [T; 4]
     }
 }
 
-/// Converts to [T;4] from &boostvoronoi::geometry::Line
+/// Converts to \[T;4\] from &boostvoronoi::geometry::Line
 /// ```
 /// # use boostvoronoi::geometry::*;
 /// let l = Line::from([0,1,2,3]);
@@ -338,7 +338,7 @@ impl<T: InputType> From<&Line<T>> for [T; 4]
     }
 }
 
-/// Converts to Line from &[T;4]
+/// Converts to Line from &\[T;4\]
 /// ```
 /// # use boostvoronoi::geometry::Line;
 /// let a = [0,1,2,3];
@@ -364,7 +364,7 @@ impl<T:InputType> From<&[T; 4]> for Line<T>
     }
 }
 
-/// Converts to [T;2] from &boostvoronoi::diagram::Vertex
+/// Converts to \[T;2\] from &boostvoronoi::diagram::Vertex
 /// ```
 /// # use boostvoronoi::geometry::*;
 /// # use boostvoronoi::diagram::Vertex;
