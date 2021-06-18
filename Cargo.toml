@@ -41,10 +41,14 @@ debug_always_exact = []
 name = "fltk_gui"
 path = "example/fltk_gui.rs"
 
-# this bin is for development test purposes
-[[bin]]
+# this example is for development test purposes
+[[example]]
 name = "main"
 path = "example/main.rs"
+
+[[example]]
+name = "readme"
+path = "example/readme.rs"
 
 [build-dependencies]
 version_check = "0.9"

@@ -207,10 +207,9 @@ where
         self.internal_color().0 == ColorBits::SEGMENT_END_POINT.0
     }
 
-    /// TODO: this should return CellIndex
     #[inline(always)]
-    pub fn get_id(&self) -> SourceIndex {
-        self.id_.0
+    pub fn id(&self) -> CellIndex {
+        self.id_
     }
 
     /// Returns the origin index of the cell.
@@ -954,7 +953,7 @@ where
             initial_index,
             sc.0,
         ))));
-        assert_eq!(self.cells_[cell_id.0].get().get_id(), cell_id.0);
+        assert_eq!(self.cells_[cell_id.0].get().id().0, cell_id.0);
 
         let ccell = &self.cells_[cell_id.0];
         {
@@ -1036,7 +1035,13 @@ where
 
     /// Returns an edge iterator. This iterates over the edges belonging to this cell starting with
     /// the incident edge.
-    pub fn cell_edge_iterator(&self, cell_id: Option<CellIndex>) -> EdgeNextIterator<'_, I, F> {
+    pub fn cell_edge_iterator(&self, cell_id: CellIndex) -> EdgeNextIterator<'_, I, F> {
+        self._cell_edge_iterator(Some(cell_id))
+    }
+
+    /// Returns an edge iterator. This iterates over the edges belonging to this cell starting with
+    /// the incident edge.
+    fn _cell_edge_iterator(&self, cell_id: Option<CellIndex>) -> EdgeNextIterator<'_, I, F> {
         let incident_edge = self._cell_get_incident_edge(cell_id);
         EdgeNextIterator::<'_, I, F>::new(self, incident_edge)
     }

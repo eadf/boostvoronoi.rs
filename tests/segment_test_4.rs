@@ -112,7 +112,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
 
     assert_eq!(output.cells().len(), 9);
     let cell = output.cells()[0].get();
-    assert_eq!(cell.get_id(), 0);
+    assert_eq!(cell.id().0, 0);
     let (source_index, cat) = cell.source_index_2();
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Point { x: 94, y: 628 });
@@ -120,7 +120,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
     assert_eq!(cell.contains_point(), true);
     assert_eq!(cell.contains_segment(), false);
     let cell = output.cells()[1].get();
-    assert_eq!(cell.get_id(), 1);
+    assert_eq!(cell.id().0, 1);
     let (source_index, cat) = cell.source_index_2();
     assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
@@ -129,7 +129,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
     let cell = output.cells()[2].get();
-    assert_eq!(cell.get_id(), 2);
+    assert_eq!(cell.id().0, 2);
     let (source_index, cat) = cell.source_index_2();
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Point { x: 96, y: 170 });
@@ -137,7 +137,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
     assert_eq!(cell.contains_point(), true);
     assert_eq!(cell.contains_segment(), false);
     let cell = output.cells()[3].get();
-    assert_eq!(cell.get_id(), 3);
+    assert_eq!(cell.id().0, 3);
     let (source_index, cat) = cell.source_index_2();
     assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
@@ -146,7 +146,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
     let cell = output.cells()[4].get();
-    assert_eq!(cell.get_id(), 4);
+    assert_eq!(cell.id().0, 4);
     let (source_index, cat) = cell.source_index_2();
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Point { x: 147, y: 103 });
@@ -154,7 +154,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
     assert_eq!(cell.contains_point(), true);
     assert_eq!(cell.contains_segment(), false);
     let cell = output.cells()[5].get();
-    assert_eq!(cell.get_id(), 5);
+    assert_eq!(cell.id().0, 5);
     let (source_index, cat) = cell.source_index_2();
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Point { x: 200, y: 200 });
@@ -162,7 +162,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
     assert_eq!(cell.contains_point(), true);
     assert_eq!(cell.contains_segment(), false);
     let cell = output.cells()[6].get();
-    assert_eq!(cell.get_id(), 6);
+    assert_eq!(cell.id().0, 6);
     let (source_index, cat) = cell.source_index_2();
     assert_eq!(cat, VD::SourceCategory::Segment);
     let p = retrieve_point(&_v, &_s, (source_index, cat));
@@ -171,7 +171,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
     let cell = output.cells()[7].get();
-    assert_eq!(cell.get_id(), 7);
+    assert_eq!(cell.id().0, 7);
     let (source_index, cat) = cell.source_index_2();
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Point { x: 200, y: 400 });
@@ -179,7 +179,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
     assert_eq!(cell.contains_point(), true);
     assert_eq!(cell.contains_segment(), false);
     let cell = output.cells()[8].get();
-    assert_eq!(cell.get_id(), 8);
+    assert_eq!(cell.id().0, 8);
     let (source_index, cat) = cell.source_index_2();
     let p = retrieve_point(&_v, &_s, (source_index, cat));
     assert_eq!(p, Point { x: 512, y: 632 });
