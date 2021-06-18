@@ -335,6 +335,23 @@ where
         }
     }
 
+    #[cfg(feature = "beachline_corruption_check")]
+    /// check if each item in the btree is actually retrievable
+    pub(crate) fn corruption_check(&self) -> Result<(), BvError> {
+        for (blk, _) in self.beach_line_.iter() {
+            if self.beach_line_.get(blk).is_none() {
+                eprintln!("Could not re-find the beach-line key {:?}", blk);
+                return Err(BvError::InternalError(format!(
+                    "The beach-line is corrupted, could not re-find beach-line key: {:?} {}:{}",
+                    blk,
+                    file!(),
+                    line!()
+                )));
+            }
+        }
+        Ok(())
+    }
+
     #[cfg(feature = "console_debug")]
     #[allow(dead_code)]
     pub(crate) fn debug_print_all(&self) -> Result<(), BvError> {

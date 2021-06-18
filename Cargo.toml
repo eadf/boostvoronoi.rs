@@ -36,6 +36,7 @@ console_debug = []
 console_debug_eval = []
 cpp_compat_debug = []
 debug_always_exact = []
+beachline_corruption_check = []
 
 [[example]]
 name = "fltk_gui"

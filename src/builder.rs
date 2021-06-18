@@ -113,12 +113,6 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    /// todo replace with default
-    #[deprecated(since = "0.8.4", note = "Please use the default function instead")]
-    pub fn new() -> Builder<I, F> {
-        Self::default()
-    }
-
     pub fn with_vertices<'a, T>(&mut self, vertices: T) -> Result<(), BvError>
     where
         I: 'a,
@@ -170,7 +164,7 @@ where
         Ok(())
     }
 
-    /// Run sweepline algorithm and fill output data structure.
+    /// Run sweep-line algorithm and fill output data structure.
     pub fn construct(&mut self) -> Result<VD::Diagram<I, F>, BvError> {
         let mut output: VD::Diagram<I, F> = VD::Diagram::<I, F>::new(self.site_events_.len());
 
@@ -684,6 +678,8 @@ where
                 self.beach_line_.debug_print_all_cmp();
                 tln!();
             }
+            #[cfg(feature = "beachline_corruption_check")]
+            self.beach_line_.corruption_check()?;
             rv
         };
 

@@ -78,17 +78,11 @@ The code uses ```#![feature(map_first_last)]``` if run on +nightly, this is only
 So +nightly should be somewhat faster.
 
 ## Todo
-- [x] Fix the degenerate vertex key problem
 - [ ] Fix the beach-line key problem
 - [x] Error handling
-- [X] Evaluate the generic API. Is <I1, F1, I2, F2> really needed?
-- [ ] Verify the builtin ulp implementation
-- [x] Replace num::BigInt with something lighter
-- [ ] Add many more test cases for voronoi_robust_ftp.rs, specially for ulp
-- [x] Remove use of vec_map::VecMap where not absolutely needed.
+- [ ] Add many more test cases for voronoi_robust_ftp.rs
 - [ ] Benchmark and optimize
-- [x] Example GUI with more features. fltk?
-- [x] Fix the beach-line bug found with main.rs example
+- [ ] Once the beachline bug is fixed, replace builtin ulp with some rust crate. 
 
 All credit goes to the original author ([Andrii Sydorchuk](https://github.com/asydorchuk)) and the [boost contributors](https://github.com/boostorg/polygon), except the porting mistakes. They are all mine.
 

@@ -280,8 +280,7 @@ impl<T: InputType> Line<T> {
 /// assert_eq!(bl.end.x,a[2]);
 /// assert_eq!(bl.end.y,a[3]);
 /// ```
-impl<T: InputType> From<[T; 4]> for Line<T>
-{
+impl<T: InputType> From<[T; 4]> for Line<T> {
     fn from(line: [T; 4]) -> Line<T> {
         Line {
             start: Point {
@@ -306,14 +305,9 @@ impl<T: InputType> From<[T; 4]> for Line<T>
 /// assert_eq!(l.end.x,a[2]);
 /// assert_eq!(l.end.y,a[3]);
 /// ```
-impl<T: InputType> From<Line<T>> for [T; 4]
-{
+impl<T: InputType> From<Line<T>> for [T; 4] {
     fn from(line: Line<T>) -> [T; 4] {
-        [       line.start.x,
-                 line.start.y,
-                 line.end.x,
-                 line.end.y,
-        ]
+        [line.start.x, line.start.y, line.end.x, line.end.y]
     }
 }
 
@@ -327,14 +321,9 @@ impl<T: InputType> From<Line<T>> for [T; 4]
 /// assert_eq!(l.end.x,a[2]);
 /// assert_eq!(l.end.y,a[3]);
 /// ```
-impl<T: InputType> From<&Line<T>> for [T; 4]
-{
+impl<T: InputType> From<&Line<T>> for [T; 4] {
     fn from(line: &Line<T>) -> [T; 4] {
-        [   line.start.x,
-            line.start.y,
-            line.end.x,
-            line.end.y,
-        ]
+        [line.start.x, line.start.y, line.end.x, line.end.y]
     }
 }
 
@@ -348,8 +337,7 @@ impl<T: InputType> From<&Line<T>> for [T; 4]
 /// assert_eq!(bl.end.x,a[2]);
 /// assert_eq!(bl.end.y,a[3]);
 /// ```
-impl<T:InputType> From<&[T; 4]> for Line<T>
-{
+impl<T: InputType> From<&[T; 4]> for Line<T> {
     fn from(line: &[T; 4]) -> Line<T> {
         Line {
             start: Point {
@@ -375,15 +363,12 @@ impl<T:InputType> From<&[T; 4]> for Line<T>
 /// assert_eq!(v.x(),a[0]);
 /// assert_eq!(v.y(),a[1]);
 /// ```
-impl<I, F> From<&Vertex<I, F>> for [F;2]
-    where
-        I: InputType + Neg<Output = I>,
-        F: OutputType + Neg<Output = F>,
+impl<I, F> From<&Vertex<I, F>> for [F; 2]
+where
+    I: InputType + Neg<Output = I>,
+    F: OutputType + Neg<Output = F>,
 {
-    fn from(vertex: &Vertex<I, F>) -> [F;2] {
-        [
-            vertex.x(),
-            vertex.y(),
-        ]
+    fn from(vertex: &Vertex<I, F>) -> [F; 2] {
+        [vertex.x(), vertex.y()]
     }
 }
