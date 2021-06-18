@@ -15,7 +15,7 @@ use super::diagram as VD;
 use super::predicate as VP;
 use std::cmp::Ordering;
 
-use super::Point;
+use super::geometry::Point;
 use super::{InputType, OutputType};
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -183,9 +183,9 @@ where
         y1: I,
         x2: I,
         y2: I,
-        initial_index: usize,
-        sorted_index: usize,
-        flags: u32,
+        initial_index: SiteEventIndexType,
+        sorted_index: SiteEventIndexType,
+        flags: VD::ColorType,
     ) -> SiteEvent<I, F> {
         Self {
             point0_: Point { x: x1, y: y1 },
@@ -253,17 +253,17 @@ where
     }
 
     #[inline(always)]
-    pub fn sorted_index(&self) -> usize {
+    pub fn sorted_index(&self) -> SiteEventIndexType {
         self.sorted_index_
     }
 
     #[inline(always)]
-    pub fn set_sorted_index(&mut self, index: usize) {
+    pub fn set_sorted_index(&mut self, index: SiteEventIndexType) {
         self.sorted_index_ = index;
     }
 
     #[inline(always)]
-    pub(crate) fn initial_index(&self) -> usize {
+    pub(crate) fn initial_index(&self) -> SiteEventIndexType {
         self.initial_index_
     }
 

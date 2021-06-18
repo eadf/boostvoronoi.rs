@@ -1,18 +1,15 @@
+use boostvoronoi::builder as VB;
 use boostvoronoi::diagram as VD;
 use boostvoronoi::diagram::EdgeIndex;
 use boostvoronoi::file_reader;
 use boostvoronoi::visual_utils as VU;
 use boostvoronoi::BvError;
-use boostvoronoi::{builder as VB, Line, Point, TypeConverter1, TypeConverter2};
-use boostvoronoi::{InputType, OutputType};
-
-use std::ops::Neg;
-
+use boostvoronoi::{geometry, InputType, OutputType, TypeConverter1, TypeConverter2};
 use fltk::{app, button, dialog, draw, enums, frame, group, menu, prelude::*, window};
-
 use geo::prelude::Intersects;
 use ordered_float::OrderedFloat;
 use std::cell::{RefCell, RefMut};
+use std::ops::Neg;
 use std::rc::Rc;
 
 #[macro_use]
@@ -94,7 +91,7 @@ struct SharedData {
     draw_flag: DrawFilterFlag,
     last_message: Option<GuiMessage>,
     visualizer: VoronoiVisualizer<i32, f64>,
-    last_click: Option<Point<i32>>,
+    last_click: Option<geometry::Point<i32>>,
 }
 
 /// The Offscreen is slightly offset from the window.
@@ -384,9 +381,9 @@ fn main() -> Result<(), BvError> {
                     println!("{:?}", point.err().unwrap());
                     return false;
                 }
-                let point = Point::from(point.unwrap());
+                let point = geometry::Point::from(point.unwrap());
                 if let Some(last_point) = shared_data_bm.last_click {
-                    let line = Line {
+                    let line = geometry::Line {
                         start: last_point,
                         end: point,
                     };
@@ -419,7 +416,7 @@ fn main() -> Result<(), BvError> {
                             println!("{:?}", point.err().unwrap());
                             return false;
                         }
-                        let point = Point::from(point.unwrap());
+                        let point = geometry::Point::from(point.unwrap());
                         shared_data_bm.visualizer.point_data_.push(point);
                     }
                     let _ = shared_data_bm.visualizer.build();
@@ -505,8 +502,8 @@ where
     diagram: VD::Diagram<I, F>,
     points_aabb: VU::Aabb2<I, F>,
 
-    point_data_: Vec<boostvoronoi::Point<I>>,
-    segment_data_: Vec<boostvoronoi::Line<I>>,
+    point_data_: Vec<geometry::Point<I>>,
+    segment_data_: Vec<geometry::Line<I>>,
     affine: VU::SimpleAffine<I, F>,
 }
 
@@ -520,8 +517,8 @@ where
             screen_aabb: VU::Aabb2::<I, F>::new_from_i32(0, 0, FW, FH),
             diagram: VD::Diagram::<I, F>::new(0),
             points_aabb: VU::Aabb2::<I, F>::default(),
-            point_data_: Vec::<boostvoronoi::Point<I>>::new(),
-            segment_data_: Vec::<boostvoronoi::Line<I>>::new(),
+            point_data_: Vec::<geometry::Point<I>>::new(),
+            segment_data_: Vec::<geometry::Line<I>>::new(),
             affine: VU::SimpleAffine::default(),
         }
     }
@@ -586,7 +583,7 @@ where
     }
 
     // returns true if l intersects with any of the lines in self.segment_data_
-    fn self_intersecting_check(&self, l: &boostvoronoi::Line<I>) -> bool {
+    fn self_intersecting_check(&self, l: &geometry::Line<I>) -> bool {
         let l_ = Self::line_i1_to_f64(l);
         for s in self.segment_data_.iter() {
             // allow end point intersection
@@ -993,7 +990,7 @@ where
 
     /// Retrieves a point from the voronoi input in the order it was presented to
     /// the voronoi builder
-    fn retrieve_point(&self, cell_id: VD::CellIndex) -> Result<boostvoronoi::Point<I>, BvError> {
+    fn retrieve_point(&self, cell_id: VD::CellIndex) -> Result<geometry::Point<I>, BvError> {
         let (index, cat) = self.diagram.get_cell(cell_id)?.get().source_index_2();
         match cat {
             VD::SourceCategory::SinglePoint => Ok(self.point_data_[index]),
@@ -1008,7 +1005,7 @@ where
 
     /// Retrieves a segment from the voronoi input in the order it was presented to
     /// the voronoi builder
-    fn retrieve_segment(&self, cell_id: VD::CellIndex) -> Result<&boostvoronoi::Line<I>, BvError> {
+    fn retrieve_segment(&self, cell_id: VD::CellIndex) -> Result<&geometry::Line<I>, BvError> {
         let cell = self.diagram.get_cell(cell_id)?.get();
         let index = cell.source_index() - self.point_data_.len();
         Ok(&self.segment_data_[index])
@@ -1389,14 +1386,14 @@ where
             Example::Simple => {
                 rv = "Simple example".to_string();
                 (
-                    Vec::<Point<I>>::default(),
+                    Vec::<geometry::Point<I>>::default(),
                     VB::to_segments::<i32, I>(&_simple_segments),
                 )
             }
             Example::Complex => {
                 rv = "Rust logo".to_string();
                 (
-                    Vec::<Point<I>>::default(),
+                    Vec::<geometry::Point<I>>::default(),
                     VB::to_segments::<i32, I>(&_segments_rust_logo),
                 )
             }
@@ -1404,7 +1401,7 @@ where
                 rv = "Clean".to_string();
                 let clean: [[i32; 4]; 0] = [];
                 (
-                    Vec::<Point<I>>::default(),
+                    Vec::<geometry::Point<I>>::default(),
                     VB::to_segments::<i32, I>(&clean),
                 )
             }
@@ -1423,11 +1420,17 @@ where
                         file_parse_result
                     } else {
                         rv = "Failed to read file".to_string();
-                        (Vec::<Point<I>>::default(), Vec::<Line<I>>::default())
+                        (
+                            Vec::<geometry::Point<I>>::default(),
+                            Vec::<geometry::Line<I>>::default(),
+                        )
                     }
                 } else {
                     rv = "Failed to read file".to_string();
-                    (Vec::<Point<I>>::default(), Vec::<Line<I>>::default())
+                    (
+                        Vec::<geometry::Point<I>>::default(),
+                        Vec::<geometry::Line<I>>::default(),
+                    )
                 }
             }
         };
@@ -1436,7 +1439,10 @@ where
         rv
     }
 
-    fn line_i1_to_f64(value: &boostvoronoi::Line<I>) -> geo::Line<f64> {
+    #[inline(always)]
+    /// converts from geometry::Line to geo::Line.
+    /// I wonder why my nice geo::Line::from(geometry::Line) does not work here, feature gated?.
+    fn line_i1_to_f64(value: &geometry::Line<I>) -> geo::Line<f64> {
         let ps = geo::Coordinate {
             x: Self::i1_to_f64(value.start.x),
             y: Self::i1_to_f64(value.start.y),

@@ -1,6 +1,6 @@
 use boostvoronoi::builder::Builder;
+use boostvoronoi::geometry::{Line, Point};
 use boostvoronoi::BvError;
-use boostvoronoi::{Line, Point};
 
 type I1 = i32;
 type F1 = f32;

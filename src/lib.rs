@@ -24,9 +24,7 @@ use core::fmt::Debug;
 use extended_exp_fpt as EX;
 use extended_int as EI;
 use num::{Float, NumCast, PrimInt, Zero};
-use std::cmp;
 use std::fmt;
-use std::fmt::Display;
 use std::hash::Hash;
 use std::marker::PhantomData;
 use std::ops::Neg;
@@ -44,6 +42,7 @@ pub mod extended_int;
 pub mod file_reader;
 pub(crate) mod predicate;
 // I'd prefer if this module could be pub (crate), but then the documentation examples would not work.
+pub mod geometry;
 pub mod robust_fpt;
 mod site_event;
 pub mod sync_diagram;
@@ -76,102 +75,6 @@ macro_rules! tln {
     });
 }
 
-/// A really simple 2d coordinate container type - integer only
-#[derive(Copy, Clone, cmp::PartialEq, cmp::Eq, Hash)]
-pub struct Point<T: InputType> {
-    pub x: T,
-    pub y: T,
-}
-
-impl<T> Debug for Point<T>
-where
-    T: InputType + Display + Hash,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "({:.12},{:.12})", self.x, self.y,)
-    }
-}
-
-impl<T: InputType> From<[T; 2]> for Point<T> {
-    fn from(coordinate: [T; 2]) -> Point<T> {
-        Point {
-            x: coordinate[0],
-            y: coordinate[1],
-        }
-    }
-}
-
-impl<T: InputType> From<&[T; 2]> for Point<T> {
-    fn from(coordinate: &[T; 2]) -> Point<T> {
-        Point {
-            x: coordinate[0],
-            y: coordinate[1],
-        }
-    }
-}
-
-/// A really simple 2d line container type - integer only
-#[derive(Copy, Clone, cmp::PartialEq, cmp::Eq, Hash, Debug)]
-pub struct Line<T: InputType> {
-    pub start: Point<T>,
-    pub end: Point<T>,
-}
-
-impl<T, IT> From<[IT; 2]> for Line<T>
-where
-    T: InputType,
-    IT: Copy + Into<Point<T>>,
-{
-    fn from(coordinate: [IT; 2]) -> Line<T> {
-        Line::<T> {
-            start: coordinate[0].into(),
-            end: coordinate[1].into(),
-        }
-    }
-}
-
-impl<T: InputType> Line<T> {
-    pub fn new(start: Point<T>, end: Point<T>) -> Line<T> {
-        Line::<T> { start, end }
-    }
-}
-
-impl<T> From<[T; 4]> for Line<T>
-where
-    T: InputType,
-{
-    fn from(coordinate: [T; 4]) -> Line<T> {
-        Line {
-            start: Point {
-                x: coordinate[0],
-                y: coordinate[1],
-            },
-            end: Point {
-                x: coordinate[2],
-                y: coordinate[3],
-            },
-        }
-    }
-}
-
-impl<T> From<&[T; 4]> for Line<T>
-where
-    T: InputType,
-{
-    fn from(coordinate: &[T; 4]) -> Line<T> {
-        Line {
-            start: Point {
-                x: coordinate[0],
-                y: coordinate[1],
-            },
-            end: Point {
-                x: coordinate[2],
-                y: coordinate[3],
-            },
-        }
-    }
-}
-
 #[derive(thiserror::Error, Debug)]
 pub enum BvError {
     #[error("error: Some error with object id")]
@@ -196,7 +99,7 @@ pub enum BvError {
 
 /// This is the integer input type of the algorithm. Typically i32 or i64.
 pub trait InputType:
-    Display
+    fmt::Display
     + Ord
     + PartialOrd
     + Eq
@@ -213,7 +116,7 @@ pub trait InputType:
 }
 
 impl<I> InputType for I where
-    I: Display
+    I: fmt::Display
         + Ord
         + PartialOrd
         + Eq
@@ -237,7 +140,7 @@ pub trait OutputType:
     + NumCast
     + Copy
     + Clone
-    + Display
+    + fmt::Display
     + Default
     + Debug
     + Zero
@@ -252,7 +155,7 @@ impl<F> OutputType for F where
         + NumCast
         + Copy
         + Clone
-        + Display
+        + fmt::Display
         + Default
         + Debug
         + Zero

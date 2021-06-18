@@ -19,7 +19,7 @@ use super::predicate as VP;
 use super::site_event as VSE;
 use super::BvError;
 
-use super::{Line, Point};
+use super::geometry::{Line, Point};
 use std::collections::BinaryHeap;
 use std::ops::Neg;
 
@@ -50,7 +50,7 @@ mod tests;
 /// correspond to the neighboring sites that form a bisector and values map to
 /// the corresponding Voronoi edges in the output data structure.
 /// ```
-/// # use boostvoronoi::{Point,Line};
+/// # use boostvoronoi::geometry::{Point,Line};
 /// # use boostvoronoi::builder::Builder;
 ///
 /// type I = i32; // this is the integer input type

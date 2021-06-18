@@ -2,10 +2,10 @@
 use super::super::beach_line as VB;
 use super::super::diagram as VD;
 use super::super::diagram::Diagram;
+use super::super::geometry::{Line, Point};
 use super::super::predicate as VP;
 use super::super::site_event as VSE;
 use super::super::BvError;
-use super::super::{Line, Point};
 use super::{InputType, OutputType};
 use std::ops::Neg;
 

@@ -1,17 +1,18 @@
 use boostvoronoi::builder::{to_points, to_segments, Builder};
 use boostvoronoi::diagram as VD;
-use boostvoronoi::{BvError, Line, Point};
+use boostvoronoi::geometry::{Line, Point};
+use boostvoronoi::BvError;
 
-type I1 = i32;
-type F1 = f64;
+type I = i32;
+type F = f64;
 
 #[allow(dead_code)]
-fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
+fn almost_equal(x1: F, x2: F, y1: F, y2: F) -> bool {
     let delta = 0.00001;
-    assert!(F1::abs(x1 - x2) < delta, "{} != {}", x1, x2);
-    assert!(F1::abs(y1 - y2) < delta, "{} != {}", y1, y2);
+    assert!(F::abs(x1 - x2) < delta, "{} != {}", x1, x2);
+    assert!(F::abs(y1 - y2) < delta, "{} != {}", y1, y2);
 
-    (F1::abs(x1 - x2) < delta) && (F1::abs(y1 - y2) < delta)
+    (F::abs(x1 - x2) < delta) && (F::abs(y1 - y2) < delta)
 }
 
 fn retrieve_point<T>(
@@ -36,7 +37,7 @@ where
 /// The rust logo
 fn large_segment_1() -> Result<(), BvError> {
     let (output, _v, _s) = {
-        let points: [[I1; 2]; 45] = [
+        let points: [[I; 2]; 45] = [
             [303, 108],
             [180, 257],
             [115, 405],
@@ -83,7 +84,7 @@ fn large_segment_1() -> Result<(), BvError> {
             [130, 102],
             [98, 141],
         ];
-        let segments: [[I1; 4]; 51] = [
+        let segments: [[I; 4]; 51] = [
             [200, 200, 200, 400],
             [200, 400, 400, 400],
             [400, 400, 400, 200],
@@ -137,10 +138,10 @@ fn large_segment_1() -> Result<(), BvError> {
             [617, 342, 675, 292],
         ];
 
-        let _v = to_points::<I1, I1>(&points);
-        let _s = to_segments::<I1, I1>(&segments);
+        let _v = to_points::<I, I>(&points);
+        let _s = to_segments::<I, I>(&segments);
 
-        let mut vb = Builder::<I1, F1>::default();
+        let mut vb = Builder::<I, F>::default();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
         (vb.construct()?, _v, _s)

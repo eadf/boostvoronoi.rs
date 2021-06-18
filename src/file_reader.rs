@@ -11,6 +11,7 @@
 
 //! Utility for reading example files.
 
+use crate::geometry;
 use crate::BvError;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -23,8 +24,8 @@ where
     T: super::InputType + Neg<Output = T>,
 {
     Number(usize),
-    Point(super::Point<T>),
-    Line(super::Line<T>),
+    Point(geometry::Point<T>),
+    Line(geometry::Line<T>),
 }
 
 #[derive(Eq, PartialEq, Debug)]
@@ -52,7 +53,7 @@ where
         2 => {
             if let Ok(x1) = line[0].parse::<i32>() {
                 if let Ok(y1) = line[1].parse::<i32>() {
-                    return Some(InputData::Point(super::Point::<I> {
+                    return Some(InputData::Point(geometry::Point::<I> {
                         x: super::TypeConverter1::<I>::i32_to_i(x1),
                         y: super::TypeConverter1::<I>::i32_to_i(y1),
                     }));
@@ -68,7 +69,7 @@ where
                 if let Ok(y1) = line[1].parse::<i32>() {
                     if let Ok(x2) = line[2].parse::<i32>() {
                         if let Ok(y2) = line[3].parse::<i32>() {
-                            return Some(InputData::Line(super::Line::<I>::from([
+                            return Some(InputData::Line(geometry::Line::<I>::from([
                                 super::TypeConverter1::<I>::i32_to_i(x1),
                                 super::TypeConverter1::<I>::i32_to_i(y1),
                                 super::TypeConverter1::<I>::i32_to_i(x2),
@@ -101,7 +102,7 @@ where
 #[allow(clippy::type_complexity)]
 pub fn read_boost_input_file<I>(
     filename: &Path,
-) -> Result<(Vec<super::Point<I>>, Vec<super::Line<I>>), BvError>
+) -> Result<(Vec<geometry::Point<I>>, Vec<geometry::Line<I>>), BvError>
 where
     I: super::InputType + Neg<Output = I>,
 {
@@ -119,13 +120,13 @@ where
 #[allow(clippy::type_complexity)]
 pub fn read_boost_input_buffer<I, F>(
     reader: BufReader<F>,
-) -> Result<(Vec<super::Point<I>>, Vec<super::Line<I>>), BvError>
+) -> Result<(Vec<geometry::Point<I>>, Vec<geometry::Line<I>>), BvError>
 where
     I: super::InputType + Neg<Output = I>,
     F: std::io::Read,
 {
-    let mut points = Vec::<super::Point<I>>::default();
-    let mut lines = Vec::<super::Line<I>>::default();
+    let mut points = Vec::<geometry::Point<I>>::default();
+    let mut lines = Vec::<geometry::Line<I>>::default();
     let mut state = StateMachine::StartingPoints;
     let mut expected_points = 0;
     let mut expected_lines = 0;
@@ -155,8 +156,8 @@ where
                     }
                 } else if state == StateMachine::ExpectPoints {
                     if expected_points > points.len() {
-                        if let InputData::Point(super::Point::<I> { x, y }) = data {
-                            points.push(super::Point { x, y });
+                        if let InputData::Point(geometry::Point::<I> { x, y }) = data {
+                            points.push(geometry::Point { x, y });
                             if expected_points == points.len() {
                                 state = StateMachine::StartingLines;
                             }

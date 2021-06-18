@@ -10,9 +10,9 @@
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 use super::beach_line as VB;
+use super::geometry::Point;
 use super::predicate as VP;
 use super::InputType;
-use super::Point;
 use std::cmp::Ordering;
 use std::ops::Neg;
 

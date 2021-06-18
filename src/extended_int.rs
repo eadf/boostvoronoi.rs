@@ -161,6 +161,7 @@ impl ExtendedInt {
         self.count_ = -self.count_;
     }
 
+    #[inline(always)]
     /// converts to f64
     pub fn d(&self) -> f64 {
         let p = self.p();
@@ -181,10 +182,9 @@ impl ExtendedInt {
         EX::ExtendedExponentFpt::<f64>::new2(p.0, p.1)
     }
 
+    #[inline(always)]
     /// return the number of words in 'self.count'
     pub fn size(&self) -> usize {
-        // TODO replace this with return self.chunks.len() when stable
-        //assert_eq!(self.chunks.len(), self.count.abs() as usize);
         self.chunks_.len()
     }
 
@@ -400,7 +400,7 @@ impl Default for ExtendedInt {
 
 impl ops::Add for ExtendedInt {
     type Output = Self;
-    /// Adds `self` to `that` returning a new object with the result
+    /// Adds `self` to `that` returning a new object containing the result
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///
@@ -420,7 +420,7 @@ impl ops::Add for ExtendedInt {
 
 impl<'a, 'b> ops::Add<&'b ExtendedInt> for &'a ExtendedInt {
     type Output = ExtendedInt;
-    /// Adds `self` to `that` returning a new object with the result
+    /// Adds `self` to `that` returning a new object containing the result
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///
@@ -440,7 +440,7 @@ impl<'a, 'b> ops::Add<&'b ExtendedInt> for &'a ExtendedInt {
 
 impl<'b> ops::Add<&'b ExtendedInt> for ExtendedInt {
     type Output = ExtendedInt;
-    /// Adds `self` to `that` returning a new object with the result
+    /// Adds `self` to `that` returning a new object containing the result
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///
@@ -460,7 +460,7 @@ impl<'b> ops::Add<&'b ExtendedInt> for ExtendedInt {
 
 impl ops::Sub for ExtendedInt {
     type Output = Self;
-    /// Subtracts `that` from `self` returning a new object with the result
+    /// Subtracts `that` from `self` returning a new object containing the result
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///
@@ -480,7 +480,7 @@ impl ops::Sub for ExtendedInt {
 
 impl<'a, 'b> ops::Sub<&'b ExtendedInt> for &'a ExtendedInt {
     type Output = ExtendedInt;
-    /// Subtracts `that` from `self` returning a new object with the result
+    /// Subtracts `that` from `self` returning a new object containing the result
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///
@@ -500,7 +500,7 @@ impl<'a, 'b> ops::Sub<&'b ExtendedInt> for &'a ExtendedInt {
 
 impl<'b> ops::Sub<&'b ExtendedInt> for ExtendedInt {
     type Output = ExtendedInt;
-    /// Subtracts `that` from `self` returning a new object with the result
+    /// Subtracts `that` from `self` returning a new object containing the result
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///
@@ -520,7 +520,7 @@ impl<'b> ops::Sub<&'b ExtendedInt> for ExtendedInt {
 
 impl ops::Mul for ExtendedInt {
     type Output = Self;
-    /// Multiplies `self` with `that` returning a new object with the result
+    /// Multiplies `self` with `that` returning a new object containing the result
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///
@@ -540,7 +540,7 @@ impl ops::Mul for ExtendedInt {
 
 impl<'a, 'b> ops::Mul<&'b ExtendedInt> for &'a ExtendedInt {
     type Output = ExtendedInt;
-    /// Multiplies `self` with `that` returning a new object with the result
+    /// Multiplies `self` with `that` returning a new object containing the result
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///
@@ -560,7 +560,7 @@ impl<'a, 'b> ops::Mul<&'b ExtendedInt> for &'a ExtendedInt {
 
 impl<'b> ops::Mul<&'b ExtendedInt> for ExtendedInt {
     type Output = ExtendedInt;
-    /// Multiplies `self` with `that` returning a new object with the result
+    /// Multiplies `self` with `that` returning a new object containing the result
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///
@@ -580,7 +580,7 @@ impl<'b> ops::Mul<&'b ExtendedInt> for ExtendedInt {
 
 impl<'b> ops::Mul<i32> for ExtendedInt {
     type Output = ExtendedInt;
-    /// Multiplies `self` with `that` returning a new object with the result
+    /// Multiplies `self` with `that` returning a new object containing the result
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///
@@ -601,7 +601,7 @@ impl<'b> ops::Mul<i32> for ExtendedInt {
 
 impl ops::Neg for ExtendedInt {
     type Output = Self;
-    /// Negates value of `self` returning a self with the result
+    /// Negates value of `self` returning a new object containing the result
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///

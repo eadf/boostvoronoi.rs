@@ -476,14 +476,14 @@ where
     F: OutputType + Neg<Output = F>,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "\n")?;
+        writeln!(f,)?;
         for (index, node) in self.beach_line_.iter().enumerate() {
-            write!(f, "{}: {:?}\n", index, node)?;
+            writeln!(f, "{}: {:?}", index, node)?;
         }
         for i in self.beach_line_vec_.iter() {
-            write!(f, "{:?}\n", i)?;
+            writeln!(f, "{:?}", i)?;
         }
-        write!(f, "\n")
+        writeln!(f,)
     }
 }
 

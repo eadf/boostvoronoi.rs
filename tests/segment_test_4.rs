@@ -1,8 +1,8 @@
 use boostvoronoi::builder as VB;
 use boostvoronoi::builder::{to_points, to_segments};
 use boostvoronoi::diagram as VD;
+use boostvoronoi::geometry::{Line, Point};
 use boostvoronoi::BvError;
-use boostvoronoi::{Line, Point};
 
 type I1 = i32;
 type F1 = f64;

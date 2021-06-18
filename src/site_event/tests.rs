@@ -1,8 +1,8 @@
 #![allow(unused_imports)]
 use super::super::diagram::Diagram;
+use super::super::geometry::{Line, Point};
 use super::super::site_event as VSE;
 use super::super::BvError;
-use super::super::{Line, Point};
 
 #[test]
 fn inverse_test_1() {

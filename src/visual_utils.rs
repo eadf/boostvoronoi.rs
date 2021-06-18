@@ -14,7 +14,7 @@
 use super::{InputType, OutputType};
 use crate::BvError;
 
-use super::{Line, Point};
+use super::geometry::{Line, Point};
 use std::fmt;
 use std::marker::PhantomData;
 use std::ops::Neg;
@@ -308,7 +308,7 @@ where
     /// returns Some(true) if the aabb contains the point (inclusive)
     /// returns None if the aabb is uninitialized
     ///```
-    /// # use boostvoronoi::Point;
+    /// # use boostvoronoi::geometry::Point;
     /// # use boostvoronoi::visual_utils::Aabb2;
     /// let p0 = Point::from([0,0]);
     /// let p1 = Point::from([1,1]);
@@ -332,7 +332,8 @@ where
     /// returns Some(true) if the aabb contains the line (inclusive)
     /// returns None if the aabb is uninitialized
     /// ```
-    /// # use boostvoronoi::{Line,Point};
+    /// # use boostvoronoi::BvError;
+    /// # use boostvoronoi::geometry::{Line, Point};
     /// # use boostvoronoi::visual_utils::Aabb2;
     /// let p0 = Point::from([0,0]);
     /// let p1 = Point::from([10,10]);
