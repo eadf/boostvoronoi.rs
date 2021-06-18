@@ -137,11 +137,9 @@ where
     I: InputType + Neg<Output = I>,
     O: OutputType + Neg<Output = O>,
 {
-    /// todo: does sorted_index_ AND initial_index_ need to be part of the hash?
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.point0_.hash(state);
         self.point1_.hash(state);
-        self.sorted_index_.hash(state);
         self.initial_index_.hash(state);
         self.flags_.hash(state);
     }
@@ -196,21 +194,6 @@ where
             pdf_: PhantomData,
         }
     }
-    /*
-    pub(crate) fn is_single_point(&self) -> bool {
-        self.flags_ & VD::SourceCategory::SOURCE_CATEGORY_BITMASK.0
-            == VD::SourceCategory::SOURCE_CATEGORY_SINGLE_POINT.0
-    }*/
-    /*
-    pub(crate) fn is_segment_start_point(&self) -> bool {
-        self.flags_ & VD::SourceCategory::SOURCE_CATEGORY_BITMASK.0
-            == VD::SourceCategory::SOURCE_CATEGORY_SEGMENT_START_POINT.0
-    }*/
-    /*
-    pub(crate) fn is_segment_end_point(&self) -> bool {
-        self.flags_ & VD::SourceCategory::SOURCE_CATEGORY_BITMASK.0
-            == VD::SourceCategory::SOURCE_CATEGORY_SEGMENT_END_POINT.0
-    }*/
 
     #[inline(always)]
     pub fn x(&self) -> I {
