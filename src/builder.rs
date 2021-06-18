@@ -670,9 +670,9 @@ where
                 t!("replace key ");
                 self.beach_line_
                     .debug_print_all_compat_node(&it_first_key_before, &self.circle_events_)?;
-                t!("b4:   ");
+                t!("with:       ");
                 self.beach_line_
-                    .debug_print_all_compat_node(&it_first_key_before, &self.circle_events_)?;
+                    .debug_print_all_compat_node(&it_first_key_after, &self.circle_events_)?;
             }
             let rv = self
                 .beach_line_
