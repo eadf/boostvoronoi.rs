@@ -194,8 +194,7 @@ where
                 );
                 tln!("################################################");
                 if i >= 8 {
-                    self.beach_line_
-                        .dbgpa_compat_(&self.circle_events_)?;
+                    self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
                     print!("");
                 }
                 i += 1;
@@ -402,8 +401,7 @@ where
                     let _ = self.end_points_.pop();
                     #[cfg(feature = "console_debug")]
                     {
-                        self.beach_line_
-                            .dbgpa_compat_(&self.circle_events_)?;
+                        self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
                         print!("erasing beach_line:");
                         self.beach_line_.dbgpa_compat_node_(
                             &self.beach_line_.get_node(&b_it)?.0,
@@ -413,8 +411,7 @@ where
                     self.beach_line_.erase(b_it)?;
                     #[cfg(feature = "console_debug")]
                     {
-                        self.beach_line_
-                            .dbgpa_compat_(&self.circle_events_)?;
+                        self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
                     }
                 }
             } else {
@@ -454,22 +451,13 @@ where
             if self.debug_circle_counter_ >= debug_range
                 && self.debug_circle_counter_ <= debug_range + 2
             {
-                self.beach_line_
-                    .dbgpa_compat_(&self.circle_events_)?;
-                //print!("right_it:"); self.beach_line_.debug_print_all_compat_node(&right_it);
+                self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
             }
         }
         while *site_event_iterator_ != last_index {
             // site_event is a copy of the the event site_event_iterator_ is indexing
             let mut site_event = self.site_events_[*site_event_iterator_];
             let mut left_it = right_it;
-            //tln!("while process_site_event: left_it:{:?}", left_it.unwrap());
-            //#[cfg(feature = "console_debug")]
-            //if let Some(ref left_it) = left_it {
-            //    tln!("left_it=right_it :{:?}", left_it);
-            //} else {
-            //    tln!("left_it=right_it :None");
-            //}
 
             // Do further processing depending on the above node position.
             // For any two neighboring nodes the second site of the first node
@@ -479,13 +467,11 @@ where
                 // Move the iterator to the last node.
 
                 left_it = Some(self.beach_line_.peek_last().unwrap().0);
-                //tln!("left_it=beach_line_.peek_last() :{:?}", left_it.unwrap());
 
                 // Get the second site of the last node
                 let site_arc = *(left_it.unwrap().right_site());
 
                 // Insert new nodes into the beach line. Update the output.
-                //tln!("insert_new_arc right_it.is_none()");
                 let right_it_idx = self.insert_new_arc(site_arc, site_arc, site_event, output)?;
                 {
                     let right_it_complete = self.beach_line_.get_node(&right_it_idx)?;
@@ -507,7 +493,6 @@ where
                 // The above arc corresponds to the first site of the first node.
                 let site_arc = right_it_some.left_site();
 
-                //tln!("insert_new_arc is_at_beginning");
                 // Insert new nodes into the beach line. Update the output.
                 left_it = {
                     let new_key = self.insert_new_arc(
@@ -515,7 +500,6 @@ where
                     )?;
                     Some(self.beach_line_.get_node(&new_key)?.0)
                 };
-                // tln!("left_it=insert_new_arc :{:?}", left_it.unwrap());
 
                 // If the site event is a segment, update its direction.
                 if site_event.is_segment() {
@@ -542,7 +526,6 @@ where
 
                 // Remove the candidate circle from the event queue.
                 self.deactivate_circle_event(&right_it)?;
-                //tln!("insert_new_arc else. left_it:{:?}", left_it.unwrap());
 
                 // emulate --left_site
                 left_it = self
@@ -556,7 +539,6 @@ where
                         line!()
                     ))
                 })?;
-                //tln!("insert_new_arc else. left_it:{:?}", left_it.unwrap());
 
                 let site_arc1 = *(left_it_unwrap.right_site());
                 let site1 = *(left_it_unwrap.left_site());
@@ -685,8 +667,7 @@ where
 
             #[cfg(feature = "console_debug")]
             {
-                self.beach_line_
-                    .dbgpa_compat_(&self.circle_events_)?;
+                self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
                 t!("replace key ");
                 self.beach_line_
                     .dbgpa_compat_node_(&it_first_key_before, &self.circle_events_)?;
@@ -696,11 +677,10 @@ where
             }
             let rv = self
                 .beach_line_
-                .replace_key(it_first_key_before, it_first_key_after)?;//, it_last.0.get_index())?;
+                .replace_key(it_first_key_before, it_first_key_after)?;
             #[cfg(feature = "console_debug")]
             {
-                self.beach_line_
-                    .dbgpa_compat_(&self.circle_events_)?;
+                self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
                 self.beach_line_.dbgp_all_cmp_();
                 tln!();
             }
@@ -724,8 +704,7 @@ where
         }
         #[cfg(feature = "console_debug")]
         {
-            self.beach_line_
-                .dbgpa_compat_(&self.circle_events_)?;
+            self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
             t!("erasing beach_line:");
             self.beach_line_
                 .dbgpa_compat_node_(&it_last.0, &self.circle_events_)?;
@@ -733,8 +712,7 @@ where
         // Remove the (B, C) bisector node from the beach line.
         self.beach_line_.erase(it_last.0.get_index())?;
         #[cfg(feature = "console_debug")]
-        self.beach_line_
-            .dbgpa_compat_(&self.circle_events_)?;
+        self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
 
         let it_last = (it_first.0, it_first.0.get_index());
 
@@ -818,7 +796,8 @@ where
             &self.circle_events_,
         )?;
 
-        #[cfg(feature = "console_debug")] {
+        #[cfg(feature = "console_debug")]
+        {
             self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
             self.beach_line_.dbgp_all_cmp_();
             println!();
@@ -829,7 +808,6 @@ where
             // second endpoint of the segment site.
             let new_node =
                 VB::BeachLineNodeKey::<I, F>::new_2(site_event, *site_event.clone().inverse());
-            //let _ = new_node.right_site_mut().inverse();
 
             #[cfg(feature = "console_debug")]
             let new_node = self
@@ -838,7 +816,8 @@ where
             #[cfg(not(feature = "console_debug"))]
             let new_node = self.beach_line_.insert(new_node, None)?;
 
-            #[cfg(feature = "console_debug")] {
+            #[cfg(feature = "console_debug")]
+            {
                 self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
                 self.beach_line_.dbgp_all_cmp_();
                 println!();
@@ -926,7 +905,8 @@ where
     }
 }
 
-/// helper function: converts a slice of \[\[integer,integer\]\] into input data for the Builder.
+/// Helper function: converts a slice of \[\[integer,integer\]\] into input data for the Builder.
+/// You should use the From traits instead, this function performs a (potentially) redundant type conversion.
 pub fn to_points<T1: InputType, T2: InputType>(points: &[[T1; 2]]) -> Vec<Point<T2>> {
     points
         .iter()
@@ -940,7 +920,8 @@ pub fn to_points<T1: InputType, T2: InputType>(points: &[[T1; 2]]) -> Vec<Point<
         .collect()
 }
 
-/// helper function: converts a slice of \[\[integer,integer,integer,integer\]\] into input data for the Builder.
+/// helper function: converts and casts a slice of \[\[integer,integer,integer,integer\]\] into
+/// You should use the From traits instead, this function performs a (potentially) redundant type conversion.
 pub fn to_segments<T1: InputType, T2: InputType>(segments: &[[T1; 4]]) -> Vec<Line<T2>> {
     segments
         .iter()
@@ -956,7 +937,9 @@ pub fn to_segments<T1: InputType, T2: InputType>(segments: &[[T1; 4]]) -> Vec<Li
         .collect()
 }
 
-/// helper function: converts a slice of \[\[integer,integer,integer,integer\]\] into input data for the Builder.
+/// helper function: converts and casts a slice of \[\[integer,integer,integer,integer\]\] into
+/// input data for the Builder.
+/// You should use the From traits instead, this function performs a (potentially) redundant type conversion.
 pub fn to_segments_offset<T1: InputType, T2: InputType>(
     points: &[[T1; 4]],
     scale_x: f64,

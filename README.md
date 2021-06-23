@@ -83,7 +83,7 @@ So +nightly should be somewhat faster.
 - [ ] Add many more test cases for voronoi_robust_ftp.rs
 - [ ] Benchmark and optimize
 - [ ] Replace C++ style boolean ordering functor.
-- [ ] Once the beachline bug is fixed, replace builtin ulp with some rust crate. 
+- [ ] Replace builtin ulp with some rust crate (approx?). 
 
 All credit goes to the original author ([Andrii Sydorchuk](https://github.com/asydorchuk)) and the [boost contributors](https://github.com/boostorg/polygon), except the porting mistakes. They are all mine.
 

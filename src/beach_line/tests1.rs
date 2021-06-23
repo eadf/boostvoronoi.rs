@@ -191,7 +191,7 @@ fn beachline_4() {
     let cmp = mykey.cmp(&node2);
     dbg!(cmp);
     assert_eq!(cmp, Ordering::Greater);
-    let cmp = node2.cmp(&mykey );
+    let cmp = node2.cmp(&mykey);
     dbg!(cmp);
     assert_eq!(cmp, Ordering::Less);
 }

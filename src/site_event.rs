@@ -165,7 +165,11 @@ where
         }
     }
 
-    pub(crate) fn new_3(a: Point<I>, b: Point<I>, initial_index: SiteEventIndexType) -> SiteEvent<I, F> {
+    pub(crate) fn new_3(
+        a: Point<I>,
+        b: Point<I>,
+        initial_index: SiteEventIndexType,
+    ) -> SiteEvent<I, F> {
         Self {
             point0_: a,
             point1_: b,

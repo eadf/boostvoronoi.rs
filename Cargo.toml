@@ -60,7 +60,7 @@ version_check = "0.9"
 geo = "=0.18"
 fltk = "1.0"
 criterion = "0.3"
-approx = ">=0.4.0,<=0.5"
+approx = "0.5"
 regex = "1.5"
 
 [[bench]]

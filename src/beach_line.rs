@@ -11,9 +11,9 @@
 
 //! The data structures needed for the beachline.
 #[cfg(test)]
-mod tests1;
-#[cfg(test)]
 mod test2;
+#[cfg(test)]
+mod tests1;
 
 use super::circle_event as VC;
 use super::diagram as VD;
@@ -269,7 +269,7 @@ where
         position: BeachLineNodeKey<I, F>,
     ) -> Option<(BeachLineNodeKey<I, F>, BeachLineIndex)> {
         self.beach_line_
-            .range((Excluded(&position),Unbounded))
+            .range((Excluded(&position), Unbounded))
             .next()
             .map(|rv| (*rv.0, *rv.1))
     }
@@ -324,14 +324,18 @@ where
         {
             let tmp = self
                 .beach_line_
-                .iter().rev()
+                .iter()
+                .rev()
                 .map(|(k, _)| (k, k.cmp(&key).reverse()))
                 .collect::<Vec<_>>();
             for (k, b) in tmp.iter() {
                 println!("{:?} {:?}", k, b)
             }
         }
-        self.beach_line_.range((Unbounded,Included(&key))).next_back().map(|rv| *rv.0)
+        self.beach_line_
+            .range((Unbounded, Included(&key)))
+            .next_back()
+            .map(|rv| *rv.0)
     }
 
     #[inline(always)]
@@ -410,7 +414,7 @@ where
     }
 
     #[cfg(feature = "console_debug")]
-    pub (crate) fn dbgpa_compat_(&self, ce: &VC::CircleEventQueue) -> Result<(), BvError> {
+    pub(crate) fn dbgpa_compat_(&self, ce: &VC::CircleEventQueue) -> Result<(), BvError> {
         tln!("-----beach_line----{}", self.beach_line_.len());
         for (i, (node, _id)) in self.beach_line_.iter().rev().enumerate() {
             t!("#{}:", i);
@@ -420,7 +424,7 @@ where
         Ok(())
     }
 
-    pub (crate) fn dgbpa_dump_and_cmp_(&self, key: &BeachLineNodeKey<I, F>) {
+    pub(crate) fn dgbpa_dump_and_cmp_(&self, key: &BeachLineNodeKey<I, F>) {
         println!("-----beach_line----{}", self.beach_line_.len());
         println!("Looking for {:?} in the beach_line", key);
         let found = self.beach_line_.get(key);
@@ -631,7 +635,8 @@ where
         if order {
             Ordering::Greater
         } else {
-            let reverse_order = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(other, self);
+            let reverse_order =
+                VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(other, self);
             if reverse_order {
                 Ordering::Less
             } else {
