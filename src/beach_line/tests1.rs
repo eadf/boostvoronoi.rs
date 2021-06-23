@@ -11,6 +11,7 @@ use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::ops::Bound::{Excluded, Included, Unbounded};
 
+//#[ignore]
 #[test]
 fn beachline_0() {
     let mut map = BTreeMap::<i32, i32>::new();
@@ -93,6 +94,7 @@ fn beachline_2() {
     }
 }
 
+//#[ignore]
 #[test]
 fn beachline_3() {
     type I = i32;
@@ -128,6 +130,7 @@ fn beachline_3() {
     }
 }
 
+//#[ignore]
 #[test]
 fn beachline_4() {
     type I = i32;
@@ -174,13 +177,26 @@ fn beachline_4() {
     let is_less = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(&node1, &mykey);
     dbg!(is_less);
     assert_eq!(is_less, true);
+    let cmp = mykey.cmp(&node1);
+    dbg!(cmp);
+    assert_eq!(cmp, Ordering::Less);
+    let cmp = node1.cmp(&mykey);
+    dbg!(cmp);
+    assert_eq!(cmp, Ordering::Greater);
 
     println!();
     let is_less = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(&node2, &mykey);
     dbg!(mykey, node2, is_less);
     assert_eq!(is_less, false);
+    let cmp = mykey.cmp(&node2);
+    dbg!(cmp);
+    assert_eq!(cmp, Ordering::Greater);
+    let cmp = node2.cmp(&mykey );
+    dbg!(cmp);
+    assert_eq!(cmp, Ordering::Less);
 }
 
+//#[ignore]
 #[test]
 fn beachline_5() {
     type I = i32;
@@ -199,7 +215,7 @@ fn beachline_5() {
         site2.set_flags(41);
         VB::BeachLineNodeKey::<I, F>::new_2(site1, site2)
     };
-    println!("L:#6(367,107)-(529,242),ii:4,f:9,R:#6(529,242)¿(367,107),ii:4,f:41 -> CircleEvent=-, Temporary bisector");
+    println!("L:#6(367,107)-(529,242),ii:4,f:9,R:#6(529,242)¿(367,107),ii:4,f:41 ");
     println!("{:?}", node1);
     println!();
 
@@ -218,29 +234,9 @@ fn beachline_5() {
     println!("{:?}", node2);
     println!();
 
-    let node3 = {
-        let mut site1 = VSE::SiteEvent::<I, F>::new_3(coord(200, 200), coord(400, 200), 3);
-        site1.set_sorted_index(3);
-        site1.set_flags(9);
-        let mut site2 = VSE::SiteEvent::<I, F>::new_2(coord(400, 200), 2);
-        site2.set_sorted_index(7);
-        site2.set_flags(2);
-        VB::BeachLineNodeKey::<I, F>::new_2(site1, site2)
-    };
-
-    println!("L:#3(200,200)-(400,200),ii:3,f:9,R:#7(400,200),ii:2,f:2 -> CircleEvent(x=4.00000e+02,y=1.71543e+02,lx=4.28457e+02)");
-    println!("{:?}", node3);
-    println!();
-
     //let is_less =
     //    VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(&node1, &node2);
     let is_less = node2.cmp(&node1);
     dbg!(is_less);
-    assert_eq!(is_less, Ordering::Greater);
-
-    //let is_less =
-    //    VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(&node2, &node3);
-    let is_less = node3.cmp(&node2);
-    dbg!(is_less);
-    assert_eq!(is_less, Ordering::Greater);
+    assert_eq!(is_less, Ordering::Less);
 }

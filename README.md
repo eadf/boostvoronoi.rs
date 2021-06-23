@@ -78,10 +78,11 @@ The code uses ```#![feature(map_first_last)]``` if run on +nightly, this is only
 So +nightly should be somewhat faster.
 
 ## Todo
-- [ ] Fix the beach-line key problem
+- [x] Fix the beach-line key problem
 - [x] Error handling
 - [ ] Add many more test cases for voronoi_robust_ftp.rs
 - [ ] Benchmark and optimize
+- [ ] Replace C++ style boolean ordering functor.
 - [ ] Once the beachline bug is fixed, replace builtin ulp with some rust crate. 
 
 All credit goes to the original author ([Andrii Sydorchuk](https://github.com/asydorchuk)) and the [boost contributors](https://github.com/boostorg/polygon), except the porting mistakes. They are all mine.

@@ -10,7 +10,10 @@
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 //! The data structures needed for the beachline.
-mod tests;
+#[cfg(test)]
+mod tests1;
+#[cfg(test)]
+mod test2;
 
 use super::circle_event as VC;
 use super::diagram as VD;
@@ -21,11 +24,14 @@ use super::{InputType, OutputType};
 use crate::BvError;
 #[allow(unused_imports)]
 use crate::{t, tln};
+#[allow(unused_imports)]
+use itertools::Itertools;
 use std::cell::Cell;
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::fmt;
 use std::hash::{Hash, Hasher};
+#[allow(unused_imports)]
 use std::ops::Bound::{Excluded, Included, Unbounded};
 use std::ops::Neg;
 use std::rc::Rc;
@@ -71,6 +77,9 @@ pub type BeachLineNodeDataType = Rc<Cell<Option<BeachLineNodeData>>>;
 
 /// Container for BeachLineNodeKey and BeachLineNodeDataType.
 /// Has a priority queue and indexed list for BeachLineNodeKey.
+///
+/// The ordering of beach_line_vec_ is intentionally reversed, pop() will return the last element.
+/// Before this change the beach-line ordering was unpredictable.
 pub struct BeachLine<I, F>
 where
     I: InputType + Neg<Output = I>,
@@ -146,7 +155,7 @@ where
         let _ = self.next_free_.increment();
         t!("inserted beach_line:");
         #[cfg(feature = "console_debug")]
-        self.debug_print_all_compat_node(&key, _ce)?;
+        self.dbgpa_compat_node_(&key, _ce)?;
         Ok(key)
     }
 
@@ -166,7 +175,7 @@ where
                 //if self.beach_line_.remove(&node).is_none() {
                 eprintln!("Tried to remove a non-existent beach_line, this error may occur if the input data is self-intersecting");
                 eprintln!("{:?}", node);
-                self.debug_print_all_dump_and_cmp(&node);
+                self.dgbpa_dump_and_cmp_(&node);
                 return Err(BvError::SelfIntersecting ("Tried to remove a non-existent beach_line, this error may occur if the input data is self-intersecting".to_string()));
             }
             let _ = self.beach_line_vec_.remove(beachline_index.0);
@@ -207,7 +216,6 @@ where
     }
 
     /// mapping: BeachLineNodeIndexType->(BeachLineNodeKey,BeachLineNodeDataType)
-    /// TODO: add Result<>
     pub(crate) fn get_node(
         &self,
         beachline_index: &BeachLineIndex,
@@ -230,15 +238,16 @@ where
 
     /// swaps the 'before' key for the 'after' key
     /// It does this by removing key/value from the map and re-inserting the new values
-    #[allow(clippy::type_complexity)]
-    pub fn replace_key(
+    //#[allow(clippy::type_complexity)]
+    pub(crate) fn replace_key(
         &mut self,
         before: BeachLineNodeKey<I, F>,
         after: BeachLineNodeKey<I, F>,
     ) -> Result<(BeachLineNodeKey<I, F>, BeachLineNodeDataType), BvError> {
         if let Some(idx) = self.beach_line_.get(&before).copied() {
-            //let idx = *idx;
             let _ = self.beach_line_.remove(&before);
+            // todo: remove assert when stable
+            assert_eq!(after.node_index_.0, idx.0);
             let _ = self.beach_line_.insert(after, idx);
 
             let item = self.beach_line_vec_.remove(idx.0).unwrap().1;
@@ -260,14 +269,15 @@ where
         position: BeachLineNodeKey<I, F>,
     ) -> Option<(BeachLineNodeKey<I, F>, BeachLineIndex)> {
         self.beach_line_
-            .range((Unbounded, Excluded(&position)))
-            .next_back()
+            .range((Excluded(&position),Unbounded))
+            .next()
             .map(|rv| (*rv.0, *rv.1))
     }
 
+    #[allow(dead_code)]
+    #[inline(always)]
     /// Returns the left neighbour beach line element
     /// Returns None if no association data is found
-    #[allow(dead_code)]
     pub(crate) fn get_left_neighbour_by_id(
         &self,
         position: BeachLineIndex,
@@ -277,18 +287,20 @@ where
             .and_then(|x| self.get_left_neighbour(x.0))
     }
 
+    #[inline(always)]
     /// Returns the right neighbour beach line element
     /// Returns None if no association data is found
-    pub fn get_right_neighbour(
+    pub(crate) fn get_right_neighbour(
         &self,
         position: BeachLineNodeKey<I, F>,
     ) -> Option<BeachLineNodeKey<I, F>> {
         self.beach_line_
-            .range((Excluded(&position), Unbounded))
-            .next()
+            .range((Unbounded, Excluded(&position)))
+            .next_back()
             .map(|rv| *rv.0)
     }
 
+    #[inline(always)]
     /// Returns the right neighbour beach line element
     /// Returns None if no association data is found
     pub(crate) fn get_right_neighbour_by_id(
@@ -300,36 +312,50 @@ where
             .and_then(|x| self.get_right_neighbour(x.0))
     }
 
+    #[inline(always)]
     /// Returns the first beach line element in the container whose key is not considered to go
     /// before position (i.e., either it is equivalent or goes after).
     /// Returns None if no  data is found
-    pub fn lower_bound(&self, key: BeachLineNodeKey<I, F>) -> Option<BeachLineNodeKey<I, F>> {
-        self.beach_line_
-            .range((Included(&key), Unbounded))
-            .next()
-            .map(|rv| *rv.0)
+    pub(crate) fn lower_bound(
+        &self,
+        key: BeachLineNodeKey<I, F>,
+    ) -> Option<BeachLineNodeKey<I, F>> {
+        #[cfg(feature = "console_debug")]
+        {
+            let tmp = self
+                .beach_line_
+                .iter().rev()
+                .map(|(k, _)| (k, k.cmp(&key).reverse()))
+                .collect::<Vec<_>>();
+            for (k, b) in tmp.iter() {
+                println!("{:?} {:?}", k, b)
+            }
+        }
+        self.beach_line_.range((Unbounded,Included(&key))).next_back().map(|rv| *rv.0)
     }
 
+    #[inline(always)]
     /// returns a copy of the last element (key,value)
     pub(crate) fn peek_last(&self) -> Option<(BeachLineNodeKey<I, F>, BeachLineIndex)> {
+        self.beach_line_
+            .range((Unbounded::<BeachLineNodeKey<I, F>>, Unbounded))
+            .next()
+            .map(|x| (*x.0, *x.1))
+    }
+
+    #[inline(always)]
+    /// returns a copy of the first element (key,value)
+    pub(crate) fn peek_first(&self) -> Option<(BeachLineNodeKey<I, F>, BeachLineIndex)> {
         self.beach_line_
             .range((Unbounded::<BeachLineNodeKey<I, F>>, Unbounded))
             .next_back()
             .map(|x| (*x.0, *x.1))
     }
 
-    /// returns a copy of the first element (key,value)
-    pub(crate) fn peek_first(&self) -> Option<(BeachLineNodeKey<I, F>, BeachLineIndex)> {
-        self.beach_line_
-            .range((Unbounded::<BeachLineNodeKey<I, F>>, Unbounded))
-            .next()
-            .map(|x| (*x.0, *x.1))
-    }
-
     #[allow(dead_code)]
     #[cfg(feature = "console_debug")]
     pub(crate) fn debug_cmp_all(&self, key: BeachLineNodeKey<I, F>) {
-        for (i, v) in self.beach_line_.iter().enumerate() {
+        for (i, v) in self.beach_line_.iter().rev().enumerate() {
             print!("#{}:", i);
             let _rv = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(v.0, &key);
         }
@@ -338,7 +364,7 @@ where
     #[cfg(feature = "beachline_corruption_check")]
     /// check if each item in the btree is actually retrievable
     pub(crate) fn corruption_check(&self) -> Result<(), BvError> {
-        for (blk, _) in self.beach_line_.iter() {
+        for (blk, _) in self.beach_line_.iter().rev() {
             if self.beach_line_.get(blk).is_none() {
                 eprintln!("Could not re-find the beach-line key {:?}", blk);
                 return Err(BvError::InternalError(format!(
@@ -357,7 +383,7 @@ where
     pub(crate) fn debug_print_all(&self) -> Result<(), BvError> {
         tln!();
         tln!("beach_line.len()={}", self.beach_line_.len());
-        for (i, (node, id)) in self.beach_line_.iter().enumerate() {
+        for (i, (node, id)) in self.beach_line_.iter().rev().enumerate() {
             t!(
                 "beach_line{} L:{:?},R:{:?}",
                 i,
@@ -384,17 +410,17 @@ where
     }
 
     #[cfg(feature = "console_debug")]
-    pub(crate) fn debug_print_all_compat(&self, ce: &VC::CircleEventQueue) -> Result<(), BvError> {
+    pub (crate) fn dbgpa_compat_(&self, ce: &VC::CircleEventQueue) -> Result<(), BvError> {
         tln!("-----beach_line----{}", self.beach_line_.len());
-        for (i, (node, _id)) in self.beach_line_.iter().enumerate() {
+        for (i, (node, _id)) in self.beach_line_.iter().rev().enumerate() {
             t!("#{}:", i);
-            self.debug_print_all_compat_node(&node, ce)?;
+            self.dbgpa_compat_node_(&node, ce)?;
         }
         tln!();
         Ok(())
     }
 
-    pub(crate) fn debug_print_all_dump_and_cmp(&self, key: &BeachLineNodeKey<I, F>) {
+    pub (crate) fn dgbpa_dump_and_cmp_(&self, key: &BeachLineNodeKey<I, F>) {
         println!("-----beach_line----{}", self.beach_line_.len());
         println!("Looking for {:?} in the beach_line", key);
         let found = self.beach_line_.get(key);
@@ -402,7 +428,7 @@ where
             "Found {:?} cmp1=node.partial_cmp(key).unwrap() cmp2=key.partial_cmp(node).unwrap()",
             found
         );
-        for (i, (node, _id)) in self.beach_line_.iter().enumerate() {
+        for (i, (node, _id)) in self.beach_line_.iter().rev().enumerate() {
             let cmp1 = node.partial_cmp(key);
             let cmp2 = key.partial_cmp(node);
 
@@ -421,7 +447,7 @@ where
         }
         println!();
         let mut it1 = self.beach_line_.iter().enumerate();
-        for it2_v in self.beach_line_.iter().enumerate().skip(1) {
+        for it2_v in self.beach_line_.iter().rev().enumerate().skip(1) {
             let it1_v = it1.next().unwrap();
             print!(
                 "key(#{}).partial_cmp(key(#{})) == {:?}",
@@ -439,27 +465,27 @@ where
     }
 
     #[cfg(feature = "console_debug")]
-    pub(crate) fn debug_print_all_cmp(&self) {
-        let mut it1 = self.beach_line_.iter().enumerate();
-        for it2_v in self.beach_line_.iter().enumerate().skip(1) {
+    pub(crate) fn dbgp_all_cmp_(&self) {
+        let mut it1 = self.beach_line_.iter().rev().enumerate();
+        for it2_v in self.beach_line_.iter().rev().enumerate().skip(1) {
             let it1_v = it1.next().unwrap();
             t!(
                 "key(#{}).partial_cmp(key(#{})) == {:?}",
                 it1_v.0,
                 it2_v.0,
-                it1_v.1 .0.partial_cmp(it2_v.1 .0).unwrap()
+                it1_v.1 .0.partial_cmp(it2_v.1 .0).unwrap().reverse()
             );
             tln!(
                 "\tkey(#{}).partial_cmp(key(#{})) == {:?}",
                 it2_v.0,
                 it1_v.0,
-                it2_v.1 .0.partial_cmp(it1_v.1 .0).unwrap()
+                it2_v.1 .0.partial_cmp(it1_v.1 .0).unwrap().reverse()
             );
         }
     }
 
     #[cfg(feature = "console_debug")]
-    pub(crate) fn debug_print_all_compat_node(
+    pub(crate) fn dbgpa_compat_node_(
         &self,
         node: &BeachLineNodeKey<I, F>,
         ce: &VC::CircleEventQueue,
@@ -472,7 +498,7 @@ where
                     t!(" -> CircleEvent: ");
                     ce.dbg_ce(_circle_event);
                 } else {
-                    t!(" -> CircleEvent=¡");
+                    t!(" -> CircleEvent=-"); // this is what the c++ code does, should print "inactive"
                 }
             } else {
                 t!(" -> CircleEvent=-");
@@ -547,8 +573,8 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    // Constructs degenerate bisector, used to search an arc that is above
-    // the given site. The input to the constructor is the new site point.
+    /// Constructs degenerate bisector, used to search an arc that is above
+    /// the given site. The input to the constructor is the new site point.
     pub fn new_1(new_site: VSE::SiteEvent<I, F>) -> Self {
         Self {
             left_site_: new_site,
@@ -567,24 +593,11 @@ where
         }
     }
 
-    pub(crate) fn left_site_m(&mut self) -> &mut VSE::SiteEvent<I, F> {
-        &mut self.left_site_
-    }
-
-    pub fn left_site(&self) -> &VSE::SiteEvent<I, F> {
+    pub(crate) fn left_site(&self) -> &VSE::SiteEvent<I, F> {
         &self.left_site_
     }
 
-    #[allow(dead_code)]
-    pub(crate) fn set_left_site(&mut self, site: &VSE::SiteEvent<I, F>) {
-        self.left_site_ = *site;
-    }
-
-    pub(crate) fn right_site_m(&mut self) -> &mut VSE::SiteEvent<I, F> {
-        &mut self.right_site_
-    }
-
-    pub fn right_site(&self) -> &VSE::SiteEvent<I, F> {
+    pub(crate) fn right_site(&self) -> &VSE::SiteEvent<I, F> {
         &self.right_site_
     }
 
@@ -612,19 +625,17 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
+    /// Remember, the ordering of the beachline is intentionally reversed.
     fn cmp(&self, other: &Self) -> Ordering {
-        let is_less = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(self, other);
-        if is_less {
-            Ordering::Less
+        let order = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(self, other);
+        if order {
+            Ordering::Greater
         } else {
-            //let is_less_reverse = VP::NodeComparisonPredicate::<I, O, BI, BF>::node_comparison_predicate(other, self);
-            //if !is_less_reverse {
-            // is_less=false && is_less_reverse=false -> must be equal
-
-            if self.left_site_ == other.left_site_ && self.right_site_ == other.right_site_ {
-                Ordering::Equal
+            let reverse_order = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(other, self);
+            if reverse_order {
+                Ordering::Less
             } else {
-                Ordering::Greater
+                other.node_index_.0.cmp(&self.node_index_.0)
             }
         }
     }

@@ -9,6 +9,7 @@
 
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
+#[cfg(test)]
 mod tests;
 
 use super::diagram as VD;
@@ -150,19 +151,21 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    pub fn new_2(a: Point<I>, initial_index: SiteEventIndexType) -> SiteEvent<I, F> {
+    #[allow(dead_code)]
+    /// only used by unit test code
+    pub(crate) fn new_2(point: Point<I>, initial_index: SiteEventIndexType) -> SiteEvent<I, F> {
         Self {
-            point0_: a,
-            point1_: a,
+            point0_: point,
+            point1_: point,
             sorted_index_: 0,
             initial_index_: initial_index,
-            flags_: VD::ColorBits::SINGLE_POINT.0,
+            flags_: VD::ColorBits::SINGLE_POINT__BIT.0,
             #[doc(hidden)]
             pdf_: PhantomData,
         }
     }
 
-    pub fn new_3(a: Point<I>, b: Point<I>, initial_index: SiteEventIndexType) -> SiteEvent<I, F> {
+    pub(crate) fn new_3(a: Point<I>, b: Point<I>, initial_index: SiteEventIndexType) -> SiteEvent<I, F> {
         Self {
             point0_: a,
             point1_: b,
@@ -252,18 +255,18 @@ where
 
     // todo this looks suspicious
     pub(crate) fn is_inverse(&self) -> bool {
-        (self.flags_ & VD::ColorBits::IS_INVERSE_BITMASK.0) != 0
+        (self.flags_ & VD::ColorBits::IS_INVERSE__BIT.0) != 0
     }
 
     // todo this looks suspicious
     pub(crate) fn inverse(&mut self) -> &mut Self {
         mem::swap(&mut self.point0_, &mut self.point1_);
-        self.flags_ ^= VD::ColorBits::IS_INVERSE_BITMASK.0;
+        self.flags_ ^= VD::ColorBits::IS_INVERSE__BIT.0;
         self
     }
 
     pub(crate) fn source_category(&self) -> VD::ColorBits {
-        VD::ColorBits(self.flags_ & VD::ColorBits::BITMASK.0)
+        VD::ColorBits(self.flags_ & VD::ColorBits::RESERVED__MASK.0)
     }
 
     pub(crate) fn or_source_category(&mut self, source_category: &VD::ColorBits) {

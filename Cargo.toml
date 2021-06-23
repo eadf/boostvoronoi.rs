@@ -29,6 +29,8 @@ smallvec = "^1.6.1"
 geo = {version="0.18", optional=true}
 # using "cgmath" feature will enable From traits
 cgmath = {version="0.18", optional=true}
+itertools = "0.10"
+lazy_static = "1.4"
 
 # These features are only for debug purposes, should normally not be used
 [features]
@@ -59,6 +61,7 @@ geo = "=0.18"
 fltk = "1.0"
 criterion = "0.3"
 approx = ">=0.4.0,<=0.5"
+regex = "1.5"
 
 [[bench]]
 name = "bench"

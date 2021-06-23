@@ -11,8 +11,11 @@
 
 //! Module containing robust floating points utilities.
 
+#[cfg(test)]
 mod extendedint_tests;
+#[cfg(test)]
 mod robustdif_tests;
+#[cfg(test)]
 mod robustfpt_tests;
 
 use super::extended_exp_fpt as EX;

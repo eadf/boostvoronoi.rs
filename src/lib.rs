@@ -20,6 +20,8 @@
 #![deny(elided_lifetimes_in_paths)]
 #![cfg_attr(feature = "map_first_last", feature(map_first_last))]
 
+#[cfg(test)]
+extern crate lazy_static;
 use core::fmt::Debug;
 use extended_exp_fpt as EX;
 use extended_int as EI;

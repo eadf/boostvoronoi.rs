@@ -11,6 +11,7 @@
 
 //! Predicate utilities
 
+#[cfg(test)]
 mod tests;
 
 use super::beach_line as VB;
@@ -320,10 +321,11 @@ where
         let rhs = rhs.lower_x().into_inner();
         let ulps = Predicates::<I, F>::ulps();
         let rv = UlpComparison::ulp_comparison(lhs, rhs, ulps) == cmp::Ordering::Less;
-        #[cfg(feature = "console_debug")]
-        println!(
+        tln!(
             "event_comparison_predicate_bif lhs:{:.12} rhs:{:.12} -> {}",
-            lhs, rhs, rv
+            lhs,
+            rhs,
+            rv
         );
         rv
     }
@@ -368,10 +370,22 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
+    #[inline(always)]
     /// Returns true if a horizontal line going through a new site intersects
     /// right arc at first, else returns false. If horizontal line goes
     /// through intersection point of the given two arcs returns false also.
     pub(crate) fn distance_predicate(
+        left_site: &VSE::SiteEvent<I, F>,
+        right_site: &VSE::SiteEvent<I, F>,
+        new_point: &Point<I>,
+    ) -> bool {
+        //let rv =
+        Self::distance_predicate_real(left_site, right_site, new_point)
+        //tln!("DistancePredicate(L:{:?}, R:{:?}, K:{:?})=={}", left_site, right_site, new_point, rv);
+        //rv
+    }
+
+    pub(crate) fn distance_predicate_real(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
         new_point: &Point<I>,
@@ -611,76 +625,82 @@ where
     ) -> bool {
         // Get x coordinate of the rightmost site from both nodes.
         let site1: &VSE::SiteEvent<I, F> =
-            NodeComparisonPredicate::<I, F>::get_comparison_site(node1);
+            NodeComparisonPredicate::<I, F>::get_comparison_site_(node1);
         let site2: &VSE::SiteEvent<I, F> =
-            NodeComparisonPredicate::<I, F>::get_comparison_site(node2);
-        let point1: &Point<I> = NodeComparisonPredicate::<I, F>::get_comparison_point(site1);
-        let point2: &Point<I> = NodeComparisonPredicate::<I, F>::get_comparison_point(site2);
-
-        match point1.x.cmp(&point2.x) {
-            cmp::Ordering::Less => {
-                // The second node contains a new site.
-                return DistancePredicate::<I, F>::distance_predicate(
-                    node1.left_site(),
-                    node1.right_site(),
-                    point2,
-                );
-            }
-            cmp::Ordering::Greater => {
-                // The first node contains a new site.
-                return !DistancePredicate::<I, F>::distance_predicate(
-                    node2.left_site(),
-                    node2.right_site(),
-                    point1,
-                );
-            }
-            cmp::Ordering::Equal => {
-                // These checks were evaluated experimentally.
-                match site1.sorted_index().cmp(&site2.sorted_index()) {
-                    cmp::Ordering::Equal => {
-                        // Both nodes are new (inserted during same site event processing).
-                        let y1 = Self::get_comparison_y(node1, true);
-                        let y2 = Self::get_comparison_y(node2, true);
-                        if y1 == y2 {
-                            // This is something not found in the C++ version
-                            // Todo: check if this fix is needed after +is_positive() issue is fixed
-                            node1.get_index().0 < node2.get_index().0
-                        } else {
+            NodeComparisonPredicate::<I, F>::get_comparison_site_(node2);
+        let point1: &Point<I> = NodeComparisonPredicate::<I, F>::get_comparison_point_(site1);
+        let point2: &Point<I> = NodeComparisonPredicate::<I, F>::get_comparison_point_(site2);
+        let rv = {
+            match point1.x.cmp(&point2.x) {
+                cmp::Ordering::Less => {
+                    //tln!("point1.x() < point2.x() {}<{}", point1.x, point2.x);
+                    // The second node contains a new site.
+                    DistancePredicate::<I, F>::distance_predicate(
+                        node1.left_site(),
+                        node1.right_site(),
+                        point2,
+                    )
+                }
+                cmp::Ordering::Greater => {
+                    //tln!( "point1.x() > point2.x()");
+                    // The first node contains a new site.
+                    !DistancePredicate::<I, F>::distance_predicate(
+                        node2.left_site(),
+                        node2.right_site(),
+                        point1,
+                    )
+                }
+                cmp::Ordering::Equal => {
+                    //tln!( "point1.x() == point2.x()");
+                    // These checks were evaluated experimentally.
+                    match site1.sorted_index().cmp(&site2.sorted_index()) {
+                        cmp::Ordering::Equal => {
+                            //tln!( "sorted_index Equal");
+                            // Both nodes are new (inserted during same site event processing).
+                            let y1 = Self::get_comparison_y_(node1, true);
+                            let y2 = Self::get_comparison_y_(node2, true);
                             y1 < y2
                         }
-                    }
-                    cmp::Ordering::Less => {
-                        let y1 = Self::get_comparison_y(node1, false);
-                        let y2 = Self::get_comparison_y(node2, true);
-                        if y1.0 != y2.0 {
-                            return y1.0 < y2.0;
+                        cmp::Ordering::Less => {
+                            let y1 = Self::get_comparison_y_(node1, false);
+                            let y2 = Self::get_comparison_y_(node2, true);
+                            //if (y1.first != y2.first) return y1.first < y2.first;
+                            //return (!site1.is_segment()) ? (y1.second < 0) : false;
+                            if y1.0 != y2.0 {
+                                //tln!( "sorted_index Less 1 y1:{:?} y2:{:?}", y1, y2);
+                                y1.0 < y2.0
+                            } else if !site1.is_segment() {
+                                //tln!( "sorted_index Less 2");
+                                y1.1 < 0
+                            } else {
+                                //tln!( "sorted_index Less 3");
+                                false
+                            }
                         }
-                        if !site1.is_segment() {
-                            y1.1 < 0
-                        } else {
-                            false
-                        }
-                    }
-                    cmp::Ordering::Greater => {
-                        let y1 = Self::get_comparison_y(node1, true);
-                        let y2 = Self::get_comparison_y(node2, false);
-                        if y1.0 != y2.0 {
-                            return y1.0 < y2.0;
-                        }
-                        if !site2.is_segment() {
-                            y2.1 > 0
-                        } else {
-                            true
+                        cmp::Ordering::Greater => {
+                            //tln!( "sorted_index Greater");
+                            let y1 = Self::get_comparison_y_(node1, true);
+                            let y2 = Self::get_comparison_y_(node2, false);
+                            //if (y1.first != y2.first) return y1.first < y2.first;
+                            //return (!site2.is_segment()) ? (y2.second > 0) : true;
+                            if y1.0 != y2.0 {
+                                y1.0 < y2.0
+                            } else if !site2.is_segment() {
+                                y2.1 > 0
+                            } else {
+                                true
+                            }
                         }
                     }
                 }
             }
-        }
+        };
+        //tln!("node_comparison_predicate(L:{:?},R:{:?}, {}:{:?}, {}:{:?})=={}", node1.left_site(), node1.right_site(), site1.sorted_index(), point1, site2.sorted_index(), point2,rv);
+        rv
     }
 
-    //private:
     /// Get the newer site.
-    pub(crate) fn get_comparison_site(node: &VB::BeachLineNodeKey<I, F>) -> &VSE::SiteEvent<I, F> {
+    fn get_comparison_site_(node: &VB::BeachLineNodeKey<I, F>) -> &VSE::SiteEvent<I, F> {
         if node.left_site().sorted_index() > node.right_site().sorted_index() {
             node.left_site()
         } else {
@@ -688,7 +708,7 @@ where
         }
     }
 
-    pub(crate) fn get_comparison_point(site: &VSE::SiteEvent<I, F>) -> &Point<I> {
+    fn get_comparison_point_(site: &VSE::SiteEvent<I, F>) -> &Point<I> {
         if PointComparisonPredicate::<I>::point_comparison_predicate(site.point0(), site.point1()) {
             site.point0()
         } else {
@@ -697,10 +717,7 @@ where
     }
 
     /// Get comparison pair: tuple of y coordinate and direction of the newer site.
-    pub(crate) fn get_comparison_y(
-        node: &VB::BeachLineNodeKey<I, F>,
-        is_new_node: bool,
-    ) -> (I, i8) {
+    fn get_comparison_y_(node: &VB::BeachLineNodeKey<I, F>, is_new_node: bool) -> (I, i8) {
         if node.left_site().sorted_index() == node.right_site().sorted_index() {
             return (node.left_site().y0(), 0);
         }

@@ -75,27 +75,33 @@ pub(crate) struct ColorBits(pub ColorType);
 impl ColorBits {
     pub(crate) const ZERO: Self = ColorBits(0x0);
     // Point subtypes.
-    pub(crate) const SINGLE_POINT: Self = ColorBits(0x0);
-    pub(crate) const SEGMENT_START_POINT: Self = ColorBits(0x1);
-    pub(crate) const SEGMENT_END_POINT: Self = ColorBits(0x2);
-    pub(crate) const SITE_VERTEX: Self = ColorBits(0x4);
+    pub(crate) const SINGLE_POINT__BIT: Self = ColorBits(0x0); // 0b_00000000
+    pub(crate) const SEGMENT_START_POINT__BIT: Self = ColorBits(0x1); // 0b_00000001
+    pub(crate) const SEGMENT_END_POINT__BIT: Self = ColorBits(0x2); // 0b_00000010
+    /// Vertex subtype (does not exists not in c++ boost)
+    pub(crate) const SITE_VERTEX__BIT: Self = ColorBits(0x4); // 0b_00000100
 
     // Segment subtypes.
-    pub(crate) const INITIAL_SEGMENT: Self = ColorBits(0x8);
-    pub(crate) const REVERSE_SEGMENT: Self = ColorBits(0x9);
+    pub(crate) const INITIAL_SEGMENT: Self = ColorBits(0x8); // 0b1_00001000
+                                                             // todo: not used for anything?
+    pub(crate) const REVERSE_SEGMENT: Self = ColorBits(0x9); // 0b1_00001001
 
-    pub(crate) const BITMASK: Self = ColorBits(0x1F); // 0b1_11111111
+    /// 5 color bits are reserved for internal use.
+    pub(crate) const RESERVED_BITS__SHIFT: Self = Self(0x5);
+    /// Used for clearing custom color
+    pub(crate) const RESERVED__MASK: Self = ColorBits(0x1F); // 0b_00011111
 
-    pub(crate) const GEOMETRY_SHIFT: Self = ColorBits(0x3);
-    pub(crate) const GEOMETRY_CATEGORY_POINT: Self = ColorBits(0x0);
-    pub(crate) const GEOMETRY_CATEGORY_SEGMENT: Self = ColorBits(0x1);
+    // todo: why have a GEOMETRY_SHIFT when GEOMETRY_CATEGORY_POINT and GEOMETRY_CATEGORY_SEGMENT could just indicate the bits directly?
+    pub(crate) const GEOMETRY__SHIFT: Self = ColorBits(0x3);
+    pub(crate) const GEOMETRY_CATEGORY_POINT__BIT: Self = ColorBits(0x0); // 0b_00000000
+    pub(crate) const GEOMETRY_CATEGORY_SEGMENT__BIT: Self = ColorBits(0x1); // 0b_00000001
 
-    // 5 color bits are reserved for internal use.
-    pub(crate) const BITS_SHIFT: Self = Self(0x5);
-    pub(crate) const IS_INVERSE_BITMASK: Self = Self(0x20); // 32
+    /// Used on the site points (beach-line keys etc.) value exceeds the reserved bit field,
+    /// but these site points are not public.
+    pub(crate) const IS_INVERSE__BIT: Self = Self(0x20); // 0b_00100000
 
     // todo: remove this
-    pub(crate) const TEMPORARY_CELL: Self = ColorBits(u32::MAX);
+    pub(crate) const TEMPORARY_CELL: Self = ColorBits(u32::MAX << ColorBits::GEOMETRY__SHIFT.0);
 }
 
 /// Represents the type of input geometry a cell was created from
@@ -168,15 +174,15 @@ where
 
     #[inline(always)]
     pub(crate) fn internal_color(&self) -> ColorBits {
-        ColorBits(self.color_ & ColorBits::BITMASK.0)
+        ColorBits(self.color_ & ColorBits::RESERVED__MASK.0)
     }
 
     #[inline(always)]
     pub fn source_category(&self) -> SourceCategory {
         match self.internal_color() {
-            ColorBits::SINGLE_POINT => SourceCategory::SinglePoint,
-            ColorBits::SEGMENT_START_POINT => SourceCategory::SegmentStart,
-            ColorBits::SEGMENT_END_POINT => SourceCategory::SegmentEnd,
+            ColorBits::SINGLE_POINT__BIT => SourceCategory::SinglePoint,
+            ColorBits::SEGMENT_START_POINT__BIT => SourceCategory::SegmentStart,
+            ColorBits::SEGMENT_END_POINT__BIT => SourceCategory::SegmentEnd,
             _ => SourceCategory::Segment,
         }
     }
@@ -184,27 +190,27 @@ where
     /// Returns true if the cell contains point site, false else.
     #[inline(always)]
     pub fn contains_point(&self) -> bool {
-        let geometry = self.internal_color().0 >> ColorBits::GEOMETRY_SHIFT.0;
-        geometry == ColorBits::GEOMETRY_CATEGORY_POINT.0
+        let geometry = self.internal_color().0 >> ColorBits::GEOMETRY__SHIFT.0;
+        geometry == ColorBits::GEOMETRY_CATEGORY_POINT__BIT.0
     }
 
     /// Returns true if the cell contains segment site, false otherwise.
     #[inline(always)]
     pub fn contains_segment(&self) -> bool {
-        let geometry = self.internal_color().0 >> ColorBits::GEOMETRY_SHIFT.0;
-        geometry == ColorBits::GEOMETRY_CATEGORY_SEGMENT.0
+        let geometry = self.internal_color().0 >> ColorBits::GEOMETRY__SHIFT.0;
+        geometry == ColorBits::GEOMETRY_CATEGORY_SEGMENT__BIT.0
     }
 
     /// Returns true if the cell contains segment start point, false otherwise.
     #[inline(always)]
     pub fn contains_segment_startpoint(&self) -> bool {
-        self.internal_color().0 == ColorBits::SEGMENT_START_POINT.0
+        self.internal_color().0 == ColorBits::SEGMENT_START_POINT__BIT.0
     }
 
     /// Returns true if the cell contains segment end point, false otherwise.
     #[inline(always)]
     pub fn contains_segment_endpoint(&self) -> bool {
-        self.internal_color().0 == ColorBits::SEGMENT_END_POINT.0
+        self.internal_color().0 == ColorBits::SEGMENT_END_POINT__BIT.0
     }
 
     #[inline(always)]
@@ -489,7 +495,7 @@ where
         is_site_vertex: bool,
     ) -> Rc<cell::Cell<Vertex<I, F>>> {
         let color = if is_site_vertex {
-            ColorBits::SITE_VERTEX.0
+            ColorBits::SITE_VERTEX__BIT.0
         } else {
             ColorBits::ZERO.0
         };
@@ -544,13 +550,13 @@ where
 
     /// get_color returns the custom edge info. (does not contain the reserved bits)
     pub fn get_color(&self) -> ColorType {
-        self.color_ >> ColorBits::BITS_SHIFT.0
+        self.color_ >> ColorBits::RESERVED_BITS__SHIFT.0
     }
 
     /// set_color sets the custom edge info. (does not affect the reserved bits)
     pub fn set_color(&mut self, color: ColorType) -> ColorType {
-        self.color_ &= ColorBits::BITMASK.0;
-        self.color_ |= color << ColorBits::BITS_SHIFT.0;
+        self.color_ &= ColorBits::RESERVED__MASK.0;
+        self.color_ |= color << ColorBits::RESERVED_BITS__SHIFT.0;
         self.color_
     }
 
@@ -564,7 +570,7 @@ where
     /// Returns true if this vertex coincides with an input site.
     #[inline]
     pub fn is_site_point(&self) -> bool {
-        (self.color_ & ColorBits::SITE_VERTEX.0) != 0
+        (self.color_ & ColorBits::SITE_VERTEX__BIT.0) != 0
     }
 }
 
@@ -741,14 +747,14 @@ where
     /// get_color returns the custom edge info. (does not contain the reserved bits)
     #[inline(always)]
     pub fn get_color(&self) -> ColorType {
-        self.color_ >> ColorBits::BITS_SHIFT.0
+        self.color_ >> ColorBits::RESERVED_BITS__SHIFT.0
     }
 
     /// set_color sets the custom edge info. (does not affect the reserved bits)
     #[inline(always)]
     pub fn set_color(&mut self, color: ColorType) -> ColorType {
-        self.color_ &= ColorBits::BITMASK.0;
-        self.color_ |= color << ColorBits::BITS_SHIFT.0;
+        self.color_ &= ColorBits::RESERVED__MASK.0;
+        self.color_ |= color << ColorBits::RESERVED_BITS__SHIFT.0;
         self.color_
     }
 
@@ -1729,7 +1735,7 @@ where
 
         #[cfg(feature = "console_debug")]
         for (i, v) in self.vertices_.iter().enumerate() {
-            println!(
+            tln!(
                 "vertex #{} contains a point: ({:.12}, {:.12}) ie:{}",
                 i,
                 v.get().x(),

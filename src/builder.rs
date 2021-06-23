@@ -26,6 +26,7 @@ use std::ops::Neg;
 use super::{InputType, OutputType};
 use crate::beach_line::BeachLineNodeData;
 use crate::{t, tln};
+#[cfg(test)]
 mod tests;
 
 /// GENERAL INFO:
@@ -125,7 +126,7 @@ where
         }
         for v in vertices {
             let mut s = VSE::SiteEvent::<I, F>::new_3(*v, *v, self.index_);
-            s.or_source_category(&VD::ColorBits::SINGLE_POINT);
+            s.or_source_category(&VD::ColorBits::SINGLE_POINT__BIT);
             self.site_events_.push(s);
             self.index_ += 1;
         }
@@ -142,9 +143,9 @@ where
             let p1 = s.start;
             let p2 = s.end;
             let mut s1 = VSE::SiteEvent::<I, F>::new_3(p1, p1, self.index_);
-            s1.or_source_category(&Cb::SEGMENT_START_POINT);
+            s1.or_source_category(&Cb::SEGMENT_START_POINT__BIT);
             let mut s2 = VSE::SiteEvent::new_3(p2, p2, self.index_);
-            s2.or_source_category(&Cb::SEGMENT_END_POINT);
+            s2.or_source_category(&Cb::SEGMENT_END_POINT__BIT);
 
             self.site_events_.push(s1);
             self.site_events_.push(s2);
@@ -194,7 +195,7 @@ where
                 tln!("################################################");
                 if i >= 8 {
                     self.beach_line_
-                        .debug_print_all_compat(&self.circle_events_)?;
+                        .dbgpa_compat_(&self.circle_events_)?;
                     print!("");
                 }
                 i += 1;
@@ -402,9 +403,9 @@ where
                     #[cfg(feature = "console_debug")]
                     {
                         self.beach_line_
-                            .debug_print_all_compat(&self.circle_events_)?;
+                            .dbgpa_compat_(&self.circle_events_)?;
                         print!("erasing beach_line:");
-                        self.beach_line_.debug_print_all_compat_node(
+                        self.beach_line_.dbgpa_compat_node_(
                             &self.beach_line_.get_node(&b_it)?.0,
                             &self.circle_events_,
                         )?;
@@ -413,7 +414,7 @@ where
                     #[cfg(feature = "console_debug")]
                     {
                         self.beach_line_
-                            .debug_print_all_compat(&self.circle_events_)?;
+                            .dbgpa_compat_(&self.circle_events_)?;
                     }
                 }
             } else {
@@ -431,10 +432,20 @@ where
 
             // Find the node in the binary search tree with left arc
             // lying above the new site point.
+            #[cfg(feature = "beachline_corruption_check")]
+            self.beach_line_.corruption_check()?;
+
             let new_key = VB::BeachLineNodeKey::<I, F>::new_1(*site_event);
-
+            tln!("\nbeach_line_.lower_bound key  : {:?} ", site_event);
             let right_it = self.beach_line_.lower_bound(new_key);
-
+            tln!(
+                "beach_line_.lower_bound found: {:?}: \n",
+                right_it.ok_or_else(|| BvError::InternalError(format!(
+                    "Could not get lower_bound {}:{}",
+                    file!(),
+                    line!()
+                )))?
+            );
             (right_it, last_index)
         };
         #[cfg(feature = "console_debug")]
@@ -444,16 +455,15 @@ where
                 && self.debug_circle_counter_ <= debug_range + 2
             {
                 self.beach_line_
-                    .debug_print_all_compat(&self.circle_events_)?;
+                    .dbgpa_compat_(&self.circle_events_)?;
                 //print!("right_it:"); self.beach_line_.debug_print_all_compat_node(&right_it);
             }
         }
         while *site_event_iterator_ != last_index {
             // site_event is a copy of the the event site_event_iterator_ is indexing
             let mut site_event = self.site_events_[*site_event_iterator_];
-
             let mut left_it = right_it;
-
+            //tln!("while process_site_event: left_it:{:?}", left_it.unwrap());
             //#[cfg(feature = "console_debug")]
             //if let Some(ref left_it) = left_it {
             //    tln!("left_it=right_it :{:?}", left_it);
@@ -539,10 +549,17 @@ where
                     .beach_line_
                     .get_left_neighbour(left_it.unwrap())
                     .map(|x| x.0);
+                let left_it_unwrap = left_it.ok_or_else(|| {
+                    BvError::InternalError(format!(
+                        "Could not get_left_neighbour() {}:{}",
+                        file!(),
+                        line!()
+                    ))
+                })?;
                 //tln!("insert_new_arc else. left_it:{:?}", left_it.unwrap());
 
-                let site_arc1 = *(left_it.unwrap().right_site());
-                let site1 = *(left_it.unwrap().left_site());
+                let site_arc1 = *(left_it_unwrap.right_site());
+                let site1 = *(left_it_unwrap.left_site());
 
                 // Insert new nodes into the beach line. Update the output.
                 let new_node_it = self.insert_new_arc(site_arc1, site_arc2, site_event, output)?;
@@ -615,7 +632,7 @@ where
         {
             t!("it_first:");
             self.beach_line_
-                .debug_print_all_compat_node(&it_first.0, &self.circle_events_)?;
+                .dbgpa_compat_node_(&it_first.0, &self.circle_events_)?;
         }
         // Get the C site.
         let site3 = it_first.0.right_site();
@@ -628,7 +645,16 @@ where
         let bisector2 = bisector2.unwrap().edge_id();
 
         // Get the half-edge corresponding to the first bisector - (A, B).
-        let it_first = self.beach_line_.get_left_neighbour(it_first.0).unwrap();
+        let it_first = self
+            .beach_line_
+            .get_left_neighbour(it_first.0)
+            .ok_or_else(|| {
+                BvError::InternalError(format!(
+                    "Could not get_left_neighbour() {}:{}",
+                    file!(),
+                    line!()
+                ))
+            })?;
         let it_first = &self.beach_line_.get_node(&it_first.1)?;
 
         let bisector1 = it_first.1.get();
@@ -660,22 +686,22 @@ where
             #[cfg(feature = "console_debug")]
             {
                 self.beach_line_
-                    .debug_print_all_compat(&self.circle_events_)?;
+                    .dbgpa_compat_(&self.circle_events_)?;
                 t!("replace key ");
                 self.beach_line_
-                    .debug_print_all_compat_node(&it_first_key_before, &self.circle_events_)?;
+                    .dbgpa_compat_node_(&it_first_key_before, &self.circle_events_)?;
                 t!("with:       ");
                 self.beach_line_
-                    .debug_print_all_compat_node(&it_first_key_after, &self.circle_events_)?;
+                    .dbgpa_compat_node_(&it_first_key_after, &self.circle_events_)?;
             }
             let rv = self
                 .beach_line_
-                .replace_key(it_first_key_before, it_first_key_after)?;
+                .replace_key(it_first_key_before, it_first_key_after)?;//, it_last.0.get_index())?;
             #[cfg(feature = "console_debug")]
             {
                 self.beach_line_
-                    .debug_print_all_compat(&self.circle_events_)?;
-                self.beach_line_.debug_print_all_cmp();
+                    .dbgpa_compat_(&self.circle_events_)?;
+                self.beach_line_.dbgp_all_cmp_();
                 tln!();
             }
             #[cfg(feature = "beachline_corruption_check")]
@@ -699,16 +725,16 @@ where
         #[cfg(feature = "console_debug")]
         {
             self.beach_line_
-                .debug_print_all_compat(&self.circle_events_)?;
+                .dbgpa_compat_(&self.circle_events_)?;
             t!("erasing beach_line:");
             self.beach_line_
-                .debug_print_all_compat_node(&it_last.0, &self.circle_events_)?;
+                .dbgpa_compat_node_(&it_last.0, &self.circle_events_)?;
         }
         // Remove the (B, C) bisector node from the beach line.
         self.beach_line_.erase(it_last.0.get_index())?;
         #[cfg(feature = "console_debug")]
         self.beach_line_
-            .debug_print_all_compat(&self.circle_events_)?;
+            .dbgpa_compat_(&self.circle_events_)?;
 
         let it_last = (it_first.0, it_first.0.get_index());
 
@@ -769,13 +795,13 @@ where
         );
         // Create two new bisectors with opposite directions.
         let new_left_node = VB::BeachLineNodeKey::<I, F>::new_2(site_arc1, site_event);
-        let mut new_right_node = VB::BeachLineNodeKey::<I, F>::new_2(site_event, site_arc2);
-
-        // Set correct orientation for the first site of the second node.
-        if site_event.is_segment() {
-            let _ = new_right_node.left_site_m().inverse();
-            tln!("new bl key i:{:?}", new_right_node);
-        }
+        let new_right_node =
+            // Set correct orientation for the first site of the second node.
+            if site_event.is_segment() {
+                VB::BeachLineNodeKey::<I, F>::new_2(*site_event.clone().inverse(), site_arc2)
+            } else {
+                VB::BeachLineNodeKey::<I, F>::new_2(site_event, site_arc2)
+            };
 
         // Update the output.
         let edges = output._insert_new_edge_2(site_arc2, site_event);
@@ -792,12 +818,18 @@ where
             &self.circle_events_,
         )?;
 
+        #[cfg(feature = "console_debug")] {
+            self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
+            self.beach_line_.dbgp_all_cmp_();
+            println!();
+        }
         if site_event.is_segment() {
             // Update the beach line with temporary bisector, that will
             // disappear after processing site event corresponding to the
             // second endpoint of the segment site.
-            let mut new_node = VB::BeachLineNodeKey::<I, F>::new_2(site_event, site_event);
-            let _ = new_node.right_site_m().inverse();
+            let new_node =
+                VB::BeachLineNodeKey::<I, F>::new_2(site_event, *site_event.clone().inverse());
+            //let _ = new_node.right_site_mut().inverse();
 
             #[cfg(feature = "console_debug")]
             let new_node = self
@@ -805,6 +837,12 @@ where
                 .insert(new_node, None, &self.circle_events_)?;
             #[cfg(not(feature = "console_debug"))]
             let new_node = self.beach_line_.insert(new_node, None)?;
+
+            #[cfg(feature = "console_debug")] {
+                self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
+                self.beach_line_.dbgp_all_cmp_();
+                println!();
+            }
             // Update the data structure that holds temporary bisectors.
             self.end_points_.push(VEP::EndPointPair::new(
                 *site_event.point1(),
@@ -822,10 +860,14 @@ where
         }
         #[cfg(feature = "console_debug")]
         {
-            Ok(self
+            let rv = Ok(self
                 .beach_line_
                 .insert(new_left_node, Some(new_node_data), &self.circle_events_)?
-                .get_index())
+                .get_index());
+            self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
+            self.beach_line_.dbgp_all_cmp_();
+            println!();
+            rv
         }
     }
 
@@ -860,7 +902,7 @@ where
                     {
                         t!("with bisector_node: ");
                         self.beach_line_
-                            .debug_print_all_compat_node(&b.0, &self.circle_events_)?;
+                            .dbgpa_compat_node_(&b.0, &self.circle_events_)?;
                     }
                 } else {
                     return Err(BvError::InternalError(format!(
