@@ -584,7 +584,7 @@ where
 
     // returns true if l intersects with any of the lines in self.segment_data_
     fn self_intersecting_check(&self, l: &geometry::Line<I>) -> bool {
-        let l_ = Self::line_i1_to_f64(l);
+        let l_ = Self::line_i_to_f64(l);
         for s in self.segment_data_.iter() {
             // allow end point intersection
             if (s.start.x == l.start.x && s.start.y == l.start.y)
@@ -608,7 +608,7 @@ where
                 continue;
             }
 
-            let s_ = Self::line_i1_to_f64(s);
+            let s_ = Self::line_i_to_f64(s);
             let s_: geo::Line<f64> = s_.into();
             let l_: geo::Line<f64> = l_.into();
 
@@ -643,10 +643,10 @@ where
     #[allow(dead_code)]
     /// Draw bounding box.
     fn draw_bb(&self) {
-        let min_x = Self::f1_to_i32(self.screen_aabb.get_low().unwrap()[0]);
-        let max_x = Self::f1_to_i32(self.screen_aabb.get_high().unwrap()[0]);
-        let min_y = Self::f1_to_i32(self.screen_aabb.get_low().unwrap()[1]);
-        let max_y = Self::f1_to_i32(self.screen_aabb.get_high().unwrap()[1]);
+        let min_x = Self::f_to_i32(self.screen_aabb.get_low().unwrap()[0]);
+        let max_x = Self::f_to_i32(self.screen_aabb.get_high().unwrap()[0]);
+        let min_y = Self::f_to_i32(self.screen_aabb.get_low().unwrap()[1]);
+        let max_y = Self::f_to_i32(self.screen_aabb.get_high().unwrap()[1]);
 
         draw::draw_line(min_x, min_y, max_x, min_y);
         draw::draw_line(min_x, max_y, max_x, max_y);
@@ -676,10 +676,10 @@ where
             let sp = affine.transform_p(&i.start);
             let ep = affine.transform_p(&i.end);
             draw::draw_line(
-                Self::f1_to_i32(sp[0]),
-                Self::f1_to_i32(sp[1]),
-                Self::f1_to_i32(ep[0]),
-                Self::f1_to_i32(ep[1]),
+                Self::f_to_i32(sp[0]),
+                Self::f_to_i32(sp[1]),
+                Self::f_to_i32(ep[0]),
+                Self::f_to_i32(ep[1]),
             );
         }
     }
@@ -821,10 +821,10 @@ where
                 if edge.is_curved() {
                     if draw_curved_as_line {
                         for i in 0..samples.len() - 1 {
-                            if let Ok(x1) = Self::try_f1_to_i32(samples[i][0]) {
-                                if let Ok(y1) = Self::try_f1_to_i32(samples[i][1]) {
-                                    if let Ok(x2) = Self::try_f1_to_i32(samples[i + 1][0]) {
-                                        if let Ok(y2) = Self::try_f1_to_i32(samples[i + 1][1]) {
+                            if let Ok(x1) = Self::try_f_to_i32(samples[i][0]) {
+                                if let Ok(y1) = Self::try_f_to_i32(samples[i][1]) {
+                                    if let Ok(x2) = Self::try_f_to_i32(samples[i + 1][0]) {
+                                        if let Ok(y2) = Self::try_f_to_i32(samples[i + 1][1]) {
                                             draw::draw_line(x1, y1, x2, y2);
                                         }
                                     }
@@ -841,19 +841,19 @@ where
             }
             if samples.len() > 1 {
                 for i in 0..samples.len() - 1 {
-                    let x1 = Self::try_f1_to_i32(samples[i][0]);
+                    let x1 = Self::try_f_to_i32(samples[i][0]);
                     if x1.is_err() {
                         break;
                     }
-                    let y1 = Self::try_f1_to_i32(samples[i][1]);
+                    let y1 = Self::try_f_to_i32(samples[i][1]);
                     if y1.is_err() {
                         break;
                     }
-                    let x2 = Self::try_f1_to_i32(samples[i + 1][0]);
+                    let x2 = Self::try_f_to_i32(samples[i + 1][0]);
                     if x2.is_err() {
                         break;
                     }
-                    let y2 = Self::try_f1_to_i32(samples[i + 1][1]);
+                    let y2 = Self::try_f_to_i32(samples[i + 1][1]);
                     if y2.is_err() {
                         break;
                     }
@@ -888,17 +888,17 @@ where
         if cell1.contains_point() && cell2.contains_point() {
             let p1 = self.retrieve_point(cell1_id)?;
             let p2 = self.retrieve_point(cell2_id)?;
-            origin[0] = (Self::i1_to_f1(p1.x) + Self::i1_to_f1(p2.x)) * Self::f64_to_f1(0.5);
-            origin[1] = (Self::i1_to_f1(p1.y) + Self::i1_to_f1(p2.y)) * Self::f64_to_f1(0.5);
-            direction[0] = Self::i1_to_f1(p1.y) - Self::i1_to_f1(p2.y);
-            direction[1] = Self::i1_to_f1(p2.x) - Self::i1_to_f1(p1.x);
+            origin[0] = (Self::i_to_f(p1.x) + Self::i_to_f(p2.x)) * Self::f64_to_f(0.5);
+            origin[1] = (Self::i_to_f(p1.y) + Self::i_to_f(p2.y)) * Self::f64_to_f(0.5);
+            direction[0] = Self::i_to_f(p1.y) - Self::i_to_f(p2.y);
+            direction[1] = Self::i_to_f(p2.x) - Self::i_to_f(p1.x);
         } else {
             origin = if cell1.contains_segment() {
                 let p = self.retrieve_point(cell2_id)?;
-                [Self::i1_to_f1(p.x), Self::i1_to_f1(p.y)]
+                [Self::i_to_f(p.x), Self::i_to_f(p.y)]
             } else {
                 let p = self.retrieve_point(cell1_id)?;
-                [Self::i1_to_f1(p.x), Self::i1_to_f1(p.y)]
+                [Self::i_to_f(p.x), Self::i_to_f(p.y)]
             };
             let segment = if cell1.contains_segment() {
                 self.retrieve_segment(cell1_id)?
@@ -908,27 +908,27 @@ where
             let dx = segment.end.x - segment.start.x;
             let dy = segment.end.y - segment.start.y;
             if ([
-                Self::i1_to_f1(segment.start.x),
-                Self::i1_to_f1(segment.start.y),
+                Self::i_to_f(segment.start.x),
+                Self::i_to_f(segment.start.y),
             ] == origin)
                 ^ cell1.contains_point()
             {
-                direction[0] = Self::i1_to_f1(dy);
-                direction[1] = Self::i1_to_f1(-dx);
+                direction[0] = Self::i_to_f(dy);
+                direction[1] = Self::i_to_f(-dx);
             } else {
-                direction[0] = Self::i1_to_f1(-dy);
-                direction[1] = Self::i1_to_f1(dx);
+                direction[0] = Self::i_to_f(-dy);
+                direction[1] = Self::i_to_f(dx);
             }
         }
 
         let side =
-            Self::i1_to_f1(affine.reverse_transform_x(self.screen_aabb.get_high().unwrap()[0])?)
-                - Self::i1_to_f1(
+            Self::i_to_f(affine.reverse_transform_x(self.screen_aabb.get_high().unwrap()[0])?)
+                - Self::i_to_f(
                     affine.reverse_transform_x(self.screen_aabb.get_low().unwrap()[0])?,
                 );
         // absolute value is taken in case the affine transform flips one coordinate
         let side = side.abs();
-        let coefficient = side / Self::max_f1(direction[0].abs(), direction[1].abs());
+        let coefficient = side / Self::max_f(direction[0].abs(), direction[1].abs());
 
         if let Some(vertex0) = edge.get().vertex0() {
             let vertex0 = self.diagram.vertex_get(vertex0)?.get();
@@ -966,7 +966,7 @@ where
         edge_id: VD::EdgeIndex,
         sampled_edge: &mut Vec<[F; 2]>,
     ) -> Result<(), BvError> {
-        let max_dist = Self::f64_to_f1(1E-3)
+        let max_dist = Self::f64_to_f(1E-3)
             * (self.screen_aabb.get_high().unwrap()[0] - self.screen_aabb.get_low().unwrap()[0]);
 
         let cell_id = self.diagram.edge_get_cell(edge_id)?;
@@ -1440,49 +1440,49 @@ where
     #[inline(always)]
     /// converts from geometry::Line to geo::Line.
     /// I wonder why my nice geo::Line::from(geometry::Line) does not work here, feature gated?.
-    fn line_i1_to_f64(value: &geometry::Line<I>) -> geo::Line<f64> {
+    fn line_i_to_f64(value: &geometry::Line<I>) -> geo::Line<f64> {
         let ps = geo::Coordinate {
-            x: Self::i1_to_f64(value.start.x),
-            y: Self::i1_to_f64(value.start.y),
+            x: Self::i_to_f64(value.start.x),
+            y: Self::i_to_f64(value.start.y),
         };
         let pe = geo::Coordinate {
-            x: Self::i1_to_f64(value.end.x),
-            y: Self::i1_to_f64(value.end.y),
+            x: Self::i_to_f64(value.end.x),
+            y: Self::i_to_f64(value.end.y),
         };
         geo::Line::<f64>::new(ps, pe)
     }
 
     #[inline(always)]
-    fn max_f1(a: F, b: F) -> F {
+    fn max_f(a: F, b: F) -> F {
         OrderedFloat(a).max(OrderedFloat(b)).into_inner()
     }
 
     #[inline(always)]
-    pub fn i1_to_f1(value: I) -> F {
+    pub fn i_to_f(value: I) -> F {
         TypeConverter2::<I, F>::i_to_f(value)
     }
     #[inline(always)]
-    pub fn f1_to_i32(value: F) -> i32 {
+    pub fn f_to_i32(value: F) -> i32 {
         TypeConverter2::<I, F>::f_to_i32(value)
     }
 
     #[inline(always)]
-    pub fn f64_to_f1(value: f64) -> F {
+    pub fn f64_to_f(value: f64) -> F {
         TypeConverter2::<I, F>::f64_to_f(value)
     }
 
     #[inline(always)]
-    pub fn f1_to_i1(value: F) -> I {
+    pub fn f_to_i(value: F) -> I {
         TypeConverter2::<I, F>::f_to_i(value)
     }
 
     #[inline(always)]
-    pub fn i1_to_f64(value: I) -> f64 {
+    pub fn i_to_f64(value: I) -> f64 {
         TypeConverter1::<I>::i_to_f64(value)
     }
 
     #[inline(always)]
-    pub fn try_f1_to_i32(value: F) -> Result<i32, BvError> {
+    pub fn try_f_to_i32(value: F) -> Result<i32, BvError> {
         TypeConverter2::<I, F>::try_f_to_i32(value)
     }
 
