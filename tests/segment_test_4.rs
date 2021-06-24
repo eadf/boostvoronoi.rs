@@ -4,16 +4,16 @@ use boostvoronoi::diagram as VD;
 use boostvoronoi::geometry::{Line, Point};
 use boostvoronoi::BvError;
 
-type I1 = i32;
-type F1 = f64;
+type I = i32;
+type F = f64;
 
 #[allow(dead_code)]
-fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
+fn almost_equal(x1: F, x2: F, y1: F, y2: F) -> bool {
     let delta = 0.00001;
-    assert!(F1::abs(x1 - x2) < delta, "{} != {}", x1, x2);
-    assert!(F1::abs(y1 - y2) < delta, "{} != {}", y1, y2);
+    assert!(F::abs(x1 - x2) < delta, "{} != {}", x1, x2);
+    assert!(F::abs(y1 - y2) < delta, "{} != {}", y1, y2);
 
-    (F1::abs(x1 - x2) < delta) && (F1::abs(y1 - y2) < delta)
+    (F::abs(x1 - x2) < delta) && (F::abs(y1 - y2) < delta)
 }
 
 fn retrieve_point<T>(
@@ -37,7 +37,7 @@ where
 #[should_panic]
 fn segment_4_1_intersecting() {
     let _output = {
-        let segments: [[I1; 4]; 9] = [
+        let segments: [[I; 4]; 9] = [
             [207, 208, 405, 400],
             [409, 401, 200, 201],
             [400, 402, 403, 230],
@@ -50,7 +50,7 @@ fn segment_4_1_intersecting() {
         ];
         let segments = VB::to_segments(&segments);
 
-        let mut vb = VB::Builder::<I1, F1>::default();
+        let mut vb = VB::Builder::<I, F>::default();
         vb.with_segments(segments.iter()).expect("should not fail");
         vb.build()
     };
@@ -61,7 +61,7 @@ fn segment_4_1_intersecting() {
 #[test]
 fn segment_4_1() -> Result<(), BvError> {
     let _output = {
-        let segments: [[I1; 4]; 9] = [
+        let segments: [[I; 4]; 9] = [
             [200, 200, 200, 400],
             [200, 400, 400, 400],
             [400, 400, 400, 200],
@@ -74,7 +74,7 @@ fn segment_4_1() -> Result<(), BvError> {
         ];
         let segments = VB::to_segments(&segments);
 
-        let mut vb = VB::Builder::<I1, F1>::default();
+        let mut vb = VB::Builder::<I, F>::default();
         vb.with_segments(segments.iter())?;
         vb.build()?
     };
@@ -89,17 +89,17 @@ fn segment_4_1() -> Result<(), BvError> {
 //#[ignore]
 #[test]
 fn vertical_segment_1() -> Result<(), BvError> {
-    let points: [[I1; 2]; 0] = [];
-    let segments: [[I1; 4]; 3] = [
+    let points: [[I; 2]; 0] = [];
+    let segments: [[I; 4]; 3] = [
         [200, 200, 200, 400],
         [94, 628, 512, 632],
         [147, 103, 96, 170],
     ];
 
-    let _v = to_points::<I1, I1>(&points);
-    let _s = to_segments::<I1, I1>(&segments);
+    let _v = to_points::<I, I>(&points);
+    let _s = to_segments::<I, I>(&segments);
 
-    let mut vb = VB::Builder::<I1, F1>::default();
+    let mut vb = VB::Builder::<I, F>::default();
     vb.with_vertices(_v.iter())?;
     vb.with_segments(_s.iter())?;
     let output = vb.build()?;
@@ -226,7 +226,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
 /// This used to give NaN coordinates in some vertexes
 fn segment_4_2() -> Result<(), BvError> {
     let _output = {
-        let segments: [[I1; 4]; 7] = [
+        let segments: [[I; 4]; 7] = [
             [-19546, 47259, -45936, 36666],
             [-45936, 36666, -59968, -21417],
             [-59968, -21417, -125257, -19781],
@@ -237,7 +237,7 @@ fn segment_4_2() -> Result<(), BvError> {
         ];
         let segments = VB::to_segments(&segments);
 
-        let mut vb = VB::Builder::<I1, F1>::default();
+        let mut vb = VB::Builder::<I, F>::default();
         vb.with_segments(segments.iter())?;
         vb.build()?
     };

@@ -1,15 +1,15 @@
 use boostvoronoi::builder as VB;
 use boostvoronoi::BvError;
 
-type I1 = i32;
-type F1 = f64;
+type I = i32;
+type F = f64;
 
-fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
+fn almost_equal(x1: F, x2: F, y1: F, y2: F) -> bool {
     let delta = 0.0001;
-    assert!(F1::abs(x1 - x2) < delta, "{} != {}", x1, x2);
-    assert!(F1::abs(y1 - y2) < delta, "{} != {}", y1, y2);
+    assert!(F::abs(x1 - x2) < delta, "{} != {}", x1, x2);
+    assert!(F::abs(y1 - y2) < delta, "{} != {}", y1, y2);
 
-    (F1::abs(x1 - x2) < delta) && (F1::abs(y1 - y2) < delta)
+    (F::abs(x1 - x2) < delta) && (F::abs(y1 - y2) < delta)
 }
 
 //#[ignore]
@@ -17,8 +17,8 @@ fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
 /// four segments in a loop + one more
 fn two_segments_9() -> Result<(), BvError> {
     let output = {
-        let points: [[I1; 2]; 0] = [];
-        let segments: [[I1; 4]; 5] = [
+        let points: [[I; 2]; 0] = [];
+        let segments: [[I; 4]; 5] = [
             [200, 200, 200, 400],
             [200, 400, 400, 400],
             [400, 400, 400, 200],
@@ -27,10 +27,10 @@ fn two_segments_9() -> Result<(), BvError> {
         ];
         //let s = segments.iter().map(|x|x.into()).collect();
 
-        let _v = VB::to_points::<I1, I1>(&points);
-        let _s = VB::to_segments::<I1, I1>(&segments);
+        let _v = VB::to_points::<I, I>(&points);
+        let _s = VB::to_segments::<I, I>(&segments);
 
-        let mut vb = VB::Builder::<I1, F1>::default();
+        let mut vb = VB::Builder::<I, F>::default();
         vb.with_vertices(_v.iter()).expect("two_segments_9");
         vb.with_segments(_s.iter()).expect("two_segments_9");
         vb.build().expect("two_segments_9")

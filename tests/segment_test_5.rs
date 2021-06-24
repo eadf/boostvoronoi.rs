@@ -2,23 +2,23 @@ use boostvoronoi::builder::{to_segments, Builder};
 use boostvoronoi::diagram as VD;
 use boostvoronoi::BvError;
 
-type I1 = i64;
-type F1 = f64;
+type I = i64;
+type F = f64;
 
 #[allow(dead_code)]
-fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
+fn almost_equal(x1: F, x2: F, y1: F, y2: F) -> bool {
     let delta = 0.00001;
-    assert!(F1::abs(x1 - x2) < delta, "{} != {}", x1, x2);
-    assert!(F1::abs(y1 - y2) < delta, "{} != {}", y1, y2);
+    assert!(F::abs(x1 - x2) < delta, "{} != {}", x1, x2);
+    assert!(F::abs(y1 - y2) < delta, "{} != {}", y1, y2);
 
-    (F1::abs(x1 - x2) < delta) && (F1::abs(y1 - y2) < delta)
+    (F::abs(x1 - x2) < delta) && (F::abs(y1 - y2) < delta)
 }
 
 //#[ignore]
 #[test]
 fn segment_5_1() -> Result<(), BvError> {
     let output = {
-        let segments: [[I1; 4]; 4] = [
+        let segments: [[I; 4]; 4] = [
             [-251891, 127298, -237685, 182389],
             [-237685, 182389, -182594, 168183],
             [-182594, 168183, -196800, 113093],
@@ -26,7 +26,7 @@ fn segment_5_1() -> Result<(), BvError> {
         ];
         let segments = to_segments(&segments);
 
-        let mut vb = Builder::<I1, F1>::default();
+        let mut vb = Builder::<I, F>::default();
         vb.with_segments(segments.iter())?;
         vb.build()?
     };
@@ -110,7 +110,7 @@ fn segment_5_1() -> Result<(), BvError> {
 #[test]
 fn segment_5_2() -> Result<(), BvError> {
     let _output = {
-        let segments: [[I1; 4]; 26] = [
+        let segments: [[I; 4]; 26] = [
             [304929, 68078, 276145, 82335],
             [276145, 82335, 252204, 88476],
             [252204, 88476, 230711, 88894],
@@ -141,7 +141,7 @@ fn segment_5_2() -> Result<(), BvError> {
 
         let segments = to_segments(&segments);
 
-        let mut vb = Builder::<I1, F1>::default();
+        let mut vb = Builder::<I, F>::default();
         vb.with_segments(segments.iter())?;
         vb.build()?
     };
@@ -152,7 +152,7 @@ fn segment_5_2() -> Result<(), BvError> {
 // this is the old gui test 'A_test'
 fn segment_5_3() -> Result<(), BvError> {
     let output = {
-        let segments: [[I1; 4]; 12] = [
+        let segments: [[I; 4]; 12] = [
             [61580, -50720, 56712, -55735],
             [56712, -55735, -148074, -55735],
             [-148074, -55735, -148480, 39809],
@@ -169,7 +169,7 @@ fn segment_5_3() -> Result<(), BvError> {
 
         let segments = to_segments(&segments);
 
-        let mut vb = Builder::<I1, F1>::default();
+        let mut vb = Builder::<I, F>::default();
         vb.with_segments(segments.iter())?;
         vb.build()?
     };
@@ -444,14 +444,14 @@ fn segment_5_3() -> Result<(), BvError> {
 // this is the old gui test 'A_test'
 fn segment_5_4() -> Result<(), BvError> {
     let output = {
-        let segments: [[I1; 4]; 2] = [
+        let segments: [[I; 4]; 2] = [
             [35058881, -35000000, 31058881, -35000000],
             [31058881, -35000000, 25058881, -35000001],
         ];
 
         let segments = to_segments(&segments);
 
-        let mut vb = Builder::<I1, F1>::default();
+        let mut vb = Builder::<I, F>::default();
         vb.with_segments(segments.iter())?;
         vb.build()?
     };

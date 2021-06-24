@@ -6,29 +6,29 @@ use boostvoronoi::BvError;
 use std::io::{BufReader, Cursor};
 
 #[allow(dead_code)]
-fn almost_equal(x1: F1, x2: F1, y1: F1, y2: F1) -> bool {
+fn almost_equal(x1: F, x2: F, y1: F, y2: F) -> bool {
     let delta = 0.000001;
-    assert!(F1::abs(x1 - x2) < delta, "{} != {}", x1, x2);
-    assert!(F1::abs(y1 - y2) < delta, "{} != {}", y1, y2);
+    assert!(F::abs(x1 - x2) < delta, "{} != {}", x1, x2);
+    assert!(F::abs(y1 - y2) < delta, "{} != {}", y1, y2);
 
-    (F1::abs(x1 - x2) < delta) && (F1::abs(y1 - y2) < delta)
+    (F::abs(x1 - x2) < delta) && (F::abs(y1 - y2) < delta)
 }
 
-type I1 = i32;
-type F1 = f64;
+type I = i32;
+type F = f64;
 
 #[test]
 fn sample_primary_070() -> Result<(), BvError> {
-    let output: VS::SyncDiagram<I1, F1> = {
+    let output: VS::SyncDiagram<I, F> = {
         let input = r#"1
 -49400 -49572
 2
 -49431 -49703 -49427 -49798
 -49427 -49798 -49423 -49892
 "#;
-        let mut vb = VB::Builder::<I1, F1>::default();
+        let mut vb = VB::Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
+        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.build()?.into()
@@ -92,7 +92,7 @@ fn sample_primary_070() -> Result<(), BvError> {
 
 #[test]
 fn sample_primary_071() -> Result<(), BvError> {
-    let output: VS::SyncDiagram<I1, F1> = {
+    let output: VS::SyncDiagram<I, F> = {
         let input = r#"0
 90
 -50051 -49552 -49991 -49625
@@ -186,9 +186,9 @@ fn sample_primary_071() -> Result<(), BvError> {
 -49022 -49065 -48973 -49118
 -49018 -49876 -48988 -49875
 "#;
-        let mut vb = VB::Builder::<I1, F1>::default();
+        let mut vb = VB::Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
+        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.build()?.into()
@@ -3489,16 +3489,16 @@ fn sample_primary_071() -> Result<(), BvError> {
 
 #[test]
 fn sample_primary_072() -> Result<(), BvError> {
-    let output: VS::SyncDiagram<I1, F1> = {
+    let output: VS::SyncDiagram<I, F> = {
         let input = r#"0
 3
 1403829871 74 1403829871 275
 1403829871 275 1403829741 275
 1403829741 275 1403829744 73
 "#;
-        let mut vb = VB::Builder::<I1, F1>::default();
+        let mut vb = VB::Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
+        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.build()?.into()
