@@ -476,7 +476,6 @@ fn main() -> Result<(), BvError> {
                         let w = &mut wind;
                         w.set_label(new_title.as_str());
                     }
-                    // todo: handle error
                     let _ = shared_data_bm.visualizer.build()?;
                     let _ = shared_data_bm.visualizer.re_calculate_affine();
                     app::redraw();
@@ -534,20 +533,36 @@ where
     }
 
     pub fn build(&mut self) -> Result<String, BvError> {
-        println!(
-            "Running voronoi with this input (in case of a crash, copy&paste and make a test case)"
-        );
-        print!("  let points:[[i32;2];{}]=[", self.point_data_.len());
-        for p in self.point_data_.iter() {
-            print!("[{},{}],", p.x, p.y)
+        if false {
+            // This generates Rust test data
+            println!(
+                "Running voronoi with this input (in case of a crash, copy&paste and make a test case)"
+            );
+            print!("  let points:[[i32;2];{}]=[", self.point_data_.len());
+            for p in self.point_data_.iter() {
+                print!("[{},{}],", p.x, p.y)
+            }
+            println!("];");
+            print!("  let segments:[[i32;4];{}]=[", self.segment_data_.len());
+            for s in self.segment_data_.iter() {
+                print!("[{},{},{},{}],", s.start.x, s.start.y, s.end.x, s.end.y)
+            }
+            println!("];");
         }
-        println!("];");
-        print!("  let segments:[[i32;4];{}]=[", self.segment_data_.len());
-        for s in self.segment_data_.iter() {
-            print!("[{},{},{},{}],", s.start.x, s.start.y, s.end.x, s.end.y)
-        }
-        println!("];");
+        if false {
+            // This generates C++ test data
+            print!("  int INPUT_PTS[{}][2]={{", self.point_data_.len());
+            for p in self.point_data_.iter() {
+                print!("{{{},{}}},", p.x, p.y)
+            }
+            println!("}};");
 
+            print!("  int INPUT_SGS[{}][4]={{", self.segment_data_.len());
+            for s in self.segment_data_.iter() {
+                print!("{{{},{},{},{}}},", s.start.x, s.start.y, s.end.x, s.end.y)
+            }
+            println!("}};");
+        }
         let mut vb = VB::Builder::<I, F>::default();
         vb.with_vertices(self.point_data_.iter())?;
         vb.with_segments(self.segment_data_.iter())?;
