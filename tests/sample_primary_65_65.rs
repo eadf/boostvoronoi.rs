@@ -114,7 +114,7 @@ fn sample_primary_065() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 261);
     let cell = output.cells()[0].get();

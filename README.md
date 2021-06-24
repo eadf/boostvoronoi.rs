@@ -46,8 +46,8 @@ fn main() -> Result<(), BvError> {
     // input geometry indices in the output.
     vb.with_vertices(p.iter())?;
     vb.with_segments(s.iter())?;
-    // this will generate the list of cells, edges and circle events (aka vertices)
-    let result = vb.construct()?;
+    // this will build the list of cells, edges and circle events (aka vertices)
+    let result = vb.build()()?;
     println!(
         "Result: cells:{}, edges:{}, vertices:{}",
         result.cells().len(),

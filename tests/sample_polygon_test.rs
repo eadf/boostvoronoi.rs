@@ -35,7 +35,7 @@ fn sample_polygon_001() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 16);
     let cell = output.cells()[0].get();
@@ -232,7 +232,7 @@ fn sample_polygon_002() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 28);
     let cell = output.cells()[0].get();
@@ -570,7 +570,7 @@ fn sample_polygon_003() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 16);
     let cell = output.cells()[0].get();
@@ -743,7 +743,7 @@ fn sample_polygon_004() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 16);
     let cell = output.cells()[0].get();
@@ -923,7 +923,7 @@ fn sample_polygon_005() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 12);
     let cell = output.cells()[0].get();
@@ -1060,7 +1060,7 @@ fn sample_polygon_006() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 14);
     let cell = output.cells()[0].get();
@@ -1224,7 +1224,7 @@ fn sample_polygon_007() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 24);
     let cell = output.cells()[0].get();
@@ -1526,7 +1526,7 @@ fn sample_polygon_008() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 20);
     let cell = output.cells()[0].get();
@@ -1757,7 +1757,7 @@ fn sample_polygon_009() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 8);
     let cell = output.cells()[0].get();
@@ -1870,7 +1870,7 @@ fn sample_polygon_010() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 48);
     let cell = output.cells()[0].get();
@@ -2392,7 +2392,7 @@ fn sample_polygon_011() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 18);
     let cell = output.cells()[0].get();
@@ -2624,7 +2624,7 @@ fn sample_polygon_012() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 26);
     let cell = output.cells()[0].get();

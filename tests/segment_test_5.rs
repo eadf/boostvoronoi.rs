@@ -28,7 +28,7 @@ fn segment_5_1() -> Result<(), BvError> {
 
         let mut vb = Builder::<I1, F1>::default();
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 8);
     let cell = output.cells()[0].get();
@@ -143,7 +143,7 @@ fn segment_5_2() -> Result<(), BvError> {
 
         let mut vb = Builder::<I1, F1>::default();
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     Ok(())
 }
@@ -171,7 +171,7 @@ fn segment_5_3() -> Result<(), BvError> {
 
         let mut vb = Builder::<I1, F1>::default();
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 24);
     let cell = output.cells()[0].get();
@@ -453,7 +453,7 @@ fn segment_5_4() -> Result<(), BvError> {
 
         let mut vb = Builder::<I1, F1>::default();
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 5);
     let cell = output.cells()[0].get();

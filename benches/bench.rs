@@ -119,7 +119,7 @@ fn bench_1(c: &mut Criterion) {
                     let mut vb = Builder::<I, F>::default();
                     vb.with_vertices(_v.iter()).expect("bench_1");
                     vb.with_segments(_s.iter()).expect("bench_1");
-                    (vb.construct().expect("bench_1"), _v, _s)
+                    (vb.build().expect("bench_1"), _v, _s)
                 };
             }
         })

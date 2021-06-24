@@ -38,7 +38,7 @@ fn sample_primary_059() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 20);
     let cell = output.cells()[0].get();
@@ -338,7 +338,7 @@ fn sample_primary_060() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 20);
     let cell = output.cells()[0].get();
@@ -560,7 +560,7 @@ fn sample_primary_061() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 17);
     let cell = output.cells()[0].get();
@@ -883,7 +883,7 @@ fn sample_primary_062() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 8);
     let cell = output.cells()[0].get();
@@ -1011,7 +1011,7 @@ fn sample_primary_063() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 6);
     let cell = output.cells()[0].get();
@@ -1089,7 +1089,7 @@ fn sample_primary_064() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 9);
     let cell = output.cells()[0].get();

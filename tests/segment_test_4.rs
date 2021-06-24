@@ -52,7 +52,7 @@ fn segment_4_1_intersecting() {
 
         let mut vb = VB::Builder::<I1, F1>::default();
         vb.with_segments(segments.iter()).expect("should not fail");
-        vb.construct()
+        vb.build()
     };
     _output.unwrap();
 }
@@ -76,7 +76,7 @@ fn segment_4_1() -> Result<(), BvError> {
 
         let mut vb = VB::Builder::<I1, F1>::default();
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     for v in _output.vertices().iter() {
         let v = v.get();
@@ -102,7 +102,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
     let mut vb = VB::Builder::<I1, F1>::default();
     vb.with_vertices(_v.iter())?;
     vb.with_segments(_s.iter())?;
-    let output = vb.construct()?;
+    let output = vb.build()?;
 
     for v in output.vertices().iter() {
         let v = v.get();
@@ -239,7 +239,7 @@ fn segment_4_2() -> Result<(), BvError> {
 
         let mut vb = VB::Builder::<I1, F1>::default();
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     for v in _output.vertices().iter() {
         let v = v.get();

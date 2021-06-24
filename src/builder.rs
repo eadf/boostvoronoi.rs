@@ -69,7 +69,7 @@ mod tests;
 /// vb.with_segments(s.iter()).unwrap();
 ///
 /// // this will generate a the list of cells, edges and circle events (aka vertices)
-/// let result = vb.construct().unwrap();
+/// let result = vb.build().unwrap();
 /// ```
 pub struct Builder<I, F>
 where
@@ -165,14 +165,20 @@ where
         Ok(())
     }
 
+    #[deprecated(since = "0.9.0", note = "Please use the build() function instead")]
     /// Run sweep-line algorithm and fill output data structure.
     pub fn construct(&mut self) -> Result<VD::Diagram<I, F>, BvError> {
+        self.build()
+    }
+
+    /// Run sweep-line algorithm and fill output data structure.
+    pub fn build(&mut self) -> Result<VD::Diagram<I, F>, BvError> {
         let mut output: VD::Diagram<I, F> = VD::Diagram::<I, F>::new(self.site_events_.len());
 
         let mut site_event_iterator_: VSE::SiteEventIndexType = self.init_sites_queue();
 
         t!("********************************************************************************");
-        tln!("\n->construct()");
+        tln!("\n->build()");
         tln!("********************************************************************************");
 
         self.init_beach_line(&mut site_event_iterator_, &mut output);

@@ -19,7 +19,7 @@ fn single_point_1() {
         let _v = vec![Point { x: 10, y: 11 }];
         let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("single_point_1");
-        vb.construct().expect("single_point_1")
+        vb.build().expect("single_point_1")
     };
 
     assert_eq!(output.cells().len(), 1);
@@ -36,7 +36,7 @@ fn two_points_1() -> Result<(), BvError> {
         let _v = vec![Point { x: 10, y: 11 }, Point { x: 1, y: 3 }];
         let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("two_points_1");
-        vb.construct().expect("two_points_1")
+        vb.build().expect("two_points_1")
     };
     assert_eq!(output.cells().len(), 2);
     let cell = output.cells()[0].get();
@@ -90,7 +90,7 @@ fn two_points_2() -> Result<(), BvError> {
         let _v = vec![Point { x: 1, y: 3 }, Point { x: 10, y: 11 }];
         let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("two_points_1");
-        vb.construct().expect("two_points_1")
+        vb.build().expect("two_points_1")
     };
     assert_eq!(output.cells().len(), 2);
     let cell = output.cells()[0].get();
@@ -120,7 +120,7 @@ fn two_points_3() -> Result<(), BvError> {
         let _v = vec![Point { x: 45, y: 1 }, Point { x: 8, y: 23 }];
         let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("two_points_2");
-        vb.construct().expect("two_points_2")
+        vb.build().expect("two_points_2")
     };
     assert_eq!(output.cells().len(), 2);
     let cell = output.cells()[0].get();
@@ -154,7 +154,7 @@ fn three_points_1() -> Result<(), BvError> {
         ];
         let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("three_points_1");
-        vb.construct().expect("three_points_1")
+        vb.build().expect("three_points_1")
     };
     assert_eq!(output.cells().len(), 3);
     let cell = output.cells()[0].get();
@@ -214,7 +214,7 @@ fn three_points_2() -> Result<(), BvError> {
         ];
         let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("three_points_2");
-        vb.construct().expect("three_points_2")
+        vb.build().expect("three_points_2")
     };
     assert_eq!(output.cells().len(), 3);
     let cell = output.cells()[0].get();
@@ -262,7 +262,7 @@ fn three_points_3() -> Result<(), BvError> {
         ];
         let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("three_points_3");
-        vb.construct().expect("three_points_3")
+        vb.build().expect("three_points_3")
     };
     assert_eq!(output.cells().len(), 3);
     let cell = output.cells()[0].get();
@@ -310,7 +310,7 @@ fn three_points_4() -> Result<(), BvError> {
         ];
         let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("three_points_4");
-        vb.construct().expect("three_points_4")
+        vb.build().expect("three_points_4")
     };
     assert_eq!(output.cells().len(), 3);
     let cell = output.cells()[0].get();
@@ -370,7 +370,7 @@ fn four_points_1() -> Result<(), BvError> {
         ];
         let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("four_points_1");
-        vb.construct().expect("four_points_1")
+        vb.build().expect("four_points_1")
     };
     assert_eq!(output.cells().len(), 4);
     let cell = output.cells()[0].get();
@@ -456,7 +456,7 @@ fn four_points_2() -> Result<(), BvError> {
         ];
         let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("four_points_2");
-        vb.construct().expect("four_points_2")
+        vb.build().expect("four_points_2")
     };
     assert_eq!(output.cells().len(), 4);
     let cell = output.cells()[0].get();
@@ -557,7 +557,7 @@ fn four_points_3() -> Result<(), BvError> {
         ];
         let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("four_points_3");
-        vb.construct().expect("four_points_3")
+        vb.build().expect("four_points_3")
     };
     assert_eq!(output.cells().len(), 4);
     let cell = output.cells()[0].get();
@@ -644,7 +644,7 @@ fn five_points_1() -> Result<(), BvError> {
         ];
         let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("five_points_1");
-        vb.construct().expect("five_points_1")
+        vb.build().expect("five_points_1")
     };
     assert_eq!(output.cells().len(), 5);
     let cell = output.cells()[0].get();
@@ -783,7 +783,7 @@ fn eighth_points_1() -> Result<(), BvError> {
         ];
         let mut vb = Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("eighth_points_1");
-        vb.construct().expect("eighth_points_1")
+        vb.build().expect("eighth_points_1")
     };
     assert_eq!(output.cells().len(), 8);
     let cell = output.cells()[0].get();

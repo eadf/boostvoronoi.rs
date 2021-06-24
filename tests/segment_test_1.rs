@@ -38,7 +38,7 @@ fn single_segment_1() -> Result<(), BvError> {
         let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 50 })];
         let mut vb = VB::Builder::<I, F>::default();
         vb.with_segments(_s.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     // results verified against c++ boost
     assert_eq!(output.cells().len(), 3);
@@ -85,7 +85,7 @@ fn single_segment_2() -> Result<(), BvError> {
         let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 50 })];
         let mut vb = VB::Builder::<I, F>::default();
         vb.with_segments(_s.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 3);
     let cell = output.cells()[0].get();
@@ -128,7 +128,7 @@ fn single_segment_3() -> Result<(), BvError> {
         let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 10 })];
         let mut vb = VB::Builder::<I, F>::default();
         vb.with_segments(_s.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 3);
     let cell = output.cells()[0].get();
@@ -171,7 +171,7 @@ fn single_segment_4() -> Result<(), BvError> {
         let _s = vec![Line::new(Point { x: 50, y: 10 }, Point { x: 10, y: 10 })];
         let mut vb = VB::Builder::<I, F>::default();
         vb.with_segments(_s.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 3);
     let cell = output.cells()[0].get();
@@ -219,7 +219,7 @@ fn two_segments_1() -> Result<(), BvError> {
         ];
         let mut vb = VB::Builder::<I, F>::default();
         vb.with_segments(_s.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 6);
     let cell = output.cells()[0].get();
@@ -389,7 +389,7 @@ fn two_segments_2() -> Result<(), BvError> {
         let mut vb = VB::Builder::<I, F>::default();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 7);
     let cell = output.cells()[0].get();
@@ -798,7 +798,7 @@ fn two_segments_3() -> Result<(), BvError> {
         let mut vb = VB::Builder::<I, F>::default();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 8);
     let cell = output.cells()[0].get();
@@ -893,7 +893,7 @@ fn two_segments_4() -> Result<(), BvError> {
         let mut vb = VB::Builder::<I, F>::default();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 10);
     let cell = output.cells()[0].get();
@@ -1011,7 +1011,7 @@ fn two_segments_5() -> Result<(), BvError> {
         let mut vb = VB::Builder::<I, F>::default();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 10);
     let cell = output.cells()[0].get();
@@ -1129,7 +1129,7 @@ fn two_segments_6() -> Result<(), BvError> {
         let mut vb = VB::Builder::<I, F>::default();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 6);
     let cell = output.cells()[0].get();
@@ -1484,7 +1484,7 @@ fn two_segments_7() -> Result<(), BvError> {
         let mut vb = VB::Builder::<I, F>::default();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     assert_eq!(output.cells().len(), 6);
     let cell = output.cells()[0].get();
@@ -1845,7 +1845,7 @@ fn two_segments_8() -> Result<(), BvError> {
         let mut vb = VB::Builder::<I, F>::default();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
-        (vb.construct()?, _v, _s)
+        (vb.build()?, _v, _s)
     };
 
     assert_eq!(output.cells().len(), 8);

@@ -177,7 +177,7 @@ fn main() -> Result<(), BvError> {
         let mut vb = VB::Builder::<I, F>::default();
         vb.with_vertices(_v.iter())?;
         vb.with_segments(_s.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     println!();
     for (i, v) in output.vertices().iter().enumerate() {

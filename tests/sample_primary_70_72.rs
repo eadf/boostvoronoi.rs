@@ -31,7 +31,7 @@ fn sample_primary_070() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?.into()
+        vb.build()?.into()
     };
     assert_eq!(output.cells().len(), 6);
     let cell = output.cells()[0];
@@ -191,7 +191,7 @@ fn sample_primary_071() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?.into()
+        vb.build()?.into()
     };
     assert_eq!(output.cells().len(), 270);
     let cell = output.cells()[0];
@@ -3501,7 +3501,7 @@ fn sample_primary_072() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I1, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?.into()
+        vb.build()?.into()
     };
     assert_eq!(output.cells().len(), 7);
     let cell = output.cells()[0];

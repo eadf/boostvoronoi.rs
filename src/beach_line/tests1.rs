@@ -52,7 +52,7 @@ fn beachline_1() {
 
     let mut vb = Builder::<I, F>::default();
     vb.with_vertices(_v.iter()).unwrap();
-    let _output = vb.construct();
+    let _output = vb.build();
     //assert!(false);
 }
 

@@ -33,7 +33,7 @@ fn two_segments_9() -> Result<(), BvError> {
         let mut vb = VB::Builder::<I1, F1>::default();
         vb.with_vertices(_v.iter()).expect("two_segments_9");
         vb.with_segments(_s.iter()).expect("two_segments_9");
-        vb.construct().expect("two_segments_9")
+        vb.build().expect("two_segments_9")
     };
     let v = output.vertices()[0].get();
     assert!(almost_equal(v.x(), 200.0000000, v.y(), 200.0000000));

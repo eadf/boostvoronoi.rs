@@ -33,7 +33,7 @@ fn segment_32bit_1() -> Result<(), BvError> {
         let mut vb = VB::Builder::<I1, F1>::default();
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.construct()?
+        vb.build()?
     };
     Ok(())
 }

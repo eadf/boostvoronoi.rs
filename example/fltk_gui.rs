@@ -553,7 +553,7 @@ where
         vb.with_segments(self.segment_data_.iter())?;
 
         // Construct voronoi diagram.
-        self.diagram = vb.construct()?;
+        self.diagram = vb.build()?;
         println!("Result: found {} vertices", self.diagram.vertices().len());
         self.points_aabb = {
             let mut aabb = VU::Aabb2::default();
