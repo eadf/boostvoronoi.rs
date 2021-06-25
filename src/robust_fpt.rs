@@ -253,7 +253,6 @@ impl ops::AddAssign<RobustFpt> for RobustFpt {
         #[cfg(feature = "console_debug")]
         {
             assert!(self.fpv_.is_finite());
-            assert!(!self.re_.is_nan());
         }
     }
 }

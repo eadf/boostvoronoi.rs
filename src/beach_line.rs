@@ -11,6 +11,8 @@
 
 //! The data structures needed for the beachline.
 #[cfg(test)]
+mod test3;
+#[cfg(test)]
 mod test2;
 #[cfg(test)]
 mod tests1;
@@ -98,7 +100,8 @@ where
     fn default() -> Self {
         Self {
             beach_line_: BTreeMap::default(),
-            next_free_: BeachLineIndex(0),
+            // zero is reserved for 'loose' search keys
+            next_free_: BeachLineIndex(1),
             beach_line_vec_: VecMap::default(),
         }
     }
@@ -154,7 +157,6 @@ where
         }
         let _ = self.next_free_.increment();
         t!("inserted beach_line:");
-        #[cfg(feature = "console_debug")]
         self.dbgpa_compat_node_(&key, _ce)?;
         Ok(key)
     }
@@ -238,14 +240,12 @@ where
 
     /// swaps the 'before' key for the 'after' key
     /// It does this by removing key/value from the map and re-inserting the new values
-    //#[allow(clippy::type_complexity)]
     pub(crate) fn replace_key(
         &mut self,
         before: BeachLineNodeKey<I, F>,
         after: BeachLineNodeKey<I, F>,
     ) -> Result<(BeachLineNodeKey<I, F>, BeachLineNodeDataType), BvError> {
-        if let Some(idx) = self.beach_line_.get(&before).copied() {
-            let _ = self.beach_line_.remove(&before);
+        if let Some(idx) = self.beach_line_.remove(&before) {
             // todo: remove assert when stable
             assert_eq!(after.node_index_.0, idx.0);
             let _ = self.beach_line_.insert(after, idx);
@@ -315,7 +315,7 @@ where
     #[inline(always)]
     /// Returns the first beach line element in the container whose key is not considered to go
     /// before position (i.e., either it is equivalent or goes after).
-    /// Returns None if no  data is found
+    /// Returns None if no data is found
     pub(crate) fn lower_bound(
         &self,
         key: BeachLineNodeKey<I, F>,
@@ -494,7 +494,7 @@ where
         node: &BeachLineNodeKey<I, F>,
         ce: &VC::CircleEventQueue,
     ) -> Result<(), BvError> {
-        let id = &node.get_index();
+        let id = &node.index();
         t!("L:{:?},R:{:?}", &node.left_site(), &node.right_site(),);
         if let Some(data) = self.get_node(id)?.1.get() {
             if let Some(_circle_event) = data.circle_event_ {
@@ -609,8 +609,16 @@ where
         self.right_site_ = *site; // Copy
     }
 
-    pub(crate) fn get_index(&self) -> BeachLineIndex {
+    /// returns the index
+    pub(crate) fn index(&self) -> BeachLineIndex {
         self.node_index_
+    }
+
+    #[cfg(test)]
+    /// Sets the key index (only needed for tests)
+    pub(crate) fn set_index(mut self, new_index:BeachLineIndex) -> Self {
+        self.node_index_ = new_index;
+        self
     }
 }
 
@@ -629,8 +637,11 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    /// Remember, the ordering of the beachline is intentionally reversed.
+    /// Remember, the ordering of the beach-line is intentionally reversed.
     fn cmp(&self, other: &Self) -> Ordering {
+        if self.node_index_.0 == other.node_index_.0 {
+            return Ordering::Equal;
+        }
         let order = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(self, other);
         if order {
             Ordering::Greater

@@ -13,7 +13,6 @@ use std::ops::Neg;
 #[macro_use]
 
 lazy_static! {
-
     static ref RE_PREDICATE: Regex =
     #[allow(unused_braces)] // rustfmt adds those for no reason
     { Regex::new(r"(?P<node1>L.+), (?P<node2>L.+)\)==(?P<result>.+)").unwrap() };
@@ -21,13 +20,13 @@ lazy_static! {
     #[allow(unused_braces)] // rustfmt adds those for no reason
     { Regex::new(r"L:(?P<left>.+),R:(?P<right>.+)").unwrap() };
     static ref RE_NODE_SINGLE: Regex = {
-        Regex::new(r"#(?P<si>\d+)\((?P<x>\d+),(?P<y>\d+)\),ii:(?P<ii>\d+),f:(?P<f>\d+)").unwrap()
+        Regex::new(r"#(?P<si>\d+)\((?P<x>-?\d+),(?P<y>-?\d+)\),ii:(?P<ii>-?\d+),f:(?P<f>\d+)").unwrap()
     };
     static ref RE_NODE_DOUBLE: Regex = {
-        Regex::new(r"#(?P<si>\d+)\((?P<x1>\d+),(?P<y1>\d+)\)-\((?P<x2>\d+),(?P<y2>\d+)\),ii:(?P<ii>\d+),f:(?P<f>\d+)").unwrap()
+        Regex::new(r"#(?P<si>\d+)\((?P<x1>-?\d+),(?P<y1>-?\d+)\)-\((?P<x2>-?\d+),(?P<y2>-?\d+)\),ii:(?P<ii>-?\d+),f:(?P<f>\d+)").unwrap()
     };
     static ref RE_NODE_INVERS: Regex = {
-        Regex::new(r"#(?P<si>\d+)\((?P<x1>\d+),(?P<y1>\d+)\)¿\((?P<x2>\d+),(?P<y2>\d+)\),ii:(?P<ii>\d+),f:(?P<f>\d+)").unwrap()
+        Regex::new(r"#(?P<si>\d+)\((?P<x1>-?\d+),(?P<y1>-?\d+)\)¿\((?P<x2>-?\d+),(?P<y2>-?\d+)\),ii:(?P<ii>-?\d+),f:(?P<f>\d+)").unwrap()
     };
 }
 
@@ -130,7 +129,7 @@ where
 
 //#[ignore]
 #[test]
-fn beachline_multiple() {
+fn beachline_multiple_1() {
     let tests = r"
 node_comparison_predicate(L:#0(0,10000000),ii:5,f:2,R:#1(0,10000000)-(10000000,10000000),ii:5,f:9, L:#2(0,10000000)-(700000,1),ii:0,f:8,R:#2(0,10000000)-(700000,1),ii:0,f:8)==false
 node_comparison_predicate(L:#0(0,10000000),ii:5,f:2,R:#2(0,10000000)-(700000,1),ii:0,f:8, L:#10(9100000,0)-(10000000,10000000),ii:4,f:8,R:#10(9100000,0)-(10000000,10000000),ii:4,f:8)==true

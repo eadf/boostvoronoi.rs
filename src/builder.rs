@@ -347,7 +347,7 @@ where
         value: &Option<VB::BeachLineNodeKey<I, F>>,
     ) -> Result<(), BvError> {
         if let Some(value) = value {
-            let node_data = self.beach_line_.get_node(&value.get_index())?.1;
+            let node_data = self.beach_line_.get_node(&value.index())?.1;
             let node_cell = node_data.get();
             if let Some(node_cell) = node_cell {
                 let cevent: Option<VC::CircleEventIndex> = node_cell.get_circle_event_id();
@@ -441,14 +441,14 @@ where
             let new_key = VB::BeachLineNodeKey::<I, F>::new_1(*site_event);
             tln!("\nbeach_line_.lower_bound key  : {:?} ", site_event);
             let right_it = self.beach_line_.lower_bound(new_key);
-            tln!(
-                "beach_line_.lower_bound found: {:?}: \n",
-                right_it.ok_or_else(|| BvError::InternalError(format!(
-                    "Could not get lower_bound {}:{}",
-                    file!(),
-                    line!()
-                )))?
-            );
+            #[cfg(feature = "console_debug")]{
+                if let Some(right_it) = right_it{
+                    tln!("beach_line_.lower_bound found: {:?}: \n", right_it);
+                } else {
+                    tln!("beach_line_.lower_bound found: Nothing (not an error)\n");
+                }
+            }
+
             (right_it, last_index)
         };
         #[cfg(feature = "console_debug")]
@@ -519,7 +519,7 @@ where
                     site_event,
                     *(right_it_some.left_site()),
                     *(right_it_some.right_site()),
-                    right_it_some.get_index(),
+                    right_it_some.index(),
                 )?;
                 right_it = left_it;
             } else {
@@ -566,7 +566,7 @@ where
                     site_event,
                     site_arc2,
                     site3,
-                    right_it.unwrap().get_index(),
+                    right_it.unwrap().index(),
                 )?;
                 //right_it = new_node_it;
                 right_it = Some(self.beach_line_.get_node_key(new_node_it));
@@ -716,11 +716,11 @@ where
                 .dbgpa_compat_node_(&it_last.0, &self.circle_events_)?;
         }
         // Remove the (B, C) bisector node from the beach line.
-        self.beach_line_.erase(it_last.0.get_index())?;
+        self.beach_line_.erase(it_last.0.index())?;
         #[cfg(feature = "console_debug")]
         self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
 
-        let it_last = (it_first.0, it_first.0.get_index());
+        let it_last = (it_first.0, it_first.0.index());
 
         // Pop the topmost circle event from the event queue.
         self.circle_events_.pop_and_destroy()?;
@@ -742,7 +742,7 @@ where
             };
 
             let site_l1 = it_first.0.left_site();
-            self.activate_circle_event(*site_l1, site1, site3, it_last.0.get_index())?;
+            self.activate_circle_event(*site_l1, site1, site3, it_last.0.index())?;
         }
 
         // Check the new triplet formed by the neighboring arcs
@@ -750,15 +750,15 @@ where
 
         let it_last = self
             .beach_line_
-            .get_right_neighbour_by_id(it_last.0.get_index());
+            .get_right_neighbour_by_id(it_last.0.index());
 
         if let Some(it_last) = it_last {
-            let it_last_node = self.beach_line_.get_node(&it_last.get_index())?.1;
+            let it_last_node = self.beach_line_.get_node(&it_last.index())?.1;
             self.circle_events_
                 .deactivate(it_last_node.get().and_then(|x| x.get_circle_event_id()));
 
             let site_r1 = it_last.right_site();
-            self.activate_circle_event(site1, site3, *site_r1, it_last.get_index())?;
+            self.activate_circle_event(site1, site3, *site_r1, it_last.index())?;
         }
         Ok(())
     }
@@ -831,7 +831,7 @@ where
             // Update the data structure that holds temporary bisectors.
             self.end_points_.push(VEP::EndPointPair::new(
                 *site_event.point1(),
-                new_node.get_index(),
+                new_node.index(),
             ));
         }
         let new_node_data = VB::BeachLineNodeData::new_1(edges.0);
@@ -841,14 +841,14 @@ where
             Ok(self
                 .beach_line_
                 .insert(new_left_node, Some(new_node_data))?
-                .get_index())
+                .index())
         }
         #[cfg(feature = "console_debug")]
         {
             let rv = Ok(self
                 .beach_line_
                 .insert(new_left_node, Some(new_node_data), &self.circle_events_)?
-                .get_index());
+                .index());
             self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
             self.beach_line_.dbgp_all_cmp_();
             println!();
