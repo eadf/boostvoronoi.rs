@@ -674,6 +674,8 @@ where
             #[cfg(feature = "console_debug")]
             {
                 self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
+                self.beach_line_.dbgp_all_cmp_();
+                tln!();
                 t!("replace key ");
                 self.beach_line_
                     .dbgpa_compat_node_(&it_first_key_before, &self.circle_events_)?;

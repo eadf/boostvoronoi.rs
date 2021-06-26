@@ -38,6 +38,7 @@ use std::ops::Bound::{Excluded, Included, Unbounded};
 use std::ops::Neg;
 use std::rc::Rc;
 use vec_map::VecMap;
+use crate::predicate::NodeComparisonPredicate;
 
 /// debug utility function, prints beach line index
 #[allow(dead_code)]
@@ -82,6 +83,8 @@ pub type BeachLineNodeDataType = Rc<Cell<Option<BeachLineNodeData>>>;
 ///
 /// The ordering of beach_line_vec_ is intentionally reversed, pop() will return the last element.
 /// Before this change the beach-line ordering was unpredictable.
+/// TODO: C++ map does not overwrite already existing (key,value) pairs.
+/// TODO: Rust does the opposite
 pub struct BeachLine<I, F>
 where
     I: InputType + Neg<Output = I>,
@@ -100,7 +103,7 @@ where
     fn default() -> Self {
         Self {
             beach_line_: BTreeMap::default(),
-            // zero is reserved for 'loose' search keys
+            // Index 0 is reserved for loose keys (lower bound tests, and unit tests)
             next_free_: BeachLineIndex(1),
             beach_line_vec_: VecMap::default(),
         }
@@ -434,14 +437,21 @@ where
         );
         for (i, (node, _id)) in self.beach_line_.iter().rev().enumerate() {
             let cmp1 = node.partial_cmp(key);
-            let cmp2 = key.partial_cmp(node);
+            let ncmp1 = NodeComparisonPredicate::node_comparison_predicate(key,node);
+            let ncmp2 = NodeComparisonPredicate::node_comparison_predicate(node, key);
 
             print!(
-                "#{}: key:{:?}, cmp1:{:?}, cmp2:{:?}",
+                "#{}: key:{:?}, cmp1:{:?}, ncmp1:{:?}, ncmp2:{:?} ccmp:{}",
                 i,
                 node,
-                cmp1.unwrap(),
-                cmp2.unwrap()
+                cmp1.unwrap().reverse(),
+                ncmp1,
+                ncmp2,
+                match (ncmp1,ncmp2) {
+                    (false, false) => "Equal",
+                    (false, true) => "Less",
+                    (true,_) => "Greater"
+                }
             );
             if cmp1.unwrap() == Ordering::Equal {
                 println!("  <----- THIS IS THE PROBLEM, 'get()' could not find it, but it's here!!")
@@ -457,13 +467,13 @@ where
                 "key(#{}).partial_cmp(key(#{})) == {:?}",
                 it1_v.0,
                 it2_v.0,
-                it1_v.1 .0.partial_cmp(it2_v.1 .0).unwrap()
+                it1_v.1 .0.partial_cmp(it2_v.1 .0).unwrap().reverse()
             );
             println!(
                 "\tkey(#{}).partial_cmp(key(#{})) == {:?}",
                 it2_v.0,
                 it1_v.0,
-                it2_v.1 .0.partial_cmp(it1_v.1 .0).unwrap()
+                it2_v.1 .0.partial_cmp(it1_v.1 .0).unwrap().reverse()
             );
         }
     }
@@ -651,7 +661,8 @@ where
             if reverse_order {
                 Ordering::Less
             } else {
-                other.node_index_.0.cmp(&self.node_index_.0)
+                // todo: when node_index_ == 0, the index should not be part of the cmp()
+                other.node_index_.0.cmp(&self.node_index_.0).reverse()
             }
         }
     }

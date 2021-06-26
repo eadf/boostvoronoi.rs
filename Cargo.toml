@@ -62,6 +62,7 @@ fltk = "1.0"
 criterion = "0.3"
 approx = "0.5"
 regex = "1.5"
+rand = "0.8"
 
 [[bench]]
 name = "bench"
