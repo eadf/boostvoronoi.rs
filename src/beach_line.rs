@@ -11,9 +11,9 @@
 
 //! The data structures needed for the beachline.
 #[cfg(test)]
-mod test3;
-#[cfg(test)]
 mod test2;
+#[cfg(test)]
+mod test3;
 #[cfg(test)]
 mod tests1;
 
@@ -23,6 +23,7 @@ use super::predicate as VP;
 use super::site_event as VSE;
 
 use super::{InputType, OutputType};
+use crate::predicate::NodeComparisonPredicate;
 use crate::BvError;
 #[allow(unused_imports)]
 use crate::{t, tln};
@@ -38,7 +39,6 @@ use std::ops::Bound::{Excluded, Included, Unbounded};
 use std::ops::Neg;
 use std::rc::Rc;
 use vec_map::VecMap;
-use crate::predicate::NodeComparisonPredicate;
 
 /// debug utility function, prints beach line index
 #[allow(dead_code)]
@@ -253,7 +253,17 @@ where
             assert_eq!(after.node_index_.0, idx.0);
             let _ = self.beach_line_.insert(after, idx);
 
-            let item = self.beach_line_vec_.remove(idx.0).unwrap().1;
+            let item = self
+                .beach_line_vec_
+                .remove(idx.0)
+                .ok_or_else(|| {
+                    BvError::BeachLineError(format!(
+                        "Could not find the beach-line key to replace. {}:{}",
+                        file!(),
+                        line!()
+                    ))
+                })?
+                .1;
             let _ = self.beach_line_vec_.insert(idx.0, (after, item));
             self.get_node(&idx)
         } else {
@@ -626,7 +636,7 @@ where
 
     #[cfg(test)]
     /// Sets the key index (only needed for tests)
-    pub(crate) fn set_index(mut self, new_index:BeachLineIndex) -> Self {
+    pub(crate) fn set_index(mut self, new_index: BeachLineIndex) -> Self {
         self.node_index_ = new_index;
         self
     }
