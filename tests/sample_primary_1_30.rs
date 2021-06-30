@@ -172,46 +172,76 @@ fn sample_primary_005() -> Result<(), BvError> {
         vb.build()?
     };
     assert_eq!(output.cells().len(), 10);
-    assert_eq!(
-        format!("{:?}", output.cells()[0].get()),
-        "(id:0 ii:9 ie:0 col:0)"
-    );
-    assert_eq!(
-        format!("{:?}", output.cells()[1].get()),
-        "(id:1 ii:8 ie:2 col:0)"
-    );
-    assert_eq!(
-        format!("{:?}", output.cells()[2].get()),
-        "(id:2 ii:7 ie:4 col:0)"
-    );
-    assert_eq!(
-        format!("{:?}", output.cells()[3].get()),
-        "(id:3 ii:6 ie:6 col:0)"
-    );
-    assert_eq!(
-        format!("{:?}", output.cells()[4].get()),
-        "(id:4 ii:5 ie:8 col:0)"
-    );
-    assert_eq!(
-        format!("{:?}", output.cells()[5].get()),
-        "(id:5 ii:0 ie:10 col:0)"
-    );
-    assert_eq!(
-        format!("{:?}", output.cells()[6].get()),
-        "(id:6 ii:1 ie:12 col:0)"
-    );
-    assert_eq!(
-        format!("{:?}", output.cells()[7].get()),
-        "(id:7 ii:2 ie:14 col:0)"
-    );
-    assert_eq!(
-        format!("{:?}", output.cells()[8].get()),
-        "(id:8 ii:3 ie:16 col:0)"
-    );
-    assert_eq!(
-        format!("{:?}", output.cells()[9].get()),
-        "(id:9 ii:4 ie:17 col:0)"
-    );
+    let cell = output.cells()[0].get();
+    assert_eq!(cell.id().0, 0);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::SinglePoint);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[1].get();
+    assert_eq!(cell.id().0, 1);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::SinglePoint);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[2].get();
+    assert_eq!(cell.id().0, 2);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::SinglePoint);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[3].get();
+    assert_eq!(cell.id().0, 3);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::SinglePoint);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[4].get();
+    assert_eq!(cell.id().0, 4);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::SinglePoint);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[5].get();
+    assert_eq!(cell.id().0, 5);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::SinglePoint);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[6].get();
+    assert_eq!(cell.id().0, 6);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::SinglePoint);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[7].get();
+    assert_eq!(cell.id().0, 7);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::SinglePoint);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[8].get();
+    assert_eq!(cell.id().0, 8);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::SinglePoint);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[9].get();
+    assert_eq!(cell.id().0, 9);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::SinglePoint);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
     assert_eq!(output.vertices().len(), 0);
     assert_eq!(output.edges().len(), 18);
     Ok(())

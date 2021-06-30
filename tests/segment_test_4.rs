@@ -33,6 +33,7 @@ where
     }
 }
 
+#[ignore]
 #[test]
 #[should_panic]
 fn segment_4_1_intersecting() {

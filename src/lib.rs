@@ -1,11 +1,11 @@
-// Boost.Polygon library detail/robust_fpt.hpp header file
+// Boost.Polygon library
 
 //          Copyright Andrii Sydorchuk 2010-2012.
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-// See http://www.boost.org for updates, documentation, and revision history.
+// See http://www.boost.org for updates, documentation, and revision history of C++ code.
 
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
@@ -45,6 +45,7 @@ pub mod file_reader;
 pub(crate) mod predicate;
 // I'd prefer if this module could be pub (crate), but then the documentation examples would not work.
 pub mod geometry;
+pub(crate) mod linked_list;
 pub mod robust_fpt;
 mod site_event;
 pub mod sync_diagram;
@@ -79,6 +80,8 @@ macro_rules! tln {
 
 #[derive(thiserror::Error, Debug)]
 pub enum BvError {
+    #[error("error: Some error with the linked list")]
+    LinkedList(String),
     #[error("error: Some error with object id")]
     IdError(String),
     #[error("error: Some error with a value")]
@@ -114,6 +117,7 @@ pub trait InputType:
     + Debug
     + Zero
     + Default
+    + Unpin
 {
 }
 
@@ -131,6 +135,7 @@ impl<I> InputType for I where
         + Debug
         + Zero
         + Default
+        + Unpin
 {
 }
 
@@ -147,6 +152,7 @@ pub trait OutputType:
     + Debug
     + Zero
     + std::ops::MulAssign
+    + Unpin
 {
 }
 
@@ -162,6 +168,7 @@ impl<F> OutputType for F where
         + Debug
         + Zero
         + std::ops::MulAssign
+        + Unpin
         + Neg<Output = F>
 {
 }

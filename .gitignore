@@ -9,10 +9,14 @@
 **.autosave
 **.DS_Store
 boostvoronoi.iml
+.vscode
 .project
 Cargo.lock
-/.idea
+.idea
 boost_voronoi_c++.dia~
-compare_cpp.txt
-compare_rust.txt
 
+# Some C++ comparison stuff:
+compare_cpp.txt
+compare_cpp2.txt
+compare_rust.txt
+find_and_replace.py

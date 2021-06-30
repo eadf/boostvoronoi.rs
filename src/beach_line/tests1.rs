@@ -58,7 +58,7 @@ fn beachline_1() {
 
 //#[ignore]
 #[test]
-fn beachline_2() {
+fn beachline_2() -> Result<(), BvError> {
     type I = i32;
     type F = f32;
 
@@ -74,29 +74,30 @@ fn beachline_2() {
         println!("site_event_iterator_:{:?}", site_event_iterator_);
         b.init_beach_line(&mut site_event_iterator_, &mut output);
         {
-            println!("all: size:{}", b.beach_line_.beach_line_.len());
-            assert_eq!(b.beach_line_.beach_line_.len(), 2);
-            for n in b.beach_line_.beach_line_.iter() {
+            println!("all: size:{}", b.beach_line_.beach_line_.borrow().len());
+            assert_eq!(b.beach_line_.beach_line_.borrow().len(), 2);
+            for n in b.beach_line_.beach_line_.borrow().iter() {
                 println!("{:?}", n);
             }
             let site_event = &b.site_events_[2];
             dbg!(&site_event);
             let new_key = VB::BeachLineNodeKey::<I, F>::new_1(*site_event);
             dbg!(&new_key);
-            let lb = b.beach_line_.lower_bound(new_key);
+            let lb = b.beach_line_.lower_bound(new_key)?;
             dbg!(&lb); // lb should be : right_it:L(4,21#0) R(8,62#1)
-            assert!(lb.is_some());
+            assert!(lb.is_ok());
 
             println!("experiment all done");
             println!();
         }
         println!("site_event_iterator_:{:?}", site_event_iterator_);
     }
+    Ok(())
 }
 
 //#[ignore]
 #[test]
-fn beachline_3() {
+fn beachline_3() -> Result<(), BvError> {
     type I = i32;
     type F = f32;
 
@@ -110,24 +111,25 @@ fn beachline_3() {
         println!("site_event_iterator_:{:?}", site_event_iterator_);
         b.init_beach_line(&mut site_event_iterator_, &mut output);
         {
-            println!("all: size:{}", b.beach_line_.beach_line_.len());
-            assert_eq!(b.beach_line_.beach_line_.len(), 3);
-            for n in b.beach_line_.beach_line_.iter() {
+            println!("all: size:{}", b.beach_line_.beach_line_.borrow().len());
+            assert_eq!(b.beach_line_.beach_line_.borrow().len(), 3);
+            for n in b.beach_line_.beach_line_.borrow().iter() {
                 println!("{:?}", n);
             }
             let site_event = &b.site_events_[2];
             dbg!(&site_event);
             let new_key = VB::BeachLineNodeKey::<I, F>::new_1(*site_event);
             dbg!(&new_key);
-            let lb = b.beach_line_.lower_bound(new_key);
+            let lb = b.beach_line_.lower_bound(new_key)?;
             dbg!(&lb); // lb should be : right_it:L(4,21#0) R(8,62#1)
-            assert!(lb.is_some());
+            assert!(lb.is_ok());
 
             println!("experiment all done");
             println!();
         }
         println!("site_event_iterator_:{:?}", site_event_iterator_);
     }
+    Ok(())
 }
 
 //#[ignore]
@@ -179,10 +181,10 @@ fn beachline_4() {
     assert_eq!(is_less, true);
     let cmp = mykey.cmp(&node1);
     dbg!(cmp);
-    assert_eq!(cmp, Ordering::Less);
+    assert_eq!(cmp, Ordering::Greater);
     let cmp = node1.cmp(&mykey);
     dbg!(cmp);
-    assert_eq!(cmp, Ordering::Greater);
+    assert_eq!(cmp, Ordering::Less);
 
     println!();
     let is_less = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(&node2, &mykey);
@@ -190,10 +192,10 @@ fn beachline_4() {
     assert_eq!(is_less, false);
     let cmp = mykey.cmp(&node2);
     dbg!(cmp);
-    assert_eq!(cmp, Ordering::Greater);
+    assert_eq!(cmp, Ordering::Less);
     let cmp = node2.cmp(&mykey);
     dbg!(cmp);
-    assert_eq!(cmp, Ordering::Less);
+    assert_eq!(cmp, Ordering::Greater);
 }
 
 //#[ignore]
@@ -238,5 +240,5 @@ fn beachline_5() {
     //    VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(&node1, &node2);
     let is_less = node2.cmp(&node1);
     dbg!(is_less);
-    assert_eq!(is_less, Ordering::Less);
+    assert_eq!(is_less, Ordering::Greater);
 }

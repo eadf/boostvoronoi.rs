@@ -5,7 +5,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-// See http://www.boost.org for updates, documentation, and revision history.
+// See http://www.boost.org for updates, documentation, and revision history of C++ code..
 
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
@@ -631,7 +631,7 @@ where
     const BIT_IS_LINEAR: ColorType = 0x1; // linear is opposite to curved
     const BIT_IS_PRIMARY: ColorType = 0x2; // primary is opposite to secondary
 
-    fn new(id: EdgeIndex, cell: CellIndex, is_linear: bool, is_primary: bool) -> EdgeType<I, F> {
+    fn new_(id: EdgeIndex, cell: CellIndex, is_linear: bool, is_primary: bool) -> EdgeType<I, F> {
         let mut rv = Self {
             id_: id,
             cell_: Some(cell),
@@ -652,11 +652,12 @@ where
         Rc::from(cell::Cell::from(rv))
     }
 
+    /// Returns the edge index
     pub fn id(&self) -> EdgeIndex {
         self.id_
     }
 
-    pub(crate) fn _cell(&self) -> Option<CellIndex> {
+    pub(crate) fn cell_(&self) -> Option<CellIndex> {
         self.cell_
     }
 
@@ -674,7 +675,7 @@ where
     }
 
     /// Returns the twin edge
-    pub(crate) fn _twin(&self) -> Option<EdgeIndex> {
+    pub(crate) fn twin_(&self) -> Option<EdgeIndex> {
         self.twin_
     }
 
@@ -688,7 +689,7 @@ where
     }
 
     /// returns the next edge (counter clockwise winding)
-    pub(crate) fn _next(&self) -> Option<EdgeIndex> {
+    pub(crate) fn next_(&self) -> Option<EdgeIndex> {
         self.next_ccw_
     }
 
@@ -705,13 +706,13 @@ where
     }
 
     /// returns the previous edge (counter clockwise winding)
-    pub(crate) fn _prev(&self) -> Option<EdgeIndex> {
+    pub(crate) fn prev_(&self) -> Option<EdgeIndex> {
         self.prev_ccw_
     }
 
     /// returns the previous edge (counter clockwise winding)
     pub fn prev(&self) -> Result<EdgeIndex, BvError> {
-        self._prev().ok_or_else(|| {
+        self.prev_().ok_or_else(|| {
             BvError::InternalError("The edge does not have a previous edge".to_string())
         })
     }
@@ -835,7 +836,7 @@ where
     }
 
     /// Returns the edge associated with the edge id
-    pub(crate) fn _get_edge(&self, edge_id: EdgeIndex) -> EdgeType<I, F> {
+    pub(crate) fn get_edge_(&self, edge_id: EdgeIndex) -> EdgeType<I, F> {
         Rc::clone(self.edges_.get(edge_id.0).unwrap())
     }
 
@@ -854,9 +855,9 @@ where
     /// Return the edge represented as an straight line
     /// if the edge does not exists or if it lacks v0 or v1; None will be returned.
     /// TODO: this looks like an into() candidate
-    pub(crate) fn _edge_as_line(&self, edge: Option<EdgeIndex>) -> Option<[F; 4]> {
-        let v0 = self._vertex_get(self._edge_get_vertex0(edge));
-        let v1 = self._vertex_get(self._edge_get_vertex1(edge));
+    pub(crate) fn edge_as_line_(&self, edge: Option<EdgeIndex>) -> Option<[F; 4]> {
+        let v0 = self.vertex_get_(self.edge_get_vertex0_(edge));
+        let v1 = self.vertex_get_(self._edge_get_vertex1(edge));
         if let Some(v0) = v0 {
             if let Some(v1) = v1 {
                 let v0 = v0.get();
@@ -871,7 +872,7 @@ where
     /// if the edge does not exists or if it lacks v0 or v1; None will be returned.
     #[inline]
     pub fn edge_as_line(&self, edge_id: EdgeIndex) -> Result<[F; 4], BvError> {
-        self._edge_as_line(Some(edge_id)).ok_or_else(|| {
+        self.edge_as_line_(Some(edge_id)).ok_or_else(|| {
             BvError::IdError(format!(
                 "Edge id:{} (probably) does not exists, or some vertex is missing",
                 edge_id.0
@@ -884,7 +885,7 @@ where
     pub fn color_exterior_edges(&self, external_color: ColorType) {
         for it in self.edges().iter() {
             let edge_id = Some(it.get().id());
-            if !self._edge_is_finite(edge_id).unwrap() {
+            if !self.edge_is_finite_(edge_id).unwrap() {
                 self.recurse_color_exterior(edge_id, external_color);
             }
         }
@@ -893,31 +894,31 @@ where
     /// Mark all edges connected to an 'infinite' edge via primary edges as 'external'
     /// You should only call this on edges that you know are infinite. i.e. lacks one or two vertexes
     fn recurse_color_exterior(&self, edge_id: Option<EdgeIndex>, external_color: ColorType) {
-        if edge_id.is_none() || (self._edge_get_color(edge_id).unwrap() & external_color) != 0 {
+        if edge_id.is_none() || (self.edge_get_color_(edge_id).unwrap() & external_color) != 0 {
             // This edge has already been colored, break recursion
             return;
         }
         // Color edge as EXTERNAL
-        self._edge_or_color(edge_id, external_color);
+        self.edge_or_color_(edge_id, external_color);
 
         let v1 = self._edge_get_vertex1(edge_id);
-        if self._edge_get_vertex0(edge_id).is_some() && v1.is_none() {
+        if self.edge_get_vertex0_(edge_id).is_some() && v1.is_none() {
             // this edge leads to nowhere, break recursion
             return;
         }
         // Color twin edge as EXTERNAL
-        self._edge_or_color(self._edge_get_twin(edge_id), external_color);
+        self.edge_or_color_(self.edge_get_twin_(edge_id), external_color);
         if v1.is_none()
-            || self._vertex_is_site_point(v1).unwrap_or(true)
-            || !self._get_edge(edge_id.unwrap()).get().is_primary()
+            || self.vertex_is_site_point_(v1).unwrap_or(true)
+            || !self.get_edge_(edge_id.unwrap()).get().is_primary()
         {
             // stop recursion if this edge does not have a vertex1 (e.g is infinite)
             // or if this edge isn't a primary edge.
             return;
         }
-        self._vertex_set_color(v1, external_color);
+        self.vertex_set_color_(v1, external_color);
         let incident_edge = self.vertex_get_incident_edge(v1);
-        for e in self._edge_rot_next_iterator(incident_edge) {
+        for e in self.edge_rot_next_iterator_(incident_edge) {
             // mark all surrounding edges as EXTERNAL, but only recurse on primary edges
             self.recurse_color_exterior(Some(e), external_color);
         }
@@ -939,7 +940,7 @@ where
     }
 
     /// push a new cell on the output. Nothing but id and source category is initialized
-    fn _make_new_cell_with_category(
+    fn make_new_cell_with_category_(
         &mut self,
         cell_id: CellIndex, // same as sorted_index
         initial_index: SourceIndex,
@@ -989,15 +990,15 @@ where
     }
 
     /// reserves space for an number of additional sites
-    pub fn _reserve(&mut self, additional_sites: usize) {
+    pub fn reserve_(&mut self, additional_sites: usize) {
         self.cells_.reserve(additional_sites);
         self.vertices_.reserve(additional_sites << 1);
         self.edges_
             .reserve((additional_sites << 2) + (additional_sites << 1));
     }
 
-    pub(crate) fn _process_single_site(&mut self, site: &VSE::SiteEvent<I, F>) {
-        let _ = self._make_new_cell_with_category(
+    pub(crate) fn process_single_site_(&mut self, site: &VSE::SiteEvent<I, F>) {
+        let _ = self.make_new_cell_with_category_(
             CellIndex(site.sorted_index()),
             site.initial_index(),
             site.source_category(),
@@ -1005,35 +1006,35 @@ where
     }
 
     #[inline]
-    fn _cell_get(&self, cell_id: Option<CellIndex>) -> Option<&CellType<I, F>> {
+    fn cell_get_(&self, cell_id: Option<CellIndex>) -> Option<&CellType<I, F>> {
         let _ = cell_id?;
         self.cells_.get(cell_id.unwrap().0)
     }
 
-    fn _cell_set_incident_edge(&self, cell_id: Option<CellIndex>, edge: Option<EdgeIndex>) {
+    fn cell_set_incident_edge_(&self, cell_id: Option<CellIndex>, edge: Option<EdgeIndex>) {
         if cell_id.is_none() {
             return;
         }
-        if let Some(cell) = self._cell_get(cell_id) {
+        if let Some(cell) = self.cell_get_(cell_id) {
             let mut c = cell.get();
             c.incident_edge_ = edge;
             cell.set(c)
         }
     }
 
-    fn _cell_get_incident_edge(&self, cell_id: Option<CellIndex>) -> Option<EdgeIndex> {
+    fn cell_get_incident_edge_(&self, cell_id: Option<CellIndex>) -> Option<EdgeIndex> {
         let _ = cell_id?;
-        if let Some(cell) = self._cell_get(cell_id) {
+        if let Some(cell) = self.cell_get_(cell_id) {
             return cell.get().incident_edge_;
         }
         None
     }
 
-    fn _cell_is_degenerate(&self, cell_id: Option<CellIndex>) -> bool {
+    fn cell_is_degenerate_(&self, cell_id: Option<CellIndex>) -> bool {
         if cell_id.is_none() {
             return false;
         }
-        if let Some(cell) = self._cell_get(cell_id) {
+        if let Some(cell) = self.cell_get_(cell_id) {
             return cell.get().is_degenerate();
         }
         false
@@ -1042,19 +1043,19 @@ where
     /// Returns an edge iterator. This iterates over the edges belonging to this cell starting with
     /// the incident edge.
     pub fn cell_edge_iterator(&self, cell_id: CellIndex) -> EdgeNextIterator<'_, I, F> {
-        self._cell_edge_iterator(Some(cell_id))
+        self.cell_edge_iterator_(Some(cell_id))
     }
 
     /// Returns an edge iterator. This iterates over the edges belonging to this cell starting with
     /// the incident edge.
-    fn _cell_edge_iterator(&self, cell_id: Option<CellIndex>) -> EdgeNextIterator<'_, I, F> {
-        let incident_edge = self._cell_get_incident_edge(cell_id);
+    fn cell_edge_iterator_(&self, cell_id: Option<CellIndex>) -> EdgeNextIterator<'_, I, F> {
+        let incident_edge = self.cell_get_incident_edge_(cell_id);
         EdgeNextIterator::<'_, I, F>::new(self, incident_edge)
     }
 
     /// Returns the vertex associated with the vertex_id
     #[inline]
-    pub(crate) fn _vertex_get(&self, vertex_id: Option<VertexIndex>) -> Option<&VertexType<I, F>> {
+    pub(crate) fn vertex_get_(&self, vertex_id: Option<VertexIndex>) -> Option<&VertexType<I, F>> {
         let _ = vertex_id?;
         self.vertices_.get(vertex_id.unwrap().0)
     }
@@ -1062,17 +1063,17 @@ where
     /// Returns the vertex associated with the vertex_id
     #[inline]
     pub fn vertex_get(&self, vertex_id: VertexIndex) -> Result<&VertexType<I, F>, BvError> {
-        self._vertex_get(Some(vertex_id))
+        self.vertex_get_(Some(vertex_id))
             .ok_or_else(|| BvError::IdError(format!("Vertex id {} does not exists.", vertex_id.0)))
     }
 
     #[inline]
     /// OR the previous color field value with this new color value
-    pub(crate) fn _vertex_or_color(&self, vertex_id: Option<VertexIndex>, color: ColorType) {
+    pub(crate) fn vertex_or_color_(&self, vertex_id: Option<VertexIndex>, color: ColorType) {
         if vertex_id.is_none() {
             return;
         }
-        if let Some(vertexcell) = self._vertex_get(vertex_id) {
+        if let Some(vertexcell) = self.vertex_get_(vertex_id) {
             let mut vertex = vertexcell.get();
             let _ = vertex.or_color(color);
             vertexcell.set(vertex);
@@ -1082,13 +1083,13 @@ where
     #[inline]
     /// OR the previous color field value with this new color value
     pub fn vertex_or_color(&self, vertex_id: VertexIndex, color: ColorType) {
-        self._vertex_or_color(Some(vertex_id), color)
+        self.vertex_or_color_(Some(vertex_id), color)
     }
 
     /// Returns the color field of the vertex.
     pub fn vertex_get_color(&self, vertex_id: Option<VertexIndex>) -> Option<ColorType> {
         let _ = vertex_id?;
-        if let Some(vertexcell) = self._vertex_get(vertex_id) {
+        if let Some(vertexcell) = self.vertex_get_(vertex_id) {
             let vertex = vertexcell.get();
             return Some(vertex.get_color());
         }
@@ -1097,17 +1098,17 @@ where
 
     /// Overwrites the content of dest with the content of source.
     /// edge_id is compensated accordingly
-    fn _vertex_copy(&self, dest: usize, source: usize) {
+    fn vertex_copy_(&self, dest: usize, source: usize) {
         let mut v = self.vertices_[source].get();
         v.id_ = VertexIndex(dest);
         self.vertices_[dest].set(v);
     }
 
-    fn _vertex_set_incident_edge(&self, vertex_id: Option<VertexIndex>, edge: Option<EdgeIndex>) {
+    fn vertex_set_incident_edge_(&self, vertex_id: Option<VertexIndex>, edge: Option<EdgeIndex>) {
         if vertex_id.is_none() {
             return;
         }
-        if let Some(vertex) = self._vertex_get(vertex_id) {
+        if let Some(vertex) = self.vertex_get_(vertex_id) {
             let mut c = vertex.get();
             c.incident_edge_ = edge;
             vertex.set(c)
@@ -1117,13 +1118,13 @@ where
     /// return one of the edges originating at the vertex
     pub fn vertex_get_incident_edge(&self, vertex_id: Option<VertexIndex>) -> Option<EdgeIndex> {
         let _ = vertex_id?;
-        self._vertex_get(vertex_id)
+        self.vertex_get_(vertex_id)
             .and_then(|x| x.get().incident_edge_)
     }
 
     /// Set the color of the vertex. This affects only the public bits, not the internal
-    pub(crate) fn _vertex_set_color(&self, vertex_id: Option<VertexIndex>, color: ColorType) {
-        if let Some(vertex_cell) = self._vertex_get(vertex_id) {
+    pub(crate) fn vertex_set_color_(&self, vertex_id: Option<VertexIndex>, color: ColorType) {
+        if let Some(vertex_cell) = self.vertex_get_(vertex_id) {
             let mut vertex = vertex_cell.get();
             let _ = vertex.set_color(color);
             vertex_cell.set(vertex);
@@ -1136,22 +1137,22 @@ where
         vertex_id: VertexIndex,
         color: ColorType,
     ) -> Result<(), BvError> {
-        self._vertex_set_color(Some(vertex_id), color);
+        self.vertex_set_color_(Some(vertex_id), color);
         Ok(())
     }
 
     /// returns true if this vertex coincides with an site point
     #[inline]
-    pub(crate) fn _vertex_is_site_point(&self, vertex_id: Option<VertexIndex>) -> Option<bool> {
+    pub(crate) fn vertex_is_site_point_(&self, vertex_id: Option<VertexIndex>) -> Option<bool> {
         let _ = vertex_id?;
-        self._vertex_get(vertex_id)
+        self.vertex_get_(vertex_id)
             .map(|cell| cell.get().is_site_point())
     }
 
     /// returns true if this vertex coincides with an site point
     #[inline]
     pub fn vertex_is_site_point(&self, vertex_id: VertexIndex) -> Result<bool, BvError> {
-        self._vertex_is_site_point(Some(vertex_id)).ok_or_else(|| {
+        self.vertex_is_site_point_(Some(vertex_id)).ok_or_else(|| {
             BvError::IdError(format!(
                 "Vertex id {} (probably) does not exists",
                 vertex_id.0
@@ -1159,10 +1160,17 @@ where
         })
     }
 
-    fn _edge_new_3(&mut self, cell_id: CellIndex, is_linear: bool, is_primary: bool) -> EdgeIndex {
+    /// Create and insert a new edge
+    fn create_and_insert_edge(
+        &mut self,
+        cell_id: CellIndex,
+        is_linear: bool,
+        is_primary: bool,
+    ) -> EdgeIndex {
         let new_edge_id = EdgeIndex(self.edges_.len());
-        let new_edge = Edge::new(new_edge_id, cell_id, is_linear, is_primary);
-        let _ = self.edges_.insert(new_edge_id.0, new_edge);
+        let new_edge = Edge::new_(new_edge_id, cell_id, is_linear, is_primary);
+        let _ = self.edges_.push(new_edge);
+        tln!("Created and inserted new edge : e={}", new_edge_id.0);
         new_edge_id
     }
 
@@ -1179,8 +1187,8 @@ where
     }
 
     /// Overwrites the content of dest with the content of source.
-    /// edge_id is compensated accordingly
-    pub(crate) fn _edge_copy(&self, dest: usize, source: usize) {
+    /// edge_id of the new dest is corrected
+    pub(crate) fn edge_copy_(&self, dest: usize, source: usize) {
         let mut e = self.edges_[source].get();
         e.id_ = EdgeIndex(dest);
         self.edges_[dest].set(e);
@@ -1188,7 +1196,7 @@ where
 
     #[inline]
     /// Returns the color field of the edge.
-    pub(crate) fn _edge_get_color(&self, edge_id: Option<EdgeIndex>) -> Option<ColorType> {
+    pub(crate) fn edge_get_color_(&self, edge_id: Option<EdgeIndex>) -> Option<ColorType> {
         let _ = edge_id?;
         if let Some(edgecell) = self._edge_get(edge_id) {
             let edge = edgecell.get();
@@ -1200,14 +1208,14 @@ where
     #[inline]
     /// Returns the color field of the edge.
     pub fn edge_get_color(&self, edge_id: EdgeIndex) -> Result<ColorType, BvError> {
-        self._edge_get_color(Some(edge_id)).ok_or_else(|| {
+        self.edge_get_color_(Some(edge_id)).ok_or_else(|| {
             BvError::IdError(format!("edge id {} (probably) does not exists", edge_id.0))
         })
     }
 
     #[inline]
     /// Sets the color field with new value
-    pub(crate) fn _edge_set_color(&self, edge_id: Option<EdgeIndex>, color: ColorType) {
+    pub(crate) fn edge_set_color_(&self, edge_id: Option<EdgeIndex>, color: ColorType) {
         if edge_id.is_none() {
             return;
         }
@@ -1222,13 +1230,13 @@ where
     /// Sets the color field with new value
     // todo: raise proper error when id not found
     pub fn edge_set_color(&self, edge_id: EdgeIndex, color: ColorType) -> Result<(), BvError> {
-        self._edge_set_color(Some(edge_id), color);
+        self.edge_set_color_(Some(edge_id), color);
         Ok(())
     }
 
     #[inline]
     /// OR the previous color field value with this new color value
-    pub(crate) fn _edge_or_color(&self, edge_id: Option<EdgeIndex>, color: ColorType) {
+    pub(crate) fn edge_or_color_(&self, edge_id: Option<EdgeIndex>, color: ColorType) {
         if edge_id.is_none() {
             return;
         }
@@ -1243,12 +1251,12 @@ where
     /// OR the previous color field value with this new color value
     // Todo: add error on edge index problems
     pub fn edge_or_color(&self, edge_id: EdgeIndex, color: ColorType) -> Result<(), BvError> {
-        self._edge_or_color(Some(edge_id), color);
+        self.edge_or_color_(Some(edge_id), color);
         Ok(())
     }
 
     #[inline]
-    pub(crate) fn _edge_set_twin(&self, edge_id: Option<EdgeIndex>, twin_id: Option<EdgeIndex>) {
+    pub(crate) fn edge_set_twin_(&self, edge_id: Option<EdgeIndex>, twin_id: Option<EdgeIndex>) {
         if edge_id.is_none() {
             return;
         }
@@ -1263,7 +1271,7 @@ where
     /// Returns an edge iterator, the edges will all originate at the same vertex as 'edge_id'.
     ///  'edge_id' will be the first edge returned by the iterator.
     /// Do *NOT* use this when altering next, prev or twin edges.
-    pub(crate) fn _edge_rot_next_iterator(
+    pub(crate) fn edge_rot_next_iterator_(
         &self,
         edge_id: Option<EdgeIndex>,
     ) -> EdgeRotNextIterator<'_, I, F> {
@@ -1275,14 +1283,14 @@ where
     ///  'edge_id' will be the first edge returned by the iterator.
     /// Do *NOT* use this when altering next, prev or twin edges.
     pub fn edge_rot_next_iterator(&self, edge_id: EdgeIndex) -> EdgeRotNextIterator<'_, I, F> {
-        self._edge_rot_next_iterator(Some(edge_id))
+        self.edge_rot_next_iterator_(Some(edge_id))
     }
 
     #[inline]
     /// Returns an edge iterator, the edges will all originate at the same vertex as 'edge_id'.
     ///  'edge_id' will be the first edge returned by the iterator.
     /// Do *NOT* use this when altering next, prev or twin edges.
-    pub(crate) fn _edge_rot_prev_iterator(
+    pub(crate) fn edge_rot_prev_iterator_(
         &self,
         edge_id: Option<EdgeIndex>,
     ) -> EdgeRotPrevIterator<'_, I, F> {
@@ -1294,21 +1302,21 @@ where
     ///  'edge_id' will be the first edge returned by the iterator.
     /// Do *NOT* use this when altering next, prev or twin edges.
     pub fn edge_rot_prev_iterator(&self, edge_id: EdgeIndex) -> EdgeRotPrevIterator<'_, I, F> {
-        self._edge_rot_prev_iterator(Some(edge_id))
+        self.edge_rot_prev_iterator_(Some(edge_id))
     }
 
     #[inline]
-    pub(crate) fn _edge_get_twin(&self, edge_id: Option<EdgeIndex>) -> Option<EdgeIndex> {
+    pub(crate) fn edge_get_twin_(&self, edge_id: Option<EdgeIndex>) -> Option<EdgeIndex> {
         let _ = edge_id?;
         if let Some(edgecell) = self._edge_get(edge_id) {
-            return edgecell.get()._twin();
+            return edgecell.get().twin_();
         }
         None
     }
 
     #[inline]
     pub fn edge_get_twin(&self, edge_id: EdgeIndex) -> Result<EdgeIndex, BvError> {
-        self._edge_get_twin(Some(edge_id))
+        self.edge_get_twin_(Some(edge_id))
             .ok_or_else(|| BvError::IdError(format!("Edge {} does not have a twin", edge_id.0)))
     }
 
@@ -1320,7 +1328,7 @@ where
     }
 
     #[inline]
-    fn _edge_set_cell(&self, edge_id: Option<EdgeIndex>, cell_id: Option<CellIndex>) {
+    fn edge_set_cell_(&self, edge_id: Option<EdgeIndex>, cell_id: Option<CellIndex>) {
         if edge_id.is_none() {
             return;
         }
@@ -1332,14 +1340,14 @@ where
     }
 
     #[inline]
-    fn _edge_get_cell(&self, edge_id: Option<EdgeIndex>) -> Option<CellIndex> {
+    fn edge_get_cell_(&self, edge_id: Option<EdgeIndex>) -> Option<CellIndex> {
         let _ = edge_id?;
-        self._edge_get(edge_id)?.get()._cell()
+        self._edge_get(edge_id)?.get().cell_()
     }
 
     #[inline]
     pub fn edge_get_cell(&self, edge_id: EdgeIndex) -> Result<CellIndex, BvError> {
-        self._edge_get_cell(Some(edge_id)).ok_or_else(|| {
+        self.edge_get_cell_(Some(edge_id)).ok_or_else(|| {
             BvError::IdError(format!(
                 "Either the edge id:{} or the cell didn't exists",
                 edge_id.0
@@ -1350,16 +1358,16 @@ where
     /// Returns true if the edge is finite (segment, parabolic arc).
     /// Returns false if the edge is infinite (ray, line).
     #[inline]
-    pub(crate) fn _edge_is_finite(&self, edge_id: Option<EdgeIndex>) -> Option<bool> {
+    pub(crate) fn edge_is_finite_(&self, edge_id: Option<EdgeIndex>) -> Option<bool> {
         let _ = edge_id?;
-        Some(self._edge_get_vertex0(edge_id).is_some() && self._edge_get_vertex1(edge_id).is_some())
+        Some(self.edge_get_vertex0_(edge_id).is_some() && self._edge_get_vertex1(edge_id).is_some())
     }
 
     /// Returns true if the edge is finite (segment, parabolic arc).
     /// Returns false if the edge is infinite (ray, line).
     #[inline]
     pub fn edge_is_finite(&self, edge_id: EdgeIndex) -> Result<bool, BvError> {
-        self._edge_is_finite(Some(edge_id))
+        self.edge_is_finite_(Some(edge_id))
             .ok_or_else(|| BvError::IdError(format!("Edge id {} doesn't exists", edge_id.0)))
     }
 
@@ -1367,7 +1375,7 @@ where
     /// Returns false if the edge is finite (segment, parabolic arc).
     #[inline]
     pub(crate) fn _edge_is_infinite(&self, edge_id: Option<EdgeIndex>) -> Option<bool> {
-        Some(!self._edge_is_finite(edge_id)?)
+        Some(!self.edge_is_finite_(edge_id)?)
     }
 
     /// Returns true if the edge is infinite (ray, line).
@@ -1388,37 +1396,37 @@ where
             return;
         }
         // Update the endpoints of the incident edges to the second vertex.
-        let vertex = self._edge_get_vertex0(edge);
-        let mut updated_edge = self._edge_rot_next(self._edge_get_twin(edge));
+        let vertex = self.edge_get_vertex0_(edge);
+        let mut updated_edge = self._edge_rot_next(self.edge_get_twin_(edge));
 
-        while updated_edge != self._edge_get_twin(edge) {
+        while updated_edge != self.edge_get_twin_(edge) {
             self._edge_set_vertex0(updated_edge, vertex);
             updated_edge = self._edge_rot_next(updated_edge);
         }
         let edge1 = edge;
-        let edge2 = self._edge_get_twin(edge);
+        let edge2 = self.edge_get_twin_(edge);
 
         // Update prev/next pointers for the incident edges.
         //edge1_rot_next->twin()->next(edge2_rot_prev);
         self._edge_set_next(
-            self._edge_get_twin(self._edge_rot_next(edge1)),
+            self.edge_get_twin_(self._edge_rot_next(edge1)),
             self.edge_rot_prev(edge2),
         );
         //edge2_rot_prev->prev(edge1_rot_next->twin());
         self._edge_set_prev(
             self.edge_rot_prev(edge2),
-            self._edge_get_twin(self._edge_rot_next(edge1)),
+            self.edge_get_twin_(self._edge_rot_next(edge1)),
         );
 
         //edge1_rot_prev->prev(edge2_rot_next->twin());
         self._edge_set_prev(
             self.edge_rot_prev(edge1),
-            self._edge_get_twin(self._edge_rot_next(edge2)),
+            self.edge_get_twin_(self._edge_rot_next(edge2)),
         );
 
         //edge2_rot_next->twin()->next(edge1_rot_prev);
         self._edge_set_next(
-            self._edge_get_twin(self._edge_rot_next(edge2)),
+            self.edge_get_twin_(self._edge_rot_next(edge2)),
             self.edge_rot_prev(edge1),
         );
     }
@@ -1426,7 +1434,8 @@ where
     fn _vertex_new_2(&mut self, x: F, y: F, is_site_vertex: bool) -> VertexIndex {
         let new_vertex_id = VertexIndex(self.vertices_.len());
         let new_edge = Vertex::new_3(new_vertex_id, x, y, is_site_vertex);
-        let _ = self.vertices_.insert(new_vertex_id.0, new_edge);
+        let _ = self.vertices_.push(new_edge);
+        assert_eq!(self.vertices_.len() - 1, new_vertex_id.0);
         new_vertex_id
     }
 
@@ -1442,7 +1451,7 @@ where
     }
 
     #[inline]
-    pub(crate) fn _edge_get_vertex0(&self, edge_id: Option<EdgeIndex>) -> Option<VertexIndex> {
+    pub(crate) fn edge_get_vertex0_(&self, edge_id: Option<EdgeIndex>) -> Option<VertexIndex> {
         let _ = edge_id?;
         self._edge_get(edge_id).and_then(|x| x.get().vertex0())
     }
@@ -1450,14 +1459,14 @@ where
     #[inline]
     // todo: add error when edge is not found
     pub fn edge_get_vertex0(&self, edge_id: EdgeIndex) -> Result<Option<VertexIndex>, BvError> {
-        Ok(self._edge_get_vertex0(Some(edge_id)))
+        Ok(self.edge_get_vertex0_(Some(edge_id)))
     }
 
     #[inline]
     pub(crate) fn _edge_get_vertex1(&self, edge_id: Option<EdgeIndex>) -> Option<VertexIndex> {
         let _ = edge_id?;
-        let twin = self._edge_get_twin(edge_id);
-        self._edge_get_vertex0(twin)
+        let twin = self.edge_get_twin_(edge_id);
+        self.edge_get_vertex0_(twin)
     }
 
     #[inline]
@@ -1496,7 +1505,7 @@ where
         let _ = edge_id?;
         self.edges_
             .get(edge_id.unwrap().0)
-            .and_then(|x| x.get()._next())
+            .and_then(|x| x.get().next_())
     }
 
     #[inline]
@@ -1504,7 +1513,7 @@ where
         let _ = edge_id?;
         self.edges_
             .get(edge_id.unwrap().0)
-            .and_then(|x| x.get()._prev())
+            .and_then(|x| x.get().prev_())
     }
 
     #[inline]
@@ -1513,7 +1522,7 @@ where
     pub(crate) fn _edge_rot_next(&self, edge_id: Option<EdgeIndex>) -> Option<EdgeIndex> {
         let _ = edge_id?;
         let prev = self._edge_get_prev(edge_id);
-        self._edge_get_twin(prev)
+        self.edge_get_twin_(prev)
     }
 
     #[inline]
@@ -1530,7 +1539,7 @@ where
     /// over the starting point of the half-edge.
     pub fn edge_rot_prev(&self, edge_id: Option<EdgeIndex>) -> Option<EdgeIndex> {
         let _ = edge_id?;
-        let twin = self._edge_get_twin(edge_id);
+        let twin = self.edge_get_twin_(edge_id);
         self._edge_get_next(twin)
     }
 
@@ -1542,6 +1551,8 @@ where
         site1: VSE::SiteEvent<I, F>,
         site2: VSE::SiteEvent<I, F>,
     ) -> (EdgeIndex, EdgeIndex) {
+        //tln!("-> insert_new_edge_2()");
+        //tln!("site1:{:?}\nsite2:{:?}", &site1, &site2);
         // Get sites' indexes.
         let site1_index = site1.sorted_index();
         let site2_index = site2.sorted_index();
@@ -1550,14 +1561,14 @@ where
         let is_primary = VSE::SiteEvent::is_primary_edge(&site1, &site2);
 
         // Create a new half-edge that belongs to the first site.
-        let edge1_id = self._edge_new_3(CellIndex(site1_index), is_linear, is_primary);
+        let edge1_id = self.create_and_insert_edge(CellIndex(site1_index), is_linear, is_primary);
 
         // Create a new half-edge that belongs to the second site.
-        let edge2_id = self._edge_new_3(CellIndex(site2_index), is_linear, is_primary);
+        let edge2_id = self.create_and_insert_edge(CellIndex(site2_index), is_linear, is_primary);
 
         // Add the initial cell during the first edge insertion.
         if self.cells_.is_empty() {
-            let _ = self._make_new_cell_with_category(
+            let _ = self.make_new_cell_with_category_(
                 CellIndex(site1_index),
                 site1.initial_index(),
                 site1.source_category(),
@@ -1566,20 +1577,23 @@ where
 
         // The second site represents a new site during site event
         // processing. Add a new cell to the cell records.
-        let _ = self._make_new_cell_with_category(
+        let _ = self.make_new_cell_with_category_(
             CellIndex(site2_index),
             site2.initial_index(),
             site2.source_category(),
         );
 
         // Set up pointers to cells. Todo! is this needed? Didn't we do this already?
-        self._edge_set_cell(Some(edge1_id), Some(CellIndex(site1_index)));
-        self._edge_set_cell(Some(edge2_id), Some(CellIndex(site2_index)));
+        self.edge_set_cell_(Some(edge1_id), Some(CellIndex(site1_index)));
+        self.edge_set_cell_(Some(edge2_id), Some(CellIndex(site2_index)));
 
         // Set up twin pointers.
-        self._edge_set_twin(Some(edge1_id), Some(edge2_id));
-        self._edge_set_twin(Some(edge2_id), Some(edge1_id));
+        self.edge_set_twin_(Some(edge1_id), Some(edge2_id));
+        self.edge_set_twin_(Some(edge2_id), Some(edge1_id));
 
+        //tln!("edge1: {:?}", self.get_edge_(edge1_id).get());
+        //tln!("edge2: {:?}", self.get_edge_(edge2_id).get());
+        //tln!("edges.len():{}", self.edges_.len());
         (edge1_id, edge2_id)
     }
 
@@ -1597,18 +1611,27 @@ where
         edge12_id: EdgeIndex,
         edge23_id: EdgeIndex,
     ) -> (EdgeIndex, EdgeIndex) {
-        //tln!("-> insert_new_edge_5()");
-        //dbg!(&site1, &site3, &circle, edge12_id, edge23_id);
+        /*tln!("-> insert_new_edge_5()");
+        tln!(
+            "site1:{:?}\nsite3:{:?}\ncircle:{:?}\nedge12_id:{:?}\nedge23_id{:?}\n",
+            &site1,
+            &site3,
+            &circle,
+            edge12_id,
+            edge23_id
+        );*/
         tln!("new vertex@CE{:?}", circle);
 
         let is_linear = VSE::SiteEvent::<I, F>::is_linear_edge(&site1, &site3);
         let is_primary = VSE::SiteEvent::<I, F>::is_primary_edge(&site1, &site3);
 
         // Add a new half-edge.
-        let new_edge1_id = self._edge_new_3(CellIndex(site1.sorted_index()), is_linear, is_primary);
+        let new_edge1_id =
+            self.create_and_insert_edge(CellIndex(site1.sorted_index()), is_linear, is_primary);
 
         // Add a new half-edge.
-        let new_edge2_id = self._edge_new_3(CellIndex(site3.sorted_index()), is_linear, is_primary);
+        let new_edge2_id =
+            self.create_and_insert_edge(CellIndex(site3.sorted_index()), is_linear, is_primary);
 
         // Add a new Voronoi vertex.
         let new_vertex_id = self._vertex_new_2(
@@ -1622,8 +1645,8 @@ where
         self._edge_set_vertex0(Some(edge23_id), Some(new_vertex_id));
 
         // Update twin pointers.
-        self._edge_set_twin(Some(new_edge1_id), Some(new_edge2_id));
-        self._edge_set_twin(Some(new_edge2_id), Some(new_edge1_id));
+        self.edge_set_twin_(Some(new_edge1_id), Some(new_edge2_id));
+        self.edge_set_twin_(Some(new_edge2_id), Some(new_edge1_id));
 
         // Update vertex pointer.
         //new_edge2.vertex0(&new_vertex);
@@ -1637,19 +1660,22 @@ where
         self._edge_set_next(Some(new_edge1_id), Some(edge12_id));
 
         //edge12->twin()->next(edge23);
-        let edge12_twin_id = self._edge_get_twin(Some(edge12_id));
+        let edge12_twin_id = self.edge_get_twin_(Some(edge12_id));
         self._edge_set_next(edge12_twin_id, Some(edge23_id));
 
         //edge23->prev(edge12->twin());
         self._edge_set_prev(Some(edge23_id), edge12_twin_id);
 
         //edge23->twin()->next(&new_edge2);
-        let edge23_twin_id = self._edge_get_twin(Some(edge23_id));
+        let edge23_twin_id = self.edge_get_twin_(Some(edge23_id));
         self._edge_set_next(edge23_twin_id, Some(new_edge2_id));
 
         //new_edge2.prev(edge23->twin());
         self._edge_set_prev(Some(new_edge2_id), edge23_twin_id);
 
+        //tln!("edge12: {:?}", self.get_edge_(edge12_id).get());
+        //tln!("edge23: {:?}", self.get_edge_(edge23_id).get());
+        //tln!("edges.len():{}", self.edges_.len());
         // Return a pointer to the new half-edge.
         (new_edge1_id, new_edge2_id)
     }
@@ -1668,11 +1694,11 @@ where
             //let mut edges_to_erase: Vec<usize> = Vec::new();
             while it < edges_end {
                 let is_equal = {
-                    let v1 = self._edge_get_vertex0(Some(EdgeIndex(it)));
-                    let v1 = self._vertex_get(v1);
+                    let v1 = self.edge_get_vertex0_(Some(EdgeIndex(it)));
+                    let v1 = self.vertex_get_(v1);
                     let v2 = self._edge_get_vertex1(Some(EdgeIndex(it)));
-                    let v2 = self._vertex_get(v2);
-                    tln!("looking at edge:{}, v1={:?}, v2={:?}", it, v1, v2);
+                    let v2 = self.vertex_get_(v2);
+                    //tln!("looking at edge:{}, v1={:?}, v2={:?}", it, v1, v2);
                     v1.is_some()
                         && v2.is_some()
                         && v1
@@ -1686,17 +1712,17 @@ where
                 } else {
                     if it != last_edge {
                         //edge_type * e1 = &(*last_edge = *it);
-                        self._edge_copy(last_edge, it);
+                        self.edge_copy_(last_edge, it);
                         //edge_type * e2 = &(*(last_edge + 1) = *(it + 1));
-                        self._edge_copy(last_edge + 1, it + 1);
+                        self.edge_copy_(last_edge + 1, it + 1);
                         let e1 = Some(EdgeIndex(last_edge));
                         let e2 = Some(EdgeIndex(last_edge + 1));
 
                         // e1->twin(e2);
-                        self._edge_set_twin(e1, e2);
+                        self.edge_set_twin_(e1, e2);
 
                         // e2->twin(e1);
-                        self._edge_set_twin(e2, e1);
+                        self.edge_set_twin_(e2, e1);
 
                         if self._edge_get_prev(e1).is_some() {
                             // e1 -> prev() -> next(e1);
@@ -1727,10 +1753,12 @@ where
 
         // Set up incident edge pointers for cells and vertices.
         for edge_it in self.edge_iter().enumerate().map(|x| EdgeIndex(x.0)) {
-            let cell = self._edge_get_cell(Some(edge_it));
-            self._cell_set_incident_edge(cell, Some(edge_it));
-            let vertex = self._edge_get_vertex0(Some(edge_it));
-            self._vertex_set_incident_edge(vertex, Some(edge_it));
+            let cell = self.edge_get_cell_(Some(edge_it));
+            if self.cell_get_incident_edge_(cell).is_none() {
+                self.cell_set_incident_edge_(cell, Some(edge_it));
+            }
+            let vertex = self.edge_get_vertex0_(Some(edge_it));
+            self.vertex_set_incident_edge_(vertex, Some(edge_it));
         }
 
         #[cfg(feature = "console_debug")]
@@ -1755,7 +1783,7 @@ where
                 let it = Some(it);
                 if self.vertex_get_incident_edge(it).is_some() {
                     if it != last_vertex {
-                        self._vertex_copy(last_vertex.unwrap().0, it.unwrap().0);
+                        self.vertex_copy_(last_vertex.unwrap().0, it.unwrap().0);
                         let v = last_vertex;
                         let mut e = self.vertex_get_incident_edge(last_vertex);
                         loop {
@@ -1809,19 +1837,19 @@ where
             }
         } else {
             // Update prev/next pointers for the ray edges.
-            //let mut cell_it_keys = self.cells_.keys();
+            // let mut cell_it_keys = self.cells_.keys();
             for cell_it in 0..self.cells_.len() {
-                if self._cell_is_degenerate(Some(CellIndex(cell_it))) {
+                if self.cell_is_degenerate_(Some(CellIndex(cell_it))) {
                     continue;
                 }
                 // Move to the previous edge while
                 // it is possible in the CW direction.
-                let mut left_edge = self._cell_get_incident_edge(Some(CellIndex(cell_it)));
-
+                let mut left_edge = self.cell_get_incident_edge_(Some(CellIndex(cell_it)));
+                let terminal_edge = left_edge;
                 while let Some(new_left_edge) = self._edge_get_prev(left_edge) {
                     left_edge = Some(new_left_edge);
                     // Terminate if this is not a boundary cell.
-                    if left_edge == self._cell_get_incident_edge(Some(CellIndex(cell_it))) {
+                    if left_edge == terminal_edge {
                         break;
                     }
                 }
@@ -1830,7 +1858,7 @@ where
                     continue;
                 }
 
-                let mut right_edge = self._cell_get_incident_edge(Some(CellIndex(cell_it)));
+                let mut right_edge = self.cell_get_incident_edge_(Some(CellIndex(cell_it)));
                 while let Some(new_right_edge) = self._edge_get_next(right_edge) {
                     right_edge = Some(new_right_edge);
                 }
@@ -1869,13 +1897,13 @@ where
             assert_eq!(i, v.get().id_.0);
 
             let edges1: Vec<usize> = self
-                ._edge_rot_next_iterator(v.get()._get_incident_edge())
+                .edge_rot_next_iterator_(v.get()._get_incident_edge())
                 .map(|x| x.0)
                 .filter(|x| edge_filter(*x))
                 .collect();
             let edges2: Vec<usize> = self
-                ._edge_rot_next_iterator(v.get()._get_incident_edge())
-                .map(|x| self._edge_get_twin(Some(x)))
+                .edge_rot_next_iterator_(v.get()._get_incident_edge())
+                .map(|x| self.edge_get_twin_(Some(x)))
                 .flatten()
                 .map(|x| x.0)
                 .filter(|x| edge_filter(*x))

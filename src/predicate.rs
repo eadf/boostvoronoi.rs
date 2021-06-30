@@ -5,7 +5,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-// See http://www.boost.org for updates, documentation, and revision history.
+// See http://www.boost.org for updates, documentation, and revision history of C++ code.
 
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
@@ -302,7 +302,7 @@ where
                 cmp::Ordering::Greater
             } else {
                 cmp::Ordering::Less
-            }
+            };
         }
         if Self::event_comparison_predicate_bii(lhs, rhs) {
             cmp::Ordering::Less

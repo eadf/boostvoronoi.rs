@@ -53,6 +53,11 @@ path = "example/main.rs"
 name = "readme"
 path = "example/readme.rs"
 
+[[example]]
+name = "stress_test"
+path = "example/stress_test.rs"
+required-features = ["geo"]
+
 [build-dependencies]
 version_check = "0.9"
 

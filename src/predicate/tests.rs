@@ -5,14 +5,7 @@ use super::super::site_event as VSE;
 use super::{InputType, OutputType};
 use std::ops::Neg;
 
-fn new_key<I, F>(
-    x1: I,
-    y1: I,
-    si1: usize,
-    x2: I,
-    y2: I,
-    si2: usize,
-) -> VB::BeachLineNodeKey<I, F>
+fn new_key<I, F>(x1: I, y1: I, si1: usize, x2: I, y2: I, si2: usize) -> VB::BeachLineNodeKey<I, F>
 where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
@@ -41,8 +34,7 @@ where
 {
     let test_node = new_key::<I, F>(x1, y1, si1, x2, y2, si2);
 
-    let is_less =
-        VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(a_key, &test_node);
+    let is_less = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(a_key, &test_node);
     dbg!(&a_key, &test_node, is_less, expect);
     expect == is_less
 }

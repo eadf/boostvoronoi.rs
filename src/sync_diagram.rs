@@ -5,7 +5,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-// See http://www.boost.org for updates, documentation, and revision history.
+// See http://www.boost.org for updates, documentation, and revision history of C++ code.
 
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
@@ -75,8 +75,8 @@ where
     /// This method returns None at any error
     fn edge_rot_next_no_err(&self, edge_id: Option<VD::EdgeIndex>) -> Option<VD::EdgeIndex> {
         self.edges_
-            .get(self.edges_.get(edge_id?.0)?._prev()?.0)?
-            ._twin()
+            .get(self.edges_.get(edge_id?.0)?.prev_()?.0)?
+            .twin_()
     }
 
     #[inline]
@@ -95,7 +95,7 @@ where
     /// Returns the previous edge or an BvError if it does not exist
     #[inline]
     pub fn edge_get_prev(&self, edge_id: VD::EdgeIndex) -> Result<VD::EdgeIndex, BvError> {
-        self.edge_get(edge_id)?._prev().ok_or_else(|| {
+        self.edge_get(edge_id)?.prev_().ok_or_else(|| {
             BvError::ValueError(format!(
                 "The edge id {} does not have a prev edge",
                 edge_id.0
@@ -106,7 +106,7 @@ where
     /// Returns the twin edge or a BvError if it does not exists
     #[inline]
     pub fn edge_get_twin(&self, edge_id: VD::EdgeIndex) -> Result<VD::EdgeIndex, BvError> {
-        self.edge_get(edge_id)?._twin().ok_or_else(|| {
+        self.edge_get(edge_id)?.twin_().ok_or_else(|| {
             BvError::ValueError(format!("The edge id {} does not have a twin", edge_id.0))
         })
     }

@@ -8,9 +8,9 @@ use super::super::InputType;
 use super::super::OutputType;
 use lazy_static::lazy_static;
 use regex::Regex;
-use std::ops::Neg;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
+use std::ops::Neg;
 use std::path::Path;
 
 #[macro_use]
@@ -133,9 +133,8 @@ where
 #[ignore]
 #[test]
 /// This test is massive, 9+ megs of node_comparison_predicate() -> disabled by default, but it works
-fn beachline_multiple_2() -> io::Result<()>{
-
-    let file = File::open( Path::new("src/beach_line/node_comparisons.txt"))?;
+fn beachline_multiple_2() -> io::Result<()> {
+    let file = File::open(Path::new("src/beach_line/node_comparisons.txt"))?;
     let reader = BufReader::new(file);
 
     for line in reader.lines() {

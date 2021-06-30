@@ -922,10 +922,7 @@ where
             };
             let dx = segment.end.x - segment.start.x;
             let dy = segment.end.y - segment.start.y;
-            if ([
-                Self::i_to_f(segment.start.x),
-                Self::i_to_f(segment.start.y),
-            ] == origin)
+            if ([Self::i_to_f(segment.start.x), Self::i_to_f(segment.start.y)] == origin)
                 ^ cell1.contains_point()
             {
                 direction[0] = Self::i_to_f(dy);
@@ -938,9 +935,7 @@ where
 
         let side =
             Self::i_to_f(affine.reverse_transform_x(self.screen_aabb.get_high().unwrap()[0])?)
-                - Self::i_to_f(
-                    affine.reverse_transform_x(self.screen_aabb.get_low().unwrap()[0])?,
-                );
+                - Self::i_to_f(affine.reverse_transform_x(self.screen_aabb.get_low().unwrap()[0])?);
         // absolute value is taken in case the affine transform flips one coordinate
         let side = side.abs();
         let coefficient = side / Self::max_f(direction[0].abs(), direction[1].abs());

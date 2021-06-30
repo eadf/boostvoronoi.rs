@@ -1,5 +1,7 @@
 use boostvoronoi::builder as VB;
+use boostvoronoi::file_reader as FR;
 use boostvoronoi::BvError;
+use std::io::{BufReader, Cursor};
 
 type I = i64;
 type F = f64;
@@ -8,40 +10,42 @@ type F = f64;
 fn main() -> Result<(), BvError> {
     #[allow(unused_variables)]
     let output = {
-        let points: [[I; 2]; 0] = [];
-        let segments: [[I; 4]; 2] = [
-            [-5357, -5417, -5111, -5027],
-            [-5330, -5287, -5312, -5283],
-        ];
+        let input = r#"0
+2
+-5357 -5417 -5111 -5027
+-5330 -5287 -5312 -5283
+"#;
+        let vb = VB::Builder::<I, F>::default();
+        let br = BufReader::new(Cursor::new(input));
+        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
 
-        let _v = VB::to_points::<I, I>(&points);
-        let _s = VB::to_segments::<I, I>(&segments);
         println!("-------\n{}", points.len());
         for p in points.iter() {
-            println!("{} {}", p[0], p[1]);
+            println!("{} {}", p.x, p.y);
         }
         println!("{}", segments.len());
         for s in segments.iter() {
-            println!("{} {} {} {}", s[0], s[1], s[2], s[3]);
+            println!("{} {} {} {}", s.start.x, s.start.y, s.end.x, s.end.y);
         }
         println!("-------");
         println!("int INPUT_PTS[{}][2] = {{", points.len());
         for p in points.iter() {
-            print!("{{{},{}}},", p[0], p[1]);
+            print!("{{{},{}}},", p.x, p.y);
         }
         println!("}};");
         println!("int INPUT_SGS[{}][4] = {{", segments.len());
         for s in segments.iter() {
-            print!("{{{},{},{},{}}},", s[0], s[1], s[2], s[3]);
+            print!("{{{},{},{},{}}},", s.start.x, s.start.y, s.end.x, s.end.y);
         }
         println!("}};");
         println!("-------");
         let mut vb = VB::Builder::<I, F>::default();
-        vb.with_vertices(_v.iter())?;
-        vb.with_segments(_s.iter())?;
+        vb.with_vertices(points.iter())?;
+        vb.with_segments(segments.iter())?;
+        //panic!();
         vb.build()?
     };
-    println!();
+    /*println!();
     for (i, v) in output.vertices().iter().enumerate() {
         println!(
             "vertex #{} contains a point: ({:.12}, {:.12}) ie:{:?}",
@@ -51,10 +55,13 @@ fn main() -> Result<(), BvError> {
             v.get().get_incident_edge()?.0
         );
     }
-
+    */
     println!("cells:{}", output.cells().len());
     println!("vertices:{}", output.vertices().len());
     println!("edges:{}", output.edges().len());
 
+    for (i, e) in output.edges().iter().enumerate() {
+        println!("Edge:#{}=>{:?}", i, e.get());
+    }
     Ok(())
 }
