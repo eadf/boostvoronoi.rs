@@ -960,14 +960,18 @@ where
             initial_index,
             sc.0,
         ))));
+        #[cfg(feature = "console_debug")]
         assert_eq!(self.cells_[cell_id.0].get().id().0, cell_id.0);
 
         let ccell = &self.cells_[cell_id.0];
         {
             let cell = ccell.get();
-            assert_eq!(cell.id_.0, cell_id.0);
-            assert_eq!(cell.source_index_, initial_index);
-            assert_eq!(cell.color_, sc.0);
+            #[cfg(feature = "console_debug")]
+            {
+                assert_eq!(cell.id_.0, cell_id.0);
+                assert_eq!(cell.source_index_, initial_index);
+                assert_eq!(cell.color_, sc.0);
+            }
             //cell.color_ = sc.get_value();
             ccell.set(cell);
         }
@@ -1435,6 +1439,7 @@ where
         let new_vertex_id = VertexIndex(self.vertices_.len());
         let new_edge = Vertex::new_3(new_vertex_id, x, y, is_site_vertex);
         let _ = self.vertices_.push(new_edge);
+        #[cfg(feature = "console_debug")]
         assert_eq!(self.vertices_.len() - 1, new_vertex_id.0);
         new_vertex_id
     }

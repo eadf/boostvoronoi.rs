@@ -414,19 +414,13 @@ impl CircleEventQueue {
     #[cfg(not(feature = "map_first_last"))]
     #[inline]
     fn pop_first(&mut self) -> Option<CircleEventType> {
-        //println!("->pop_first {}", self._c.len());
-        // super inefficient implementation of 'pop_first()'
-        let item = self.c_.iter().next();
-        //println!("{:?}", item);
-        let item = item.cloned();
-        //println!("{:?}", item);
-        if let Some(item) = item {
-            //println!("->pop_first {} {:?}", self._c.len(), item);
+        if let Some(item) = self.c_.iter().next().cloned() {
+            #[cfg(feature = "console_debug")]
             assert!(self.c_.remove(&item));
-            //println!("<-pop_first {}", self._c.len());
+            #[cfg(not(feature = "console_debug"))]
+            let _ = self.c_.remove(&item);
             Some(item)
         } else {
-            //println!("<-pop_first nop {}", self._c.len());
             None
         }
     }
@@ -504,7 +498,6 @@ impl CircleEventQueue {
     /// Insert Rc wrapped object in self.c_
     /// return a Rc ref of the inserted element
     pub(crate) fn associate_and_push(&mut self, cc: CircleEventType) -> Rc<CircleEventC> {
-        //assert!(!self.c_.contains(&cc)); // todo: is this supposed to happen?
         {
             let mut c = cc.0.get();
             let _ = c.set_index(self.c_list_next_free_index_);

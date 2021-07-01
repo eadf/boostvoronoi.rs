@@ -719,6 +719,7 @@ where
             println!("------- it_first.next()?");
             it_first.next()?;
         }
+        #[cfg(feature = "console_debug")]
         assert_ne!(it_first.get_index(), it_last.get_index());
 
         let _ = it_last.remove_current(false)?;

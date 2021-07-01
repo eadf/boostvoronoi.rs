@@ -251,9 +251,7 @@ impl ops::AddAssign<RobustFpt> for RobustFpt {
         self.fpv_ = fpv;
         self.re_ = re;
         #[cfg(feature = "console_debug")]
-        {
-            assert!(self.fpv_.is_finite());
-        }
+        assert!(self.fpv_.is_finite());
     }
 }
 
@@ -480,7 +478,6 @@ impl RobustDif {
     pub fn new_2(pos: f64, neg: f64) -> Self {
         #[cfg(feature = "console_debug")]
         {
-            // todo: remove asserts when stable
             assert!(!pos.is_sign_negative());
             assert!(!neg.is_sign_negative());
         }

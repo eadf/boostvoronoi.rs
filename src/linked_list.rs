@@ -278,8 +278,9 @@ where
 
         //println!("insert_before Pushed {:?} at index:{}", new_node, curr_len);
         {
-            let i = self.replace_or_push_(insertion_index, new_node);
-            assert_eq!(insertion_index, i);
+            let _i = self.replace_or_push_(insertion_index, new_node);
+            #[cfg(feature = "console_debug")]
+            assert_eq!(insertion_index, _i);
         };
 
         if prev_node != usize::MAX {
@@ -350,8 +351,9 @@ where
         };
         //println!("push_back Pushed {:?} at index:{}", new_node, insertion_index);
         {
-            let insert_index = self.replace_or_push_(insertion_index, new_node);
-            assert_eq!(insert_index, insertion_index);
+            let _insert_index = self.replace_or_push_(insertion_index, new_node);
+            #[cfg(feature = "console_debug")]
+            assert_eq!(_insert_index, insertion_index);
         }
         Ok(insertion_index)
     }
@@ -535,8 +537,11 @@ where
         //println!("erase_operation {:?}", operation);
         match (operation.change_prev, operation.change_next) {
             (Some((prev_i, new_next)), Some((next_i, new_prev))) => {
-                assert_eq!(new_next, next_i);
-                assert_eq!(prev_i, new_prev);
+                #[cfg(feature = "console_debug")]
+                {
+                    assert_eq!(new_next, next_i);
+                    assert_eq!(prev_i, new_prev);
+                }
                 match self.nodes_.get_mut(prev_i) {
                     Some(Some(node)) => {
                         node.next = new_next;
