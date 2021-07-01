@@ -224,7 +224,10 @@ where
     /// Clear the beach line list
     pub fn clear(&mut self) {
         #[cfg(feature = "console_debug")]
-        tln!("The capacity of the beachline was {:?}", self.beach_line_.borrow().capacity());
+        tln!(
+            "The capacity of the beachline was {:?}",
+            self.beach_line_.borrow().capacity()
+        );
 
         self.beach_line_.borrow_mut().clear();
     }

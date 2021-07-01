@@ -370,22 +370,29 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
+    #[cfg(feature = "console_debug")]
+    #[allow(dead_code)]
     #[inline(always)]
     /// Returns true if a horizontal line going through a new site intersects
     /// right arc at first, else returns false. If horizontal line goes
     /// through intersection point of the given two arcs returns false also.
-    pub(crate) fn distance_predicate(
+    pub(crate) fn distance_predicate_fake(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
         new_point: &Point<I>,
     ) -> bool {
-        //let rv =
-        Self::distance_predicate_real(left_site, right_site, new_point)
-        //tln!("DistancePredicate(L:{:?}, R:{:?}, K:{:?})=={}", left_site, right_site, new_point, rv);
-        //rv
+        let rv = Self::distance_predicate(left_site, right_site, new_point);
+        tln!(
+            "DistancePredicate(L:{:?}, R:{:?}, K:{:?})=={}",
+            left_site,
+            right_site,
+            new_point,
+            rv
+        );
+        rv
     }
 
-    pub(crate) fn distance_predicate_real(
+    pub(crate) fn distance_predicate(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
         new_point: &Point<I>,
@@ -1153,7 +1160,7 @@ where
                 ),
                 num::cast::<f32, f64>(3.0f32).unwrap(),
             );
-            let mut t = RF::RobustFpt::default();
+            let mut t = RF::RobustDif::default();
             t -= RF::RobustFpt::new_1(a1)
                 * RF::RobustFpt::new_1(
                     (i1_to_f64(segm_start1.x) + i1_to_f64(segm_start2.x)) * 0.5
@@ -1172,13 +1179,18 @@ where
             t /= a;
             let mut c_x = RF::RobustDif::default();
             let mut c_y = RF::RobustDif::default();
-
+            //tln!("ulps0: x:{:.12}, y:{:.12}", c_x.dif().fpv(), c_y.dif().fpv());
             c_x +=
                 RF::RobustFpt::new_1(0.5 * (i1_to_f64(segm_start1.x) + i1_to_f64(segm_start2.x)));
-            c_x += RF::RobustFpt::new_1(a1) * t;
+            //tln!("ulps1: x:{:.12}, y:{:.12}", c_x.dif().fpv(), c_y.dif().fpv());
+            //tln!("ulps1.5: 1:{:.12}, 2:{:.12}", RF::RobustFpt::new_1(a1).fpv(), t.dif().fpv());
+            //tln!("ulps1.6: 1:{:.12}", (t*RF::RobustFpt::new_1(a1)).dif().fpv());
+            c_x += t * RF::RobustFpt::new_1(a1);
             c_y +=
                 RF::RobustFpt::new_1(0.5 * (i1_to_f64(segm_start1.y) + i1_to_f64(segm_start2.y)));
-            c_y += RF::RobustFpt::new_1(b1) * t;
+            //tln!("ulps2: x:{:.12}, y:{:.12}", c_x.dif().fpv(), c_y.dif().fpv());
+            c_y += t * RF::RobustFpt::new_1(b1);
+            //tln!("ulps3: x:{:.12}, y:{:.12}", c_x.dif().fpv(), c_y.dif().fpv());
             let mut lower_x = RF::RobustDif::new_from(c_x);
             if c.is_neg() {
                 lower_x -= RF::RobustFpt::new_1(0.5) * c / a.sqrt();
@@ -1191,6 +1203,19 @@ where
             recompute_lower_x = lower_x.dif().ulp() > ulps;
             #[cfg(feature = "console_debug")]
             {
+                tln!(
+                    "ulps:{}, x:{:.12}, y:{:.12}, lx:{:.12}",
+                    ulps,
+                    c_x.dif().ulp(),
+                    c_y.dif().ulp(),
+                    lower_x.dif().ulp()
+                );
+                tln!(
+                    "x:{:.12}, y:{:.12}, lx:{:.12}",
+                    c_x.dif().fpv(),
+                    c_y.dif().fpv(),
+                    lower_x.dif().fpv()
+                );
                 assert!(!c_x.dif().ulp().is_nan());
                 assert!(!c_y.dif().ulp().is_nan());
                 assert!(!lower_x.dif().ulp().is_nan());
@@ -1578,6 +1603,33 @@ where
 
         UlpComparison::ulp_comparison(cc_y, y0, 64) == cmp::Ordering::Less
             || UlpComparison::ulp_comparison(cc_y, y1, 64) == cmp::Ordering::Greater
+    }
+
+    #[cfg(feature = "console_debug")]
+    #[allow(dead_code)]
+    #[inline(always)]
+    pub(crate) fn circle_formation_predicate_fake(
+        site1: &VSE::SiteEvent<I, F>,
+        site2: &VSE::SiteEvent<I, F>,
+        site3: &VSE::SiteEvent<I, F>,
+        circle: &VC::CircleEventType,
+    ) -> bool {
+        tln!(
+            "circle_formation_predicate(site1:{:?}, site2:{:?}, site3:{:?}, circle:{:?})",
+            site1,
+            site2,
+            site3,
+            circle
+        );
+        tln!(
+            "                           1:{}, 2:{}, 3:{}",
+            site1.is_segment(),
+            site2.is_segment(),
+            site3.is_segment()
+        );
+
+        let rv = Self::circle_formation_predicate(site1, site2, site3, circle);
+        rv
     }
 
     /// Create a circle event from the given three sites.

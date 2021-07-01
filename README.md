@@ -46,8 +46,8 @@ fn main() -> Result<(), BvError> {
     // input geometry indices in the output.
     vb.with_vertices(p.iter())?;
     vb.with_segments(s.iter())?;
-    // this will build the list of cells, edges and circle events (aka vertices)
-    let result = vb.build()()?;
+    // this will generate the list of cells, edges and circle events (aka vertices)
+    let result = vb.build()?;
     println!(
         "Result: cells:{}, edges:{}, vertices:{}",
         result.cells().len(),
@@ -78,12 +78,12 @@ The code uses ```#![feature(map_first_last)]``` if run on +nightly, this is only
 So +nightly should be somewhat faster.
 
 ## Todo
-- [x] Fix the beach-line key problem
-- [x] Error handling
-- [ ] Add many more test cases for voronoi_robust_ftp.rs
-- [ ] Benchmark and optimize
+- [x] Fix the beach-line key problem.
+- [x] Error handling.
+- [ ] Try to fix the known problems in Boost voronoi and port over.  
+- [ ] Add many more test cases for voronoi_robust_ftp.rs.
+- [ ] Benchmark and optimize.
 - [ ] Replace C++ style boolean ordering functor.
 - [ ] Replace builtin ulp with some rust crate (approx?). 
 
 All credit goes to the original author ([Andrii Sydorchuk](https://github.com/asydorchuk)) and the [boost contributors](https://github.com/boostorg/polygon), except the porting mistakes. They are all mine.
-

@@ -86,7 +86,7 @@ where
     }
 
     /// Returns the capacity or the vectors
-    pub fn capacity(&self) -> (usize,usize) {
+    pub fn capacity(&self) -> (usize, usize) {
         (self.nodes_.capacity(), self.id_pool_.capacity())
     }
 
