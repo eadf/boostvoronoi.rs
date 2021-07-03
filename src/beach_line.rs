@@ -56,14 +56,6 @@ pub(crate) fn debug_print_bli_id(value: Option<BeachLineIndex>) -> String {
 #[derive(Copy, Clone)]
 pub(crate) struct BeachLineIndex(pub(crate) usize);
 
-/*
-impl BeachLineIndex {
-    fn increment(&mut self) -> &Self {
-        self.0 += 1;
-        self
-    }
-}*/
-
 impl fmt::Display for BeachLineIndex {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.0)
@@ -102,8 +94,6 @@ where
     fn default() -> Self {
         Self {
             beach_line_: Rc::from(RefCell::from(cpp_map::LinkedList::default())),
-            // Index 0 is reserved for loose keys (lower bound tests, and unit tests)
-            //beach_line_vec_: VecMap::default(),
         }
     }
 }
@@ -480,6 +470,7 @@ where
 {
     left_site_: VSE::SiteEvent<I, F>,
     right_site_: VSE::SiteEvent<I, F>,
+    // node_index_ does not take part in the ordering calculation
     node_index_: BeachLineIndex,
 }
 
@@ -567,15 +558,11 @@ where
     F: OutputType + Neg<Output = F>,
 {
     fn cmp(&self, other: &Self) -> Ordering {
-        //if self.node_index_.0 == other.node_index_.0 {
-        //    return Ordering::Equal;
-        //}
         if VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(self, other) {
             Ordering::Less
         } else if VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(other, self) {
             Ordering::Greater
         } else {
-            //self.node_index_.0.cmp(&other.node_index_.0)
             Ordering::Equal
         }
     }
@@ -627,13 +614,6 @@ impl BeachLineNodeData {
             edge_: new_edge,
         }
     }
-    /*
-    fn new_2(circle: Option<VC::CircleEventIndex>, new_edge: VD::VoronoiEdgeIndex) -> Self {
-        Self {
-            circle_event_: circle,
-            edge_: new_edge,
-        }
-    }*/
 
     pub fn get_circle_event_id(&self) -> Option<VC::CircleEventIndex> {
         self.circle_event_

@@ -741,8 +741,6 @@ where
     }
 }
 
-//#[derive(Default)]
-
 pub struct CircleExistencePredicate<I, F>
 where
     I: InputType + Neg<Output = I>,

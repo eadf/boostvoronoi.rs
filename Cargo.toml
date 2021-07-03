@@ -25,13 +25,13 @@ thiserror = "1.0"
 bitflags = "1.2"
 libm = "0.2"
 smallvec = "^1.6.1"
-# using "geo" feature will enable From traits
+# using "geo" feature will enable some From traits
 geo = {version="0.18", optional=true}
-# using "cgmath" feature will enable From traits
+# using "cgmath" feature will enable some From traits
 cgmath = {version="0.18", optional=true}
 itertools = "0.10"
 lazy_static = "1.4"
-cpp_map = "0.0.1"
+cpp_map = "0.0.2"
 #cpp_map={path="../cpp_map.rs"}
 
 # These features are only for debug purposes, should normally not be used
