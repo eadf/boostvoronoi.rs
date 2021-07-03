@@ -37,9 +37,6 @@ cpp_map = "0.0.2"
 # These features are only for debug purposes, should normally not be used
 [features]
 console_debug = []
-console_debug_eval = []
-cpp_compat_debug = []
-debug_always_exact = []
 beachline_corruption_check = []
 
 [[example]]

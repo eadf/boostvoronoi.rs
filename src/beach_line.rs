@@ -269,7 +269,7 @@ where
     #[allow(dead_code)]
     #[cfg(feature = "console_debug")]
     pub(crate) fn debug_cmp_all(&self, key: BeachLineNodeKey<I, F>) {
-        for (i, v) in self.beach_line_.borrow().iter().rev().enumerate() {
+        for (i, (v,_)) in self.beach_line_.borrow().iter().rev().enumerate() {
             print!("#{}:", i);
             let _rv = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(v, &key);
         }
@@ -297,7 +297,7 @@ where
     pub(crate) fn debug_print_all(&self) -> Result<(), BvError> {
         tln!();
         tln!("beach_line.len()={}", self.beach_line_.borrow().len());
-        for (i, node) in self.beach_line_.borrow().iter().rev().enumerate() {
+        for (i, (node,_)) in self.beach_line_.borrow().iter().rev().enumerate() {
             let id = node.node_index_;
             t!(
                 "beach_line{} L:{:?},R:{:?}",
@@ -306,8 +306,6 @@ where
                 &node.right_site()
             );
 
-            #[cfg(not(feature = "cpp_compat_debug"))]
-            t!(", id={:?}", id);
             if let Some(data) = self.get_node(&id)?.1.get() {
                 if let Some(circle_event) = data.circle_event_ {
                     t!(" -> CircleEvent:{}", circle_event);
@@ -327,7 +325,7 @@ where
     #[cfg(feature = "console_debug")]
     pub(crate) fn dbgpa_compat_(&self, ce: &VC::CircleEventQueue) -> Result<(), BvError> {
         tln!("-----beach_line----{}", self.beach_line_.borrow().len());
-        for (i, node) in self.beach_line_.borrow().iter().enumerate() {
+        for (i, (node,_)) in self.beach_line_.borrow().iter().enumerate() {
             t!("#{}:", i);
             self.dbgpa_compat_node_(&node, ce)?;
         }
@@ -391,8 +389,8 @@ where
     #[cfg(feature = "console_debug")]
     pub(crate) fn dbgp_all_cmp_(&self) {
         let _iter1 = self.beach_line_.borrow();
-        let mut it1 = _iter1.iter().enumerate();
-        for it2_v in self.beach_line_.borrow().iter().enumerate().skip(1) {
+        let mut it1 = _iter1.iter().map(|x|x.0).enumerate();
+        for it2_v in self.beach_line_.borrow().iter().map(|x|x.0).enumerate().skip(1) {
             let it1_v = it1.next().unwrap();
             t!(
                 "key(#{}).partial_cmp(key(#{})) == {:?}",
@@ -432,7 +430,7 @@ where
         } else {
             t!(" Temporary bisector");
         }
-        //#[cfg(not(feature = "cpp_compat_debug"))]
+
         // print!(" id={}", id);
         tln!();
         Ok(())
@@ -480,15 +478,7 @@ where
     F: OutputType + Neg<Output = F>,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        #[cfg(feature = "cpp_compat_debug")]
-        {
-            write!(f, "L:{:?},R:{:?}", &self.left_site(), &self.right_site())
-        }
-        #[cfg(not(feature = "cpp_compat_debug"))]
-        {
-            write!(f, "L:{:?},R:{:?}", &self.left_site(), &self.right_site())?;
-            write!(f, ", id={:?}", self.node_index_.0)
-        }
+       write!(f, "L:{:?},R:{:?}", &self.left_site(), &self.right_site())
     }
 }
 

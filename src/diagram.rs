@@ -796,6 +796,7 @@ where
             edges_: Vec::<EdgeType<I, F>>::with_capacity(input_size * 2),
         }
     }
+
     /// clear the list of cells, vertices and edges
     pub fn clear(&mut self) {
         self.cells_.clear();
@@ -803,16 +804,19 @@ where
         self.edges_.clear();
     }
 
+    #[inline(always)]
     /// Returns a reference to the list of cells
     pub fn cells(&self) -> &Vec<CellType<I, F>> {
         &self.cells_
     }
 
+    #[inline(always)]
     /// Returns a reference to all of the vertices
     pub fn vertices(&self) -> &Vec<VertexType<I, F>> {
         &self.vertices_
     }
 
+    #[inline(always)]
     /// Computes an AABB large enough to contain all the vertices
     pub fn vertices_get_aabb(&self) -> VU::Aabb2<I, F> {
         let mut rv = VU::Aabb2::<I, F>::default();
@@ -823,11 +827,13 @@ where
         rv
     }
 
+    #[inline(always)]
     /// Returns a reference to the list of edges
     pub fn edges(&self) -> &Vec<EdgeType<I, F>> {
         &self.edges_
     }
 
+    #[inline(always)]
     /// Returns a Rc<cell::Cell<>> belonging to the cell_id
     pub fn get_cell(&self, cell_id: CellIndex) -> Result<Rc<cell::Cell<Cell<I, F>>>, BvError> {
         Ok(Rc::clone(self.cells_.get(cell_id.0).ok_or_else(|| {
@@ -835,9 +841,11 @@ where
         })?))
     }
 
+    #[inline(always)]
     /// Returns the edge associated with the edge id
-    pub(crate) fn get_edge_(&self, edge_id: EdgeIndex) -> EdgeType<I, F> {
-        Rc::clone(self.edges_.get(edge_id.0).unwrap())
+    pub(crate) fn get_edge_(&self, edge_id: Option<EdgeIndex>) -> Option<EdgeType<I, F>> {
+        let edge_id = edge_id?;
+        self.edges_.get(edge_id.0).map(|x|Rc::clone(x))
     }
 
     /// Returns the edge associated with the edge id
@@ -910,7 +918,7 @@ where
         self.edge_or_color_(self.edge_get_twin_(edge_id), external_color);
         if v1.is_none()
             || self.vertex_is_site_point_(v1).unwrap_or(true)
-            || !self.get_edge_(edge_id.unwrap()).get().is_primary()
+            || !self.get_edge_(edge_id).map_or(false, |x|x.get().is_primary())
         {
             // stop recursion if this edge does not have a vertex1 (e.g is infinite)
             // or if this edge isn't a primary edge.

@@ -177,36 +177,16 @@ impl ExtendedExponentFpt<f64> {
     /// ```
     #[inline]
     pub fn sqrt(&self) -> Self {
-        #[cfg(feature = "console_debug_eval")]
-        {
-            println!(
-                "->sqrt:{:.12} val:{:.12} exp:{:}",
-                self.d(),
-                self.val(),
-                self.exp()
-            );
-        }
+
         let mut val = self.val_;
         let mut exp = self.exp_;
         if (exp & 1) != 0 {
             val *= 2.0;
             exp -= 1;
         }
-        #[cfg(feature = "console_debug_eval")]
-        {
-            let rv = Self::new2(val.sqrt(), exp >> 1);
-            println!(
-                "<-sqrt:{:.12} val:{:.12} exp:{:}",
-                rv.d(),
-                rv.val(),
-                rv.exp()
-            );
-            rv
-        }
-        #[cfg(not(feature = "console_debug_eval"))]
-        {
-            Self::new2(val.sqrt(), exp >> 1)
-        }
+
+        Self::new2(val.sqrt(), exp >> 1)
+
     }
 
     /// A to-float operation.

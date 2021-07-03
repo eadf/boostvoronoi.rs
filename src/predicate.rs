@@ -912,12 +912,6 @@ where
             assert!(!c_y.dif().ulp().is_nan());
             assert!(!lower_x.dif().ulp().is_nan());
         }
-        #[cfg(feature = "debug_always_exact")]
-        let recompute_c_x = true;
-        #[cfg(feature = "debug_always_exact")]
-        let recompute_c_y = true;
-        #[cfg(feature = "debug_always_exact")]
-        let recompute_lower_x = true;
 
         if recompute_c_x || recompute_c_y || recompute_lower_x {
             ExactCircleFormationFunctor::<I, F>::ppp(
@@ -1055,12 +1049,6 @@ where
             assert!(!c_y.dif().ulp().is_nan());
             assert!(!lower_x.dif().ulp().is_nan());
         }
-        #[cfg(feature = "debug_always_exact")]
-        let recompute_c_x = true;
-        #[cfg(feature = "debug_always_exact")]
-        let recompute_c_y = true;
-        #[cfg(feature = "debug_always_exact")]
-        let recompute_lower_x = true;
 
         if recompute_c_x || recompute_c_y || recompute_lower_x {
             ExactCircleFormationFunctor::<I, F>::pps(
@@ -1403,12 +1391,7 @@ where
             //println!("  LazyCircleFormationFunctor::pss {:?}", c_event);
             //println!("  LazyCircleFormationFunctor::pss(recompute_c_x:{},recompute_c_y:{},recompute_lower_x:{}", recompute_c_x, recompute_c_y, recompute_lower_x);
         }
-        #[cfg(feature = "debug_always_exact")]
-        {
-            recompute_c_x = true;
-            recompute_c_y = true;
-            recompute_lower_x = true;
-        }
+
         if recompute_c_x || recompute_c_y || recompute_lower_x {
             ExactCircleFormationFunctor::pss(
                 site1,
@@ -1552,12 +1535,6 @@ where
             assert!(!lower_x.dif().ulp().is_nan());
         }
         c_event.set_3_raw(c_x_dif.fpv(), c_y_dif.fpv(), lower_x_dif.fpv());
-        #[cfg(feature = "debug_always_exact")]
-        let recompute_c_x = true;
-        #[cfg(feature = "debug_always_exact")]
-        let recompute_c_y = true;
-        #[cfg(feature = "debug_always_exact")]
-        let recompute_lower_x = true;
 
         if recompute_c_x || recompute_c_y || recompute_lower_x {
             ExactCircleFormationFunctor::sss(

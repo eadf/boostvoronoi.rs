@@ -738,16 +738,7 @@ impl<
         //tln!("eval1:");
         //tln!(" a:{:.0}", a.d());
         //tln!(" b:{:.0}", b.d());
-        #[cfg(feature = "console_debug_eval")]
-        {
-            let rv = a * (b.sqrt());
-            tln!("eval1: {:.0}", rv.d());
-            rv
-        }
-        #[cfg(not(feature = "console_debug_eval"))]
-        {
-            a * (b.sqrt())
-        }
+        a * (b.sqrt())
     }
 
     // Evaluates expression (re = 7 EPS):
@@ -759,16 +750,7 @@ impl<
     ) -> EX::ExtendedExponentFpt<f64> {
         let ra = self.eval1(a, b);
         let rb = self.eval1(&a[1..], &b[1..]);
-        #[cfg(feature = "console_debug_eval")]
-        {
-            tln!("->eval2");
-            tln!(" a[0]:{:.0}", a[0].d());
-            tln!(" a[1]:{:.0}", a[1].d());
-            tln!(" b[0]:{:.0}", b[0].d());
-            tln!(" b[1]:{:.0}", b[1].d());
-            tln!(" ra:{:.0}", ra.d());
-            tln!(" rb:{:.0}", rb.d());
-        }
+
         if ra.is_zero()
             || rb.is_zero()
             || (!ra.is_neg() && !rb.is_neg())
@@ -780,21 +762,8 @@ impl<
         let p = &a[0] * &a[0] * &b[0] - &a[1] * &a[1] * &b[1];
         let numer = Self::i_to_f(&p);
         let divisor = ra - rb;
-        #[cfg(feature = "console_debug_eval")]
-        {
-            let rv = numer / divisor;
-            tln!(
-                "<-eval2:\n numer:{:.0}\n divisor:{:.0}\n rv:{:.0}",
-                numer.d(),
-                divisor.d(),
-                rv.d()
-            );
-            rv
-        }
-        #[cfg(not(feature = "console_debug_eval"))]
-        {
-            numer / divisor
-        }
+
+        numer / divisor
     }
 
     /// Evaluates expression (re = 16 EPS):
@@ -806,18 +775,7 @@ impl<
     ) -> EX::ExtendedExponentFpt<f64> {
         let ra = self.eval2(a, b);
         let rb = self.eval1(&a[2..], &b[2..]);
-        #[cfg(feature = "console_debug_eval")]
-        {
-            tln!("->eval3");
-            tln!(" a[0]:{:.0}", a[0].d());
-            tln!(" a[1]:{:.0}", a[1].d());
-            tln!(" a[2]:{:.0}", a[2].d());
-            tln!(" b[0]:{:.0}", b[0].d());
-            tln!(" b[1]:{:.0}", b[1].d());
-            tln!(" b[2]:{:.0}", b[2].d());
-            tln!(" ra:{:.0}", ra.d());
-            tln!(" rb:{:.0}", rb.d());
-        }
+
         if ra.is_zero()
             || rb.is_zero()
             || (!ra.is_neg() && !rb.is_neg())
@@ -832,37 +790,10 @@ impl<
         tb[0] = EI::ExtendedInt::from(1);
         ta[1] = &a[0] * &a[1] * &EI::ExtendedInt::from(2_i32);
         tb[1] = &b[0] * &b[1];
-        #[cfg(feature = "console_debug_eval")]
-        {
-            tln!("<-eval3");
-            tln!(" ta[0]:{:.0}", ta[0].d());
-            tln!(" ta[1]:{:.0}", ta[1].d());
-            tln!(" tb[0]:{:.0}", tb[0].d());
-            tln!(" tb[1]:{:.0}", tb[1].d());
-            tln!(" ra:{:.0} val:{:.12} exp:{:}", ra.d(), ra.val(), ra.exp());
-            tln!(" rb:{:.0} val:{:.12} exp:{:}", rb.d(), rb.val(), rb.exp());
-            let rarb = ra - rb;
-            tln!(
-                " ra-rb:{:.0} val:{:.12} exp:{:}",
-                rarb.d(),
-                rarb.val(),
-                rarb.exp()
-            );
-        }
+
         let nom = self.eval2(&ta[..], &tb[..]);
         let div = ra - rb;
-        #[cfg(feature = "console_debug_eval")]
-        {
-            let rv = nom / div;
-            tln!(" nom:{:.0}", nom.d());
-            tln!(" div:{:.0}", div.d());
-            tln!(" rv:{:.0}", rv.d());
-            rv
-        }
-        #[cfg(not(feature = "console_debug_eval"))]
-        {
-            nom / div
-        }
+        nom / div
     }
 
     /// Evaluates expression (re = 25 EPS):
@@ -902,16 +833,7 @@ impl<
         tb[1] = &b[0] * &b[1];
         ta[2] = &a[2] * &a[3] * &EI::ExtendedInt::from(-2_i32);
         tb[2] = &b[2] * &b[3];
-        #[cfg(feature = "console_debug_eval")]
-        {
-            let rv = self.eval3(&ta, &tb) / (ra - rb);
-            tln!("<-eval4:{}", rv.d());
-            rv
-        }
-        #[cfg(not(feature = "console_debug_eval"))]
-        {
-            self.eval3(&ta, &tb) / (ra - rb)
-        }
+        self.eval3(&ta, &tb) / (ra - rb)
     }
 
     /// Evaluates A\[0] * sqrt(B\[0\]) + A\[1\] * sqrt(B\[1\]) +
@@ -928,23 +850,12 @@ impl<
 
         let lh = self.eval2(A, B);
         let rh = self.eval2(&A[2..], &B[2..]);
-        #[cfg(feature = "console_debug_eval")]
-        {
-            tln!(
-                "sqrt_expr_evaluator_pss3\n lh={:.0}\n rh={:.0}",
-                lh.d(),
-                rh.d()
-            );
-        }
+
         if lh.is_zero()
             || rh.is_zero()
             || (!lh.is_neg() && !rh.is_neg())
             || (!lh.is_pos() && !rh.is_pos())
         {
-            #[cfg(feature = "console_debug_eval")]
-            {
-                tln!("<-sqrt_expr_evaluator_pss3 lh + rh");
-            }
             return lh + rh;
         }
         cA[0] = &A[0] * &A[0] * &B[0] + &A[1] * &A[1] * &B[1]
@@ -955,14 +866,6 @@ impl<
         cB[1] = B[3].clone();
         let numer = self.eval2(&cA, &cB);
         let divisor = lh - rh;
-        #[cfg(feature = "console_debug_eval")]
-        {
-            tln!(
-                "<-sqrt_expr_evaluator_pss3\n numer:{:.0}\n divisor:{:.0}",
-                numer.d(),
-                divisor.d()
-            );
-        }
         numer / divisor
     }
 
@@ -974,18 +877,7 @@ impl<
         A: &[EI::ExtendedInt],
         B: &[EI::ExtendedInt],
     ) -> EX::ExtendedExponentFpt<f64> {
-        #[cfg(feature = "console_debug_eval")]
-        {
-            tln!("->sqrt_expr_evaluator_pss4");
-            tln!(" A[0]={:?}", A[0]);
-            tln!(" A[1]={:?}", A[1]);
-            tln!(" A[2]={:?}", A[2]);
-            tln!(" A[3]={:?}", A[3]);
-            tln!(" B[0]={:?}", B[0]);
-            tln!(" B[1]={:?}", B[1]);
-            tln!(" B[2]={:?}", B[2]);
-            tln!(" B[3]={:?}", B[3]);
-        }
+
         let mut cA: [EI::ExtendedInt; 4] = [
             EI::ExtendedInt::zero(),
             EI::ExtendedInt::zero(),
@@ -1010,14 +902,6 @@ impl<
                 || (!lh.is_neg() && !rh.is_neg())
                 || (!lh.is_pos() && !rh.is_pos())
             {
-                #[cfg(feature = "console_debug_eval")]
-                {
-                    tln!(
-                        "<-sqrt_expr_evaluator_pss4 1\nlh:{:.0}\nrh:{:.0}",
-                        lh.d(),
-                        rh.d()
-                    );
-                }
                 return lh + rh;
             }
             cA[0] = &A[0] * &A[0] * &B[0] + &A[1] * &A[1] * &B[1] - &A[2] * &A[2] * &B[3] * &B[2];
@@ -1025,15 +909,6 @@ impl<
             cA[1] = &A[0] * &A[1] * &EI::ExtendedInt::from(2_i32) - &A[2] * &A[2] * &B[3];
             cB[1] = &B[0] * &B[1];
             let numer = self.eval2(&cA, &cB);
-            #[cfg(feature = "console_debug_eval")]
-            {
-                tln!(
-                    "<-sqrt_expr_evaluator_pss4 2\nnumerator:{:.0}\nlh:{:.0}\nrh:{:.0}",
-                    numer.d(),
-                    lh.d(),
-                    rh.d()
-                );
-            }
 
             return numer / (lh - rh);
         }
@@ -1049,34 +924,12 @@ impl<
         cA[2] = A[3].clone();
         cB[2] = EI::ExtendedInt::from(1);
         let lh = self.eval3(&cA, &cB);
-        #[cfg(feature = "console_debug_eval")]
-        {
-            tln!(
-                "<-sqrt_expr_evaluator_pss4 2.5\nlh:{:.0}\nrh:{:.0}",
-                lh.d(),
-                rh.d()
-            );
-            tln!("lh.is_neg():{} lh.is_pos():{}", lh.is_neg(), lh.is_pos());
-            tln!("rh.is_neg():{} rh.is_pos():{}", rh.is_neg(), rh.is_pos());
-            tln!(
-                "lh.is_zero():{} rh.is_zero():{}",
-                lh.is_zero(),
-                rh.is_zero()
-            );
-        }
+
         if lh.is_zero()
             || rh.is_zero()
             || (!lh.is_neg() && !rh.is_neg())
             || (!lh.is_pos() && !rh.is_pos())
         {
-            #[cfg(feature = "console_debug_eval")]
-            {
-                tln!(
-                    "<-sqrt_expr_evaluator_pss4 3\nlh:{:.0}\nrh:{:.0}",
-                    lh.d(),
-                    rh.d()
-                );
-            }
             return lh + rh;
         }
         cA[0] = &A[3] * &A[0] * &EI::ExtendedInt::from(2_i32);
@@ -1086,15 +939,6 @@ impl<
         cA[3] = &A[0] * &A[1] * &EI::ExtendedInt::from(2_i32) - &A[2] * &A[2] * &B[3];
         cB[3] = &B[0] * &B[1];
         let numer = self.sqrt_expr_evaluator_pss3(&cA, &cB);
-        #[cfg(feature = "console_debug_eval")]
-        {
-            tln!(
-                "<-sqrt_expr_evaluator_pss4 4\nnumer:{:.0}\nlh:{:.0}\nrh:{:.0}",
-                numer.d(),
-                lh.d(),
-                rh.d()
-            );
-        }
 
         numer / (lh - rh)
     }
