@@ -21,7 +21,6 @@ use std::collections::BTreeSet;
 use std::fmt;
 use std::ops::Neg;
 use std::rc::Rc;
-use vec_map::VecMap;
 
 /// Type-checked placeholder for usize
 /// Hopefully rust zero cost abstractions will flatten this out.
@@ -364,9 +363,10 @@ pub type CircleEventType = Rc<CircleEventC>;
 /// of the iterators to the list elements is used to keep the correct circle
 /// events ordering. (todo: this comment text is from c++, convert to rust)
 pub(crate) struct CircleEventQueue {
+    // circle events sorted by order
     c_: BTreeSet<CircleEventType>,
-    // todo: replace with ahash?
-    c_list_: VecMap<CircleEventType>,
+    // circle events sorted by id
+    c_list_: ahash::AHashMap<usize, CircleEventType>,
     c_list_next_free_index_: CircleEventIndex,
     inactive_circle_ids_: yabf::Yabf, // Circle events turned inactive
 }
@@ -375,7 +375,7 @@ impl Default for CircleEventQueue {
     fn default() -> CircleEventQueue {
         Self {
             c_: BTreeSet::new(),
-            c_list_: VecMap::new(),
+            c_list_: ahash::AHashMap::new(),
             c_list_next_free_index_: CircleEventIndex(0),
             inactive_circle_ids_: yabf::Yabf::default(),
         }
@@ -463,7 +463,7 @@ impl CircleEventQueue {
     pub(crate) fn pop_and_destroy(&mut self) -> Result<(), BvError> {
         if let Some(circle) = self.pop_first() {
             if let Some(circle_id) = circle.0.get().index_ {
-                let _ = self.c_list_.remove(circle_id.0);
+                let _ = self.c_list_.remove(&circle_id.0);
                 let _ = self.inactive_circle_ids_.set_bit(circle_id.0, true);
             } else {
                 return Err(BvError::InternalError(format!(
@@ -524,8 +524,8 @@ impl CircleEventQueue {
         #[cfg(feature = "console_debug")]
         if let Some(circle_event_id) = circle_event_id {
             if !self.inactive_circle_ids_.bit(circle_event_id.0) {
-                if self.c_list_.contains_key(circle_event_id.0) {
-                    println!("deactivate {:?}", self.c_list_[circle_event_id.0]);
+                if self.c_list_.contains_key(&circle_event_id.0) {
+                    println!("deactivate {:?}", self.c_list_[&circle_event_id.0]);
                 } else {
                     println!("circle {} not present", circle_event_id);
                 }
@@ -552,7 +552,7 @@ impl CircleEventQueue {
 
     #[cfg(feature = "console_debug")]
     pub(crate) fn dbg_ce(&self, cei: CircleEventIndex) {
-        if let Some(ce) = self.c_list_.get(cei.0) {
+        if let Some(ce) = self.c_list_.get(&cei.0) {
             print!("{:?}", ce);
         } else {
             print!("{}: not found", cei);

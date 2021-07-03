@@ -463,3 +463,145 @@ fn sample_primary_problem_7() -> Result<(), BvError> {
     assert_eq!(v.get_incident_edge().unwrap().0, 17);
     Ok(())
 }
+
+#[test]
+fn sample_primary_problem_9() -> Result<(), BvError> {
+    let output = {
+        let input = r#"0
+2
+129 455 264 104
+192 20 32 436
+"#;
+        let mut vb = VB::Builder::<I, F>::default();
+        let br = BufReader::new(Cursor::new(input));
+        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
+        vb.with_vertices(points.iter())?;
+        vb.with_segments(segments.iter())?;
+        vb.build()?
+    };
+    assert_eq!(output.cells().len(), 6);
+    let cell = output.cells()[0].get();
+    assert_eq!(cell.id().0, 0);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[1].get();
+    assert_eq!(cell.id().0, 1);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[2].get();
+    assert_eq!(cell.id().0, 2);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[3].get();
+    assert_eq!(cell.id().0, 3);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), false);
+    assert_eq!(cell.contains_segment(), true);
+    let cell = output.cells()[4].get();
+    assert_eq!(cell.id().0, 4);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    let cell = output.cells()[5].get();
+    assert_eq!(cell.id().0, 5);
+    let (_source_index, _cat) = cell.source_index_2();
+    assert_eq!(cell.is_degenerate(), false);
+    assert_eq!(cell.contains_point(), true);
+    assert_eq!(cell.contains_segment(), false);
+    assert_eq!(output.vertices().len(), 4);
+    assert_eq!(output.edges().len(), 18);
+    let v = output.vertices()[0].get();
+    assert!(almost_equal(v.x(), 78.8325959, v.y(), 454.0125369));
+    assert_eq!(v.get_incident_edge().unwrap().0, 7);
+    let v = output.vertices()[1].get();
+    assert!(almost_equal(v.x(), 83.5670103, v.y(), 437.5257732));
+    assert_eq!(v.get_incident_edge().unwrap().0, 9);
+    let v = output.vertices()[2].get();
+    assert!(almost_equal(v.x(), 218.5670103, v.y(), 86.5257732));
+    assert_eq!(v.get_incident_edge().unwrap().0, 15);
+    let v = output.vertices()[3].get();
+    assert!(almost_equal(v.x(), 250.6725664, v.y(), 42.5663717));
+    assert_eq!(v.get_incident_edge().unwrap().0, 17);
+    Ok(())
+}
+
+#[test]
+fn sample_primary_problem_10() -> Result<(), BvError> {
+    let output = {
+        let input = r#"0
+2
+356 -306 -52 136
+-297 -62 -69 -309
+"#;
+        let mut vb = VB::Builder::<I, F>::default();
+        let br = BufReader::new(Cursor::new(input));
+        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
+        vb.with_vertices(points.iter())?;
+        vb.with_segments(segments.iter())?;
+        vb.build()?
+    };
+    assert_eq!(output.cells().len(),6);
+    let cell = output.cells()[0].get();
+    assert_eq!(cell.id().0,0);
+    let (_source_index,_cat)=cell.source_index_2();
+    assert_eq!(cell.is_degenerate(),false);
+    assert_eq!(cell.contains_point(),true);
+    assert_eq!(cell.contains_segment(),false);
+    let cell = output.cells()[1].get();
+    assert_eq!(cell.id().0,1);
+    let (_source_index,_cat)=cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(cell.is_degenerate(),false);
+    assert_eq!(cell.contains_point(),false);
+    assert_eq!(cell.contains_segment(),true);
+    let cell = output.cells()[2].get();
+    assert_eq!(cell.id().0,2);
+    let (_source_index,_cat)=cell.source_index_2();
+    assert_eq!(cell.is_degenerate(),false);
+    assert_eq!(cell.contains_point(),true);
+    assert_eq!(cell.contains_segment(),false);
+    let cell = output.cells()[3].get();
+    assert_eq!(cell.id().0,3);
+    let (_source_index,_cat)=cell.source_index_2();
+    assert_eq!(cell.is_degenerate(),false);
+    assert_eq!(cell.contains_point(),true);
+    assert_eq!(cell.contains_segment(),false);
+    let cell = output.cells()[4].get();
+    assert_eq!(cell.id().0,4);
+    let (_source_index,_cat)=cell.source_index_2();
+    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(cell.is_degenerate(),false);
+    assert_eq!(cell.contains_point(),false);
+    assert_eq!(cell.contains_segment(),true);
+    let cell = output.cells()[5].get();
+    assert_eq!(cell.id().0,5);
+    let (_source_index,_cat)=cell.source_index_2();
+    assert_eq!(cell.is_degenerate(),false);
+    assert_eq!(cell.contains_point(),true);
+    assert_eq!(cell.contains_segment(),false);
+    assert_eq!(output.vertices().len(),4);
+    assert_eq!(output.edges().len(),18);
+    let v = output.vertices()[0].get();
+    assert!(almost_equal(v.x(), -181.0157346, v.y(), 45.0623988));
+    assert_eq!(v.get_incident_edge().unwrap().0,9);
+    let v = output.vertices()[1].get();
+    assert!(almost_equal(v.x(), -167.4840256, v.y(), 29.3993610));
+    assert_eq!(v.get_incident_edge().unwrap().0,11);
+    let v = output.vertices()[2].get();
+    assert!(almost_equal(v.x(), 46.4840256, v.y(), -202.3993610));
+    assert_eq!(v.get_incident_edge().unwrap().0,13);
+    let v = output.vertices()[3].get();
+    assert!(almost_equal(v.x(), 144.8651322, v.y(), -500.8937242));
+    assert_eq!(v.get_incident_edge().unwrap().0,17);
+    Ok(())
+}

@@ -10,8 +10,9 @@ use rand::{thread_rng, Rng};
 type I = i64;
 type F = f64;
 
-/// check if all the vertices really are at the midpoint between two segments
-fn verify_vertices(
+/// Check if all the vertices really are at the midpoint between (at least) two segments.
+/// Returns true if error is detected.
+fn fault_check(
     diagram: &Result<VD::Diagram<I, F>, BvError>,
     segments: Vec<geo::Line<I>>,
 ) -> bool {
@@ -38,11 +39,11 @@ fn verify_vertices(
                 let delta: f64 = distance - *peek;
                 //print!(" delta:{}", delta);
 
-                if delta > 0.0001 {
+                if delta > 0.000001 {
                     //println!(" ignore peek:{}", peek);
                     continue;
                 }
-                if delta < -0.0001 {
+                if delta < -0.000001 {
                     //println!(" clear peek:{}", peek);
                     heap.clear();
                 }
@@ -53,43 +54,33 @@ fn verify_vertices(
         if heap.len() < 2 {
             println!("pop1: {:?}, pop2:{:?}", heap.get(0), heap.get(1));
             return true;
-        } else {
-            //println!("heap:{:?}", heap);
         }
         heap.clear();
     }
-    //panic!();
     false
 }
 
 /// Looking for failing examples
 fn main() -> Result<(), BvError> {
-    let l1 = Line::from([(-5500_i64, -5343), (-5120_i64, -5120)]);
-    let l2 = Line::from([(-5472_i64, -5270), (-5380_i64, -5380)]);
-    if l1.intersects(&l2) {
-        println!("intersects");
-    }
-    //panic!();
+    let to_r = 1000_i64;
+
     let mut rng = thread_rng();
-    //#[allow(unused_variables)]
     loop {
         let mut geo_segments = Vec::<geo::Line<I>>::new();
         'gen_loop: while geo_segments.len() < 2 {
             let line = Line::from([
                 (
-                    rng.gen_range(-5500_i64..-5000),
-                    rng.gen_range(-5500_i64..-5000),
+                    rng.gen_range(-to_r..to_r),
+                    rng.gen_range(-to_r..to_r),
                 ),
                 (
-                    rng.gen_range(-5500_i64..-5000),
-                    rng.gen_range(-5500_i64..-5000),
+                    rng.gen_range(-to_r..to_r),
+                    rng.gen_range(-to_r..to_r),
                 ),
             ]);
             for s in geo_segments.iter() {
                 if line.intersects(s) {
                     continue 'gen_loop;
-                } else {
-                    //println!("{:?} does NOT intersect {:?}", s,line);
                 }
             }
             geo_segments.push(line);
@@ -105,7 +96,7 @@ fn main() -> Result<(), BvError> {
         vb.with_vertices(vertices.iter())?;
         vb.with_segments(segments.iter())?;
         let result = vb.build();
-        if result.is_err() || verify_vertices(&result, geo_segments) {
+        if result.is_err() || fault_check(&result, geo_segments) {
             println!("-------\n{}", vertices.len());
             for p in vertices.iter() {
                 println!("{} {}", p.x, p.y);

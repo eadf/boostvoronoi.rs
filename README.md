@@ -12,7 +12,7 @@
 [Boost 1.76.0 polygon::voronoi](https://www.boost.org/doc/libs/1_76_0/libs/polygon/doc/voronoi_main.htm) ported to 100% rust.
 This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) works for line segments as well as points, making it useful for calculating centerlines [(like the title image above)](https://github.com/eadf/toxicblend.rs).
 
-Code still in development, not ready for any purpose.
+Code still in development, there are still bugs. All the remaining bugs I've noticed are also present in C++ boost voronoi.
 
 ![Rusty voronoi](img/img.png)
 
@@ -84,6 +84,8 @@ So +nightly should be somewhat faster.
 - [ ] Add many more test cases for voronoi_robust_ftp.rs.
 - [ ] Benchmark and optimize.
 - [ ] Replace C++ style boolean ordering functor.
-- [ ] Replace builtin ulp with some rust crate (approx?). 
+- [ ] Replace builtin ulp with some rust crate (approx?).
+- [x] Replace the beachline RBTree with cpp_map. 
+- [x] Replace vec_map with ahash
 
 All credit goes to the original author ([Andrii Sydorchuk](https://github.com/asydorchuk)) and the [boost contributors](https://github.com/boostorg/polygon), except the porting mistakes. They are all mine.

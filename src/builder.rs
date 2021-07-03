@@ -15,7 +15,6 @@ use super::beach_line as VB;
 use super::circle_event as VC;
 use super::diagram as VD;
 use super::end_point as VEP;
-use super::linked_list::Pointer;
 use super::predicate as VP;
 use super::site_event as VSE;
 use super::BvError;
@@ -183,7 +182,7 @@ where
         tln!("\n->build()");
         tln!("********************************************************************************");
 
-        self.init_beach_line(&mut site_event_iterator_, &mut output);
+        self.init_beach_line(&mut site_event_iterator_, &mut output)?;
         #[cfg(feature = "console_debug")]
         let mut i = 0;
 
@@ -257,9 +256,9 @@ where
         &mut self,
         site_event_iterator_: &mut VSE::SiteEventIndexType,
         output: &mut VD::Diagram<I, F>,
-    ) {
+    ) -> Result<(), BvError> {
         if self.site_events_.is_empty() {
-            return;
+            return Ok(());
         }
         if self.site_events_.len() == 1 {
             // Handle single site event case.
@@ -282,12 +281,13 @@ where
 
             if skip == 1 {
                 // Init beach line with the first two sites.
-                self.init_beach_line_default(site_event_iterator_, output);
+                self.init_beach_line_default(site_event_iterator_, output)?;
             } else {
                 // Init beach line with collinear vertical sites.
-                self.init_beach_line_collinear_sites(site_event_iterator_, output);
+                self.init_beach_line_collinear_sites(site_event_iterator_, output)?;
             }
         }
+        Ok(())
     }
 
     /// Init beach line with the two first sites.
@@ -296,17 +296,24 @@ where
         &mut self,
         site_event_iterator_: &mut VSE::SiteEventIndexType,
         output: &mut VD::Diagram<I, F>,
-    ) {
+    ) -> Result<(), BvError> {
         // Get the first and the second site event.
         let first = *site_event_iterator_ - 1;
         let first = self.site_events_[first];
         let second = *site_event_iterator_;
         let second = self.site_events_[second];
         tln!("insert_new_arc init_beach_line_default");
-        let _ = self.insert_new_arc(first, first, second, output);
+        let _ = self.insert_new_arc(
+            first,
+            first,
+            second,
+            self.beach_line_.last_position()?,
+            output,
+        );
 
         // The second site was already processed. Move the iterator.
         *site_event_iterator_ += 1;
+        Ok(())
     }
 
     /// Init beach line with collinear sites.
@@ -314,7 +321,7 @@ where
         &mut self,
         site_event_iterator_: &VSE::SiteEventIndexType,
         output: &mut VD::Diagram<I, F>,
-    ) {
+    ) -> Result<(), BvError> {
         let mut it_first: VSE::SiteEventIndexType = 0;
         let mut it_second: VSE::SiteEventIndexType = 1;
         while it_second != *site_event_iterator_ {
@@ -330,18 +337,22 @@ where
             // Insert a new bisector into the beach line.
             #[cfg(feature = "console_debug")]
             let _ = self.beach_line_.insert(
+                self.beach_line_.last_position()?,
                 new_node_key,
                 VB::BeachLineNodeData::new_1(edge),
                 &self.circle_events_,
             );
             #[cfg(not(feature = "console_debug"))]
-            let _ = self
-                .beach_line_
-                .insert(new_node_key, Some(VB::BeachLineNodeData::new_1(edge)));
+            let _ = self.beach_line_.insert(
+                self.beach_line_.last_position()?,
+                new_node_key,
+                Some(VB::BeachLineNodeData::new_1(edge)),
+            );
             // Update iterators.
             it_first += 1;
             it_second += 1;
         }
+        Ok(())
     }
 
     fn deactivate_circle_event(
@@ -403,7 +414,7 @@ where
                 {
                     // we checked with !is_empty(), unwrap is safe
                     let b_it = self.end_points_.pop().unwrap();
-                    let mut b_it = Pointer::new_2(
+                    let mut b_it = cpp_map::PIterator::new_2(
                         Rc::clone(&self.beach_line_.beach_line_),
                         b_it.beachline_index().0,
                     );
@@ -484,7 +495,13 @@ where
                 let site_arc = *(left_it.get_k()?.right_site());
 
                 // Insert new nodes into the beach line. Update the output.
-                let right_it_idx = self.insert_new_arc(site_arc, site_arc, site_event, output)?;
+                let right_it_idx = self.insert_new_arc(
+                    site_arc,
+                    site_arc,
+                    site_event,
+                    right_it.get_index(),
+                    output,
+                )?;
                 right_it = self.beach_line_.get_pointer(right_it_idx)?;
 
                 // Add a candidate circle to the circle event queue.
@@ -506,7 +523,11 @@ where
                 // Insert new nodes into the beach line. Update the output.
                 left_it = {
                     let new_key_id = self.insert_new_arc(
-                        site_arc, site_arc, site_event, /*right_it,*/ output,
+                        site_arc,
+                        site_arc,
+                        site_event,
+                        right_it.get_index(),
+                        output,
                     )?;
                     self.beach_line_.get_pointer(new_key_id)?
                 };
@@ -544,7 +565,13 @@ where
                 let site1 = *(left_it.get_k()?.left_site());
 
                 // Insert new nodes into the beach line. Update the output.
-                let new_node_it = self.insert_new_arc(site_arc1, site_arc2, site_event, output)?;
+                let new_node_it = self.insert_new_arc(
+                    site_arc1,
+                    site_arc2,
+                    site_event,
+                    right_it.get_index(),
+                    output,
+                )?;
 
                 // Add candidate circles to the circle event queue.
                 // There could be up to two circle events formed by
@@ -782,6 +809,7 @@ where
         site_arc1: VSE::SiteEvent<I, F>,
         site_arc2: VSE::SiteEvent<I, F>,
         site_event: VSE::SiteEvent<I, F>,
+        position: usize,
         output: &mut VD::Diagram<I, F>,
     ) -> Result<VB::BeachLineIndex, BvError> {
         tln!(
@@ -805,11 +833,14 @@ where
         let edges = output._insert_new_edge_2(site_arc2, site_event);
 
         #[cfg(not(feature = "console_debug"))]
-        let _ = self
-            .beach_line_
-            .insert(new_right_node, Some(VB::BeachLineNodeData::new_1(edges.1)));
+        let _ = self.beach_line_.insert(
+            position,
+            new_right_node,
+            Some(VB::BeachLineNodeData::new_1(edges.1)),
+        );
         #[cfg(feature = "console_debug")]
         let _ = self.beach_line_.insert(
+            position,
             new_right_node,
             VB::BeachLineNodeData::new_1(edges.1),
             &self.circle_events_,
@@ -851,14 +882,14 @@ where
         {
             Ok(self
                 .beach_line_
-                .insert(new_left_node, Some(new_node_data))?
+                .insert(position, new_left_node, Some(new_node_data))?
                 .index())
         }
         #[cfg(feature = "console_debug")]
         {
             let rv = Ok(self
                 .beach_line_
-                .insert(new_left_node, new_node_data, &self.circle_events_)?
+                .insert(position, new_left_node, new_node_data, &self.circle_events_)?
                 .index());
             self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
             self.beach_line_.dbgp_all_cmp_();

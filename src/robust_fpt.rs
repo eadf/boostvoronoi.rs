@@ -235,6 +235,12 @@ impl ops::Add<RobustFpt> for RobustFpt {
 
 impl ops::AddAssign<RobustFpt> for RobustFpt {
     fn add_assign(&mut self, _rhs: RobustFpt) {
+        #[cfg(feature = "console_debug")]
+        {
+            assert!(self.fpv_.is_finite());
+            assert!(_rhs.fpv_.is_finite());
+        }
+
         let fpv: f64 = self.fpv_ + _rhs.fpv_;
         let re = if (!self.is_neg() && !_rhs.is_neg()) || (!self.is_pos() && !_rhs.is_pos()) {
             std::cmp::max(self.re_, _rhs.re_) + OrderedFloat(ROUNDING_ERROR)
@@ -567,6 +573,11 @@ impl ops::SubAssign<RobustDif> for RobustDif {
 
 impl ops::SubAssign<RobustFpt> for RobustDif {
     fn sub_assign(&mut self, _rhs: RobustFpt) {
+        #[cfg(feature = "console_debug")]
+        {
+            assert!(self.dif().fpv().is_finite());
+            assert!(_rhs.fpv().is_finite());
+        }
         //dbg!(&self, &_rhs);
         if !_rhs.is_neg() {
             self.negative_sum_ += _rhs;

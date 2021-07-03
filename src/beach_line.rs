@@ -19,7 +19,6 @@ mod tests1;
 
 use super::circle_event as VC;
 use super::diagram as VD;
-use super::linked_list;
 use super::predicate as VP;
 use super::site_event as VSE;
 
@@ -31,7 +30,6 @@ use crate::BvError;
 use crate::{t, tln};
 #[allow(unused_imports)]
 use itertools::Itertools;
-use linked_list::Pointer;
 use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
 use std::fmt;
@@ -40,7 +38,6 @@ use std::hash::{Hash, Hasher};
 use std::ops::Bound::{Excluded, Included, Unbounded};
 use std::ops::Neg;
 use std::rc::Rc;
-//use vec_map::VecMap;
 
 /// debug utility function, prints beach line index
 #[allow(dead_code)]
@@ -94,7 +91,7 @@ where
     F: OutputType + Neg<Output = F>,
 {
     pub(crate) beach_line_:
-        Rc<RefCell<linked_list::LinkedList<BeachLineNodeKey<I, F>, BeachLineNodeDataType>>>,
+        Rc<RefCell<cpp_map::LinkedList<BeachLineNodeKey<I, F>, BeachLineNodeDataType>>>,
 }
 
 impl<I, F> Default for BeachLine<I, F>
@@ -104,7 +101,7 @@ where
 {
     fn default() -> Self {
         Self {
-            beach_line_: Rc::from(RefCell::from(linked_list::LinkedList::default())),
+            beach_line_: Rc::from(RefCell::from(cpp_map::LinkedList::default())),
             // Index 0 is reserved for loose keys (lower bound tests, and unit tests)
             //beach_line_vec_: VecMap::default(),
         }
@@ -131,17 +128,23 @@ where
     pub(crate) fn get_pointer(
         &self,
         new_key_id: BeachLineIndex,
-    ) -> Result<Pointer<BeachLineNodeKey<I, F>, BeachLineNodeDataType>, BvError> {
-        Ok(Pointer::new_2(Rc::clone(&self.beach_line_), new_key_id.0))
+    ) -> Result<cpp_map::PIterator<BeachLineNodeKey<I, F>, BeachLineNodeDataType>, BvError> {
+        Ok(cpp_map::PIterator::new_2(Rc::clone(&self.beach_line_), new_key_id.0))
     }
 
     #[inline(always)]
     /// Returns a pointer to the last beach-line item or None
     pub(crate) fn last(
         &self,
-    ) -> Result<Pointer<BeachLineNodeKey<I, F>, BeachLineNodeDataType>, BvError> {
+    ) -> Result<cpp_map::PIterator<BeachLineNodeKey<I, F>, BeachLineNodeDataType>, BvError> {
         let tail = self.beach_line_.borrow().tail();
-        Ok(Pointer::new_2(Rc::clone(&self.beach_line_), tail))
+        Ok(cpp_map::PIterator::new_2(Rc::clone(&self.beach_line_), tail))
+    }
+
+    #[inline(always)]
+    /// Returns the last position of the beach-line list
+    pub(crate) fn last_position(&self) -> Result<usize, BvError> {
+        Ok(self.beach_line_.borrow().tail())
     }
 
     /// updates the node_index of the key, inserts it into the list and
@@ -149,6 +152,7 @@ where
     #[cfg(not(feature = "console_debug"))]
     pub(crate) fn insert(
         &mut self,
+        position: usize,
         mut key: BeachLineNodeKey<I, F>,
         data: Option<BeachLineNodeData>,
     ) -> Result<BeachLineNodeKey<I, F>, BvError> {
@@ -156,7 +160,10 @@ where
 
         let node = Rc::new(Cell::new(data));
         //let _ = self.beach_line_vec_.insert(key.node_index_.0, (key, node));
-        let _ = self.beach_line_.borrow_mut().ordered_insert(key, node)?;
+        let _ = self
+            .beach_line_
+            .borrow_mut()
+            .ordered_insert_pos(key, node, position, false)?;
         Ok(key)
     }
 
@@ -165,6 +172,7 @@ where
     #[cfg(feature = "console_debug")]
     pub(crate) fn insert(
         &mut self,
+        position: usize,
         mut key: BeachLineNodeKey<I, F>,
         data: BeachLineNodeData,
         _ce: &VC::CircleEventQueue,
@@ -175,7 +183,7 @@ where
             let i = self
                 .beach_line_
                 .borrow_mut()
-                .ordered_insert(key, data_node)?;
+                .ordered_insert_pos(key, data_node, position, false)?;
             assert_eq!(i, key.node_index_.0);
         }
         //tln!("inserted beach_line with key:{}", key.node_index_.0);
@@ -198,7 +206,7 @@ where
             let insert_index = self
                 .beach_line_
                 .borrow_mut()
-                .ordered_insert(key, data_node)?;
+                .ordered_insert(key, data_node, false)?;
             assert_eq!(insert_index, key.node_index_.0);
         }
         t!("inserted beach_line:");
@@ -216,8 +224,10 @@ where
         key.node_index_ = BeachLineIndex(self.beach_line_.borrow().next_free_index());
 
         let node = Rc::new(Cell::new(None));
-        //let _ = self.beach_line_vec_.insert(key.node_index_.0, (key, node));
-        let _ = self.beach_line_.borrow_mut().ordered_insert(key, node)?;
+        let _ = self
+            .beach_line_
+            .borrow_mut()
+            .ordered_insert(key, node, false)?;
         Ok(key)
     }
 
@@ -262,12 +272,8 @@ where
     pub(crate) fn lower_bound(
         &self,
         key: BeachLineNodeKey<I, F>,
-    ) -> Result<Pointer<BeachLineNodeKey<I, F>, BeachLineNodeDataType>, BvError> {
-        if let Some(index) = self.beach_line_.borrow().lower_bound(key)? {
-            Ok(Pointer::new_2(Rc::clone(&self.beach_line_), index))
-        } else {
-            Ok(Pointer::new_2(Rc::clone(&self.beach_line_), usize::MAX))
-        }
+    ) -> Result<cpp_map::PIterator<BeachLineNodeKey<I, F>, BeachLineNodeDataType>, BvError> {
+        Ok(cpp_map::PIterator::lower_bound(Rc::clone(&self.beach_line_), key, false)?)
     }
 
     #[allow(dead_code)]

@@ -45,7 +45,6 @@ pub mod file_reader;
 pub(crate) mod predicate;
 // I'd prefer if this module could be pub (crate), but then the documentation examples would not work.
 pub mod geometry;
-pub(crate) mod linked_list;
 pub mod robust_fpt;
 mod site_event;
 pub mod sync_diagram;
@@ -80,8 +79,11 @@ macro_rules! tln {
 
 #[derive(thiserror::Error, Debug)]
 pub enum BvError {
-    #[error("error: Some error with the linked list")]
-    LinkedList(String),
+    #[error("error: Some error from cpp_map")]
+    ListError {
+        #[from]
+        source: cpp_map::MapError,
+    },
     #[error("error: Some error with object id")]
     IdError(String),
     #[error("error: Some error with a value")]

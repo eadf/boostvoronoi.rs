@@ -11,9 +11,13 @@ fn main() -> Result<(), BvError> {
     #[allow(unused_variables)]
     let output = {
         let input = r#"0
-2
--5357 -5417 -5111 -5027
--5330 -5287 -5312 -5283
+6
+0 10000000 700000 1
+700000 1 700000 9000000
+700000 9000000 9100000 9000000
+9100000 9000000 9100000 0
+9100000 0 10000000 10000000
+10000000 10000000 0 10000000
 "#;
         let vb = VB::Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
