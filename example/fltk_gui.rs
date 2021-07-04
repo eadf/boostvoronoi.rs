@@ -55,14 +55,6 @@ bitflags! {
         const INPUT_POINT =   0b000000001000000;
         /// Input geometry segments
         const INPUT_SEGMENT = 0b000000010000000;
-        /// Edge belonging to cells defined by a segment
-        const E_CELL_SEGMENT= 0b000000100000000;
-        /// Edge belonging to cells defined by a point
-        const E_CELL_POINT =  0b000001000000000;
-        /// Vertices belonging to cells defined by a segment
-        const V_CELL_SEGMENT= 0b000010000000000;
-        /// Vertices belonging to cells defined by a point
-        const V_CELL_POINT =  0b000100000000000;
         /// Draw infinite edges
         const INFINITE =      0b001000000000000;
         /// Draw curves as straight lines
@@ -96,7 +88,7 @@ struct SharedData {
 
 /// The Offscreen is slightly offset from the window.
 /// This method gives the mouse coordinates usable inside the offscreen.
-#[inline]
+#[inline(always)]
 fn offscreen_event_coords() -> (i32, i32) {
     let pos = app::event_coords();
     (pos.0 - COORD_X_OFFSET, pos.1 - COORD_Y_OFFSET)
@@ -655,20 +647,6 @@ where
         Ok(())
     }
 
-    #[allow(dead_code)]
-    /// Draw bounding box.
-    fn draw_bb(&self) {
-        let min_x = Self::f_to_i32(self.screen_aabb.get_low().unwrap()[0]);
-        let max_x = Self::f_to_i32(self.screen_aabb.get_high().unwrap()[0]);
-        let min_y = Self::f_to_i32(self.screen_aabb.get_low().unwrap()[1]);
-        let max_y = Self::f_to_i32(self.screen_aabb.get_high().unwrap()[1]);
-
-        draw::draw_line(min_x, min_y, max_x, min_y);
-        draw::draw_line(min_x, max_y, max_x, max_y);
-        draw::draw_line(min_x, min_y, min_x, max_y);
-        draw::draw_line(max_x, min_y, max_x, max_y);
-    }
-
     /// Draw input points and endpoints of the input segments.
     fn draw_input_points(&self, affine: &VU::SimpleAffine<I, F>) {
         let draw = |point: [F; 2]| {
@@ -705,8 +683,6 @@ where
             draw::draw_circle(x, y, 1.0);
         };
         let draw_external = config.draw_flag.contains(DrawFilterFlag::EXTERNAL);
-        let draw_cell_points = config.draw_flag.contains(DrawFilterFlag::V_CELL_POINT);
-        let draw_cell_segment = config.draw_flag.contains(DrawFilterFlag::V_CELL_SEGMENT);
         let draw_site_vertex = config.draw_flag.contains(DrawFilterFlag::SITE_VERTEX);
 
         for it in self.diagram.vertex_iter().enumerate() {
@@ -719,20 +695,6 @@ where
                 && ColorFlag::from_bits(vertex.get_color())
                     .unwrap()
                     .contains(ColorFlag::EXTERNAL)
-            {
-                continue;
-            }
-            if (!draw_cell_points)
-                && ColorFlag::from_bits(vertex.get_color())
-                    .unwrap()
-                    .contains(ColorFlag::CELL_POINT)
-            {
-                continue;
-            }
-            if (!draw_cell_segment)
-                && ColorFlag::from_bits(vertex.get_color())
-                    .unwrap()
-                    .contains(ColorFlag::CELL_SEGMENT)
             {
                 continue;
             }
@@ -755,8 +717,6 @@ where
         let draw_secondary = config.draw_flag.contains(DrawFilterFlag::SECONDARY);
         let draw_curved = config.draw_flag.contains(DrawFilterFlag::CURVE);
         let draw_curved_as_line = config.draw_flag.contains(DrawFilterFlag::CURVE_LINE);
-        let draw_cell_segment = config.draw_flag.contains(DrawFilterFlag::E_CELL_SEGMENT);
-        let draw_cell_point = config.draw_flag.contains(DrawFilterFlag::E_CELL_POINT);
         let draw_infinite_edges = config.draw_flag.contains(DrawFilterFlag::INFINITE);
 
         let mut already_drawn = yabf::Yabf::default();
@@ -801,20 +761,6 @@ where
                 } else {
                     draw::set_draw_color(enums::Color::Green);
                 }
-            }
-            if (!draw_cell_point)
-                && ColorFlag::from_bits(edge.get_color())
-                    .unwrap()
-                    .contains(ColorFlag::CELL_POINT)
-            {
-                continue;
-            }
-            if (!draw_cell_segment)
-                && ColorFlag::from_bits(edge.get_color())
-                    .unwrap()
-                    .contains(ColorFlag::CELL_SEGMENT)
-            {
-                continue;
             }
 
             // the coordinates in samples must be 'screen' coordinates, i.e. affine transformed

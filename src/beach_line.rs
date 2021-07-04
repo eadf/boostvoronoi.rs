@@ -333,59 +333,6 @@ where
         Ok(())
     }
 
-    /*
-    pub(crate) fn dgbpa_dump_and_cmp_(&self, key: &BeachLineNodeKey<I, F>) {
-
-        println!("-----beach_line----{}", self.beach_line_.len());
-        println!("Looking for {:?} in the beach_line", key);
-        let found = self.beach_line_.get(key);
-        println!(
-            "Found {:?} cmp1=node.partial_cmp(key).unwrap() cmp2=key.partial_cmp(node).unwrap()",
-            found
-        );
-        for (i, (node, _id)) in self.beach_line_.iter().enumerate() {
-            let cmp1 = node.partial_cmp(key);
-            let ncmp1 = NodeComparisonPredicate::node_comparison_predicate(key, node);
-            let ncmp2 = NodeComparisonPredicate::node_comparison_predicate(node, key);
-
-            print!(
-                "#{}: key:{:?}, cmp1:{:?}, ncmp1:{:?}, ncmp2:{:?} ccmp:{}",
-                i,
-                node,
-                cmp1.unwrap(),
-                ncmp1,
-                ncmp2,
-                match (ncmp1, ncmp2) {
-                    (false, false) => "Equal",
-                    (false, true) => "Less",
-                    (true, _) => "Greater",
-                }
-            );
-            if cmp1.unwrap() == Ordering::Equal {
-                println!("  <----- THIS IS THE PROBLEM, 'get()' could not find it, but it's here!!")
-            } else {
-                println!()
-            };
-        }
-        println!();
-        let mut it1 = self.beach_line_.iter().enumerate();
-        for it2_v in self.beach_line_.iter().enumerate().skip(1) {
-            let it1_v = it1.next().unwrap();
-            print!(
-                "key(#{}).partial_cmp(key(#{})) == {:?}",
-                it1_v.0,
-                it2_v.0,
-                it1_v.1 .0.partial_cmp(it2_v.1 .0).unwrap()
-            );
-            println!(
-                "\tkey(#{}).partial_cmp(key(#{})) == {:?}",
-                it2_v.0,
-                it1_v.0,
-                it2_v.1 .0.partial_cmp(it1_v.1 .0).unwrap()
-            );
-        }
-    }*/
-
     #[cfg(feature = "console_debug")]
     pub(crate) fn dbgp_all_cmp_(&self) {
         let _iter1 = self.beach_line_.borrow();
@@ -469,6 +416,7 @@ where
     left_site_: VSE::SiteEvent<I, F>,
     right_site_: VSE::SiteEvent<I, F>,
     // node_index_ does not take part in the ordering calculation
+    // todo: remove from key
     node_index_: BeachLineIndex,
 }
 

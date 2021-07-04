@@ -5,7 +5,6 @@ use boostvoronoi::BvError;
 type I = i32; // this is the integer input type
 type F = f64; // this is the float output type (circle event coordinates)
 
-/// This is the readme example
 fn main() -> Result<(), BvError> {
     // Only unique Points will be used. Points should not intersect lines
     let p = vec![Point::from([9_i32, 10])];

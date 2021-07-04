@@ -34,7 +34,6 @@ use boostvoronoi::BvError;
 type I = i32; // this is the integer input type
 type F = f64; // this is the float output type (circle event coordinates)
 
-/// This is the readme example
 fn main() -> Result<(), BvError> {
     // Only unique Points will be used. Points should not intersect lines
     let p = vec![Point::from([9_i32, 10])];
@@ -82,7 +81,7 @@ So +nightly should be somewhat faster.
 - [ ] Try to fix the known problems in C++ Boost voronoi and port over.  
 - [ ] Add many more test cases for voronoi_robust_ftp.rs.
 - [ ] Benchmark and optimize.
-- [ ] Replace C++ style boolean ordering functor.
+- [ ] Replace C++ style boolean ordering functors.
 - [ ] Replace builtin ulp with some rust crate (approx?).
 - [x] Replace the beachline RBTree with cpp_map. 
 - [x] Replace vec_map with ahash
