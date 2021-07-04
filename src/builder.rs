@@ -359,7 +359,7 @@ where
         &mut self,
         beachline_index: &VB::BeachLineIndex,
     ) -> Result<(), BvError> {
-        if let Some(node_cell) =self.beach_line_.get_node(beachline_index)?.1.get() {
+        if let Some(node_cell) = self.beach_line_.get_node(beachline_index)?.1.get() {
             let cevent: Option<VC::CircleEventIndex> = node_cell.get_circle_event_id();
             self.circle_events_.deactivate(cevent);
 

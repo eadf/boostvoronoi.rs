@@ -1,6 +1,6 @@
 [package]
 name = "boostvoronoi"
-version = "0.8.4"
+version = "0.9.0"
 authors = ["eadf"]
 edition = "2018"
 description = "Boost voronoi ported to 100% rust"
@@ -32,7 +32,6 @@ cgmath = {version="0.18", optional=true}
 itertools = "0.10"
 lazy_static = "1.4"
 cpp_map = "0.0.2"
-#cpp_map={path="../cpp_map.rs"}
 
 # These features are only for debug purposes, should normally not be used
 [features]
@@ -43,7 +42,7 @@ beachline_corruption_check = []
 name = "fltk_gui"
 path = "example/fltk_gui.rs"
 
-# this example is for development test purposes
+# this example is for development test purposes only
 [[example]]
 name = "main"
 path = "example/main.rs"
@@ -52,6 +51,7 @@ path = "example/main.rs"
 name = "readme"
 path = "example/readme.rs"
 
+# this example is for development test purposes only
 [[example]]
 name = "stress_test"
 path = "example/stress_test.rs"

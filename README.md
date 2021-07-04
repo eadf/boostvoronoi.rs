@@ -4,7 +4,7 @@
 [![Documentation](https://docs.rs/boostvoronoi/badge.svg)](https://docs.rs/boostvoronoi)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Clippy/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Clippy/badge.svg)
-[![dependency status](https://deps.rs/crate/boostvoronoi/0.8.4/status.svg)](https://deps.rs/crate/boostvoronoi/0.8.4)
+[![dependency status](https://deps.rs/crate/boostvoronoi/0.9.0/status.svg)](https://deps.rs/crate/boostvoronoi/0.9.0)
 
 # Segmented Voronoi for Rust
 
@@ -77,14 +77,10 @@ The code uses ```#![feature(map_first_last)]``` if run on +nightly, this is only
 So +nightly should be somewhat faster.
 
 ## Todo
-- [x] Fix the beach-line key problem.
-- [x] Error handling.
 - [ ] Try to fix the known problems in C++ Boost voronoi and port over.  
 - [ ] Add many more test cases for voronoi_robust_ftp.rs.
 - [ ] Benchmark and optimize.
 - [ ] Replace C++ style boolean ordering functors.
 - [ ] Replace builtin ulp with some rust crate (approx?).
-- [x] Replace the beachline RBTree with cpp_map. 
-- [x] Replace vec_map with ahash
 
 All credit goes to the original author ([Andrii Sydorchuk](https://github.com/asydorchuk)) and the [boost contributors](https://github.com/boostorg/polygon), except the porting mistakes. They are all mine.

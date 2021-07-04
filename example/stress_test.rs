@@ -11,8 +11,10 @@ type I = i64;
 type F = f64;
 
 /// Check if all the vertices really are at the midpoint between (at least) two segments.
-/// Returns true if error is detected.
-fn fault_check(diagram: &Result<VD::Diagram<I, F>, BvError>, segments: Vec<geo::Line<I>>) -> bool {
+fn fault_check(
+    diagram: &Result<VD::Diagram<I, F>, BvError>,
+    segments: Vec<geo::Line<I>>,
+) -> Result<(), String> {
     let mut heap: Vec<f64> = Vec::new();
     let diagram = diagram.as_ref().unwrap();
     // is there no easier way to cast Vec<geo::Line<i64>> to Vec<geo::Line<f64>>??
@@ -49,12 +51,16 @@ fn fault_check(diagram: &Result<VD::Diagram<I, F>, BvError>, segments: Vec<geo::
             heap.push(distance);
         }
         if heap.len() < 2 {
-            println!("pop1: {:?}, pop2:{:?}", heap.get(0), heap.get(1));
-            return true;
+            let err_msg = format!(
+                "Got a vertex with only one close neighbour: {:?}",
+                heap.get(0)
+            );
+            eprintln!("{}",err_msg);
+            return Err(err_msg);
         }
         heap.clear();
     }
-    false
+    Ok(())
 }
 
 /// Looking for failing examples
@@ -71,6 +77,7 @@ fn main() -> Result<(), BvError> {
             ]);
             for s in geo_segments.iter() {
                 if line.intersects(s) {
+                    // this line was of no use to us, generate a new one
                     continue 'gen_loop;
                 }
             }
@@ -87,7 +94,7 @@ fn main() -> Result<(), BvError> {
         vb.with_vertices(vertices.iter())?;
         vb.with_segments(segments.iter())?;
         let result = vb.build();
-        if result.is_err() || fault_check(&result, geo_segments) {
+        if result.is_err() || fault_check(&result, geo_segments).is_err() {
             println!("-------\n{}", vertices.len());
             for p in vertices.iter() {
                 println!("{} {}", p.x, p.y);
