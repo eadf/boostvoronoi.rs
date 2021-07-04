@@ -2027,12 +2027,21 @@ where
                 tln!(" cA[0]={:?}", cA[0]);
                 tln!(" a[0]={:?}", a[0]);
                 tln!(" b[0]={:?}", b[0]);
-                tln!(" segm_start1.x={:?} segm_start1.y={:?}", segm_start1.x, segm_start1.y);
-                tln!(" segm_start2.x={:?} segm_start2.y={:?}", segm_start2.x, segm_start2.y);
-                cA[1] = &a[0] * &a[0] *
-                    ( i1_to_xi(segm_start1.y) + i1_to_xi(segm_start2.y) )
-                    - &a[0] * &b[0] * (i1_to_xi(segm_start1.x) + i1_to_xi(segm_start2.x) -
-                      (i1_to_xi(site1.x()) * EI::ExtendedInt::from(2_i32)))
+                tln!(
+                    " segm_start1.x={:?} segm_start1.y={:?}",
+                    segm_start1.x,
+                    segm_start1.y
+                );
+                tln!(
+                    " segm_start2.x={:?} segm_start2.y={:?}",
+                    segm_start2.x,
+                    segm_start2.y
+                );
+                cA[1] = &a[0] * &a[0] * (i1_to_xi(segm_start1.y) + i1_to_xi(segm_start2.y))
+                    - &a[0]
+                        * &b[0]
+                        * (i1_to_xi(segm_start1.x) + i1_to_xi(segm_start2.x)
+                            - (i1_to_xi(site1.x()) * EI::ExtendedInt::from(2_i32)))
                     + &b[0] * &b[0] * (i1_to_xi(site1.y()) * EI::ExtendedInt::from(2_i32));
                 tln!("cA[1]={:?}", cA[1]);
                 let c_y = sqrt_expr_.eval2(&cA, &cB);
@@ -2047,8 +2056,8 @@ where
                 cA[1] = &b[0] * &b[0] * (i1_to_xi(segm_start1.x) + i1_to_xi(segm_start2.x))
                     - &a[0]
                         * &b[0]
-                        * (i1_to_xi(segm_start1.y) + i1_to_xi(segm_start2.y) - i1_to_xi(site1.y())
-                        * &EI::ExtendedInt::from(2_i32))
+                        * (i1_to_xi(segm_start1.y) + i1_to_xi(segm_start2.y)
+                            - i1_to_xi(site1.y()) * &EI::ExtendedInt::from(2_i32))
                     + &a[0] * &a[0] * (i1_to_xi(site1.x())) * &EI::ExtendedInt::from(2_i32);
                 tln!(" cA[0]={:.0}", cA[0].d());
                 tln!(" cA[1]={:.0}", cA[1].d());

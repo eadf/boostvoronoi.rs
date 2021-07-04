@@ -149,7 +149,7 @@ fn beachline_4() {
     let mykey = {
         let mut site1 = VSE::SiteEvent::<I, F>::new_2(coord(50, 50), 2);
         site1.set_sorted_index(2);
-        VB::BeachLineNodeKey::<I, F>::new_1(site1).set_index(BeachLineIndex(1))
+        VB::BeachLineNodeKey::<I, F>::new_1(site1)
     };
 
     // (10,10)#0, ((10,10)-(50,50)#1
@@ -158,7 +158,7 @@ fn beachline_4() {
         site1.set_sorted_index(0);
         let mut site2 = VSE::SiteEvent::<I, F>::new_3(coord(10, 10), coord(50, 50), 1);
         site2.set_sorted_index(1);
-        VB::BeachLineNodeKey::<I, F>::new_2(site1, site2).set_index(BeachLineIndex(2))
+        VB::BeachLineNodeKey::<I, F>::new_2(site1, site2)
     };
 
     //(50,50)¿(10,10)#1, ((10,10)#0
@@ -171,7 +171,7 @@ fn beachline_4() {
         site2.set_sorted_index(0);
 
         //dbg!(site1, site2);
-        VB::BeachLineNodeKey::<I, F>::new_2(site1, site2).set_index(BeachLineIndex(3))
+        VB::BeachLineNodeKey::<I, F>::new_2(site1, site2)
     };
 
     dbg!(mykey, node1);
@@ -215,7 +215,7 @@ fn beachline_5() {
         let _ = site2.inverse();
         site2.set_sorted_index(6);
         site2.set_flags(41);
-        VB::BeachLineNodeKey::<I, F>::new_2(site1, site2).set_index(BeachLineIndex(2))
+        VB::BeachLineNodeKey::<I, F>::new_2(site1, site2)
     };
     println!("L:#6(367,107)-(529,242),ii:4,f:9,R:#6(529,242)¿(367,107),ii:4,f:41 ");
     println!("{:?}", node1);

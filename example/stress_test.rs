@@ -12,10 +12,7 @@ type F = f64;
 
 /// Check if all the vertices really are at the midpoint between (at least) two segments.
 /// Returns true if error is detected.
-fn fault_check(
-    diagram: &Result<VD::Diagram<I, F>, BvError>,
-    segments: Vec<geo::Line<I>>,
-) -> bool {
+fn fault_check(diagram: &Result<VD::Diagram<I, F>, BvError>, segments: Vec<geo::Line<I>>) -> bool {
     let mut heap: Vec<f64> = Vec::new();
     let diagram = diagram.as_ref().unwrap();
     // is there no easier way to cast Vec<geo::Line<i64>> to Vec<geo::Line<f64>>??
@@ -69,14 +66,8 @@ fn main() -> Result<(), BvError> {
         let mut geo_segments = Vec::<geo::Line<I>>::new();
         'gen_loop: while geo_segments.len() < 2 {
             let line = Line::from([
-                (
-                    rng.gen_range(-to_r..to_r),
-                    rng.gen_range(-to_r..to_r),
-                ),
-                (
-                    rng.gen_range(-to_r..to_r),
-                    rng.gen_range(-to_r..to_r),
-                ),
+                (rng.gen_range(-to_r..to_r), rng.gen_range(-to_r..to_r)),
+                (rng.gen_range(-to_r..to_r), rng.gen_range(-to_r..to_r)),
             ]);
             for s in geo_segments.iter() {
                 if line.intersects(s) {

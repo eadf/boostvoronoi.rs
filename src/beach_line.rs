@@ -119,7 +119,10 @@ where
         &self,
         new_key_id: BeachLineIndex,
     ) -> Result<cpp_map::PIterator<BeachLineNodeKey<I, F>, BeachLineNodeDataType>, BvError> {
-        Ok(cpp_map::PIterator::new_2(Rc::clone(&self.beach_line_), new_key_id.0))
+        Ok(cpp_map::PIterator::new_2(
+            Rc::clone(&self.beach_line_),
+            new_key_id.0,
+        ))
     }
 
     #[inline(always)]
@@ -127,8 +130,10 @@ where
     pub(crate) fn last(
         &self,
     ) -> Result<cpp_map::PIterator<BeachLineNodeKey<I, F>, BeachLineNodeDataType>, BvError> {
-        let tail = self.beach_line_.borrow().tail();
-        Ok(cpp_map::PIterator::new_2(Rc::clone(&self.beach_line_), tail))
+        Ok(cpp_map::PIterator::new_2(
+            Rc::clone(&self.beach_line_),
+            self.beach_line_.borrow().tail(),
+        ))
     }
 
     #[inline(always)]
@@ -143,18 +148,16 @@ where
     pub(crate) fn insert(
         &mut self,
         position: usize,
-        mut key: BeachLineNodeKey<I, F>,
+        key: BeachLineNodeKey<I, F>,
         data: Option<BeachLineNodeData>,
-    ) -> Result<BeachLineNodeKey<I, F>, BvError> {
-        key.node_index_ = BeachLineIndex(self.beach_line_.borrow().next_free_index());
-
+    ) -> Result<(BeachLineNodeKey<I, F>, BeachLineIndex), BvError> {
         let node = Rc::new(Cell::new(data));
-        //let _ = self.beach_line_vec_.insert(key.node_index_.0, (key, node));
-        let _ = self
-            .beach_line_
-            .borrow_mut()
-            .ordered_insert_pos(key, node, position, false)?;
-        Ok(key)
+        let node_index = BeachLineIndex(
+            self.beach_line_
+                .borrow_mut()
+                .ordered_insert_pos(key, node, position, false)?,
+        );
+        Ok((key, node_index))
     }
 
     /// updates the node_index of the key, inserts it into the list and
@@ -163,45 +166,41 @@ where
     pub(crate) fn insert(
         &mut self,
         position: usize,
-        mut key: BeachLineNodeKey<I, F>,
+        key: BeachLineNodeKey<I, F>,
         data: BeachLineNodeData,
         _ce: &VC::CircleEventQueue,
-    ) -> Result<BeachLineNodeKey<I, F>, BvError> {
-        key.node_index_ = BeachLineIndex(self.beach_line_.borrow().next_free_index());
-        let data_node = Rc::from(Cell::from(Some(data)));
-        {
-            let i = self
-                .beach_line_
-                .borrow_mut()
-                .ordered_insert_pos(key, data_node, position, false)?;
-            assert_eq!(i, key.node_index_.0);
-        }
+    ) -> Result<(BeachLineNodeKey<I, F>, BeachLineIndex), BvError> {
+        let node_data = Rc::from(Cell::from(Some(data)));
+        let node_index = BeachLineIndex(self.beach_line_.borrow_mut().ordered_insert_pos(
+            key,
+            Rc::clone(&node_data),
+            position,
+            false,
+        )?);
+
         //tln!("inserted beach_line with key:{}", key.node_index_.0);
         t!("inserted beach_line:");
-        self.dbgpa_compat_node_(&key, _ce)?;
-        Ok(key)
+        self.dbgpa_compat_node_(&key, &node_data, _ce)?;
+        Ok((key, node_index))
     }
 
-    /// updates the node_index of the key, inserts it into the list and
+    /// inserts a new node key into the list and
     /// returns a copy of it
     #[cfg(feature = "console_debug")]
     pub(crate) fn insert_2(
         &mut self,
-        mut key: BeachLineNodeKey<I, F>,
+        key: BeachLineNodeKey<I, F>,
         _ce: &VC::CircleEventQueue,
-    ) -> Result<BeachLineNodeKey<I, F>, BvError> {
-        key.node_index_ = BeachLineIndex(self.beach_line_.borrow().next_free_index());
+    ) -> Result<(BeachLineNodeKey<I, F>, BeachLineIndex), BvError> {
         let data_node = Rc::from(Cell::from(None));
-        {
-            let insert_index = self
-                .beach_line_
+        let node_index = BeachLineIndex(
+            self.beach_line_
                 .borrow_mut()
-                .ordered_insert(key, data_node, false)?;
-            assert_eq!(insert_index, key.node_index_.0);
-        }
+                .ordered_insert(key, data_node, false)?,
+        );
         t!("inserted beach_line:");
-        self.dbgpa_compat_node_(&key, _ce)?;
-        Ok(key)
+        self.dbgpa_compat_node_(&key, self.beach_line_.borrow().get_v(node_index.0)?, _ce)?;
+        Ok((key, node_index))
     }
 
     /// updates the node_index of the key, inserts it into the list and
@@ -209,16 +208,15 @@ where
     #[cfg(not(feature = "console_debug"))]
     pub(crate) fn insert_2(
         &mut self,
-        mut key: BeachLineNodeKey<I, F>,
-    ) -> Result<BeachLineNodeKey<I, F>, BvError> {
-        key.node_index_ = BeachLineIndex(self.beach_line_.borrow().next_free_index());
-
+        key: BeachLineNodeKey<I, F>,
+    ) -> Result<(BeachLineNodeKey<I, F>, BeachLineIndex), BvError> {
         let node = Rc::new(Cell::new(None));
-        let _ = self
-            .beach_line_
-            .borrow_mut()
-            .ordered_insert(key, node, false)?;
-        Ok(key)
+        let node_index = BeachLineIndex(
+            self.beach_line_
+                .borrow_mut()
+                .ordered_insert(key, node, false)?,
+        );
+        Ok((key, node_index))
     }
 
     /// Clear the beach line list
@@ -263,13 +261,17 @@ where
         &self,
         key: BeachLineNodeKey<I, F>,
     ) -> Result<cpp_map::PIterator<BeachLineNodeKey<I, F>, BeachLineNodeDataType>, BvError> {
-        Ok(cpp_map::PIterator::lower_bound(Rc::clone(&self.beach_line_), key, false)?)
+        Ok(cpp_map::PIterator::lower_bound(
+            Rc::clone(&self.beach_line_),
+            key,
+            false,
+        )?)
     }
 
     #[allow(dead_code)]
     #[cfg(feature = "console_debug")]
     pub(crate) fn debug_cmp_all(&self, key: BeachLineNodeKey<I, F>) {
-        for (i, (v,_)) in self.beach_line_.borrow().iter().rev().enumerate() {
+        for (i, (v, _)) in self.beach_line_.borrow().iter().rev().enumerate() {
             print!("#{}:", i);
             let _rv = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(v, &key);
         }
@@ -297,16 +299,15 @@ where
     pub(crate) fn debug_print_all(&self) -> Result<(), BvError> {
         tln!();
         tln!("beach_line.len()={}", self.beach_line_.borrow().len());
-        for (i, (node,_)) in self.beach_line_.borrow().iter().rev().enumerate() {
-            let id = node.node_index_;
+        for (i, (node_key, node_data)) in self.beach_line_.borrow().iter().rev().enumerate() {
             t!(
                 "beach_line{} L:{:?},R:{:?}",
                 i,
-                &node.left_site(),
-                &node.right_site()
+                &node_key.left_site(),
+                &node_key.right_site()
             );
 
-            if let Some(data) = self.get_node(&id)?.1.get() {
+            if let Some(data) = node_data.get() {
                 if let Some(circle_event) = data.circle_event_ {
                     t!(" -> CircleEvent:{}", circle_event);
                 } else {
@@ -325,9 +326,9 @@ where
     #[cfg(feature = "console_debug")]
     pub(crate) fn dbgpa_compat_(&self, ce: &VC::CircleEventQueue) -> Result<(), BvError> {
         tln!("-----beach_line----{}", self.beach_line_.borrow().len());
-        for (i, (node,_)) in self.beach_line_.borrow().iter().enumerate() {
+        for (i, (node_key, node_data)) in self.beach_line_.borrow().iter().enumerate() {
             t!("#{}:", i);
-            self.dbgpa_compat_node_(&node, ce)?;
+            self.dbgpa_compat_node_(&node_key, node_data, ce)?;
         }
         tln!();
         Ok(())
@@ -336,8 +337,15 @@ where
     #[cfg(feature = "console_debug")]
     pub(crate) fn dbgp_all_cmp_(&self) {
         let _iter1 = self.beach_line_.borrow();
-        let mut it1 = _iter1.iter().map(|x|x.0).enumerate();
-        for it2_v in self.beach_line_.borrow().iter().map(|x|x.0).enumerate().skip(1) {
+        let mut it1 = _iter1.iter().map(|x| x.0).enumerate();
+        for it2_v in self
+            .beach_line_
+            .borrow()
+            .iter()
+            .map(|x| x.0)
+            .enumerate()
+            .skip(1)
+        {
             let it1_v = it1.next().unwrap();
             t!(
                 "key(#{}).partial_cmp(key(#{})) == {:?}",
@@ -357,12 +365,16 @@ where
     #[cfg(feature = "console_debug")]
     pub(crate) fn dbgpa_compat_node_(
         &self,
-        node: &BeachLineNodeKey<I, F>,
+        node_key: &BeachLineNodeKey<I, F>,
+        node_data: &BeachLineNodeDataType,
         ce: &VC::CircleEventQueue,
     ) -> Result<(), BvError> {
-        let id = &node.index();
-        t!("L:{:?},R:{:?}", &node.left_site(), &node.right_site(),);
-        if let Some(data) = self.get_node(id)?.1.get() {
+        t!(
+            "L:{:?},R:{:?}",
+            &node_key.left_site(),
+            &node_key.right_site(),
+        );
+        if let Some(data) = node_data.get() {
             if let Some(_circle_event) = data.circle_event_ {
                 if ce.is_active(_circle_event) {
                     t!(" -> CircleEvent: ");
@@ -415,9 +427,6 @@ where
 {
     left_site_: VSE::SiteEvent<I, F>,
     right_site_: VSE::SiteEvent<I, F>,
-    // node_index_ does not take part in the ordering calculation
-    // todo: remove from key
-    node_index_: BeachLineIndex,
 }
 
 impl<I, F> fmt::Debug for BeachLineNodeKey<I, F>
@@ -426,7 +435,7 @@ where
     F: OutputType + Neg<Output = F>,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-       write!(f, "L:{:?},R:{:?}", &self.left_site(), &self.right_site())
+        write!(f, "L:{:?},R:{:?}", &self.left_site(), &self.right_site())
     }
 }
 
@@ -441,7 +450,6 @@ where
         Self {
             left_site_: new_site,
             right_site_: new_site,
-            node_index_: BeachLineIndex(0), // will be populated by Beachline::insert
         }
     }
 
@@ -451,7 +459,6 @@ where
         Self {
             left_site_: left_site,
             right_site_: right_site,
-            node_index_: BeachLineIndex(0), // will be populated by Beachline::insert
         }
     }
 
@@ -465,18 +472,6 @@ where
 
     pub(crate) fn set_right_site(&mut self, site: &VSE::SiteEvent<I, F>) {
         self.right_site_ = *site; // Copy
-    }
-
-    /// returns the index
-    pub(crate) fn index(&self) -> BeachLineIndex {
-        self.node_index_
-    }
-
-    #[cfg(test)]
-    /// Sets the key index (only needed for tests)
-    pub(crate) fn set_index(mut self, new_index: BeachLineIndex) -> Self {
-        self.node_index_ = new_index;
-        self
     }
 }
 
@@ -495,6 +490,7 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
+    // todo: move the content of node_comparison_predicate to here
     fn cmp(&self, other: &Self) -> Ordering {
         if VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(self, other) {
             Ordering::Less
@@ -511,6 +507,7 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
+    // todo: node1.cmp(node2)==Ordering.Equal is not the same as node1 == node2, should it be?
     fn eq(&self, other: &Self) -> bool {
         self.left_site_ == other.left_site_ && self.right_site_ == other.right_site_
     }

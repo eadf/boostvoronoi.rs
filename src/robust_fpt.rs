@@ -877,7 +877,6 @@ impl<
         A: &[EI::ExtendedInt],
         B: &[EI::ExtendedInt],
     ) -> EX::ExtendedExponentFpt<f64> {
-
         let mut cA: [EI::ExtendedInt; 4] = [
             EI::ExtendedInt::zero(),
             EI::ExtendedInt::zero(),

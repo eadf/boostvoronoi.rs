@@ -845,7 +845,7 @@ where
     /// Returns the edge associated with the edge id
     pub(crate) fn get_edge_(&self, edge_id: Option<EdgeIndex>) -> Option<EdgeType<I, F>> {
         let edge_id = edge_id?;
-        self.edges_.get(edge_id.0).map(|x|Rc::clone(x))
+        self.edges_.get(edge_id.0).map(|x| Rc::clone(x))
     }
 
     /// Returns the edge associated with the edge id
@@ -918,7 +918,9 @@ where
         self.edge_or_color_(self.edge_get_twin_(edge_id), external_color);
         if v1.is_none()
             || self.vertex_is_site_point_(v1).unwrap_or(true)
-            || !self.get_edge_(edge_id).map_or(false, |x|x.get().is_primary())
+            || !self
+                .get_edge_(edge_id)
+                .map_or(false, |x| x.get().is_primary())
         {
             // stop recursion if this edge does not have a vertex1 (e.g is infinite)
             // or if this edge isn't a primary edge.

@@ -177,7 +177,6 @@ impl ExtendedExponentFpt<f64> {
     /// ```
     #[inline]
     pub fn sqrt(&self) -> Self {
-
         let mut val = self.val_;
         let mut exp = self.exp_;
         if (exp & 1) != 0 {
@@ -186,7 +185,6 @@ impl ExtendedExponentFpt<f64> {
         }
 
         Self::new2(val.sqrt(), exp >> 1)
-
     }
 
     /// A to-float operation.
