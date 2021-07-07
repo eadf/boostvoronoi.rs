@@ -440,6 +440,7 @@ fn segment_5_3() -> Result<(), BvError> {
     Ok(())
 }
 
+#[ignore]
 #[test]
 // this is the old gui test 'A_test'
 fn segment_5_4() -> Result<(), BvError> {

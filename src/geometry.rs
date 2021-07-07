@@ -20,6 +20,36 @@ pub struct Point<T: InputType> {
     pub y: T,
 }
 
+impl<T> Point<T>
+where
+    T: InputType + fmt::Display + hash::Hash,
+{
+    /// Got "conflicting implementations of trait `std::convert::From..."
+    /// So i picked the name as_f64 for this conversion
+    pub fn as_f64(&self) -> [f64; 2] {
+        [
+            num::cast::<T, f64>(self.x).unwrap(),
+            num::cast::<T, f64>(self.y).unwrap(),
+        ]
+    }
+}
+
+/// Converts to [f64;2] from boostvoronoi::geometry::Point
+/// ```
+/// # use boostvoronoi::geometry::*;
+/// let c1 = [1,2];
+/// let p:Point<i32> = Point::from(c1);
+/// let c2: [f64;2] = p.into();
+/// println!("c1:{:?}, c2:{:?}", c1, c2);
+/// assert_eq!(c1[0] as f64, c2[0]);
+/// assert_eq!(c1[1] as f64, c2[1]);
+/// ```
+impl<T: InputType> From<Point<T>> for [f64;2]{
+    fn from(coordinate:Point<T>) -> [f64;2] {
+        coordinate.as_f64()
+    }
+}
+
 impl<T> fmt::Debug for Point<T>
 where
     T: InputType + fmt::Display + hash::Hash,
@@ -81,19 +111,6 @@ impl<T: InputType> From<geo::Coordinate<T>> for Point<T> {
     }
 }
 
-/* why the *redacted* does this not compile?
-#[cfg(feature = "geo")]
-/// Converts to Point from geo::Point
-impl<T: InputType + geo::CoordNum> From<geo::Point<geo::Coordinate<T>>> for Point<T> {
-    fn from(p: geo::Point<geo::Coordinate<T>>) -> Point<T> {
-        Point {
-            x: p.0.x,
-            y: p.0.y,
-        }
-    }
-}
-*/
-
 #[cfg(feature = "geo")]
 /// Converts to geo::Coordinate from boostvoronoi::geometry::Point
 /// ```
@@ -105,6 +122,24 @@ impl<T: InputType + geo::CoordNum> From<geo::Point<geo::Coordinate<T>>> for Poin
 /// ```
 impl<T: InputType + geo::CoordNum> From<Point<T>> for geo::Coordinate<T> {
     fn from(coordinate: Point<T>) -> geo::Coordinate<T> {
+        geo::Coordinate {
+            x: coordinate.x,
+            y: coordinate.y,
+        }
+    }
+}
+
+#[cfg(feature = "geo")]
+/// Converts to geo::Coordinate from &boostvoronoi::geometry::Point
+/// ```
+/// # use boostvoronoi::geometry::*;
+/// let p = Point{x:1,y:2};
+/// let c = geo::Coordinate::<i32>::from(&p);
+/// assert_eq!(p.x,c.x);
+/// assert_eq!(p.y,c.y);
+/// ```
+impl<T: InputType + geo::CoordNum> From<&Point<T>> for geo::Coordinate<T> {
+    fn from(coordinate: &Point<T>) -> geo::Coordinate<T> {
         geo::Coordinate {
             x: coordinate.x,
             y: coordinate.y,

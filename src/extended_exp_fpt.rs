@@ -392,6 +392,31 @@ impl ops::Div for ExtendedExponentFpt<f64> {
     }
 }
 
+impl ops::Div<f64> for ExtendedExponentFpt<f64> {
+    type Output = Self;
+    /// ```
+    /// # use boostvoronoi::extended_exp_fpt;
+    ///
+    /// let a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
+    /// let b = 2_f64;
+    ///
+    /// approx::assert_ulps_eq!(a.d(), 1_f64);
+    /// let c = a / b;
+    /// approx::assert_ulps_eq!(c.d(), 1.0/2.0);
+    /// let a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(2000000000_f64);
+    /// let b = -2000000000_f64;
+    /// approx::assert_ulps_eq!(a.d(),  2000000000_f64);
+    /// let c = a / b;
+    /// approx::assert_ulps_eq!(c.d(), -1f64);
+    /// ```
+    fn div(self, that: f64) -> Self {
+        let that = Self::from(that);
+        let val = self.val_ / that.val_;
+        let exp = self.exp_ - that.exp_;
+        Self::new2(val, exp)
+    }
+}
+
 impl ops::AddAssign for ExtendedExponentFpt<f64> {
     /// ```
     /// # use boostvoronoi::extended_exp_fpt;

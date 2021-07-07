@@ -26,6 +26,7 @@ use std::rc::Rc;
 
 use super::{InputType, OutputType};
 use crate::{t, tln};
+use cpp_map::PIterator;
 
 #[cfg(test)]
 mod tests;
@@ -81,6 +82,8 @@ where
     circle_events_: VC::CircleEventQueue,
     end_points_: BinaryHeap<VEP::EndPointPair<I>>,
     pub(crate) beach_line_: VB::BeachLine<I, F>,
+    // The number of input sites if points and segments are counted as one.
+    // (segments generates two site events so we can't use the lenght of the list)
     index_: usize,
     segments_added_: bool, // make sure eventual vertices are added before segments
     #[cfg(feature = "console_debug")]
@@ -115,6 +118,16 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
+    #[inline(always)]
+    fn update_range_( l:&mut I,  h:&mut I, sample:I) {
+        if sample < *l {
+            *l = sample;
+        }
+        if sample > *h {
+            *h = sample;
+        }
+    }
+
     pub fn with_vertices<'a, T>(&mut self, vertices: T) -> Result<(), BvError>
     where
         I: 'a,
@@ -355,13 +368,14 @@ where
         Ok(())
     }
 
+    #[inline(always)]
     fn deactivate_circle_event(
         &mut self,
-        beachline_index: &VB::BeachLineIndex,
+        beachline_ptr: &PIterator<VB::BeachLineNodeKey<I, F>, VB::BeachLineNodeDataType>,
     ) -> Result<(), BvError> {
-        if let Some(node_cell) = self.beach_line_.get_node(beachline_index)?.1.get() {
-            let cevent: Option<VC::CircleEventIndex> = node_cell.get_circle_event_id();
-            self.circle_events_.deactivate(cevent);
+        if let Some(mut node_cell) = beachline_ptr.get_v()?.get() {
+            self.circle_events_
+                .deactivate(node_cell.get_circle_event_id());
 
             // TODO! should this be in here?
             // make sure there are no dangling references to deactivated circle events..
@@ -553,7 +567,7 @@ where
                 };
 
                 // Remove the candidate circle from the event queue.
-                self.deactivate_circle_event(&VB::BeachLineIndex(right_it.get_index()))?;
+                self.deactivate_circle_event(&right_it)?;
 
                 // emulate --left_site
                 left_it.prev()?;
@@ -601,7 +615,7 @@ where
     /// we remove (A, B), (B, C) and insert (A, C). As beach line comparison
     /// works correctly only if one of the nodes is a new one we remove
     /// (B, C) bisector and change (A, B) bisector to the (A, C). That's
-    /// why we use const_cast there and take all the responsibility that
+    /// why we use replace_key() there and take all the responsibility that
     /// map data structure keeps correct ordering.
     pub(crate) fn process_circle_event(
         &mut self,
@@ -976,13 +990,13 @@ where
 
 /// Helper function: converts a slice of \[\[integer,integer\]\] into input data for the Builder.
 /// You should use the From traits instead, this function performs a (potentially) redundant type conversion.
-pub fn to_points<T1: InputType, T2: InputType>(points: &[[T1; 2]]) -> Vec<Point<T2>> {
+pub fn to_points<I: InputType, F: InputType>(points: &[[I; 2]]) -> Vec<Point<F>> {
     points
         .iter()
         .map(|x| {
             [
-                num::cast::<T1, T2>(x[0]).unwrap(),
-                num::cast::<T1, T2>(x[1]).unwrap(),
+                num::cast::<I, F>(x[0]).unwrap(),
+                num::cast::<I, F>(x[1]).unwrap(),
             ]
             .into()
         })

@@ -879,9 +879,9 @@ fn two_segments_3() -> Result<(), BvError> {
     Ok(())
 }
 
-//#[ignore]
+#[ignore]
 #[test]
-/// three segments and one point
+/// three segments (self intersecting) and one point
 fn two_segments_4() -> Result<(), BvError> {
     let output = {
         let _v = vec![Point { x: 4, y: 3 }];

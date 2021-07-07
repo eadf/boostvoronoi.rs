@@ -32,6 +32,7 @@ cgmath = {version="0.18", optional=true}
 itertools = "0.10"
 lazy_static = "1.4"
 cpp_map = "0.0.2"
+approx = "0.5"
 
 # These features are only for debug purposes, should normally not be used
 [features]
@@ -55,6 +56,12 @@ path = "example/readme.rs"
 [[example]]
 name = "stress_test"
 path = "example/stress_test.rs"
+required-features = ["geo"]
+
+# this example is for development test purposes only
+[[example]]
+name = "stress_test2"
+path = "example/stress_test2.rs"
 required-features = ["geo"]
 
 [build-dependencies]

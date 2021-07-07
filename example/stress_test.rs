@@ -35,27 +35,31 @@ fn fault_check(
             let distance = v.euclidean_distance(s);
             //print!("s{:?} -> v {:?} = {:?}", s, v, distance);
             if let Some(peek) = heap.first() {
-                let delta: f64 = distance - *peek;
-                //print!(" delta:{}", delta);
-
-                if delta > 0.000001 {
-                    //println!(" ignore peek:{}", peek);
-                    continue;
-                }
-                if delta < -0.000001 {
-                    //println!(" clear peek:{}", peek);
-                    heap.clear();
+                if distance <= *peek {
+                    if *peek - distance > 0.0001 {
+                        // this sample is smaller than anything before
+                        heap.clear();
+                    }
+                } else {
+                    if distance - *peek > 0.0001 {
+                        // ignore this sample, get a new sample
+                        continue;
+                    }
                 }
             }
             //println!();
             heap.push(distance);
         }
         if heap.len() < 2 {
-            let err_msg = format!(
-                "Got a vertex with only one close neighbour: {:?}",
+            let mut err_msg = format!(
+                "Got a vertex with only one close neighbour: {:?}, dist:{:?}",
+                v,
                 heap.get(0)
             );
-            eprintln!("{}",err_msg);
+            for s in segments.iter() {
+                err_msg += format!("\n {:?}, dist:{}", s, v.euclidean_distance(s)).as_str();
+            }
+            eprintln!("{}", err_msg);
             return Err(err_msg);
         }
         heap.clear();
@@ -116,7 +120,13 @@ fn main() -> Result<(), BvError> {
             println!("}};");
             println!("-------");
 
-            println!("{:?}", result?);
+            let result = result?;
+            for e in result.edges() {
+                println!("e:{:?}", e.get());
+            }
+            for v in result.vertices() {
+                println!("v:{:?}", v.get());
+            }
             break;
         } else {
             println!(

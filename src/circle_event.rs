@@ -93,7 +93,7 @@ impl Default for CircleEvent {
 
 impl PartialEq for CircleEvent {
     fn eq(&self, other: &Self) -> bool {
-        //println!("eq self.idx:{:?}, other.idx:{:?}", self.index_, other.index_);
+        //tln!("eq self.idx:{:?}, other.idx:{:?}", self.index_, other.index_);
         self.center_x_ == other.center_x_
             && self.center_y_ == other.center_y_
             && self.lower_x_ == other.lower_x_
@@ -123,9 +123,9 @@ impl Ord for CircleEvent {
         } else if self.y() < other.y() {
             Ordering::Less
         } else if self.y() == other.y() {
-            //println!("cmp self.lx():{:.12}, other.lx:{:.12} si:{:?}", self.lower_x(), other.lower_x(), self._index);
-            //println!("cmp self.y():{:.12}, other.y:{:.12} oi:{:?}", self.y(), other.y(), self._index);
-            //println!("cmp self.idx:{:?}, other.idx:{:?}", self.index_, other.index_);
+            //tln!("cmp self.lx():{:.12}, other.lx:{:.12} si:{:?}", self.lower_x(), other.lower_x(), self._index);
+            //tln!("cmp self.y():{:.12}, other.y:{:.12} oi:{:?}", self.y(), other.y(), self._index);
+            //tln!("cmp self.idx:{:?}, other.idx:{:?}", self.index_, other.index_);
             if let Some(self_index) = self.index_ {
                 if let Some(other_index) = other.index_ {
                     self_index.0.cmp(&other_index.0)
@@ -219,9 +219,9 @@ impl PartialOrd for CircleEventC {
 
 impl Ord for CircleEventC {
     fn cmp(&self, other: &Self) -> Ordering {
-        let cself = self.0.get();
-        let cother = other.0.get();
-        cself.cmp(&cother)
+        let cell_self = self.0.get();
+        let cell_other = other.0.get();
+        cell_self.cmp(&cell_other)
     }
 }
 
@@ -399,7 +399,7 @@ impl CircleEventQueue {
     #[cfg(not(feature = "map_first_last"))]
     #[inline]
     pub(crate) fn peek(&self) -> Option<&CircleEventType> {
-        // super inefficient implementation of 'first()'
+        // super inefficient implementation of 'first()' for +stable
         self.c_.iter().next()
     }
 
@@ -525,9 +525,9 @@ impl CircleEventQueue {
         if let Some(circle_event_id) = circle_event_id {
             if !self.inactive_circle_ids_.bit(circle_event_id.0) {
                 if self.c_list_.contains_key(&circle_event_id.0) {
-                    println!("deactivate {:?}", self.c_list_[&circle_event_id.0]);
+                    tln!("deactivate {:?}", self.c_list_[&circle_event_id.0]);
                 } else {
-                    println!("circle {} not present", circle_event_id);
+                    tln!("circle {} not present", circle_event_id);
                 }
                 let _ = self.inactive_circle_ids_.set_bit(circle_event_id.0, true);
             }

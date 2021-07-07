@@ -41,13 +41,13 @@ where
     I: super::InputType + Neg<Output = I>,
 {
     let line = line.split(' ').collect::<Vec<&str>>();
-    //println!("line split: {:?}", line);
+    //tln!("line split: {:?}", line);
     match line.len() {
         1 => {
             if let Ok(n) = line[0].parse::<usize>() {
                 return Some(InputData::Number(n));
             } else {
-                println!("failed to parse {}, ignoring line", line[0]);
+                eprintln!("failed to parse {}, ignoring line", line[0]);
             }
         }
         2 => {

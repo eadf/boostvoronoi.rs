@@ -767,11 +767,12 @@ where
             == Orientation::Right
     }
 
+    #[inline(always)]
     pub(crate) fn pps(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        segment_index: u64,
+        segment_index: u8,
     ) -> bool {
         #[allow(clippy::suspicious_operation_groupings)]
         if segment_index != 2 {
@@ -801,12 +802,12 @@ where
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        point_index: i32,
+        point_index: u8,
     ) -> bool {
         if site2.sorted_index() == site3.sorted_index() {
             return false;
         }
-        if point_index == 2i32 {
+        if point_index == 2 {
             if !site2.is_inverse() && site3.is_inverse() {
                 return false;
             }
@@ -932,7 +933,7 @@ where
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        segment_index: usize,
+        segment_index: u8,
         c_event: &VC::CircleEventType,
     ) {
         let i1_to_f64 = TC1::<I>::i_to_f64;
@@ -1069,7 +1070,7 @@ where
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        point_index: i32,
+        point_index: u8,
         c_event: &VC::CircleEventType,
     ) {
         let i1_to_f64 = TC1::<I>::i_to_f64;
@@ -1167,7 +1168,7 @@ where
                     (i1_to_f64(segm_start1.y) + i1_to_f64(segm_start2.y)) * 0.5
                         - i1_to_f64(site1.y()),
                 );
-            if point_index == 2i32 {
+            if point_index == 2 {
                 t += det.sqrt();
             } else {
                 t -= det.sqrt();
@@ -1324,7 +1325,7 @@ where
             tln!("1: b:{:?}", b);
             t -= b;
             tln!("1: t:{:?}", t);
-            if point_index == 2i32 {
+            if point_index == 2 {
                 t += det.sqrt();
                 tln!("2: t:{:?}", t);
             } else {
@@ -1803,7 +1804,7 @@ where
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        segment_index: usize,
+        segment_index: u8,
         c_event: &VC::CircleEventType,
         recompute_c_x: bool,
         recompute_c_y: bool,
@@ -1876,10 +1877,10 @@ where
             ca[2] = &denom * &sum_y * 2 + &numer * &vec_y;
             let inv_denom = EX::ExtendedExponentFpt::from(1f64) / bi_to_ext(&denom);
             if recompute_c_x {
-                c_event.set_x_xf(bi_to_ext(&ca[0]) * inv_denom * 0.25f64);
+                c_event.set_x_xf(bi_to_ext(&ca[0]) * inv_denom / 4_f64);
             }
             if recompute_c_y {
-                c_event.set_y_xf(bi_to_ext(&ca[2]) * inv_denom * 0.25f64);
+                c_event.set_y_xf(bi_to_ext(&ca[2]) * inv_denom / 4_f64);
             }
             if recompute_lower_x {
                 c_event.set_lower_x_xf(
@@ -1956,7 +1957,7 @@ where
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        point_index: i32,
+        point_index: u8,
         c_event: &VC::CircleEventType,
         recompute_c_x: bool,
         recompute_c_y: bool,
@@ -2019,7 +2020,7 @@ where
             cB[1] = EI::ExtendedInt::from(1_i32);
 
             if recompute_c_y {
-                cA[0] = if point_index == 2i32 {
+                cA[0] = if point_index == 2 {
                     EI::ExtendedInt::from(2i32)
                 } else {
                     EI::ExtendedInt::from(-2i32)
@@ -2051,8 +2052,7 @@ where
             }
 
             if recompute_c_x || recompute_lower_x {
-                cA[0] =
-                    &a[0] * &EI::ExtendedInt::from(if point_index == 2i32 { 2i32 } else { -2i32 });
+                cA[0] = &a[0] * &EI::ExtendedInt::from(if point_index == 2 { 2i32 } else { -2i32 });
                 cA[1] = &b[0] * &b[0] * (i1_to_xi(segm_start1.x) + i1_to_xi(segm_start2.x))
                     - &a[0]
                         * &b[0]

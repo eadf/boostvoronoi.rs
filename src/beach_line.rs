@@ -239,7 +239,7 @@ where
         let node = bl_borrow.get_kv(beachline_index.0);
 
         if node.is_err() {
-            println!("Failed to retrieve beach line key : {}", beachline_index.0);
+            eprintln!("Failed to retrieve beach line key : {}", beachline_index.0);
             //panic!();
             return Err(BvError::InternalError(format!(
                 "Tried to retrieve a beach line node that doesn't exist. Id:{}. {}:{}",
@@ -272,7 +272,7 @@ where
     #[cfg(feature = "console_debug")]
     pub(crate) fn debug_cmp_all(&self, key: BeachLineNodeKey<I, F>) {
         for (i, (v, _)) in self.beach_line_.borrow().iter().rev().enumerate() {
-            print!("#{}:", i);
+            t!("#{}:", i);
             let _rv = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(v, &key);
         }
     }
@@ -390,7 +390,7 @@ where
             t!(" Temporary bisector");
         }
 
-        // print!(" id={}", id);
+        // t!(" id={}", id);
         tln!();
         Ok(())
     }
