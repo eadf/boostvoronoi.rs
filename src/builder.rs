@@ -118,6 +118,7 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
+    #[allow(dead_code)] // was not ready to push this
     #[inline(always)]
     fn update_range_( l:&mut I,  h:&mut I, sample:I) {
         if sample < *l {
@@ -373,7 +374,7 @@ where
         &mut self,
         beachline_ptr: &PIterator<VB::BeachLineNodeKey<I, F>, VB::BeachLineNodeDataType>,
     ) -> Result<(), BvError> {
-        if let Some(mut node_cell) = beachline_ptr.get_v()?.get() {
+        if let Some(node_cell) = beachline_ptr.get_v()?.get() {
             self.circle_events_
                 .deactivate(node_cell.get_circle_event_id());
 
