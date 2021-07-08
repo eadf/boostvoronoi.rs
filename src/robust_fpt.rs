@@ -564,6 +564,36 @@ impl ops::Sub<RobustDif> for RobustDif {
     }
 }
 
+/// Converts to geo::Coordinate from boostvoronoi::geometry::Point
+/// ```
+/// # use boostvoronoi::geometry::*;
+/// let p = Point{x:1,y:2};
+/// let c = geo::Coordinate::<i32>::from(p);
+/// assert_eq!(p.x,c.x);
+/// assert_eq!(p.y,c.y);
+/// ```
+impl From<RobustFpt> for RobustDif {
+    fn from(value: RobustFpt) -> RobustDif{
+        if value.is_neg() {
+            RobustDif{ positive_sum_:RobustFpt::default(), negative_sum_:-value}
+        } else {
+            RobustDif{positive_sum_:value, negative_sum_:RobustFpt::default()}
+        }
+    }
+}
+
+impl ops::Sub<RobustFpt> for RobustDif {
+    type Output = RobustDif;
+
+    fn sub(self, rhs: RobustFpt) -> Self {
+        let rhs = RobustDif::from(rhs);
+        Self {
+            positive_sum_: self.positive_sum_ + rhs.negative_sum_,
+            negative_sum_: self.negative_sum_ + rhs.positive_sum_,
+        }
+    }
+}
+
 impl ops::SubAssign<RobustDif> for RobustDif {
     fn sub_assign(&mut self, _rhs: RobustDif) {
         self.positive_sum_ += _rhs.negative_sum_;

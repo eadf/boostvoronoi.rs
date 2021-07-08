@@ -37,6 +37,13 @@ use std::ops::Neg;
 const ULPS: u64 = 64;
 const ULPSX2: u64 = 64; // Todo: This is what c++ boost uses. Find a fix for this
 
+#[derive(Eq, PartialEq, Debug)]
+enum SiteIndex {
+    One,
+    Two,
+    Three,
+}
+
 /// Predicate utilities. Operates with the coordinate types that could
 /// be converted to the 32-bit signed integer without precision loss.
 /// Todo! give this a lookover
@@ -91,7 +98,7 @@ where
 /// It was mathematically proven that the result is correct
 /// with epsilon relative error equal to 1EPS.
 #[inline]
-fn robust_cross_product_f<T, U>(a1_: T, b1_: T, a2_: T, b2_: T) -> U
+fn robust_cross_product_f<T, U>(s_a1: T, s_b1: T, s_a2: T, s_b2: T) -> U
 where
     T: PrimInt
         + PartialOrd
@@ -118,16 +125,16 @@ where
 {
     // Why can't *all* integers implement is_negative()? E.g u64 would just always return false.
     // It would make it easier to implement generic code
-    let a1: T = if a1_ < T::zero() { -a1_ } else { a1_ };
-    let b1: T = if b1_ < T::zero() { -b1_ } else { b1_ };
-    let a2: T = if a2_ < T::zero() { -a2_ } else { a2_ };
-    let b2: T = if b2_ < T::zero() { -b2_ } else { b2_ };
+    let u_a1 = if s_a1 < T::zero() { -s_a1 } else { s_a1 };
+    let u_b1 = if s_b1 < T::zero() { -s_b1 } else { s_b1 };
+    let u_a2 = if s_a2 < T::zero() { -s_a2 } else { s_a2 };
+    let u_b2 = if s_b2 < T::zero() { -s_b2 } else { s_b2 };
 
-    let l: T = a1 * b2;
-    let r: T = b1 * a2;
+    let l = u_a1 * u_b2;
+    let r = u_b1 * u_a2;
 
-    if (a1_ < T::zero()) ^ (b2_ < T::zero()) {
-        return if (a2_ < T::zero()) ^ (b1_ < T::zero()) {
+    if (s_a1 < T::zero()) ^ (s_b2 < T::zero()) {
+        return if (s_a2 < T::zero()) ^ (s_b1 < T::zero()) {
             if l > r {
                 -num::cast::<T, U>(l - r).unwrap()
             } else {
@@ -137,7 +144,7 @@ where
             -num::cast::<T, U>(l + r).unwrap()
         };
     }
-    if (a2_ < T::zero()) ^ (b1_ < T::zero()) {
+    if (s_a2 < T::zero()) ^ (s_b1 < T::zero()) {
         return num::cast::<T, U>(l + r).unwrap();
     }
     if l < r {
@@ -943,8 +950,11 @@ where
 
         let line_a = i1_to_f64(site3.y1()) - i1_to_f64(site3.y0());
         let line_b = i1_to_f64(site3.x0()) - i1_to_f64(site3.x1());
+        // (vec_x,vec_y) it the perpendicular vector of site1->site2
+        // t*(vec_x,vec_y) + midpoint(site1->site2) is our circle event position
         let vec_x = i1_to_f64(site2.y()) - i1_to_f64(site1.y());
         let vec_y = i1_to_f64(site1.x()) - i1_to_f64(site2.x());
+
         let teta = RF::RobustFpt::new_2(
             Predicates::<I, F>::robust_cross_product(
                 i1_to_i64(site3.y1()) - i1_to_i64(site3.y0()),

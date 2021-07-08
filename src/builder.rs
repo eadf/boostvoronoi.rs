@@ -120,12 +120,12 @@ where
 {
     #[allow(dead_code)] // was not ready to push this
     #[inline(always)]
-    fn update_range_( l:&mut I,  h:&mut I, sample:I) {
-        if sample < *l {
-            *l = sample;
+    fn update_range_(low: &mut I, high: &mut I, sample: I) {
+        if sample < *low {
+            *low = sample;
         }
-        if sample > *h {
-            *h = sample;
+        if sample > *high {
+            *high = sample;
         }
     }
 

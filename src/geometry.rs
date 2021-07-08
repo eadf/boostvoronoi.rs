@@ -32,6 +32,12 @@ where
             num::cast::<T, f64>(self.y).unwrap(),
         ]
     }
+
+    pub (crate) fn distance_to(&self, circle: &crate::circle_event::CircleEvent) -> f64 {
+        let x = num::cast::<T, f64>(self.x).unwrap() - circle.x().0;
+        let y = num::cast::<T, f64>(self.y).unwrap() - circle.y().0;
+        (x*x+y*y).sqrt()
+    }
 }
 
 /// Converts to [f64;2] from boostvoronoi::geometry::Point
@@ -44,8 +50,8 @@ where
 /// assert_eq!(c1[0] as f64, c2[0]);
 /// assert_eq!(c1[1] as f64, c2[1]);
 /// ```
-impl<T: InputType> From<Point<T>> for [f64;2]{
-    fn from(coordinate:Point<T>) -> [f64;2] {
+impl<T: InputType> From<Point<T>> for [f64; 2] {
+    fn from(coordinate: Point<T>) -> [f64; 2] {
         coordinate.as_f64()
     }
 }
