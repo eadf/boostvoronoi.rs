@@ -33,10 +33,10 @@ where
         ]
     }
 
-    pub (crate) fn distance_to(&self, circle: &crate::circle_event::CircleEvent) -> f64 {
+    pub(crate) fn distance_to(&self, circle: &crate::circle_event::CircleEvent) -> f64 {
         let x = num::cast::<T, f64>(self.x).unwrap() - circle.x().0;
         let y = num::cast::<T, f64>(self.y).unwrap() - circle.y().0;
-        (x*x+y*y).sqrt()
+        (x * x + y * y).sqrt()
     }
 }
 
