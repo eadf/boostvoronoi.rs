@@ -412,7 +412,7 @@ impl CircleEventQueue {
 
     /// simulated pop_firs() for +stable builds
     #[cfg(not(feature = "map_first_last"))]
-    #[inline]
+    #[inline(always)]
     fn pop_first(&mut self) -> Option<CircleEventType> {
         if let Some(item) = self.c_.iter().next().cloned() {
             #[cfg(feature = "console_debug")]
@@ -512,6 +512,7 @@ impl CircleEventQueue {
         cc
     }
 
+    #[inline(always)]
     pub(crate) fn is_active(&self, circle_event_id: CircleEventIndex) -> bool {
         !self.inactive_circle_ids_.bit(circle_event_id.0)
     }
@@ -561,7 +562,7 @@ impl CircleEventQueue {
 
     /// Returns the number of circle events (both active and inactive)
     /// Only used by test code.
-    #[allow(dead_code)]
+    #[cfg(any(feature = "test", feature = "console_debug"))]
     pub(crate) fn len(&self) -> usize {
         self.c_.len()
     }

@@ -14,8 +14,6 @@ This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortu
 
 Code still in development, there are still bugs. However, all the remaining bugs I've noticed are also present in C++ boost voronoi.
 
-![Rusty voronoi](img/img.png)
-
 Gui example:
 ```fish
 cargo run --example fltk_gui

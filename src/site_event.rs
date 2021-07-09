@@ -151,7 +151,7 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    #[allow(dead_code)]
+    #[cfg(test)]
     /// only used by unit test code
     pub(crate) fn new_2(point: Point<I>, initial_index: SiteEventIndexType) -> SiteEvent<I, F> {
         Self {
@@ -182,7 +182,7 @@ where
     }
 
     /// Only used by test code
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub fn new_7(
         x1: I,
         y1: I,
@@ -279,7 +279,7 @@ where
 
     /// only for basic test purposes
     #[inline(always)]
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub(crate) fn set_flags(&mut self, flags: u32) {
         self.flags_ = flags;
     }
