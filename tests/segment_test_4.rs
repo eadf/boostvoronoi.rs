@@ -33,31 +33,6 @@ where
     }
 }
 
-#[ignore]
-#[test]
-#[should_panic]
-fn segment_4_1_intersecting() {
-    let _output = {
-        let segments: [[I; 4]; 9] = [
-            [207, 208, 405, 400],
-            [409, 401, 200, 201],
-            [400, 402, 403, 230],
-            [410, 203, 204, 220],
-            [529, 244, 367, 107],
-            [94, 628, 512, 632],
-            [680, 608, 669, 291],
-            [572, 96, 363, 51],
-            [147, 103, 96, 170],
-        ];
-        let segments = VB::to_segments(&segments);
-
-        let mut vb = VB::Builder::<I, F>::default();
-        vb.with_segments(segments.iter()).expect("should not fail");
-        vb.build()
-    };
-    _output.unwrap();
-}
-
 //#[ignore]
 #[test]
 fn segment_4_1() -> Result<(), BvError> {
