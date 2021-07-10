@@ -202,6 +202,26 @@ where
         }
     }
 
+    #[cfg(feature = "ce_corruption_check")]
+    #[allow(dead_code)]
+    pub fn dbg(&self) {
+        if self.is_point() {
+            println!(
+                "[{},{}];",
+                num::cast::<I, f64>(self.point0().x).unwrap(),
+                num::cast::<I, f64>(self.point0().y).unwrap()
+            );
+        } else {
+            println!(
+                "[{},{},{},{}];",
+                num::cast::<I, f64>(self.point0().x).unwrap(),
+                num::cast::<I, f64>(self.point0().y).unwrap(),
+                num::cast::<I, f64>(self.point1().x).unwrap(),
+                num::cast::<I, f64>(self.point1().y).unwrap()
+            );
+        }
+    }
+
     #[inline(always)]
     pub fn x(&self) -> I {
         self.point0_.x
@@ -313,6 +333,22 @@ where
             return true;
         }
         !(site1.is_segment() ^ site2.is_segment())
+    }
+
+    #[cfg(all(feature = "ce_corruption_check", feature = "geo"))]
+    #[inline(always)]
+    pub fn distance_to_point(&self, x: f64, y: f64) -> f64 {
+        use geo::algorithm::euclidean_distance::*;
+        let c = geo::Coordinate { x, y };
+
+        if self.is_point() {
+            c.euclidean_distance(&geo::Coordinate::from(self.point0().as_f64()))
+        } else {
+            c.euclidean_distance(&geo::Line::new(
+                geo::Coordinate::from(self.point0().as_f64()),
+                geo::Coordinate::from(self.point1().as_f64()),
+            ))
+        }
     }
 }
 

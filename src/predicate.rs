@@ -37,11 +37,22 @@ use std::ops::Neg;
 const ULPS: u64 = 64;
 const ULPSX2: u64 = 64; // Todo: This is what c++ boost uses. Find a fix for this
 
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 enum SiteIndex {
     One,
     Two,
     Three,
+}
+
+impl Debug for SiteIndex
+{
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{}", match self {
+            SiteIndex::One => 1,
+            SiteIndex::Two => 2,
+            SiteIndex::Three=> 3,
+        })
+    }
 }
 
 /// Predicate utilities. Operates with the coordinate types that could
@@ -647,7 +658,7 @@ where
         let rv = {
             match point1.x.cmp(&point2.x) {
                 cmp::Ordering::Less => {
-                    //tln!("point1.x() < point2.x() {}<{}", point1.x, point2.x);
+                    //tln!("point1.x < point2.x {}<{}", point1.x, point2.x);
                     // The second node contains a new site.
                     DistancePredicate::<I, F>::distance_predicate(
                         node1.left_site(),
@@ -656,7 +667,7 @@ where
                     )
                 }
                 cmp::Ordering::Greater => {
-                    //tln!( "point1.x() > point2.x()");
+                    //tln!( "point1.x > point2.x");
                     // The first node contains a new site.
                     !DistancePredicate::<I, F>::distance_predicate(
                         node2.left_site(),
@@ -665,7 +676,7 @@ where
                     )
                 }
                 cmp::Ordering::Equal => {
-                    //tln!( "point1.x() == point2.x()");
+                    //tln!( "point1.x == point2.x");
                     // These checks were evaluated experimentally.
                     match site1.sorted_index().cmp(&site2.sorted_index()) {
                         cmp::Ordering::Equal => {
@@ -770,28 +781,75 @@ where
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
     ) -> bool {
-        OrientationTest::<I, F>::eval_3(site1.point0(), site2.point0(), site3.point0())
-            == Orientation::Right
+        Self::ppp_points(site1.point0(), site2.point0(), site3.point0())
     }
 
     #[inline(always)]
-    pub(crate) fn pps(
+    fn ppp_points(point1: &Point<I>, point2: &Point<I>, point3: &Point<I>) -> bool {
+        OrientationTest::<I, F>::eval_3(point1, point2, point3) == Orientation::Right
+    }
+
+    #[cfg(all(feature = "geo", feature = "ce_corruption_check"))]
+    #[inline(always)]
+    pub(crate) fn validate_circle_formation_predicate(
+        _site1: &VSE::SiteEvent<I, F>,
+        _site2: &VSE::SiteEvent<I, F>,
+        _site3: &VSE::SiteEvent<I, F>,
+        c_event: &VC::CircleEventType,
+    ) {
+        // only do this if the circle event is outside the site event x range.
+        eprintln!(
+            "\nvalidate CE x={} y:{} xl:{}",
+            c_event.0.get().x().0,
+            c_event.0.get().y().0,
+            c_event.0.get().lower_x().0
+        );
+        if match (_site1.is_point(), _site2.is_point(), _site3.is_point()) {
+            // only validate pps
+            (false, true, true) => true,
+            (true, false, true) => true,
+            (true, true, false) => true,
+            _ => false,
+        } {
+            use approx::AbsDiffEq;
+
+            let c = geo::Coordinate {
+                x: c_event.0.get().x().0 as f64,
+                y: c_event.0.get().y().0 as f64,
+            };
+            let d1 = _site1.distance_to_point(c.x, c.y);
+            let d2 = _site2.distance_to_point(c.x, c.y);
+            let d3 = _site3.distance_to_point(c.x, c.y);
+
+            if d1.abs_diff_ne(&d2, 0.001) || d1.abs_diff_ne(&d3, 0.001) {
+                eprintln!("circle_formation_predicate should return false but doesn't");
+                eprintln!("c={:?} lx:{}", c, c_event.0.get().lower_x().0);
+                eprintln!("site1:{:?} distance={:.12}", _site1, d1);
+                eprintln!("site2:{:?} distance={:.12}", _site2, d2);
+                eprintln!("site3:{:?}, distance={:.12}", _site3, d3);
+                eprintln!("there were no three point vertex!");
+            }
+        }
+    }
+
+    #[inline(always)]
+    fn pps(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        segment_index: u8,
+        segment_index: SiteIndex,
     ) -> bool {
         #[allow(clippy::suspicious_operation_groupings)]
-        if segment_index != 2 {
+        if segment_index != SiteIndex::Two {
             let orient1 =
                 OrientationTest::<I, F>::eval_3(site1.point0(), site2.point0(), site3.point0());
             let orient2 =
                 OrientationTest::<I, F>::eval_3(site1.point0(), site2.point0(), site3.point1());
-            if segment_index == 1 && site1.x0() >= site2.x0() {
+            if segment_index == SiteIndex::One && site1.x0() >= site2.x0() {
                 if orient1 != Orientation::Right {
                     return false;
                 }
-            } else if segment_index == 3 && site2.x0() >= site1.x0() {
+            } else if segment_index == SiteIndex::Three && site2.x0() >= site1.x0() {
                 if orient2 != Orientation::Right {
                     return false;
                 }
@@ -805,16 +863,16 @@ where
     }
 
     #[inline(always)]
-    pub(crate) fn pss(
+    fn pss(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        point_index: u8,
+        point_index: SiteIndex,
     ) -> bool {
         if site2.sorted_index() == site3.sorted_index() {
             return false;
         }
-        if point_index == 2 {
+        if point_index == SiteIndex::Two {
             if !site2.is_inverse() && site3.is_inverse() {
                 return false;
             }
@@ -856,35 +914,45 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
+    #[inline(always)]
     fn ppp(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
         c_event: &VC::CircleEventType,
     ) {
+        Self::ppp_points(site1.point0(), site2.point0(), site3.point0(), c_event)
+    }
+
+    fn ppp_points(
+        point1: &Point<I>,
+        point2: &Point<I>,
+        point3: &Point<I>,
+        c_event: &VC::CircleEventType,
+    ) {
         let i1_to_f64 = TC1::<I>::i_to_f64;
         let i1_to_i64 = TC1::<I>::i_to_i64;
 
-        let dif_x1 = i1_to_f64(site1.x()) - i1_to_f64(site2.x());
-        let dif_x2 = i1_to_f64(site2.x()) - i1_to_f64(site3.x());
-        let dif_y1 = i1_to_f64(site1.y()) - i1_to_f64(site2.y());
-        let dif_y2 = i1_to_f64(site2.y()) - i1_to_f64(site3.y());
+        let dif_x1 = i1_to_f64(point1.x) - i1_to_f64(point2.x);
+        let dif_x2 = i1_to_f64(point2.x) - i1_to_f64(point3.x);
+        let dif_y1 = i1_to_f64(point1.y) - i1_to_f64(point2.y);
+        let dif_y2 = i1_to_f64(point2.y) - i1_to_f64(point3.y);
         let orientation = Predicates::<I, F>::robust_cross_product(
-            i1_to_i64(site1.x()) - i1_to_i64(site2.x()),
-            i1_to_i64(site2.x()) - i1_to_i64(site3.x()),
-            i1_to_i64(site1.y()) - i1_to_i64(site2.y()),
-            i1_to_i64(site2.y()) - i1_to_i64(site3.y()),
+            i1_to_i64(point1.x) - i1_to_i64(point2.x),
+            i1_to_i64(point2.x) - i1_to_i64(point3.x),
+            i1_to_i64(point1.y) - i1_to_i64(point2.y),
+            i1_to_i64(point2.y) - i1_to_i64(point3.y),
         );
         let inv_orientation: RF::RobustFpt = RF::RobustFpt::new_2(
             num::cast::<f32, f64>(0.5f32).unwrap() / orientation,
             num::cast::<f32, f64>(2.0f32).unwrap(),
         );
-        let sum_x1: f64 = i1_to_f64(site1.x()) + i1_to_f64(site2.x());
-        let sum_x2: f64 = i1_to_f64(site2.x()) + i1_to_f64(site3.x());
-        let sum_y1: f64 = i1_to_f64(site1.y()) + i1_to_f64(site2.y());
-        let sum_y2: f64 = i1_to_f64(site2.y()) + i1_to_f64(site3.y());
-        let dif_x3: f64 = i1_to_f64(site1.x()) - i1_to_f64(site3.x());
-        let dif_y3: f64 = i1_to_f64(site1.y()) - i1_to_f64(site3.y());
+        let sum_x1: f64 = i1_to_f64(point1.x) + i1_to_f64(point2.x);
+        let sum_x2: f64 = i1_to_f64(point2.x) + i1_to_f64(point3.x);
+        let sum_y1: f64 = i1_to_f64(point1.y) + i1_to_f64(point2.y);
+        let sum_y2: f64 = i1_to_f64(point2.y) + i1_to_f64(point3.y);
+        let dif_x3: f64 = i1_to_f64(point1.x) - i1_to_f64(point3.x);
+        let dif_y3: f64 = i1_to_f64(point1.y) - i1_to_f64(point3.y);
         let mut c_x = RF::RobustDif::new();
         let mut c_y = RF::RobustDif::new();
         let error = 2_f64;
@@ -923,9 +991,9 @@ where
 
         if recompute_c_x || recompute_c_y || recompute_lower_x {
             ExactCircleFormationFunctor::<I, F>::ppp(
-                site1,
-                site2,
-                site3,
+                point1,
+                point2,
+                point3,
                 c_event,
                 recompute_c_x,
                 recompute_c_y,
@@ -940,54 +1008,56 @@ where
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        segment_index: u8,
+        segment_index: SiteIndex,
         c_event: &VC::CircleEventType,
     ) {
-        let i1_to_f64 = TC1::<I>::i_to_f64;
-        let i1_to_i64 = TC1::<I>::i_to_i64;
+        let i_to_f64 = TC1::<I>::i_to_f64;
+        let i_to_i64 = TC1::<I>::i_to_i64;
+        #[cfg(feature = "ce_corruption_check")]
+        eprintln!("\n->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?})", site1, site2, site3, segment_index);
+        tln!("->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?})", site1, site2, site3, segment_index);
 
-        tln!("->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{})", site1, site2, site3, segment_index);
-
-        let line_a = i1_to_f64(site3.y1()) - i1_to_f64(site3.y0());
-        let line_b = i1_to_f64(site3.x0()) - i1_to_f64(site3.x1());
+        // (line_a,line_b) it the perpendicular vector of site3-point0 -> site3-point1
+        let line_a = i_to_f64(site3.y1()) - i_to_f64(site3.y0());
+        let line_b = i_to_f64(site3.x0()) - i_to_f64(site3.x1());
         // (vec_x,vec_y) it the perpendicular vector of site1->site2
         // t*(vec_x,vec_y) + midpoint(site1->site2) is our circle event position
-        let vec_x = i1_to_f64(site2.y()) - i1_to_f64(site1.y());
-        let vec_y = i1_to_f64(site1.x()) - i1_to_f64(site2.x());
+        let vec_x = i_to_f64(site2.y()) - i_to_f64(site1.y());
+        let vec_y = i_to_f64(site1.x()) - i_to_f64(site2.x());
 
         let teta = RF::RobustFpt::new_2(
             Predicates::<I, F>::robust_cross_product(
-                i1_to_i64(site3.y1()) - i1_to_i64(site3.y0()),
-                i1_to_i64(site3.x0()) - i1_to_i64(site3.x1()),
-                i1_to_i64(site2.x()) - i1_to_i64(site1.x()),
-                i1_to_i64(site2.y()) - i1_to_i64(site1.y()),
+                i_to_i64(site3.y1()) - i_to_i64(site3.y0()),
+                i_to_i64(site3.x0()) - i_to_i64(site3.x1()),
+                i_to_i64(site2.x()) - i_to_i64(site1.x()),
+                i_to_i64(site2.y()) - i_to_i64(site1.y()),
             ),
             1_f64,
         );
         let A = RF::RobustFpt::new_2(
             Predicates::<I, F>::robust_cross_product(
-                i1_to_i64(site3.y0()) - i1_to_i64(site3.y1()),
-                i1_to_i64(site3.x0()) - i1_to_i64(site3.x1()),
-                i1_to_i64(site3.y1()) - i1_to_i64(site1.y()),
-                i1_to_i64(site3.x1()) - i1_to_i64(site1.x()),
+                i_to_i64(site3.y0()) - i_to_i64(site3.y1()),
+                i_to_i64(site3.x0()) - i_to_i64(site3.x1()),
+                i_to_i64(site3.y1()) - i_to_i64(site1.y()),
+                i_to_i64(site3.x1()) - i_to_i64(site1.x()),
             ),
             1_f64,
         );
         let B = RF::RobustFpt::new_2(
             Predicates::<I, F>::robust_cross_product(
-                i1_to_i64(site3.y0()) - i1_to_i64(site3.y1()),
-                i1_to_i64(site3.x0()) - i1_to_i64(site3.x1()),
-                i1_to_i64(site3.y1()) - i1_to_i64(site2.y()),
-                i1_to_i64(site3.x1()) - i1_to_i64(site2.x()),
+                i_to_i64(site3.y0()) - i_to_i64(site3.y1()),
+                i_to_i64(site3.x0()) - i_to_i64(site3.x1()),
+                i_to_i64(site3.y1()) - i_to_i64(site2.y()),
+                i_to_i64(site3.x1()) - i_to_i64(site2.x()),
             ),
             1_f64,
         );
         let denom = RF::RobustFpt::new_2(
             Predicates::<I, F>::robust_cross_product(
-                i1_to_i64(site1.y()) - i1_to_i64(site2.y()),
-                i1_to_i64(site1.x()) - i1_to_i64(site2.x()),
-                i1_to_i64(site3.y1()) - i1_to_i64(site3.y0()),
-                i1_to_i64(site3.x1()) - i1_to_i64(site3.x0()),
+                i_to_i64(site1.y()) - i_to_i64(site2.y()),
+                i_to_i64(site1.x()) - i_to_i64(site2.x()),
+                i_to_i64(site3.y1()) - i_to_i64(site3.y0()),
+                i_to_i64(site3.x1()) - i_to_i64(site3.x0()),
             ),
             1_f64,
         );
@@ -1003,7 +1073,7 @@ where
         } else {
             let det = ((teta * teta + denom * denom) * A * B).sqrt();
             //tln!("det:{:?}", det);
-            if segment_index == 2 {
+            if segment_index == SiteIndex::Two {
                 tln!("3 det:{:?}", det);
                 tln!("3 denom:{:?}", denom);
                 tln!("3 det/denom:{:?}", det / (denom * denom));
@@ -1023,25 +1093,51 @@ where
         let mut c_x = RF::RobustDif::default();
         tln!("0: c_x:{:?}", c_x);
         let mut c_y = RF::RobustDif::default();
-        c_x += RF::RobustFpt::new_1(0.5 * (i1_to_f64(site1.x()) + i1_to_f64(site2.x())));
+        c_x += RF::RobustFpt::new_1(0.5 * (i_to_f64(site1.x()) + i_to_f64(site2.x())));
         tln!("1: c_x:{:?}", c_x);
         c_x += t * RF::RobustFpt::new_1(vec_x);
         tln!("2: c_x:{:?}", c_x);
-        c_y += RF::RobustFpt::new_1(0.5 * (i1_to_f64(site1.y()) + i1_to_f64(site2.y())));
+        c_y += RF::RobustFpt::new_1(0.5 * (i_to_f64(site1.y()) + i_to_f64(site2.y())));
         c_y += t * RF::RobustFpt::new_1(vec_y);
+
         let mut r = RF::RobustDif::default();
         let mut lower_x = RF::RobustDif::new_from(c_x);
-        r -= RF::RobustFpt::new_1(line_a) * RF::RobustFpt::new_1(i1_to_f64(site3.x0()));
-        r -= RF::RobustFpt::new_1(line_b) * RF::RobustFpt::new_1(i1_to_f64(site3.y0()));
+        r -= RF::RobustFpt::new_1(line_a) * RF::RobustFpt::new_1(i_to_f64(site3.x0()));
+        r -= RF::RobustFpt::new_1(line_b) * RF::RobustFpt::new_1(i_to_f64(site3.y0()));
         r += c_x * RF::RobustFpt::new_1(line_a);
         r += c_y * RF::RobustFpt::new_1(line_b);
         if r.positive().fpv() < r.negative().fpv() {
             r = -r;
         }
         lower_x += r * inv_segm_len;
+
+        #[cfg(feature = "ce_corruption_check")]
+        {
+            eprintln!("let site1=[{},{}];", site1.x(), site1.y());
+            eprintln!("let site2=[{},{}];", site2.x(), site2.y());
+            eprintln!(
+                "let site3=[{},{},{},{}];",
+                site3.point0().x,
+                site3.point0().y,
+                site3.point1().x,
+                site3.point1().y
+            );
+            eprintln!(
+                "let c1=[{:.12},{:.12}];//lx={:.12}",
+                c_x.dif().fpv(),
+                c_y.dif().fpv(),
+                lower_x.dif().fpv()
+            );
+        }
         c_event.set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
 
         tln!("  c_x:{:?}, c_y:{:?}, l_x:{:?}", c_x, c_y, lower_x);
+        tln!(
+            "  c_x:{:?}, c_y:{:?}, l_x:{:?}",
+            c_event.0.get().x().0,
+            c_event.0.get().y().0,
+            c_event.0.get().lower_x().0
+        );
 
         let ulps = Predicates::<I, F>::ulps() as f64;
         let recompute_c_x = c_x.dif().ulp() > ulps;
@@ -1073,6 +1169,126 @@ where
                 recompute_lower_x,
             );
         }
+        #[allow(clippy::suspicious_operation_groupings)]
+        if true {
+            let c_x = c_event.0.get().x().0;
+            let c_y = c_event.0.get().y().0;
+
+            #[cfg(feature = "ce_corruption_check")]
+            {
+                eprintln!(
+                    "site1->c distance:{:-12}",
+                    site1.distance_to_point(c_x, c_y)
+                );
+                eprintln!(
+                    "site2->c distance:{:-12}",
+                    site2.distance_to_point(c_x, c_y)
+                );
+                eprintln!(
+                    "site3->c distance:{:-12}",
+                    site3.distance_to_point(c_x, c_y)
+                );
+            }
+
+            // site3.point0 -> c
+            let v_3_c = (
+                c_x - i_to_f64(site3.point0().x),
+                c_y - i_to_f64(site3.point0().y),
+            );
+            // site3.point0 -> site3.point1
+            let v_3 = (
+                i_to_f64(site3.point1().x - site3.point0().x),
+                i_to_f64(site3.point1().y - site3.point0().y),
+            );
+            let dot = v_3_c.0 * v_3.0 + v_3_c.1 * v_3.1;
+            let dot_n = dot / (v_3.0 * v_3.0 + v_3.1 * v_3.1);
+            #[cfg(feature = "ce_corruption_check")]
+            {
+                eprintln!("v_a_c:{:?}, v3:{:?}", v_3_c, v_3);
+                eprintln!("dot:{:?}, dot_n:{:?}", dot, dot_n);
+            }
+            // ppp will return NaN if not all points are unique
+            let unique_endpoints = !(site3.point0() == site1.point0()
+                || site3.point0() == site2.point0()
+                || site3.point1() == site1.point0()
+                || site3.point1() == site2.point0());
+
+            if unique_endpoints && !(-0.0..=1.0).contains(&dot_n) {
+                // The (current) circle event is located outside the length of the segment
+                // - re-calculate with ppp
+                let site_3_point = if dot_n < -0.0 {
+                    site3.point0()
+                } else {
+                    site3.point1()
+                };
+
+                #[cfg(feature = "ce_corruption_check")]
+                {
+                    eprintln!(
+                        "dot_n:{:?} was bad ---------------- calling ppp on point0",
+                        dot_n
+                    );
+                    eprintln!(
+                        "point0 distance {}",
+                        site3.point0().distance_to(&c_event.0.get())
+                    );
+                    eprintln!(
+                        "point1 distance {}",
+                        site3.point1().distance_to(&c_event.0.get())
+                    );
+                }
+                match segment_index {
+                    SiteIndex::One => {
+                        LazyCircleFormationFunctor::<I, F>::ppp_points(
+                            site_3_point,
+                            site1.point0(),
+                            site2.point0(),
+                            c_event,
+                        );
+                    }
+                    SiteIndex::Two => {
+                        LazyCircleFormationFunctor::<I, F>::ppp_points(
+                            site1.point0(),
+                            site_3_point,
+                            site2.point0(),
+                            c_event,
+                        );
+                    }
+                    SiteIndex::Three => {
+                        LazyCircleFormationFunctor::<I, F>::ppp_points(
+                            site1.point0(),
+                            site2.point0(),
+                            site_3_point,
+                            c_event,
+                        );
+                    }
+                };
+                #[cfg(feature = "ce_corruption_check")]
+                {
+                    eprintln!("//c after ppp");
+                    eprintln!(
+                        "let c2=[{:.12},{:.12}];//l_x={:12}",
+                        c_event.0.get().x().0,
+                        c_event.0.get().y().0,
+                        c_event.0.get().lower_x().0
+                    );
+                    eprintln!(
+                        "site1->c distance:{:-12}",
+                        site1.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
+                    );
+                    eprintln!(
+                        "site2->c distance:{:-12}",
+                        site2.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
+                    );
+                    eprintln!(
+                        "site3->c distance:{:-12}",
+                        site3.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
+                    );
+                    assert!(c_event.0.get().x().is_finite());
+                    assert!(c_event.0.get().y().is_finite());
+                }
+            }
+        };
     }
 
     #[allow(unused_parens)]
@@ -1080,7 +1296,7 @@ where
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        point_index: u8,
+        point_index: SiteIndex,
         c_event: &VC::CircleEventType,
     ) {
         let i1_to_f64 = TC1::<I>::i_to_f64;
@@ -1091,7 +1307,7 @@ where
         let segm_start2 = site3.point0();
         let segm_end2 = site3.point1();
         tln!(
-            "->LazyCircleFormationFunctor::pss(site1:{:?}, site2:{:?}, site3:{:?}, point_index:{})",
+            "->LazyCircleFormationFunctor::pss(site1:{:?}, site2:{:?}, site3:{:?}, point_index:{:?})",
             site1,
             site2,
             site3,
@@ -1178,7 +1394,7 @@ where
                     (i1_to_f64(segm_start1.y) + i1_to_f64(segm_start2.y)) * 0.5
                         - i1_to_f64(site1.y()),
                 );
-            if point_index == 2 {
+            if point_index == SiteIndex::Two {
                 t += det.sqrt();
             } else {
                 t -= det.sqrt();
@@ -1335,7 +1551,7 @@ where
             tln!("1: b:{:?}", b);
             t -= b;
             tln!("1: t:{:?}", t);
-            if point_index == 2 {
+            if point_index == SiteIndex::Two {
                 t += det.sqrt();
                 tln!("2: t:{:?}", t);
             } else {
@@ -1647,44 +1863,75 @@ where
                     LazyCircleFormationFunctor::<I, F>::ppp(site1, site2, site3, circle);
                 } else {
                     // (point, point, segment) sites.
-                    if !CircleExistencePredicate::<I, F>::pps(site1, site2, site3, 3) {
+                    if !CircleExistencePredicate::<I, F>::pps(site1, site2, site3, SiteIndex::Three)
+                    {
                         return false;
                     }
-                    LazyCircleFormationFunctor::<I, F>::pps(site1, site2, site3, 3, circle);
+                    LazyCircleFormationFunctor::<I, F>::pps(
+                        site1,
+                        site2,
+                        site3,
+                        SiteIndex::Three,
+                        circle,
+                    )
                 }
             } else if !site3.is_segment() {
                 // (point, segment, point) sites.
-                if !CircleExistencePredicate::<I, F>::pps(site1, site3, site2, 2) {
+                if !CircleExistencePredicate::<I, F>::pps(site1, site3, site2, SiteIndex::Two) {
                     return false;
                 }
-                LazyCircleFormationFunctor::<I, F>::pps(site1, site3, site2, 2, circle);
+                LazyCircleFormationFunctor::<I, F>::pps(
+                    site1,
+                    site3,
+                    site2,
+                    SiteIndex::Two,
+                    circle,
+                );
             } else {
                 // (point, segment, segment) sites.
-                if !CircleExistencePredicate::<I, F>::pss(site1, site2, site3, 1) {
+                if !CircleExistencePredicate::<I, F>::pss(site1, site2, site3, SiteIndex::One) {
                     return false;
                 }
-                LazyCircleFormationFunctor::<I, F>::pss(site1, site2, site3, 1, circle);
+                LazyCircleFormationFunctor::<I, F>::pss(
+                    site1,
+                    site2,
+                    site3,
+                    SiteIndex::One,
+                    circle,
+                );
             }
         } else if !site2.is_segment() {
             if !site3.is_segment() {
                 // (segment, point, point) sites.
-                if !CircleExistencePredicate::<I, F>::pps(site2, site3, site1, 1) {
+                if !CircleExistencePredicate::<I, F>::pps(site2, site3, site1, SiteIndex::One) {
                     return false;
                 }
-                LazyCircleFormationFunctor::<I, F>::pps(site2, site3, site1, 1, circle);
+                LazyCircleFormationFunctor::<I, F>::pps(
+                    site2,
+                    site3,
+                    site1,
+                    SiteIndex::One,
+                    circle,
+                );
             } else {
                 // (segment, point, segment) sites.
-                if !CircleExistencePredicate::<I, F>::pss(site2, site1, site3, 2) {
+                if !CircleExistencePredicate::<I, F>::pss(site2, site1, site3, SiteIndex::Two) {
                     return false;
                 }
-                LazyCircleFormationFunctor::<I, F>::pss(site2, site1, site3, 2, circle);
+                LazyCircleFormationFunctor::<I, F>::pss(
+                    site2,
+                    site1,
+                    site3,
+                    SiteIndex::Two,
+                    circle,
+                );
             }
         } else if !site3.is_segment() {
             // (segment, segment, point) sites.
-            if !CircleExistencePredicate::<I, F>::pss(site3, site1, site2, 3) {
+            if !CircleExistencePredicate::<I, F>::pss(site3, site1, site2, SiteIndex::Three) {
                 return false;
             }
-            LazyCircleFormationFunctor::<I, F>::pss(site3, site1, site2, 3, circle);
+            LazyCircleFormationFunctor::<I, F>::pss(site3, site1, site2, SiteIndex::Three, circle);
         } else {
             // (segment, segment, segment) sites.
             if !CircleExistencePredicate::<I, F>::sss(site1, site2, site3) {
@@ -1699,6 +1946,10 @@ where
         {
             return false;
         }
+        #[cfg(all(feature = "geo", feature = "ce_corruption_check"))]
+        CircleExistencePredicate::<I, F>::validate_circle_formation_predicate(
+            site1, site2, site3, circle,
+        );
         true
     }
 }
@@ -1720,10 +1971,10 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    pub(crate) fn ppp(
-        site1: &VSE::SiteEvent<I, F>,
-        site2: &VSE::SiteEvent<I, F>,
-        site3: &VSE::SiteEvent<I, F>,
+    fn ppp(
+        point1: &Point<I>,
+        point2: &Point<I>,
+        point3: &Point<I>,
         circle: &VC::CircleEventType,
         recompute_c_x: bool,
         recompute_c_y: bool,
@@ -1733,24 +1984,24 @@ where
         let i1_to_xi = TC1::<I>::i_to_xi;
 
         let dif_x = [
-            i1_to_xi(site1.x()) - i1_to_xi(site2.x()),
-            i1_to_xi(site2.x()) - i1_to_xi(site3.x()),
-            i1_to_xi(site1.x()) - i1_to_xi(site3.x()),
+            i1_to_xi(point1.x) - i1_to_xi(point2.x),
+            i1_to_xi(point2.x) - i1_to_xi(point3.x),
+            i1_to_xi(point1.x) - i1_to_xi(point3.x),
         ];
 
         let dif_y = [
-            i1_to_xi(site1.y()) - i1_to_xi(site2.y()),
-            i1_to_xi(site2.y()) - i1_to_xi(site3.y()),
-            i1_to_xi(site1.y()) - i1_to_xi(site3.y()),
+            i1_to_xi(point1.y) - i1_to_xi(point2.y),
+            i1_to_xi(point2.y) - i1_to_xi(point3.y),
+            i1_to_xi(point1.y) - i1_to_xi(point3.y),
         ];
 
         let sum_x = [
-            i1_to_xi(site1.x()) + i1_to_xi(site2.x()),
-            i1_to_xi(site2.x()) + i1_to_xi(site3.x()),
+            i1_to_xi(point1.x) + i1_to_xi(point2.x),
+            i1_to_xi(point2.x) + i1_to_xi(point3.x),
         ];
         let sum_y = [
-            i1_to_xi(site1.y()) + i1_to_xi(site2.y()),
-            i1_to_xi(site2.y()) + i1_to_xi(site3.y()),
+            i1_to_xi(point1.y) + i1_to_xi(point2.y),
+            i1_to_xi(point2.y) + i1_to_xi(point3.y),
         ];
 
         let inv_denom = {
@@ -1810,11 +2061,11 @@ where
 
     /// Recompute parameters of the circle event using high-precision library.
     #[allow(clippy::too_many_arguments)]
-    pub(crate) fn pps(
+    fn pps(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        segment_index: u8,
+        segment_index: SiteIndex,
         c_event: &VC::CircleEventType,
         recompute_c_x: bool,
         recompute_c_y: bool,
@@ -1827,7 +2078,7 @@ where
             site3
         );
         t!(
-            "  segment_index:{} recompute_c_x:{}",
+            "  segment_index:{:?} recompute_c_x:{}",
             segment_index,
             recompute_c_x
         );
@@ -1908,7 +2159,11 @@ where
         if recompute_c_x || recompute_lower_x {
             ca[0] = sum_x * &denom * &denom + &teta * &sum_ab * &vec_x;
             cb[0] = EI::ExtendedInt::from(1_i32);
-            ca[1] = if segment_index == 2 { -vec_x } else { vec_x };
+            ca[1] = if segment_index == SiteIndex::Two {
+                -vec_x
+            } else {
+                vec_x
+            };
             cb[1] = det.clone();
             if recompute_c_x {
                 c_event.set_x_xf(sqrt_expr_.eval2(&ca, &cb) * inv_denom_sqr * 0.5f64);
@@ -1918,7 +2173,11 @@ where
         if recompute_c_y || recompute_lower_x {
             ca[2] = sum_y * &denom * &denom + &teta * &sum_ab * &vec_y;
             cb[2] = EI::ExtendedInt::from(1);
-            ca[3] = if segment_index == 2 { -vec_y } else { vec_y };
+            ca[3] = if segment_index == SiteIndex::Two {
+                -vec_y
+            } else {
+                vec_y
+            };
             cb[3] = det.clone();
             if recompute_c_y {
                 c_event.set_y_xf(sqrt_expr_.eval2(&ca[2..], &cb[2..]) * inv_denom_sqr * 0.5f64);
@@ -1930,7 +2189,11 @@ where
             cb[1] = cb[1].clone() * &segm_len;
             ca[2] = sum_ab * (&denom * &denom + &teta * &teta);
             cb[2] = EI::ExtendedInt::from(1);
-            ca[3] = if segment_index == 2 { -teta } else { teta };
+            ca[3] = if segment_index == SiteIndex::Two {
+                -teta
+            } else {
+                teta
+            };
             cb[3] = det;
             let segm_len = bi_to_ext(&segm_len).sqrt();
             tln!(" ca[0]:{:?}", ca[0]);
@@ -1963,11 +2226,11 @@ where
     /// Recompute parameters of the circle event using high-precision library.
     #[allow(non_snake_case)]
     #[allow(clippy::too_many_arguments)]
-    pub(crate) fn pss(
+    fn pss(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        point_index: u8,
+        point_index: SiteIndex,
         c_event: &VC::CircleEventType,
         recompute_c_x: bool,
         recompute_c_y: bool,
@@ -2030,7 +2293,7 @@ where
             cB[1] = EI::ExtendedInt::from(1_i32);
 
             if recompute_c_y {
-                cA[0] = if point_index == 2 {
+                cA[0] = if point_index == SiteIndex::Two {
                     EI::ExtendedInt::from(2i32)
                 } else {
                     EI::ExtendedInt::from(-2i32)
@@ -2062,7 +2325,12 @@ where
             }
 
             if recompute_c_x || recompute_lower_x {
-                cA[0] = &a[0] * &EI::ExtendedInt::from(if point_index == 2 { 2i32 } else { -2i32 });
+                cA[0] = &a[0]
+                    * &EI::ExtendedInt::from(if point_index == SiteIndex::Two {
+                        2i32
+                    } else {
+                        -2i32
+                    });
                 cA[1] = &b[0] * &b[0] * (i1_to_xi(segm_start1.x) + i1_to_xi(segm_start2.x))
                     - &a[0]
                         * &b[0]
@@ -2113,8 +2381,9 @@ where
             return;
         }
 
-        let sign: EI::ExtendedInt = EI::ExtendedInt::from(if point_index == 2 { 1 } else { -1 })
-            * &EI::ExtendedInt::from(if orientation.is_neg() { 1_i32 } else { -1 });
+        let sign: EI::ExtendedInt =
+            EI::ExtendedInt::from(if point_index == SiteIndex::Two { 1 } else { -1 })
+                * &EI::ExtendedInt::from(if orientation.is_neg() { 1_i32 } else { -1 });
         // todo: remove -1*-1
         tln!(" a[1]={:?}", &a[1]);
         tln!(" b[1]={:?}", &b[1]);

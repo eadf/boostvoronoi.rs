@@ -118,17 +118,6 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    #[allow(dead_code)] // was not ready to push this
-    #[inline(always)]
-    fn update_range_(low: &mut I, high: &mut I, sample: I) {
-        if sample < *low {
-            *low = sample;
-        }
-        if sample > *high {
-            *high = sample;
-        }
-    }
-
     pub fn with_vertices<'a, T>(&mut self, vertices: T) -> Result<(), BvError>
     where
         I: 'a,
@@ -374,14 +363,13 @@ where
         &mut self,
         beachline_ptr: &PIterator<VB::BeachLineNodeKey<I, F>, VB::BeachLineNodeDataType>,
     ) -> Result<(), BvError> {
-        if let Some(node_cell) = beachline_ptr.get_v()?.get() {
+        if let Some(mut node_cell) = beachline_ptr.get_v()?.get() {
             self.circle_events_
                 .deactivate(node_cell.get_circle_event_id());
 
-            // TODO! should this be in here?
             // make sure there are no dangling references to deactivated circle events..
-            //node_cell.set_circle_event_id(None);
-            //node_data.set(Some(node_cell));
+            let _ = node_cell.set_circle_event_id(None);
+            beachline_ptr.get_v()?.set(Some(node_cell));
         }
         Ok(())
     }

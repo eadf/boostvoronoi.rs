@@ -262,6 +262,22 @@ where
         self.min_max_ = Some((aabb_min, aabb_max));
     }
 
+    #[inline]
+    pub fn update_i64(&mut self, x: i64, y: i64) {
+        self.update_vertex(
+            num::cast::<i64, F>(x).unwrap(),
+            num::cast::<i64, F>(y).unwrap(),
+        )
+    }
+
+    #[inline]
+    pub fn update_f64(&mut self, x: f64, y: f64) {
+        self.update_vertex(
+            num::cast::<f64, F>(x).unwrap(),
+            num::cast::<f64, F>(y).unwrap(),
+        )
+    }
+
     #[inline(always)]
     pub fn update_line(&mut self, line: &Line<I>) {
         self.update_point(&line.start);
@@ -500,12 +516,18 @@ where
 
     /// transform from source coordinate system to dest coordinate system
     #[inline(always)]
+    pub fn transform_f(&self, point: [F; 2]) -> [F; 2] {
+        [self.transform_fx(point[0]), self.transform_fy(point[1])]
+    }
+
+    /// transform from source coordinate system to dest coordinate system
+    #[inline(always)]
     pub fn transform_p(&self, point: &Point<I>) -> [F; 2] {
         [self.transform_ix(point.x), self.transform_iy(point.y)]
     }
 
     /// transform from source coordinate system to dest coordinate system
-    /// /// integer x coordinate
+    /// integer x coordinate
     #[inline(always)]
     pub fn transform_ix(&self, x: I) -> F {
         (super::TypeConverter2::<I, F>::i_to_f(x) + self.to_center_[0]) * self.scale[0]
@@ -518,5 +540,31 @@ where
     pub fn transform_iy(&self, y: I) -> F {
         (super::TypeConverter2::<I, F>::i_to_f(y) + self.to_center_[1]) * self.scale[1]
             + self.to_offset[1]
+    }
+
+    /// transform from source coordinate system to dest coordinate system
+    /// float x coordinate
+    #[inline(always)]
+    pub fn transform_fx(&self, x: F) -> F {
+        (x + self.to_center_[0]) * self.scale[0] + self.to_offset[0]
+    }
+
+    /// transform from source coordinate system to dest coordinate system
+    /// float y coordinate
+    #[inline(always)]
+    pub fn transform_fy(&self, y: F) -> F {
+        (y + self.to_center_[1]) * self.scale[1] + self.to_offset[1]
+    }
+
+    /// Only scale
+    #[inline(always)]
+    pub fn scale(&self, r: F) -> F {
+        r * self.scale[1]
+    }
+
+    /// Only scale
+    #[inline(always)]
+    pub fn reverse_scale(&self, r: F) -> F {
+        r / self.scale[1]
     }
 }

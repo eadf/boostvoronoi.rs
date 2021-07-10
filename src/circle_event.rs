@@ -13,6 +13,8 @@ use super::beach_line as VB;
 use super::extended_exp_fpt as EX;
 
 use super::OutputType;
+#[cfg(feature = "console_debug")]
+use crate::tln;
 use crate::BvError;
 use ordered_float::OrderedFloat;
 use std::cell::Cell;
@@ -350,6 +352,12 @@ where
     #[inline(always)]
     pub(crate) fn is_site_point(&self) -> bool {
         self.is_site_point_
+    }
+
+    #[cfg(any(feature = "ce_corruption_check", feature = "console_debug"))]
+    #[allow(dead_code)]
+    pub fn dbg(&self) {
+        println!("[{},{}]", self.x().0, self.y().0);
     }
 }
 
