@@ -44,14 +44,17 @@ enum SiteIndex {
     Three,
 }
 
-impl Debug for SiteIndex
-{
+impl Debug for SiteIndex {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{}", match self {
-            SiteIndex::One => 1,
-            SiteIndex::Two => 2,
-            SiteIndex::Three=> 3,
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                SiteIndex::One => 1,
+                SiteIndex::Two => 2,
+                SiteIndex::Three => 3,
+            }
+        )
     }
 }
 
@@ -1132,12 +1135,6 @@ where
         c_event.set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
 
         tln!("  c_x:{:?}, c_y:{:?}, l_x:{:?}", c_x, c_y, lower_x);
-        tln!(
-            "  c_x:{:?}, c_y:{:?}, l_x:{:?}",
-            c_event.0.get().x().0,
-            c_event.0.get().y().0,
-            c_event.0.get().lower_x().0
-        );
 
         let ulps = Predicates::<I, F>::ulps() as f64;
         let recompute_c_x = c_x.dif().ulp() > ulps;
@@ -1170,53 +1167,53 @@ where
             );
         }
         #[allow(clippy::suspicious_operation_groupings)]
-        if true {
-            let c_x = c_event.0.get().x().0;
-            let c_y = c_event.0.get().y().0;
-
+        // All sites needs to be unique, or ppp will return NaN
+        let unique_endpoints = !(site3.point0() == site1.point0()
+            || site3.point0() == site2.point0()
+            || site3.point1() == site1.point0()
+            || site3.point1() == site2.point0()
+            || site1.point0() == site2.point0());
+        tln!("pps unique_endpoints:{}", unique_endpoints);
+        if unique_endpoints {
             #[cfg(feature = "ce_corruption_check")]
             {
                 eprintln!(
                     "site1->c distance:{:-12}",
-                    site1.distance_to_point(c_x, c_y)
+                    site1.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
                 );
                 eprintln!(
                     "site2->c distance:{:-12}",
-                    site2.distance_to_point(c_x, c_y)
+                    site2.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
                 );
                 eprintln!(
                     "site3->c distance:{:-12}",
-                    site3.distance_to_point(c_x, c_y)
+                    site3.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
                 );
             }
 
             // site3.point0 -> c
             let v_3_c = (
-                c_x - i_to_f64(site3.point0().x),
-                c_y - i_to_f64(site3.point0().y),
+                c_event.0.get().x().0 - i_to_f64(site3.point0().x),
+                c_event.0.get().y().0 - i_to_f64(site3.point0().y),
             );
             // site3.point0 -> site3.point1
             let v_3 = (
-                i_to_f64(site3.point1().x - site3.point0().x),
-                i_to_f64(site3.point1().y - site3.point0().y),
+                i_to_f64(site3.point1().x) - i_to_f64(site3.point0().x),
+                i_to_f64(site3.point1().y) - i_to_f64(site3.point0().y),
             );
-            let dot = v_3_c.0 * v_3.0 + v_3_c.1 * v_3.1;
-            let dot_n = dot / (v_3.0 * v_3.0 + v_3.1 * v_3.1);
+            #[allow(clippy::suspicious_operation_groupings)]
+            let dot = (v_3_c.0 * v_3.0 + v_3_c.1 * v_3.1) / (v_3.0 * v_3.0 + v_3.1 * v_3.1);
+            tln!("pps dot:{:.12}", dot);
             #[cfg(feature = "ce_corruption_check")]
             {
                 eprintln!("v_a_c:{:?}, v3:{:?}", v_3_c, v_3);
-                eprintln!("dot:{:?}, dot_n:{:?}", dot, dot_n);
+                eprintln!("dot:{:?}", dot);
             }
-            // ppp will return NaN if not all points are unique
-            let unique_endpoints = !(site3.point0() == site1.point0()
-                || site3.point0() == site2.point0()
-                || site3.point1() == site1.point0()
-                || site3.point1() == site2.point0());
 
-            if unique_endpoints && !(-0.0..=1.0).contains(&dot_n) {
+            if !(-0.0..=1.0).contains(&dot) {
                 // The (current) circle event is located outside the length of the segment
                 // - re-calculate with ppp
-                let site_3_point = if dot_n < -0.0 {
+                let site_3_point = if dot < -0.0 {
                     site3.point0()
                 } else {
                     site3.point1()
@@ -1226,7 +1223,7 @@ where
                 {
                     eprintln!(
                         "dot_n:{:?} was bad ---------------- calling ppp on point0",
-                        dot_n
+                        dot
                     );
                     eprintln!(
                         "point0 distance {}",

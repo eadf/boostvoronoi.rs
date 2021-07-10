@@ -1,7 +1,7 @@
 use fltk::{
     app,
     draw::{
-        draw_line, draw_circle, draw_rectf, set_draw_color, set_line_style, LineStyle, Offscreen,
+        draw_circle, draw_line, draw_rectf, set_draw_color, set_line_style, LineStyle, Offscreen,
     },
     enums::{Color, FrameType},
     frame::Frame,
@@ -67,8 +67,7 @@ fn main() {
         println!("dot:{:?}", dot);
         println!("dot_n:{:?}", dot_n);
 
-        let d_aabb =
-            boostvoronoi::visual_utils::Aabb2::<i64, f64>::new_from_i32(0, 0, 800, 600);
+        let d_aabb = boostvoronoi::visual_utils::Aabb2::<i64, f64>::new_from_i32(0, 0, 800, 600);
         let mut s_aabb = boostvoronoi::visual_utils::Aabb2::<i64, f64>::default();
         s_aabb.update_i64(site1[0], site1[1]);
         s_aabb.update_i64(site2[0], site2[1]);
@@ -82,7 +81,7 @@ fn main() {
 
         let point_f = |x: f64, y: f64| {
             let xy = affine.transform(x, y);
-            draw_circle(xy[0] , xy[1], 2.0);
+            draw_circle(xy[0], xy[1], 2.0);
         };
         let point_i = |x: i64, y: i64| {
             point_f(x as f64, y as f64);
