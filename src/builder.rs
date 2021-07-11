@@ -614,6 +614,9 @@ where
         {
             self.debug_circle_counter_ += 1;
         }
+        #[cfg(feature = "ce_corruption_check")]
+        self.circle_events_.ce_corruption_check();
+
         // Get the topmost circle event.
         let e = self.circle_events_.top()?.ok_or_else(|| {
             BvError::InternalError(format!(
@@ -630,7 +633,7 @@ where
             .is_active(circle_event.get_index().unwrap())
         {
             return Err(BvError::InternalError(format!(
-                "Internal error, the circle event should be active. {}:{}",
+                "Internal error, the topmost circle event should be active. {}:{}",
                 file!(),
                 line!()
             )));

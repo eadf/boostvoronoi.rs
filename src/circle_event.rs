@@ -411,6 +411,22 @@ impl CircleEventQueue {
         self.c_.iter().next()
     }
 
+    #[cfg(feature = "ce_corruption_check")]
+    pub(crate) fn ce_corruption_check(&self) {
+        if self.c_.len() >= 2 {
+            let mut iter = self.c_.iter();
+            let first_ce = iter.next().unwrap().0.get();
+            let second_ce = iter.next().unwrap().0.get();
+
+            if first_ce.cmp(&second_ce) != Ordering::Less {
+                println!("*************************************************");
+                println!("topmost CE could just as well been the second CE.");
+                println!("topmost CE :{:?}", first_ce);
+                println!("second CE :{:?}", second_ce);
+            }
+        }
+    }
+
     /// the real pop_firs() for +nightly builds
     #[inline(always)]
     #[cfg(feature = "map_first_last")]
@@ -434,8 +450,6 @@ impl CircleEventQueue {
     }
 
     pub(crate) fn pop_inactive_at_top(&mut self) -> Result<(), BvError> {
-        //let size_b4 = self.c_.len();
-
         while !self.is_empty() {
             if let Some(peek) = self.peek() {
                 if let Some(peek) = peek.0.get().get_index() {

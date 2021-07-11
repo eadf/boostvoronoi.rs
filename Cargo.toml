@@ -1,6 +1,6 @@
 [package]
 name = "boostvoronoi"
-version = "0.9.0"
+version = "0.9.1"
 authors = ["eadf"]
 edition = "2018"
 description = "Boost voronoi ported to 100% rust"
@@ -31,7 +31,7 @@ geo = {version="0.18", optional=true}
 cgmath = {version="0.18", optional=true}
 itertools = "0.10"
 lazy_static = "1.4"
-cpp_map = "0.0.2"
+cpp_map = "0.0.3"
 approx = "0.5"
 
 # These features are only for debug purposes, should normally not be used

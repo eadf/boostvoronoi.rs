@@ -801,7 +801,7 @@ where
         c_event: &VC::CircleEventType,
     ) {
         // only do this if the circle event is outside the site event x range.
-        eprintln!(
+        println!(
             "\nvalidate CE x={} y:{} xl:{}",
             c_event.0.get().x().0,
             c_event.0.get().y().0,
@@ -825,12 +825,12 @@ where
             let d3 = _site3.distance_to_point(c.x, c.y);
 
             if d1.abs_diff_ne(&d2, 0.001) || d1.abs_diff_ne(&d3, 0.001) {
-                eprintln!("circle_formation_predicate should return false but doesn't");
-                eprintln!("c={:?} lx:{}", c, c_event.0.get().lower_x().0);
-                eprintln!("site1:{:?} distance={:.12}", _site1, d1);
-                eprintln!("site2:{:?} distance={:.12}", _site2, d2);
-                eprintln!("site3:{:?}, distance={:.12}", _site3, d3);
-                eprintln!("there were no three point vertex!");
+                println!("circle_formation_predicate should return false but doesn't");
+                println!("c={:?} lx:{}", c, c_event.0.get().lower_x().0);
+                println!("site1:{:?} distance={:.12}", _site1, d1);
+                println!("site2:{:?} distance={:.12}", _site2, d2);
+                println!("site3:{:?}, distance={:.12}", _site3, d3);
+                println!("there were no three point vertex!");
             }
         }
     }
@@ -1017,7 +1017,7 @@ where
         let i_to_f64 = TC1::<I>::i_to_f64;
         let i_to_i64 = TC1::<I>::i_to_i64;
         #[cfg(feature = "ce_corruption_check")]
-        eprintln!("\n->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?})", site1, site2, site3, segment_index);
+        println!("\n->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?})", site1, site2, site3, segment_index);
         tln!("->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?})", site1, site2, site3, segment_index);
 
         // (line_a,line_b) it the perpendicular vector of site3-point0 -> site3-point1
@@ -1116,16 +1116,16 @@ where
 
         #[cfg(feature = "ce_corruption_check")]
         {
-            eprintln!("let site1=[{},{}];", site1.x(), site1.y());
-            eprintln!("let site2=[{},{}];", site2.x(), site2.y());
-            eprintln!(
+            println!("let site1=[{},{}];", site1.x(), site1.y());
+            println!("let site2=[{},{}];", site2.x(), site2.y());
+            println!(
                 "let site3=[{},{},{},{}];",
                 site3.point0().x,
                 site3.point0().y,
                 site3.point1().x,
                 site3.point1().y
             );
-            eprintln!(
+            println!(
                 "let c1=[{:.12},{:.12}];//lx={:.12}",
                 c_x.dif().fpv(),
                 c_y.dif().fpv(),
@@ -1177,15 +1177,15 @@ where
         if unique_endpoints {
             #[cfg(feature = "ce_corruption_check")]
             {
-                eprintln!(
+                println!(
                     "site1->c distance:{:-12}",
                     site1.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
                 );
-                eprintln!(
+                println!(
                     "site2->c distance:{:-12}",
                     site2.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
                 );
-                eprintln!(
+                println!(
                     "site3->c distance:{:-12}",
                     site3.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
                 );
@@ -1206,8 +1206,8 @@ where
             tln!("pps dot:{:.12}", dot);
             #[cfg(feature = "ce_corruption_check")]
             {
-                eprintln!("v_a_c:{:?}, v3:{:?}", v_3_c, v_3);
-                eprintln!("dot:{:?}", dot);
+                println!("v_a_c:{:?}, v3:{:?}", v_3_c, v_3);
+                println!("dot:{:?}", dot);
             }
 
             if !(-0.0..=1.0).contains(&dot) {
@@ -1221,15 +1221,15 @@ where
 
                 #[cfg(feature = "ce_corruption_check")]
                 {
-                    eprintln!(
+                    println!(
                         "dot_n:{:?} was bad ---------------- calling ppp on point0",
                         dot
                     );
-                    eprintln!(
+                    println!(
                         "point0 distance {}",
                         site3.point0().distance_to(&c_event.0.get())
                     );
-                    eprintln!(
+                    println!(
                         "point1 distance {}",
                         site3.point1().distance_to(&c_event.0.get())
                     );
@@ -1262,22 +1262,22 @@ where
                 };
                 #[cfg(feature = "ce_corruption_check")]
                 {
-                    eprintln!("//c after ppp");
-                    eprintln!(
+                    println!("//c after ppp");
+                    println!(
                         "let c2=[{:.12},{:.12}];//l_x={:12}",
                         c_event.0.get().x().0,
                         c_event.0.get().y().0,
                         c_event.0.get().lower_x().0
                     );
-                    eprintln!(
+                    println!(
                         "site1->c distance:{:-12}",
                         site1.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
                     );
-                    eprintln!(
+                    println!(
                         "site2->c distance:{:-12}",
                         site2.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
                     );
-                    eprintln!(
+                    println!(
                         "site3->c distance:{:-12}",
                         site3.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
                     );
