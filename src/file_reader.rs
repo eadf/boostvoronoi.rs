@@ -106,6 +106,9 @@ pub fn read_boost_input_file<I>(
 where
     I: super::InputType + Neg<Output = I>,
 {
+    if !filename.is_file() || !filename.exists() {
+        return Err(BvError::ValueError(format!("{:?} not a file", filename)));
+    }
     // Open the file in read-only mode
     let file = File::open(filename)?;
     let reader = BufReader::new(file);

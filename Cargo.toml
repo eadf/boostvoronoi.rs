@@ -60,8 +60,12 @@ path = "example/stress_test.rs"
 required-features = ["geo"]
 
 [[example]]
-name = "debug_ce"
-path = "example/debug_ce.rs"
+name = "debug_pps_ce"
+path = "example/debug_pps_ce.rs"
+
+[[example]]
+name = "debug_pss_ce"
+path = "example/debug_pss_ce.rs"
 
 # this example is for development test purposes only
 [[example]]
