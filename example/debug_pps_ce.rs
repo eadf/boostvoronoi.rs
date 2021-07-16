@@ -52,20 +52,48 @@ fn main() {
         }
     });
     {
-        let site1 = [552, -566];
-        let site2 = [535, -110];
-        let site3 = [604, -936, -671, 955];
-        let c1 = [2332.752214259521, -271.295421836816]; //lx=4137.725686912381
-        let c2 = [4590.074675697394, -187.140856388474]; //l_x=8645.883021416737
+        let site1 = [-5165, -5162];
+        let site2 = [-5404, -5134];
+        let site3 = [-5011, -5195, -5404, -5134];
+        let c1 = [-4909.985314685315, -1951.249650349650]; //lx=83.691104228608
+        let c2 = [-4909.985314685315, -1951.249650349650]; //l_x=97.17800560721074
 
         // site3.point0 -> c
         let v_3_c = ((c1[0] - site3[0] as f64), (c1[1] - site3[1] as f64));
         // site3.point0 -> site3.point1
         let v_3 = ((site3[2] - site3[0]) as f64, (site3[3] - site3[1]) as f64);
-        let dot = v_3_c.0 * v_3.0 + v_3_c.1 * v_3.1;
-        let dot_n = dot / (v_3.0 * v_3.0 + v_3.1 * v_3.1);
+
+        let dot = v_3_c.0 * v_3.0 + v_3_c.1 * v_3.1 / (v_3.0 * v_3.0 + v_3.1 * v_3.1);
         println!("dot:{:?}", dot);
-        println!("dot_n:{:?}", dot_n);
+        use geo::algorithm::euclidean_distance::*;
+        let c = geo::Coordinate { x: c1[0], y: c1[1] };
+        println!(
+            "site1 dist:{:?}",
+            c.euclidean_distance(&geo::Coordinate {
+                x: site1[0] as f64,
+                y: site1[1] as f64
+            })
+        );
+        println!(
+            "site2 dist:{:?}",
+            c.euclidean_distance(&geo::Coordinate {
+                x: site2[0] as f64,
+                y: site2[1] as f64
+            })
+        );
+        println!(
+            "site2 dist:{:?}",
+            c.euclidean_distance(&geo::Line::new(
+                geo::Coordinate {
+                    x: site3[0] as f64,
+                    y: site3[1] as f64
+                },
+                geo::Coordinate {
+                    x: site3[2] as f64,
+                    y: site3[3] as f64
+                }
+            ),)
+        );
 
         let d_aabb = boostvoronoi::visual_utils::Aabb2::<i64, f64>::new_from_i32(0, 0, 800, 600);
         let mut s_aabb = boostvoronoi::visual_utils::Aabb2::<i64, f64>::default();
@@ -75,8 +103,13 @@ fn main() {
         s_aabb.update_i64(site3[2], site3[3]);
         s_aabb.update_f64(c1[0], c1[1]);
         s_aabb.update_f64(c2[0], c2[1]);
-        let affine =
+        let mut affine =
             boostvoronoi::visual_utils::SimpleAffine::<i64, f64>::new(&s_aabb, &d_aabb).unwrap();
+        // flip y
+        affine.scale = [affine.scale[0], -affine.scale[1]];
+        affine.zoom(0.9);
+        let affine = affine;
+
         offs.borrow().begin();
 
         let point_f = |x: f64, y: f64| {

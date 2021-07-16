@@ -52,20 +52,21 @@ fn main() {
         }
     });
     {
-        let site1=[716,302];
-        let site2=[597,-23,533,65];
-        let site3=[-716,412,999,356];
-        let c1=[889.404056867864,68.895661360933];//lx=1179.932196005178
-        let c2=[889.404056867864,68.895661360933];//lx=1179.932196005178
+        /*
+
+        */
+        let site1 = [3, -11];
+        let site2 = [13, -1, 3, -11];
+        let site3 = [-6, 5, 2, -7];
+        let c1 = [1.780196097281, -9.780196097281];
+        let c2 = [1.780196097281, -9.780196097281];
 
         // site3.point0 -> c
         let v_3_c = ((c1[0] - site3[0] as f64), (c1[1] - site3[1] as f64));
         // site3.point0 -> site3.point1
         let v_3 = ((site3[2] - site3[0]) as f64, (site3[3] - site3[1]) as f64);
-        let dot = v_3_c.0 * v_3.0 + v_3_c.1 * v_3.1;
-        let dot_n = dot / (v_3.0 * v_3.0 + v_3.1 * v_3.1);
+        let dot = v_3_c.0 * v_3.0 + v_3_c.1 * v_3.1 / (v_3.0 * v_3.0 + v_3.1 * v_3.1);
         println!("dot:{:?}", dot);
-        println!("dot_n:{:?}", dot_n);
 
         let d_aabb = boostvoronoi::visual_utils::Aabb2::<i64, f64>::new_from_i32(0, 0, 800, 600);
         let mut s_aabb = boostvoronoi::visual_utils::Aabb2::<i64, f64>::default();
@@ -75,8 +76,13 @@ fn main() {
         s_aabb.update_i64(site3[2], site3[3]);
         s_aabb.update_f64(c1[0], c1[1]);
         s_aabb.update_f64(c2[0], c2[1]);
-        let affine =
+        let mut affine =
             boostvoronoi::visual_utils::SimpleAffine::<i64, f64>::new(&s_aabb, &d_aabb).unwrap();
+        // flip y
+        affine.scale = [affine.scale[0], -affine.scale[1]];
+        affine.zoom(0.9);
+        let affine = affine;
+
         offs.borrow().begin();
 
         let point_f = |x: f64, y: f64| {
@@ -94,7 +100,7 @@ fn main() {
 
         let circle_f = |x: f64, y: f64, r: f64| {
             let xy = affine.transform(x, y);
-            let r = affine.scale(r);
+            let r = affine.scale[0]*r;
             draw_circle(xy[0], xy[1], r)
         };
 
@@ -116,8 +122,7 @@ fn main() {
         set_draw_color(Color::Cyan);
         point_f(c2[0], c2[1]);
         circle_f(c2[0], c2[1], r2);
-        set_draw_color(Color::Black);
-        point_i(site1[0], site1[1]);
+
         set_draw_color(Color::Blue);
         line_i(site2[0], site2[1], site2[2], site2[3]);
         set_draw_color(Color::DarkBlue);
@@ -126,7 +131,8 @@ fn main() {
         line_i(site3[0], site3[1], site3[2], site3[3]);
         set_draw_color(Color::DarkGreen);
         point_i(site3[0], site3[1]);
-
+        set_draw_color(Color::Black);
+        point_i(site1[0], site1[1]);
         offs.borrow().end();
     }
     app.run().unwrap();
