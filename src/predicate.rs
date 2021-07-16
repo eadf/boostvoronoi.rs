@@ -220,11 +220,11 @@ where
 
     #[inline(always)]
     fn eval_3(point1: &Point<I>, point2: &Point<I>, point3: &Point<I>) -> Orientation {
-        let i1_to_i64 = TC1::<I>::i_to_i64;
-        let dx1: i64 = i1_to_i64(point1.x) - i1_to_i64(point2.x);
-        let dx2: i64 = i1_to_i64(point2.x) - i1_to_i64(point3.x);
-        let dy1: i64 = i1_to_i64(point1.y) - i1_to_i64(point2.y);
-        let dy2: i64 = i1_to_i64(point2.y) - i1_to_i64(point3.y);
+        let i_to_i64 = TC1::<I>::i_to_i64;
+        let dx1: i64 = i_to_i64(point1.x) - i_to_i64(point2.x);
+        let dx2: i64 = i_to_i64(point2.x) - i_to_i64(point3.x);
+        let dy1: i64 = i_to_i64(point1.y) - i_to_i64(point2.y);
+        let dy2: i64 = i_to_i64(point2.y) - i_to_i64(point3.y);
         let cp: f64 = Predicates::<I, F>::robust_cross_product(dx1, dy1, dx2, dy2);
         Self::eval_bf(cp)
     }
@@ -442,7 +442,7 @@ where
     ) -> bool {
         let left_point = left_site.point0();
         let right_point = right_site.point0();
-        let i1_to_i64 = TC1::<I>::i_to_i64;
+        let i_to_i64 = TC1::<I>::i_to_i64;
         //dbg!(&left_site, &right_site, &new_point);
         //dbg!(left_point.x, left_point.y);
         //dbg!(right_point.x, right_point.y);
@@ -459,8 +459,7 @@ where
                 }
             }
             _ => {
-                return i1_to_i64(left_point.y) + i1_to_i64(right_point.y)
-                    < i1_to_i64(new_point.y) * 2
+                return i_to_i64(left_point.y) + i_to_i64(right_point.y) < i_to_i64(new_point.y) * 2
             }
         }
 
@@ -519,16 +518,16 @@ where
     }
 
     fn find_distance_to_segment_arc(site: &VSE::SiteEvent<I, F>, point: &Point<I>) -> f64 {
-        let i1_to_i64 = TC1::<I>::i_to_i64;
-        let i1_to_f64 = TC1::<I>::i_to_f64;
+        let i_to_i64 = TC1::<I>::i_to_i64;
+        let i_to_f64 = TC1::<I>::i_to_f64;
 
         if Predicates::<I, F>::is_vertical_1(site) {
             (TC1::<I>::i_to_f64(site.x()) - TC1::<I>::i_to_f64(point.x)) * 0.5_f64
         } else {
             let segment0: &Point<I> = site.point0();
             let segment1: &Point<I> = site.point1();
-            let a1: f64 = i1_to_f64(segment1.x) - i1_to_f64(segment0.x);
-            let b1: f64 = i1_to_f64(segment1.y) - i1_to_f64(segment0.y);
+            let a1: f64 = i_to_f64(segment1.x) - i_to_f64(segment0.x);
+            let b1: f64 = i_to_f64(segment1.y) - i_to_f64(segment0.y);
             let mut k: f64 = (a1 * a1 + b1 * b1).sqrt();
             // Avoid subtraction while computing k.
             #[allow(clippy::suspicious_operation_groupings)]
@@ -539,10 +538,10 @@ where
             }
             // The relative error is at most 7EPS.
             k * Predicates::<I, F>::robust_cross_product(
-                i1_to_i64(segment1.x) - i1_to_i64(segment0.x),
-                i1_to_i64(segment1.y) - i1_to_i64(segment0.y),
-                i1_to_i64(point.x) - i1_to_i64(segment0.x),
-                i1_to_i64(point.y) - i1_to_i64(segment0.y),
+                i_to_i64(segment1.x) - i_to_i64(segment0.x),
+                i_to_i64(segment1.y) - i_to_i64(segment0.y),
+                i_to_i64(point.x) - i_to_i64(segment0.x),
+                i_to_i64(point.y) - i_to_i64(segment0.y),
             )
         }
     }
@@ -553,8 +552,8 @@ where
         new_point: &Point<I>,
         reverse_order: bool,
     ) -> KPredicateResult {
-        let i1_to_f64 = TC1::<I>::i_to_f64;
-        let i1_to_i64 = TC1::<I>::i_to_i64;
+        let i_to_f64 = TC1::<I>::i_to_f64;
+        let i_to_i64 = TC1::<I>::i_to_i64;
 
         let site_point: &Point<I> = left_site.point0();
         let segment_start: &Point<I> = right_site.point0();
@@ -569,10 +568,10 @@ where
             };
         }
 
-        let dif_x = i1_to_f64(new_point.x) - i1_to_f64(site_point.x);
-        let dif_y = i1_to_f64(new_point.y) - i1_to_f64(site_point.y);
-        let a = i1_to_f64(segment_end.x) - i1_to_f64(segment_start.x);
-        let b = i1_to_f64(segment_end.y) - i1_to_f64(segment_start.y);
+        let dif_x = i_to_f64(new_point.x) - i_to_f64(site_point.x);
+        let dif_y = i_to_f64(new_point.y) - i_to_f64(site_point.y);
+        let a = i_to_f64(segment_end.x) - i_to_f64(segment_start.x);
+        let b = i_to_f64(segment_end.y) - i_to_f64(segment_start.y);
 
         if Predicates::<I, F>::is_vertical_1(right_site) {
             if new_point.y < site_point.y && !reverse_order {
@@ -583,10 +582,10 @@ where
             return KPredicateResult::UNDEFINED;
         } else {
             let orientation = OrientationTest::<I, F>::eval_4(
-                i1_to_i64(segment_end.x) - i1_to_i64(segment_start.x),
-                i1_to_i64(segment_end.y) - i1_to_i64(segment_start.y),
-                i1_to_i64(new_point.x) - i1_to_i64(site_point.x),
-                i1_to_i64(new_point.y) - i1_to_i64(site_point.y),
+                i_to_i64(segment_end.x) - i_to_i64(segment_start.x),
+                i_to_i64(segment_end.y) - i_to_i64(segment_start.y),
+                i_to_i64(new_point.x) - i_to_i64(site_point.x),
+                i_to_i64(new_point.y) - i_to_i64(site_point.y),
             );
             if orientation == Orientation::Left {
                 if !right_site.is_inverse() {
@@ -784,12 +783,8 @@ where
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
     ) -> bool {
-        Self::ppp_points(site1.point0(), site2.point0(), site3.point0())
-    }
-
-    #[inline(always)]
-    fn ppp_points(point1: &Point<I>, point2: &Point<I>, point3: &Point<I>) -> bool {
-        OrientationTest::<I, F>::eval_3(point1, point2, point3) == Orientation::Right
+        OrientationTest::<I, F>::eval_3(site1.point0(), site2.point0(), site3.point0())
+            == Orientation::Right
     }
 
     #[cfg(all(feature = "geo", feature = "ce_corruption_check"))]
@@ -1296,8 +1291,8 @@ where
         point_index: SiteIndex,
         c_event: &VC::CircleEventType,
     ) {
-        let i1_to_f64 = TC1::<I>::i_to_f64;
-        let i1_to_i64 = TC1::<I>::i_to_i64;
+        let i_to_f64 = TC1::<I>::i_to_f64;
+        let i_to_i64 = TC1::<I>::i_to_i64;
 
         let segm_start1 = site2.point1();
         let segm_end1 = site2.point0();
@@ -1319,54 +1314,57 @@ where
             && (site1.point0() == site3.point0() || site1.point0() == site3.point1())
         {
             c_event.set_is_site_point();
-            let x = i1_to_f64(site1.point0().x);
-            let y = i1_to_f64(site1.point0().y);
+            let x = i_to_f64(site1.point0().x);
+            let y = i_to_f64(site1.point0().y);
             c_event.set_3_raw(x, y, x);
             tln!("<-LazyCircleFormationFunctor::pss shortcut");
             return;
         }
-        let a1 = i1_to_f64(segm_end1.x) - i1_to_f64(segm_start1.x);
-        let b1 = i1_to_f64(segm_end1.y) - i1_to_f64(segm_start1.y);
-        let a2 = i1_to_f64(segm_end2.x) - i1_to_f64(segm_start2.x);
-        let b2 = i1_to_f64(segm_end2.y) - i1_to_f64(segm_start2.y);
+
+        let a1 = i_to_f64(segm_end1.x) - i_to_f64(segm_start1.x);
+        let b1 = i_to_f64(segm_end1.y) - i_to_f64(segm_start1.y);
+        let a2 = i_to_f64(segm_end2.x) - i_to_f64(segm_start2.x);
+        let b2 = i_to_f64(segm_end2.y) - i_to_f64(segm_start2.y);
         let recompute_c_x: bool;
         let recompute_c_y: bool;
         let recompute_lower_x: bool;
 
         let orientation = RF::RobustFpt::new_2(
             Predicates::<I, F>::robust_cross_product(
-                i1_to_i64(segm_end1.y) - i1_to_i64(segm_start1.y),
-                i1_to_i64(segm_end1.x) - i1_to_i64(segm_start1.x),
-                i1_to_i64(segm_end2.y) - i1_to_i64(segm_start2.y),
-                i1_to_i64(segm_end2.x) - i1_to_i64(segm_start2.x),
+                i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
+                i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
+                i_to_i64(segm_end2.y) - i_to_i64(segm_start2.y),
+                i_to_i64(segm_end2.x) - i_to_i64(segm_start2.x),
             ),
             1_f64,
         );
+        let is_collinear =
+            OrientationTest::<I, F>::eval_f(orientation.fpv()) == Orientation::Collinear;
         #[allow(unknown_lints)] // for +stable
         #[allow(clippy::branches_sharing_code)] // false positive
-        if OrientationTest::<I, F>::eval_f(orientation.fpv()) == Orientation::Collinear {
+        if is_collinear {
             tln!("  LazyCircleFormationFunctor::pss collinear");
             let a = RF::RobustFpt::new_2(a1 * a1 + b1 * b1, 2_f64);
             let c = RF::RobustFpt::new_2(
                 Predicates::<I, F>::robust_cross_product(
-                    i1_to_i64(segm_end1.y) - i1_to_i64(segm_start1.y),
-                    i1_to_i64(segm_end1.x) - i1_to_i64(segm_start1.x),
-                    i1_to_i64(segm_start2.y) - i1_to_i64(segm_start1.y),
-                    i1_to_i64(segm_start2.x) - i1_to_i64(segm_start1.x),
+                    i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
+                    i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
+                    i_to_i64(segm_start2.y) - i_to_i64(segm_start1.y),
+                    i_to_i64(segm_start2.x) - i_to_i64(segm_start1.x),
                 ),
                 1_f64,
             );
             let det = RF::RobustFpt::new_2(
                 Predicates::<I, F>::robust_cross_product(
-                    i1_to_i64(segm_end1.x) - i1_to_i64(segm_start1.x),
-                    i1_to_i64(segm_end1.y) - i1_to_i64(segm_start1.y),
-                    i1_to_i64(site1.x()) - i1_to_i64(segm_start1.x),
-                    i1_to_i64(site1.y()) - i1_to_i64(segm_start1.y),
+                    i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
+                    i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
+                    i_to_i64(site1.x()) - i_to_i64(segm_start1.x),
+                    i_to_i64(site1.y()) - i_to_i64(segm_start1.y),
                 ) * Predicates::<I, F>::robust_cross_product(
-                    i1_to_i64(segm_end1.y) - i1_to_i64(segm_start1.y),
-                    i1_to_i64(segm_end1.x) - i1_to_i64(segm_start1.x),
-                    i1_to_i64(site1.y()) - i1_to_i64(segm_start2.y),
-                    i1_to_i64(site1.x()) - i1_to_i64(segm_start2.x),
+                    i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
+                    i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
+                    i_to_i64(site1.y()) - i_to_i64(segm_start2.y),
+                    i_to_i64(site1.x()) - i_to_i64(segm_start2.x),
                 ),
                 3.0,
             );
@@ -1383,13 +1381,11 @@ where
             let mut t = RF::RobustDif::default();
             t -= RF::RobustFpt::new_1(a1)
                 * RF::RobustFpt::new_1(
-                    (i1_to_f64(segm_start1.x) + i1_to_f64(segm_start2.x)) * 0.5
-                        - i1_to_f64(site1.x()),
+                    (i_to_f64(segm_start1.x) + i_to_f64(segm_start2.x)) * 0.5 - i_to_f64(site1.x()),
                 );
             t -= RF::RobustFpt::new_1(b1)
                 * RF::RobustFpt::new_1(
-                    (i1_to_f64(segm_start1.y) + i1_to_f64(segm_start2.y)) * 0.5
-                        - i1_to_f64(site1.y()),
+                    (i_to_f64(segm_start1.y) + i_to_f64(segm_start2.y)) * 0.5 - i_to_f64(site1.y()),
                 );
             if point_index == SiteIndex::Two {
                 t += det.sqrt();
@@ -1400,14 +1396,12 @@ where
             let mut c_x = RF::RobustDif::default();
             let mut c_y = RF::RobustDif::default();
             //tln!("ulps0: x:{:.12}, y:{:.12}", c_x.dif().fpv(), c_y.dif().fpv());
-            c_x +=
-                RF::RobustFpt::new_1(0.5 * (i1_to_f64(segm_start1.x) + i1_to_f64(segm_start2.x)));
+            c_x += RF::RobustFpt::new_1(0.5 * (i_to_f64(segm_start1.x) + i_to_f64(segm_start2.x)));
             //tln!("ulps1: x:{:.12}, y:{:.12}", c_x.dif().fpv(), c_y.dif().fpv());
             //tln!("ulps1.5: 1:{:.12}, 2:{:.12}", RF::RobustFpt::new_1(a1).fpv(), t.dif().fpv());
             //tln!("ulps1.6: 1:{:.12}", (t*RF::RobustFpt::new_1(a1)).dif().fpv());
             c_x += t * RF::RobustFpt::new_1(a1);
-            c_y +=
-                RF::RobustFpt::new_1(0.5 * (i1_to_f64(segm_start1.y) + i1_to_f64(segm_start2.y)));
+            c_y += RF::RobustFpt::new_1(0.5 * (i_to_f64(segm_start1.y) + i_to_f64(segm_start2.y)));
             //tln!("ulps2: x:{:.12}, y:{:.12}", c_x.dif().fpv(), c_y.dif().fpv());
             c_y += t * RF::RobustFpt::new_1(b1);
             //tln!("ulps3: x:{:.12}, y:{:.12}", c_x.dif().fpv(), c_y.dif().fpv());
@@ -1447,10 +1441,10 @@ where
             let sqr_sum2 = RF::RobustFpt::new_2((a2 * a2 + b2 * b2).sqrt(), 2_f64);
             let mut a = RF::RobustFpt::new_2(
                 Predicates::<I, F>::robust_cross_product(
-                    i1_to_i64(segm_end1.x) - i1_to_i64(segm_start1.x),
-                    i1_to_i64(segm_end1.y) - i1_to_i64(segm_start1.y),
-                    i1_to_i64(segm_start2.y) - i1_to_i64(segm_end2.y),
-                    i1_to_i64(segm_end2.x) - i1_to_i64(segm_start2.x),
+                    i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
+                    i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
+                    i_to_i64(segm_start2.y) - i_to_i64(segm_end2.y),
+                    i_to_i64(segm_end2.x) - i_to_i64(segm_start2.x),
                 ),
                 1_f64,
             );
@@ -1464,38 +1458,38 @@ where
             }
             let or1 = RF::RobustFpt::new_2(
                 Predicates::<I, F>::robust_cross_product(
-                    i1_to_i64(segm_end1.y) - i1_to_i64(segm_start1.y),
-                    i1_to_i64(segm_end1.x) - i1_to_i64(segm_start1.x),
-                    i1_to_i64(segm_end1.y) - i1_to_i64(site1.y()),
-                    i1_to_i64(segm_end1.x) - i1_to_i64(site1.x()),
+                    i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
+                    i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
+                    i_to_i64(segm_end1.y) - i_to_i64(site1.y()),
+                    i_to_i64(segm_end1.x) - i_to_i64(site1.x()),
                 ),
                 1_f64,
             );
             let or2 = RF::RobustFpt::new_2(
                 Predicates::<I, F>::robust_cross_product(
-                    i1_to_i64(segm_end2.x) - i1_to_i64(segm_start2.x),
-                    i1_to_i64(segm_end2.y) - i1_to_i64(segm_start2.y),
-                    i1_to_i64(segm_end2.x) - i1_to_i64(site1.x()),
-                    i1_to_i64(segm_end2.y) - i1_to_i64(site1.y()),
+                    i_to_i64(segm_end2.x) - i_to_i64(segm_start2.x),
+                    i_to_i64(segm_end2.y) - i_to_i64(segm_start2.y),
+                    i_to_i64(segm_end2.x) - i_to_i64(site1.x()),
+                    i_to_i64(segm_end2.y) - i_to_i64(site1.y()),
                 ),
                 1_f64,
             );
             let det = RF::RobustFpt::new_1(2_f64) * a * or1 * or2;
             let c1 = RF::RobustFpt::new_2(
                 Predicates::<I, F>::robust_cross_product(
-                    i1_to_i64(segm_end1.y) - i1_to_i64(segm_start1.y),
-                    i1_to_i64(segm_end1.x) - i1_to_i64(segm_start1.x),
-                    i1_to_i64(segm_end1.y),
-                    i1_to_i64(segm_end1.x),
+                    i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
+                    i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
+                    i_to_i64(segm_end1.y),
+                    i_to_i64(segm_end1.x),
                 ),
                 1_f64,
             );
             let c2 = RF::RobustFpt::new_2(
                 Predicates::<I, F>::robust_cross_product(
-                    i1_to_i64(segm_end2.x) - i1_to_i64(segm_start2.x),
-                    i1_to_i64(segm_end2.y) - i1_to_i64(segm_start2.y),
-                    i1_to_i64(segm_end2.x),
-                    i1_to_i64(segm_end2.y),
+                    i_to_i64(segm_end2.x) - i_to_i64(segm_start2.x),
+                    i_to_i64(segm_end2.y) - i_to_i64(segm_start2.y),
+                    i_to_i64(segm_end2.x),
+                    i_to_i64(segm_end2.y),
                 ),
                 1_f64,
             );
@@ -1525,10 +1519,10 @@ where
             b -= sqr_sum1
                 * RF::RobustFpt::new_2(
                     Predicates::<I, F>::robust_cross_product(
-                        i1_to_i64(segm_end2.x) - i1_to_i64(segm_start2.x),
-                        i1_to_i64(segm_end2.y) - i1_to_i64(segm_start2.y),
-                        i1_to_i64(-site1.y()),
-                        i1_to_i64(site1.x()),
+                        i_to_i64(segm_end2.x) - i_to_i64(segm_start2.x),
+                        i_to_i64(segm_end2.y) - i_to_i64(segm_start2.y),
+                        i_to_i64(-site1.y()),
+                        i_to_i64(site1.x()),
                     ),
                     1_f64,
                 );
@@ -1536,10 +1530,10 @@ where
             b -= sqr_sum2
                 * RF::RobustFpt::new_2(
                     Predicates::<I, F>::robust_cross_product(
-                        i1_to_i64(segm_end1.x) - i1_to_i64(segm_start1.x),
-                        i1_to_i64(segm_end1.y) - i1_to_i64(segm_start1.y),
-                        i1_to_i64(-site1.y()),
-                        i1_to_i64(site1.x()),
+                        i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
+                        i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
+                        i_to_i64(-site1.y()),
+                        i_to_i64(site1.x()),
                     ),
                     1_f64,
                 );
@@ -1636,41 +1630,41 @@ where
         site3: &VSE::SiteEvent<I, F>,
         c_event: &VC::CircleEventType,
     ) {
-        let i1_to_f64 = TC1::<I>::i_to_f64;
-        let i1_to_i64 = TC1::<I>::i_to_i64;
+        let i_to_f64 = TC1::<I>::i_to_f64;
+        let i_to_i64 = TC1::<I>::i_to_i64;
 
-        let a1 = RF::RobustFpt::new_1(i1_to_f64(site1.x1()) - i1_to_f64(site1.x0()));
-        let b1 = RF::RobustFpt::new_1(i1_to_f64(site1.y1()) - i1_to_f64(site1.y0()));
+        let a1 = RF::RobustFpt::new_1(i_to_f64(site1.x1()) - i_to_f64(site1.x0()));
+        let b1 = RF::RobustFpt::new_1(i_to_f64(site1.y1()) - i_to_f64(site1.y0()));
         let c1 = RF::RobustFpt::new_2(
             Predicates::<I, F>::robust_cross_product(
-                i1_to_i64(site1.x0()),
-                i1_to_i64(site1.y0()),
-                i1_to_i64(site1.x1()),
-                i1_to_i64(site1.y1()),
+                i_to_i64(site1.x0()),
+                i_to_i64(site1.y0()),
+                i_to_i64(site1.x1()),
+                i_to_i64(site1.y1()),
             ),
             1_f64,
         );
 
-        let a2 = RF::RobustFpt::new_1(i1_to_f64(site2.x1()) - i1_to_f64(site2.x0()));
-        let b2 = RF::RobustFpt::new_1(i1_to_f64(site2.y1()) - i1_to_f64(site2.y0()));
+        let a2 = RF::RobustFpt::new_1(i_to_f64(site2.x1()) - i_to_f64(site2.x0()));
+        let b2 = RF::RobustFpt::new_1(i_to_f64(site2.y1()) - i_to_f64(site2.y0()));
         let c2 = RF::RobustFpt::new_2(
             Predicates::<I, F>::robust_cross_product(
-                i1_to_i64(site2.x0()),
-                i1_to_i64(site2.y0()),
-                i1_to_i64(site2.x1()),
-                i1_to_i64(site2.y1()),
+                i_to_i64(site2.x0()),
+                i_to_i64(site2.y0()),
+                i_to_i64(site2.x1()),
+                i_to_i64(site2.y1()),
             ),
             1_f64,
         );
 
-        let a3 = RF::RobustFpt::new_1(i1_to_f64(site3.x1()) - i1_to_f64(site3.x0()));
-        let b3 = RF::RobustFpt::new_1(i1_to_f64(site3.y1()) - i1_to_f64(site3.y0()));
+        let a3 = RF::RobustFpt::new_1(i_to_f64(site3.x1()) - i_to_f64(site3.x0()));
+        let b3 = RF::RobustFpt::new_1(i_to_f64(site3.y1()) - i_to_f64(site3.y0()));
         let c3 = RF::RobustFpt::new_2(
             Predicates::<I, F>::robust_cross_product(
-                i1_to_i64(site3.x0()),
-                i1_to_i64(site3.y0()),
-                i1_to_i64(site3.x1()),
-                i1_to_i64(site3.y1()),
+                i_to_i64(site3.x0()),
+                i_to_i64(site3.y0()),
+                i_to_i64(site3.x1()),
+                i_to_i64(site3.y1()),
             ),
             1_f64,
         );
@@ -1680,28 +1674,28 @@ where
         let len3 = (a3 * a3 + b3 * b3).sqrt();
         let cross_12 = RF::RobustFpt::new_2(
             Predicates::<I, F>::robust_cross_product(
-                i1_to_i64(site1.x1()) - i1_to_i64(site1.x0()),
-                i1_to_i64(site1.y1()) - i1_to_i64(site1.y0()),
-                i1_to_i64(site2.x1()) - i1_to_i64(site2.x0()),
-                i1_to_i64(site2.y1()) - i1_to_i64(site2.y0()),
+                i_to_i64(site1.x1()) - i_to_i64(site1.x0()),
+                i_to_i64(site1.y1()) - i_to_i64(site1.y0()),
+                i_to_i64(site2.x1()) - i_to_i64(site2.x0()),
+                i_to_i64(site2.y1()) - i_to_i64(site2.y0()),
             ),
             1_f64,
         );
         let cross_23 = RF::RobustFpt::new_2(
             Predicates::<I, F>::robust_cross_product(
-                i1_to_i64(site2.x1()) - i1_to_i64(site2.x0()),
-                i1_to_i64(site2.y1()) - i1_to_i64(site2.y0()),
-                i1_to_i64(site3.x1()) - i1_to_i64(site3.x0()),
-                i1_to_i64(site3.y1()) - i1_to_i64(site3.y0()),
+                i_to_i64(site2.x1()) - i_to_i64(site2.x0()),
+                i_to_i64(site2.y1()) - i_to_i64(site2.y0()),
+                i_to_i64(site3.x1()) - i_to_i64(site3.x0()),
+                i_to_i64(site3.y1()) - i_to_i64(site3.y0()),
             ),
             1_f64,
         );
         let cross_31 = RF::RobustFpt::new_2(
             Predicates::<I, F>::robust_cross_product(
-                i1_to_i64(site3.x1()) - i1_to_i64(site3.x0()),
-                i1_to_i64(site3.y1()) - i1_to_i64(site3.y0()),
-                i1_to_i64(site1.x1()) - i1_to_i64(site1.x0()),
-                i1_to_i64(site1.y1()) - i1_to_i64(site1.y0()),
+                i_to_i64(site3.x1()) - i_to_i64(site3.x0()),
+                i_to_i64(site3.y1()) - i_to_i64(site3.y0()),
+                i_to_i64(site1.x1()) - i_to_i64(site1.x0()),
+                i_to_i64(site1.y1()) - i_to_i64(site1.y0()),
             ),
             1_f64,
         );

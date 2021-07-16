@@ -542,29 +542,23 @@ where
             + self.to_offset[1]
     }
 
-    /// transform from source coordinate system to dest coordinate system
+    /// transform from source coordinate system to destination coordinate system
     /// float x coordinate
     #[inline(always)]
     pub fn transform_fx(&self, x: F) -> F {
         (x + self.to_center_[0]) * self.scale[0] + self.to_offset[0]
     }
 
-    /// transform from source coordinate system to dest coordinate system
+    /// transform from source coordinate system to destination coordinate system
     /// float y coordinate
     #[inline(always)]
     pub fn transform_fy(&self, y: F) -> F {
         (y + self.to_center_[1]) * self.scale[1] + self.to_offset[1]
     }
 
-    /// Only scale
+    /// multiply the scale by a factor f
     #[inline(always)]
-    pub fn scale(&self, r: F) -> F {
-        r * self.scale[1]
-    }
-
-    /// Only scale
-    #[inline(always)]
-    pub fn reverse_scale(&self, r: F) -> F {
-        r / self.scale[1]
+    pub fn zoom(&mut self, f: F) {
+        self.scale = [self.scale[0] * f, self.scale[1] * f];
     }
 }
