@@ -199,19 +199,6 @@ where
         if value.is_zero() {
             return Orientation::Collinear;
         }
-        match value < 0.0 {
-            true => Orientation::Right,
-            false => Orientation::Left,
-        }
-    }
-
-    /// Value is a determinant of two vectors (e.g. x1 * y2 - x2 * y1).
-    /// Return orientation based on the sign of the determinant.
-    #[inline(always)]
-    fn eval_bf(value: f64) -> Orientation {
-        if value.is_zero() {
-            return Orientation::Collinear;
-        }
         match value.is_sign_negative() {
             true => Orientation::Right,
             false => Orientation::Left,
@@ -219,20 +206,19 @@ where
     }
 
     #[inline(always)]
-    fn eval_3(point1: &Point<I>, point2: &Point<I>, point3: &Point<I>) -> Orientation {
+    fn eval_p(point1: &Point<I>, point2: &Point<I>, point3: &Point<I>) -> Orientation {
         let i_to_i64 = TC1::<I>::i_to_i64;
         let dx1: i64 = i_to_i64(point1.x) - i_to_i64(point2.x);
         let dx2: i64 = i_to_i64(point2.x) - i_to_i64(point3.x);
         let dy1: i64 = i_to_i64(point1.y) - i_to_i64(point2.y);
         let dy2: i64 = i_to_i64(point2.y) - i_to_i64(point3.y);
         let cp: f64 = Predicates::<I, F>::robust_cross_product(dx1, dy1, dx2, dy2);
-        Self::eval_bf(cp)
+        Self::eval_f(cp)
     }
 
     #[inline(always)]
-    fn eval_4(dif_x1_: i64, dif_y1_: i64, dif_x2_: i64, dif_y2_: i64) -> Orientation {
-        let a = Predicates::<I, F>::robust_cross_product(dif_x1_, dif_y1_, dif_x2_, dif_y2_);
-        Self::eval_bf(a)
+    fn eval_i(dif_x1: i64, dif_y1: i64, dif_x2: i64, dif_y2: i64) -> Orientation {
+        Self::eval_f( Predicates::<I, F>::robust_cross_product(dif_x1, dif_y1, dif_x2, dif_y2))
     }
 }
 
@@ -306,7 +292,7 @@ where
             if lhs.y0() != rhs.y0() {
                 return lhs.y0() < rhs.y0();
             }
-            return OrientationTest::<I, F>::eval_3(lhs.point1(), lhs.point0(), rhs.point1())
+            return OrientationTest::<I, F>::eval_p(lhs.point1(), lhs.point0(), rhs.point1())
                 == Orientation::Left;
         }
     }
@@ -495,7 +481,7 @@ where
     ) -> bool {
         // Handle temporary segment sites.
         if left_site.sorted_index() == right_site.sorted_index() {
-            return OrientationTest::<I, F>::eval_3(
+            return OrientationTest::<I, F>::eval_p(
                 left_site.point0(),
                 left_site.point1(),
                 new_point,
@@ -559,7 +545,7 @@ where
         let segment_start: &Point<I> = right_site.point0();
         let segment_end: &Point<I> = right_site.point1();
         let eval: Orientation =
-            OrientationTest::<I, F>::eval_3(segment_start, segment_end, new_point);
+            OrientationTest::<I, F>::eval_p(segment_start, segment_end, new_point);
         if eval != Orientation::Right {
             return if !right_site.is_inverse() {
                 KPredicateResult::LESS
@@ -581,7 +567,7 @@ where
             }
             return KPredicateResult::UNDEFINED;
         } else {
-            let orientation = OrientationTest::<I, F>::eval_4(
+            let orientation = OrientationTest::<I, F>::eval_i(
                 i_to_i64(segment_end.x) - i_to_i64(segment_start.x),
                 i_to_i64(segment_end.y) - i_to_i64(segment_start.y),
                 i_to_i64(new_point.x) - i_to_i64(site_point.x),
@@ -783,7 +769,7 @@ where
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
     ) -> bool {
-        OrientationTest::<I, F>::eval_3(site1.point0(), site2.point0(), site3.point0())
+        OrientationTest::<I, F>::eval_p(site1.point0(), site2.point0(), site3.point0())
             == Orientation::Right
     }
 
@@ -840,9 +826,9 @@ where
         #[allow(clippy::suspicious_operation_groupings)]
         if segment_index != SiteIndex::Two {
             let orient1 =
-                OrientationTest::<I, F>::eval_3(site1.point0(), site2.point0(), site3.point0());
+                OrientationTest::<I, F>::eval_p(site1.point0(), site2.point0(), site3.point0());
             let orient2 =
-                OrientationTest::<I, F>::eval_3(site1.point0(), site2.point0(), site3.point1());
+                OrientationTest::<I, F>::eval_p(site1.point0(), site2.point0(), site3.point1());
             if segment_index == SiteIndex::One && site1.x0() >= site2.x0() {
                 if orient1 != Orientation::Right {
                     return false;
@@ -875,7 +861,7 @@ where
                 return false;
             }
             if site2.is_inverse() == site3.is_inverse()
-                && OrientationTest::<I, F>::eval_3(site2.point0(), site1.point0(), site3.point1())
+                && OrientationTest::<I, F>::eval_p(site2.point0(), site1.point0(), site3.point1())
                     != Orientation::Right
             {
                 return false;
