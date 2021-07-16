@@ -898,17 +898,7 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
-    #[inline(always)]
     fn ppp(
-        site1: &VSE::SiteEvent<I, F>,
-        site2: &VSE::SiteEvent<I, F>,
-        site3: &VSE::SiteEvent<I, F>,
-        c_event: &VC::CircleEventType,
-    ) {
-        Self::ppp_points(site1.point0(), site2.point0(), site3.point0(), c_event)
-    }
-
-    fn ppp_points(
         point1: &Point<I>,
         point2: &Point<I>,
         point3: &Point<I>,
@@ -1217,7 +1207,7 @@ where
                 }
                 match segment_index {
                     SiteIndex::One => {
-                        LazyCircleFormationFunctor::<I, F>::ppp_points(
+                        LazyCircleFormationFunctor::<I, F>::ppp(
                             site_3_point,
                             site1.point0(),
                             site2.point0(),
@@ -1225,7 +1215,7 @@ where
                         );
                     }
                     SiteIndex::Two => {
-                        LazyCircleFormationFunctor::<I, F>::ppp_points(
+                        LazyCircleFormationFunctor::<I, F>::ppp(
                             site1.point0(),
                             site_3_point,
                             site2.point0(),
@@ -1233,7 +1223,7 @@ where
                         );
                     }
                     SiteIndex::Three => {
-                        LazyCircleFormationFunctor::<I, F>::ppp_points(
+                        LazyCircleFormationFunctor::<I, F>::ppp(
                             site1.point0(),
                             site2.point0(),
                             site_3_point,
@@ -1837,7 +1827,7 @@ where
                     if !CircleExistencePredicate::<I, F>::ppp(site1, site2, site3) {
                         return false;
                     }
-                    LazyCircleFormationFunctor::<I, F>::ppp(site1, site2, site3, circle);
+                    LazyCircleFormationFunctor::<I, F>::ppp(site1.point0(), site2.point0(), site3.point0(), circle);
                 } else {
                     // (point, point, segment) sites.
                     if !CircleExistencePredicate::<I, F>::pps(site1, site2, site3, SiteIndex::Three)
