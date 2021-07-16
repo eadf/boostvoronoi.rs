@@ -898,6 +898,7 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
+    /// Lazy evaluation of point, point, point circle events
     fn ppp(
         point1: &Point<I>,
         point2: &Point<I>,
@@ -976,6 +977,7 @@ where
         }
     }
 
+    /// Lazy evaluation of point, point, segment circle events
     #[allow(unknown_lints)]
     #[allow(clippy::branches_sharing_code)] // false positive
     fn pps(
@@ -1259,6 +1261,7 @@ where
         };
     }
 
+    /// Lazy evaluation of point, segment, segment circle events
     #[allow(unused_parens)]
     fn pss(
         site1: &VSE::SiteEvent<I, F>,
@@ -1282,9 +1285,11 @@ where
             point_index
         );
 
-        // this is a case that does not exists in c++ boost voronoi
-        // It seems better to use the pristine int coordinate instead of re-calculating
-        // it again with lossy floats.
+        // This is a case that does not exists in C++ boost voronoi.
+        // If site1 is a point shared by both site2 and site3 there can only be one CE solution.
+        // The CE must be the site1 point with zero radius.
+        // It seems better to use the pristine int coordinate instead of spending cycles
+        // re-calculating it again with lossy floats.
         #[allow(clippy::suspicious_operation_groupings)]
         if (site1.point0() == site2.point0() || site1.point0() == site2.point1())
             && (site1.point0() == site3.point0() || site1.point0() == site3.point1())
@@ -1600,6 +1605,7 @@ where
         }
     }
 
+    /// Lazy evaluation of segment, segment, segment circle events
     fn sss(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
@@ -1938,6 +1944,7 @@ where
     I: InputType + Neg<Output = I>,
     F: OutputType + Neg<Output = F>,
 {
+    /// Recompute parameters of the point, point, point circle event using high-precision library.
     fn ppp(
         point1: &Point<I>,
         point2: &Point<I>,
@@ -2026,7 +2033,7 @@ where
         }
     }
 
-    /// Recompute parameters of the circle event using high-precision library.
+    /// Recompute parameters of the point, point, segment circle event using high-precision library.
     #[allow(clippy::too_many_arguments)]
     fn pps(
         site1: &VSE::SiteEvent<I, F>,
@@ -2190,7 +2197,7 @@ where
         }
     }
 
-    /// Recompute parameters of the circle event using high-precision library.
+    /// Recompute parameters of the point, segment, segment circle event using high-precision library.
     #[allow(non_snake_case)]
     #[allow(clippy::too_many_arguments)]
     fn pss(
@@ -2422,7 +2429,7 @@ where
         }
     }
 
-    /// Recompute parameters of the circle event using high-precision library.
+    /// Recompute parameters of the segment, segment, segment circle event using high-precision library.
     #[allow(non_snake_case)]
     #[allow(clippy::many_single_char_names)]
     #[allow(clippy::suspicious_operation_groupings)]
@@ -2435,7 +2442,8 @@ where
         recompute_c_y: bool,
         recompute_lower_x: bool,
     ) {
-        tln!(">ExactCircleFormationFunctor:sss site1:{:?} site2:{:?}, site3:{:?}, recompute_c_x:{} recompute_c_y:{}, recompute_lower_x:{}", site1, site2, site3, recompute_c_x,recompute_c_y, recompute_lower_x);
+        tln!(">ExactCircleFormationFunctor:sss site1:{:?} site2:{:?}, site3:{:?}, recompute_c_x:{} recompute_c_y:{}, recompute_lower_x:{}",
+            site1, site2, site3, recompute_c_x,recompute_c_y, recompute_lower_x);
 
         let i1_to_bi = TC1::<I>::i_to_xi;
         let sqrt_expr_ = RF::robust_sqrt_expr::<f64>::default();
