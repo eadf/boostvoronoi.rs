@@ -905,29 +905,29 @@ where
         point3: &Point<I>,
         c_event: &VC::CircleEventType,
     ) {
-        let i1_to_f64 = TC1::<I>::i_to_f64;
-        let i1_to_i64 = TC1::<I>::i_to_i64;
+        let i_to_f64 = TC1::<I>::i_to_f64;
+        let i_to_i64 = TC1::<I>::i_to_i64;
 
-        let dif_x1 = i1_to_f64(point1.x) - i1_to_f64(point2.x);
-        let dif_x2 = i1_to_f64(point2.x) - i1_to_f64(point3.x);
-        let dif_y1 = i1_to_f64(point1.y) - i1_to_f64(point2.y);
-        let dif_y2 = i1_to_f64(point2.y) - i1_to_f64(point3.y);
+        let dif_x1 = i_to_f64(point1.x) - i_to_f64(point2.x);
+        let dif_x2 = i_to_f64(point2.x) - i_to_f64(point3.x);
+        let dif_y1 = i_to_f64(point1.y) - i_to_f64(point2.y);
+        let dif_y2 = i_to_f64(point2.y) - i_to_f64(point3.y);
         let orientation = Predicates::<I, F>::robust_cross_product(
-            i1_to_i64(point1.x) - i1_to_i64(point2.x),
-            i1_to_i64(point2.x) - i1_to_i64(point3.x),
-            i1_to_i64(point1.y) - i1_to_i64(point2.y),
-            i1_to_i64(point2.y) - i1_to_i64(point3.y),
+            i_to_i64(point1.x) - i_to_i64(point2.x),
+            i_to_i64(point2.x) - i_to_i64(point3.x),
+            i_to_i64(point1.y) - i_to_i64(point2.y),
+            i_to_i64(point2.y) - i_to_i64(point3.y),
         );
         let inv_orientation: RF::RobustFpt = RF::RobustFpt::new_2(
             num::cast::<f32, f64>(0.5f32).unwrap() / orientation,
             num::cast::<f32, f64>(2.0f32).unwrap(),
         );
-        let sum_x1: f64 = i1_to_f64(point1.x) + i1_to_f64(point2.x);
-        let sum_x2: f64 = i1_to_f64(point2.x) + i1_to_f64(point3.x);
-        let sum_y1: f64 = i1_to_f64(point1.y) + i1_to_f64(point2.y);
-        let sum_y2: f64 = i1_to_f64(point2.y) + i1_to_f64(point3.y);
-        let dif_x3: f64 = i1_to_f64(point1.x) - i1_to_f64(point3.x);
-        let dif_y3: f64 = i1_to_f64(point1.y) - i1_to_f64(point3.y);
+        let sum_x1: f64 = i_to_f64(point1.x) + i_to_f64(point2.x);
+        let sum_x2: f64 = i_to_f64(point2.x) + i_to_f64(point3.x);
+        let sum_y1: f64 = i_to_f64(point1.y) + i_to_f64(point2.y);
+        let sum_y2: f64 = i_to_f64(point2.y) + i_to_f64(point3.y);
+        let dif_x3: f64 = i_to_f64(point1.x) - i_to_f64(point3.x);
+        let dif_y3: f64 = i_to_f64(point1.y) - i_to_f64(point3.y);
         let mut c_x = RF::RobustDif::new();
         let mut c_y = RF::RobustDif::new();
         let error = 2_f64;
@@ -1777,13 +1777,13 @@ where
         c: &VC::CircleEventType,
         s: &VSE::SiteEvent<I, F>,
     ) -> bool {
-        let i1_to_f64 = TC1::<I>::i_to_f64;
+        let i_to_f64 = TC1::<I>::i_to_f64;
 
         if !s.is_segment() || !Predicates::<I, F>::is_vertical_1(s) {
             return false;
         }
-        let y0 = i1_to_f64(if s.is_inverse() { s.y1() } else { s.y0() });
-        let y1 = i1_to_f64(if s.is_inverse() { s.y0() } else { s.y1() });
+        let y0 = i_to_f64(if s.is_inverse() { s.y1() } else { s.y0() });
+        let y1 = i_to_f64(if s.is_inverse() { s.y0() } else { s.y1() });
         let cc_y = c.0.get().y().into_inner();
 
         UlpComparison::ulp_comparison(cc_y, y0, 64) == cmp::Ordering::Less
@@ -1955,27 +1955,27 @@ where
         recompute_lower_x: bool,
     ) {
         let xi_to_xf = TC2::<I, F>::xi_to_xf;
-        let i1_to_xi = TC1::<I>::i_to_xi;
+        let i_to_xi = TC1::<I>::i_to_xi;
 
         let dif_x = [
-            i1_to_xi(point1.x) - i1_to_xi(point2.x),
-            i1_to_xi(point2.x) - i1_to_xi(point3.x),
-            i1_to_xi(point1.x) - i1_to_xi(point3.x),
+            i_to_xi(point1.x) - i_to_xi(point2.x),
+            i_to_xi(point2.x) - i_to_xi(point3.x),
+            i_to_xi(point1.x) - i_to_xi(point3.x),
         ];
 
         let dif_y = [
-            i1_to_xi(point1.y) - i1_to_xi(point2.y),
-            i1_to_xi(point2.y) - i1_to_xi(point3.y),
-            i1_to_xi(point1.y) - i1_to_xi(point3.y),
+            i_to_xi(point1.y) - i_to_xi(point2.y),
+            i_to_xi(point2.y) - i_to_xi(point3.y),
+            i_to_xi(point1.y) - i_to_xi(point3.y),
         ];
 
         let sum_x = [
-            i1_to_xi(point1.x) + i1_to_xi(point2.x),
-            i1_to_xi(point2.x) + i1_to_xi(point3.x),
+            i_to_xi(point1.x) + i_to_xi(point2.x),
+            i_to_xi(point2.x) + i_to_xi(point3.x),
         ];
         let sum_y = [
-            i1_to_xi(point1.y) + i1_to_xi(point2.y),
-            i1_to_xi(point2.y) + i1_to_xi(point3.y),
+            i_to_xi(point1.y) + i_to_xi(point2.y),
+            i_to_xi(point2.y) + i_to_xi(point3.y),
         ];
 
         let inv_denom = {
@@ -2063,7 +2063,7 @@ where
         );
 
         let bi_to_ext = TC2::<I, F>::xi_to_xf;
-        let i1_to_bi = TC1::<I>::i_to_xi;
+        let i_to_bi = TC1::<I>::i_to_xi;
 
         let sqrt_expr_ = RF::robust_sqrt_expr::<f64>::default();
 
@@ -2082,22 +2082,22 @@ where
             EI::ExtendedInt::zero(),
             EI::ExtendedInt::zero(),
         ];
-        let line_a: EI::ExtendedInt = i1_to_bi(site3.y1()) - i1_to_bi(site3.y0());
-        let line_b: EI::ExtendedInt = i1_to_bi(site3.x0()) - i1_to_bi(site3.x1());
+        let line_a: EI::ExtendedInt = i_to_bi(site3.y1()) - i_to_bi(site3.y0());
+        let line_b: EI::ExtendedInt = i_to_bi(site3.x0()) - i_to_bi(site3.x1());
         let segm_len: EI::ExtendedInt = &line_a * &line_a + &line_b * &line_b;
-        let vec_x: EI::ExtendedInt = i1_to_bi(site2.y()) - i1_to_bi(site1.y());
-        let vec_y: EI::ExtendedInt = i1_to_bi(site1.x()) - i1_to_bi(site2.x());
-        let sum_x: EI::ExtendedInt = i1_to_bi(site1.x()) + i1_to_bi(site2.x());
-        let sum_y: EI::ExtendedInt = i1_to_bi(site1.y()) + i1_to_bi(site2.y());
+        let vec_x: EI::ExtendedInt = i_to_bi(site2.y()) - i_to_bi(site1.y());
+        let vec_y: EI::ExtendedInt = i_to_bi(site1.x()) - i_to_bi(site2.x());
+        let sum_x: EI::ExtendedInt = i_to_bi(site1.x()) + i_to_bi(site2.x());
+        let sum_y: EI::ExtendedInt = i_to_bi(site1.y()) + i_to_bi(site2.y());
         let teta: EI::ExtendedInt = &line_a * &vec_x + &line_b * &vec_y;
         let mut denom: EI::ExtendedInt = &vec_x * &line_b - &vec_y * &line_a;
 
-        let mut dif0: EI::ExtendedInt = i1_to_bi(site3.y1()) - i1_to_bi(site1.y());
-        let mut dif1: EI::ExtendedInt = i1_to_bi(site1.x()) - i1_to_bi(site3.x1());
+        let mut dif0: EI::ExtendedInt = i_to_bi(site3.y1()) - i_to_bi(site1.y());
+        let mut dif1: EI::ExtendedInt = i_to_bi(site1.x()) - i_to_bi(site3.x1());
         let a: EI::ExtendedInt = &line_a * &dif1 - &line_b * &dif0;
 
-        dif0 = i1_to_bi(site3.y1()) - i1_to_bi(site2.y());
-        dif1 = i1_to_bi(site2.x()) - i1_to_bi(site3.x1());
+        dif0 = i_to_bi(site3.y1()) - i_to_bi(site2.y());
+        dif1 = i_to_bi(site2.x()) - i_to_bi(site3.x1());
         let b = line_a * dif1 - line_b * dif0;
         let sum_ab = &a + &b;
         tln!("a:{:?} b:{:?} denom:{:?}", a, b, denom);
@@ -2210,7 +2210,7 @@ where
         recompute_c_y: bool,
         recompute_lower_x: bool,
     ) {
-        let i1_to_xi = TC1::<I>::i_to_xi;
+        let i_to_xi = TC1::<I>::i_to_xi;
         let xi_to_xf = TC2::<I, F>::xi_to_xf;
         let mut sqrt_expr_ = RF::robust_sqrt_expr::<f64>::default();
 
@@ -2233,13 +2233,13 @@ where
         let segm_start2 = site3.point0();
         let segm_end2 = site3.point1();
         let a: [EI::ExtendedInt; 2] = [
-            i1_to_xi(segm_end1.x) - i1_to_xi(segm_start1.x),
-            i1_to_xi(segm_end2.x) - i1_to_xi(segm_start2.x),
+            i_to_xi(segm_end1.x) - i_to_xi(segm_start1.x),
+            i_to_xi(segm_end2.x) - i_to_xi(segm_start2.x),
         ];
 
         let b: [EI::ExtendedInt; 2] = [
-            i1_to_xi(segm_end1.y) - i1_to_xi(segm_start1.y),
-            i1_to_xi(segm_end2.y) - i1_to_xi(segm_start2.y),
+            i_to_xi(segm_end1.y) - i_to_xi(segm_start1.y),
+            i_to_xi(segm_end2.y) - i_to_xi(segm_start2.y),
         ];
         tln!("->ExactCircleFormationFunctor:pss");
         tln!(" a[0]={:?}", a[0]);
@@ -2257,12 +2257,12 @@ where
             let denom =
                 xi_to_xf(&((&a[0] * &a[0] + &b[0] * &b[0]) * &EI::ExtendedInt::from(2_i32)));
 
-            c[0] = &b[0] * &(i1_to_xi(segm_start2.x) - i1_to_xi(segm_start1.x))
-                - &a[0] * &(i1_to_xi(segm_start2.y) - i1_to_xi(segm_start1.y));
-            let dx: EI::ExtendedInt = &a[0] * &(i1_to_xi(site1.y()) - i1_to_xi(segm_start1.y))
-                - &b[0] * &(i1_to_xi(site1.x()) - i1_to_xi(segm_start1.x));
-            let dy: EI::ExtendedInt = &b[0] * &(i1_to_xi(site1.x()) - i1_to_xi(segm_start2.x))
-                - &a[0] * &(i1_to_xi(site1.y()) - i1_to_xi(segm_start2.y));
+            c[0] = &b[0] * &(i_to_xi(segm_start2.x) - i_to_xi(segm_start1.x))
+                - &a[0] * &(i_to_xi(segm_start2.y) - i_to_xi(segm_start1.y));
+            let dx: EI::ExtendedInt = &a[0] * &(i_to_xi(site1.y()) - i_to_xi(segm_start1.y))
+                - &b[0] * &(i_to_xi(site1.x()) - i_to_xi(segm_start1.x));
+            let dy: EI::ExtendedInt = &b[0] * &(i_to_xi(site1.x()) - i_to_xi(segm_start2.x))
+                - &a[0] * &(i_to_xi(site1.y()) - i_to_xi(segm_start2.y));
             cB[0] = dx * &dy;
             cB[1] = EI::ExtendedInt::from(1_i32);
 
@@ -2285,12 +2285,12 @@ where
                     segm_start2.x,
                     segm_start2.y
                 );
-                cA[1] = &a[0] * &a[0] * (i1_to_xi(segm_start1.y) + i1_to_xi(segm_start2.y))
+                cA[1] = &a[0] * &a[0] * (i_to_xi(segm_start1.y) + i_to_xi(segm_start2.y))
                     - &a[0]
                         * &b[0]
-                        * (i1_to_xi(segm_start1.x) + i1_to_xi(segm_start2.x)
-                            - (i1_to_xi(site1.x()) * EI::ExtendedInt::from(2_i32)))
-                    + &b[0] * &b[0] * (i1_to_xi(site1.y()) * EI::ExtendedInt::from(2_i32));
+                        * (i_to_xi(segm_start1.x) + i_to_xi(segm_start2.x)
+                            - (i_to_xi(site1.x()) * EI::ExtendedInt::from(2_i32)))
+                    + &b[0] * &b[0] * (i_to_xi(site1.y()) * EI::ExtendedInt::from(2_i32));
                 tln!("cA[1]={:?}", cA[1]);
                 let c_y = sqrt_expr_.eval2(&cA, &cB);
                 tln!("c_y={:?}", c_y);
@@ -2305,12 +2305,12 @@ where
                     } else {
                         -2i32
                     });
-                cA[1] = &b[0] * &b[0] * (i1_to_xi(segm_start1.x) + i1_to_xi(segm_start2.x))
+                cA[1] = &b[0] * &b[0] * (i_to_xi(segm_start1.x) + i_to_xi(segm_start2.x))
                     - &a[0]
                         * &b[0]
-                        * (i1_to_xi(segm_start1.y) + i1_to_xi(segm_start2.y)
-                            - i1_to_xi(site1.y()) * &EI::ExtendedInt::from(2_i32))
-                    + &a[0] * &a[0] * (i1_to_xi(site1.x())) * &EI::ExtendedInt::from(2_i32);
+                        * (i_to_xi(segm_start1.y) + i_to_xi(segm_start2.y)
+                            - i_to_xi(site1.y()) * &EI::ExtendedInt::from(2_i32))
+                    + &a[0] * &a[0] * (i_to_xi(site1.x())) * &EI::ExtendedInt::from(2_i32);
                 tln!(" cA[0]={:.0}", cA[0].d());
                 tln!(" cA[1]={:.0}", cA[1].d());
 
@@ -2336,12 +2336,12 @@ where
             }
             return;
         }
-        c[0] = &b[0] * &i1_to_xi(segm_end1.x) - &a[0] * &i1_to_xi(segm_end1.y);
-        c[1] = &a[1] * &i1_to_xi(segm_end2.y) - &b[1] * &i1_to_xi(segm_end2.x);
+        c[0] = &b[0] * &i_to_xi(segm_end1.x) - &a[0] * &i_to_xi(segm_end1.y);
+        c[1] = &a[1] * &i_to_xi(segm_end2.y) - &b[1] * &i_to_xi(segm_end2.x);
         let ix: EI::ExtendedInt = &a[0] * &c[1] + &a[1] * &c[0];
         let iy: EI::ExtendedInt = &b[0] * &c[1] + &b[1] * &c[0];
-        let dx: EI::ExtendedInt = ix.clone() - &orientation * &i1_to_xi(site1.x());
-        let dy: EI::ExtendedInt = iy.clone() - &orientation * &i1_to_xi(site1.y());
+        let dx: EI::ExtendedInt = ix.clone() - &orientation * &i_to_xi(site1.x());
+        let dy: EI::ExtendedInt = iy.clone() - &orientation * &i_to_xi(site1.y());
         tln!(" ix={:?}", ix);
         tln!(" iy={:?}", iy);
         tln!(" dx={:?}", dx);
@@ -2445,7 +2445,7 @@ where
         tln!(">ExactCircleFormationFunctor:sss site1:{:?} site2:{:?}, site3:{:?}, recompute_c_x:{} recompute_c_y:{}, recompute_lower_x:{}",
             site1, site2, site3, recompute_c_x,recompute_c_y, recompute_lower_x);
 
-        let i1_to_bi = TC1::<I>::i_to_xi;
+        let i_to_bi = TC1::<I>::i_to_xi;
         let sqrt_expr_ = RF::robust_sqrt_expr::<f64>::default();
 
         let mut cA: [EI::ExtendedInt; 4] = [
@@ -2465,23 +2465,23 @@ where
         // cB - corresponds to the squared length.
 
         let a = [
-            i1_to_bi(site1.x1()) - i1_to_bi(site1.x0()),
-            i1_to_bi(site2.x1()) - i1_to_bi(site2.x0()),
-            i1_to_bi(site3.x1()) - i1_to_bi(site3.x0()),
+            i_to_bi(site1.x1()) - i_to_bi(site1.x0()),
+            i_to_bi(site2.x1()) - i_to_bi(site2.x0()),
+            i_to_bi(site3.x1()) - i_to_bi(site3.x0()),
         ];
         let b = [
-            i1_to_bi(site1.y1()) - i1_to_bi(site1.y0()),
-            i1_to_bi(site2.y1()) - i1_to_bi(site2.y0()),
-            i1_to_bi(site3.y1()) - i1_to_bi(site3.y0()),
+            i_to_bi(site1.y1()) - i_to_bi(site1.y0()),
+            i_to_bi(site2.y1()) - i_to_bi(site2.y0()),
+            i_to_bi(site3.y1()) - i_to_bi(site3.y0()),
         ];
 
         let c = [
-            &i1_to_bi(site1.x0()) * &i1_to_bi(site1.y1())
-                - &i1_to_bi(site1.y0()) * &i1_to_bi(site1.x1()),
-            &i1_to_bi(site2.x0()) * &i1_to_bi(site2.y1())
-                - &i1_to_bi(site2.y0()) * &i1_to_bi(site2.x1()),
-            &i1_to_bi(site3.x0()) * &i1_to_bi(site3.y1())
-                - &i1_to_bi(site3.y0()) * &i1_to_bi(site3.x1()),
+            &i_to_bi(site1.x0()) * &i_to_bi(site1.y1())
+                - &i_to_bi(site1.y0()) * &i_to_bi(site1.x1()),
+            &i_to_bi(site2.x0()) * &i_to_bi(site2.y1())
+                - &i_to_bi(site2.y0()) * &i_to_bi(site2.x1()),
+            &i_to_bi(site3.x0()) * &i_to_bi(site3.y1())
+                - &i_to_bi(site3.y0()) * &i_to_bi(site3.x1()),
         ];
 
         for (i, aa) in a.iter().enumerate().take(3) {

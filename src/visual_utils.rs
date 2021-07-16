@@ -415,8 +415,8 @@ where
     F: OutputType + Neg<Output = F>,
 {
     pub fn new(source_aabb: &Aabb2<I, F>, dest_aabb: &Aabb2<I, F>) -> Result<Self, BvError> {
-        let i32_to_f1 = super::TypeConverter2::<I, F>::i32_to_f;
-        let min_dim = i32_to_f1(10);
+        let i32_to_f = super::TypeConverter2::<I, F>::i32_to_f;
+        let min_dim = i32_to_f(10);
 
         if let Some(s_low) = source_aabb.get_low() {
             if let Some(s_high) = source_aabb.get_high() {
@@ -425,8 +425,8 @@ where
                         //println!("s_low:{:?},s_high:{:?},d_low:{:?},d_high:{:?}", s_low, s_high, d_low, d_high);
 
                         let source_aabb_center = [
-                            -(s_low[0] + s_high[0]) / i32_to_f1(2_i32),
-                            -(s_low[1] + s_high[1]) / i32_to_f1(2_i32),
+                            -(s_low[0] + s_high[0]) / i32_to_f(2_i32),
+                            -(s_low[1] + s_high[1]) / i32_to_f(2_i32),
                         ];
                         let source_aabb_size = [
                             (s_high[0] - s_low[0]).max(min_dim),
