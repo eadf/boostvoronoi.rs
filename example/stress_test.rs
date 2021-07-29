@@ -1,4 +1,4 @@
-#![feature(map_first_last)]
+#![cfg_attr(feature = "map_first_last", feature(map_first_last))]
 use boostvoronoi::builder as VB;
 use boostvoronoi::diagram as VD;
 use boostvoronoi::BvError;

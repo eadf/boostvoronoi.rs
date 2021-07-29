@@ -85,7 +85,7 @@ fn beachline_2() -> Result<(), BvError> {
             dbg!(&new_key);
             let lb = b.beach_line_.lower_bound(new_key)?;
             dbg!(&lb); // lb should be : right_it:L(4,21#0) R(8,62#1)
-            assert!(lb.is_ok());
+            assert!(lb.is_ok()?);
 
             println!("experiment all done");
             println!();
@@ -122,7 +122,7 @@ fn beachline_3() -> Result<(), BvError> {
             dbg!(&new_key);
             let lb = b.beach_line_.lower_bound(new_key)?;
             dbg!(&lb); // lb should be : right_it:L(4,21#0) R(8,62#1)
-            assert!(lb.is_ok());
+            assert!(lb.is_ok()?);
 
             println!("experiment all done");
             println!();

@@ -155,7 +155,7 @@ where
         let node_index = BeachLineIndex(
             self.beach_line_
                 .borrow_mut()
-                .ordered_insert_pos(key, node, position, false)?,
+                .ordered_insert_pos(key, node, position)?,
         );
         Ok((key, node_index))
     }
@@ -175,7 +175,6 @@ where
             key,
             Rc::clone(&node_data),
             position,
-            false,
         )?);
 
         //tln!("inserted beach_line with key:{}", key.node_index_.0);
@@ -196,7 +195,7 @@ where
         let node_index = BeachLineIndex(
             self.beach_line_
                 .borrow_mut()
-                .ordered_insert(key, data_node, false)?,
+                .ordered_insert(key, data_node)?,
         );
         t!("inserted beach_line:");
         self.dbgpa_compat_node_(&key, self.beach_line_.borrow().get_v(node_index.0)?, _ce)?;
@@ -214,7 +213,7 @@ where
         let node_index = BeachLineIndex(
             self.beach_line_
                 .borrow_mut()
-                .ordered_insert(key, node, false)?,
+                .ordered_insert(key, node)?,
         );
         Ok((key, node_index))
     }
@@ -236,7 +235,7 @@ where
         beachline_index: &BeachLineIndex,
     ) -> Result<(BeachLineNodeKey<I, F>, BeachLineNodeDataType), BvError> {
         let bl_borrow = self.beach_line_.borrow();
-        let node = bl_borrow.get_kv(beachline_index.0);
+        let node = bl_borrow.get(beachline_index.0);
 
         if node.is_err() {
             eprintln!("Failed to retrieve beach line key : {}", beachline_index.0);
@@ -264,7 +263,6 @@ where
         Ok(cpp_map::PIterator::lower_bound(
             Rc::clone(&self.beach_line_),
             key,
-            false,
         )?)
     }
 

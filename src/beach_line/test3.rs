@@ -13,8 +13,6 @@ use std::io::{self, prelude::*, BufReader};
 use std::ops::Neg;
 use std::path::Path;
 
-#[macro_use]
-
 lazy_static! {
     static ref RE_PREDICATE: Regex =
     #[allow(unused_braces)] // rustfmt adds those for no reason

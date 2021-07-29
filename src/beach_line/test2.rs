@@ -10,8 +10,6 @@ use lazy_static::lazy_static;
 use regex::Regex;
 use std::ops::Neg;
 
-#[macro_use]
-
 lazy_static! {
     static ref RE_PREDICATE: Regex =
     #[allow(unused_braces)] // rustfmt adds those for no reason

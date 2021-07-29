@@ -19,7 +19,7 @@ exclude = [
 num = "0.4"
 ordered-float = "2.5"
 ahash = "0.7"
-yabf = {version="^0.1.1",default-features=false}
+yabf = {version="0.2",default-features=false}
 num-traits = "0.2"
 thiserror = "1.0"
 bitflags = "1.2"
@@ -31,7 +31,7 @@ geo = {version="0.18", optional=true}
 cgmath = {version="0.18", optional=true}
 itertools = "0.10"
 lazy_static = "1.4"
-cpp_map = "0.0.3"
+cpp_map = "0.1"
 approx = "0.5"
 
 # These features are only for debug purposes, should normally not be used

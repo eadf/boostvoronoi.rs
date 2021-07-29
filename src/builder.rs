@@ -429,7 +429,7 @@ where
                             &self.circle_events_,
                         )?;
                     }
-                    let _ = b_it.remove_current(false)?;
+                    let _ = b_it.remove_current()?;
                     #[cfg(feature = "console_debug")]
                     {
                         self.beach_line_.dbgpa_compat_(&self.circle_events_)?;
@@ -458,7 +458,7 @@ where
             let right_it = self.beach_line_.lower_bound(new_key)?;
             #[cfg(feature = "console_debug")]
             {
-                if right_it.is_ok() {
+                if right_it.is_ok()? {
                     tln!("beach_line_.lower_bound found: {:?}: \n", right_it.get_k()?);
                 } else {
                     tln!("beach_line_.lower_bound found: Nothing (not an error)\n");
@@ -484,7 +484,7 @@ where
             // Do further processing depending on the above node position.
             // For any two neighboring nodes the second site of the first node
             // is the same as the first site of the second node.
-            if !right_it.is_ok() {
+            if !right_it.is_ok()? {
                 // The above arc corresponds to the second arc of the last node.
                 // Move the iterator to the last node.
 
@@ -499,7 +499,7 @@ where
                     site_arc,
                     site_arc,
                     site_event,
-                    right_it.get_index(),
+                    right_it.current(),
                     output,
                 )?;
                 right_it = self.beach_line_.get_pointer(right_it_idx)?;
@@ -516,7 +516,7 @@ where
                         right_it_idx,
                     )?;
                 }
-            } else if right_it.is_at_head() {
+            } else if right_it.is_at_head()? {
                 // The above arc corresponds to the first site of the first node.
                 let site_arc = *right_it.get_k()?.left_site();
 
@@ -526,7 +526,7 @@ where
                         site_arc,
                         site_arc,
                         site_event,
-                        right_it.get_index(),
+                        right_it.current(),
                         output,
                     )?;
                     self.beach_line_.get_pointer(new_key_id)?
@@ -544,7 +544,7 @@ where
                     site_event,
                     *(right_it.get_k()?.left_site()),
                     *(right_it.get_k()?.right_site()),
-                    VB::BeachLineIndex(right_it.get_index()),
+                    VB::BeachLineIndex(right_it.current()),
                 )?;
                 right_it = left_it;
             } else {
@@ -569,7 +569,7 @@ where
                     site_arc1,
                     site_arc2,
                     site_event,
-                    right_it.get_index(),
+                    right_it.current(),
                     output,
                 )?;
 
@@ -587,7 +587,7 @@ where
                     site_event,
                     site_arc2,
                     site3,
-                    VB::BeachLineIndex(right_it.get_index()),
+                    VB::BeachLineIndex(right_it.current()),
                 )?;
                 //right_it = new_node_it;
                 right_it = self.beach_line_.get_pointer(new_node_it)?;
@@ -710,7 +710,7 @@ where
                 )?;
             }
 
-            it_first.replace_key(it_first_key_after);
+            it_first.replace_key(it_first_key_after)?;
 
             #[cfg(feature = "console_debug")]
             {
@@ -762,15 +762,15 @@ where
             )?;
         }
         // Remove the (B, C) bisector node from the beach line.
-        if it_first.get_index() == it_last.get_index() {
+        if it_first.current() == it_last.current() {
             // todo: is this correct?
             println!("------- it_first.next()?");
             it_first.next()?;
         }
         #[cfg(feature = "console_debug")]
-        assert_ne!(it_first.get_index(), it_last.get_index());
+        assert_ne!(it_first.current(), it_last.current());
 
-        let _ = it_last.remove_current(false)?;
+        let _ = it_last.remove_current()?;
 
         #[cfg(feature = "console_debug")]
         {
@@ -792,7 +792,7 @@ where
 
         // Check new triplets formed by the neighboring arcs
         // to the left for potential circle events.
-        if !self.beach_line_.is_empty() && !it_first.is_at_head() {
+        if !self.beach_line_.is_empty() && !it_first.is_at_head()? {
             self.circle_events_.deactivate(
                 it_first
                     .get_v()?
@@ -807,7 +807,7 @@ where
                 site_l1,
                 site1,
                 site3,
-                VB::BeachLineIndex(it_last.get_index()),
+                VB::BeachLineIndex(it_last.current()),
             )?;
         }
 
@@ -816,7 +816,7 @@ where
 
         it_last.next()?;
 
-        if it_last.is_ok() {
+        if it_last.is_ok()? {
             let it_last_node = it_last.get_v()?;
             self.circle_events_
                 .deactivate(it_last_node.get().and_then(|x| x.get_circle_event_id()));
@@ -826,7 +826,7 @@ where
                 site1,
                 site3,
                 site_r1,
-                VB::BeachLineIndex(it_last.get_index()),
+                VB::BeachLineIndex(it_last.current()),
             )?;
         }
         Ok(())
