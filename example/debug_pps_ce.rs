@@ -127,7 +127,7 @@ fn main() {
 
         let circle_f = |x: f64, y: f64, r: f64| {
             let xy = affine.transform(x, y);
-            let r = affine.scale[0]*r;
+            let r = affine.scale[0] * r;
             draw_circle(xy[0], xy[1], r)
         };
 

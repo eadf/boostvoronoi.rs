@@ -9,19 +9,25 @@
 
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
-#![deny(non_camel_case_types)]
-#![deny(unused_parens)]
-#![deny(non_upper_case_globals)]
-#![deny(unused_qualifications)]
-#![deny(unused_results)]
-#![deny(unused_imports)]
-#![deny(bare_trait_objects)]
-#![deny(ellipsis_inclusive_range_patterns)]
-#![deny(elided_lifetimes_in_paths)]
+#![deny(
+    rust_2018_compatibility,
+    rust_2018_idioms,
+    nonstandard_style,
+    unused,
+    future_incompatible,
+    non_camel_case_types,
+    unused_parens,
+    non_upper_case_globals,
+    unused_qualifications,
+    unused_results,
+    unused_imports,
+    unused_variables,
+    bare_trait_objects,
+    ellipsis_inclusive_range_patterns,
+    elided_lifetimes_in_paths
+)]
 #![cfg_attr(feature = "map_first_last", feature(map_first_last))]
 
-#[cfg(test)]
-extern crate lazy_static;
 use core::fmt::Debug;
 use extended_exp_fpt as EX;
 use extended_int as EI;

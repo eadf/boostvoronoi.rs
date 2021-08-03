@@ -210,11 +210,7 @@ where
         key: BeachLineNodeKey<I, F>,
     ) -> Result<(BeachLineNodeKey<I, F>, BeachLineIndex), BvError> {
         let node = Rc::new(Cell::new(None));
-        let node_index = BeachLineIndex(
-            self.beach_line_
-                .borrow_mut()
-                .ordered_insert(key, node)?,
-        );
+        let node_index = BeachLineIndex(self.beach_line_.borrow_mut().ordered_insert(key, node)?);
         Ok((key, node_index))
     }
 

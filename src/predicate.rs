@@ -218,7 +218,9 @@ where
 
     #[inline(always)]
     fn eval_i(dif_x1: i64, dif_y1: i64, dif_x2: i64, dif_y2: i64) -> Orientation {
-        Self::eval_f( Predicates::<I, F>::robust_cross_product(dif_x1, dif_y1, dif_x2, dif_y2))
+        Self::eval_f(Predicates::<I, F>::robust_cross_product(
+            dif_x1, dif_y1, dif_x2, dif_y2,
+        ))
     }
 }
 
@@ -899,12 +901,7 @@ where
     F: OutputType + Neg<Output = F>,
 {
     /// Lazy evaluation of point, point, point circle events
-    fn ppp(
-        point1: &Point<I>,
-        point2: &Point<I>,
-        point3: &Point<I>,
-        c_event: &VC::CircleEventType,
-    ) {
+    fn ppp(point1: &Point<I>, point2: &Point<I>, point3: &Point<I>, c_event: &VC::CircleEventType) {
         let i_to_f64 = TC1::<I>::i_to_f64;
         let i_to_i64 = TC1::<I>::i_to_i64;
 
@@ -1833,7 +1830,12 @@ where
                     if !CircleExistencePredicate::<I, F>::ppp(site1, site2, site3) {
                         return false;
                     }
-                    LazyCircleFormationFunctor::<I, F>::ppp(site1.point0(), site2.point0(), site3.point0(), circle);
+                    LazyCircleFormationFunctor::<I, F>::ppp(
+                        site1.point0(),
+                        site2.point0(),
+                        site3.point0(),
+                        circle,
+                    );
                 } else {
                     // (point, point, segment) sites.
                     if !CircleExistencePredicate::<I, F>::pps(site1, site2, site3, SiteIndex::Three)
