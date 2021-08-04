@@ -25,7 +25,6 @@ use super::site_event as VSE;
 use super::TypeConverter1 as TC1;
 use super::TypeConverter2 as TC2;
 use super::{InputType, OutputType};
-#[allow(unused_imports)]
 use crate::{t, tln};
 use num::{Float, NumCast, PrimInt, Zero};
 use std::cmp;
@@ -207,11 +206,10 @@ where
 
     #[inline(always)]
     fn eval_p(point1: &Point<I>, point2: &Point<I>, point3: &Point<I>) -> Orientation {
-        let i_to_i64 = TC1::<I>::i_to_i64;
-        let dx1: i64 = i_to_i64(point1.x) - i_to_i64(point2.x);
-        let dx2: i64 = i_to_i64(point2.x) - i_to_i64(point3.x);
-        let dy1: i64 = i_to_i64(point1.y) - i_to_i64(point2.y);
-        let dy2: i64 = i_to_i64(point2.y) - i_to_i64(point3.y);
+        let dx1: i64 = TC1::<I>::i_to_i64(point1.x) - TC1::<I>::i_to_i64(point2.x);
+        let dx2: i64 = TC1::<I>::i_to_i64(point2.x) - TC1::<I>::i_to_i64(point3.x);
+        let dy1: i64 = TC1::<I>::i_to_i64(point1.y) - TC1::<I>::i_to_i64(point2.y);
+        let dy2: i64 = TC1::<I>::i_to_i64(point2.y) - TC1::<I>::i_to_i64(point3.y);
         let cp: f64 = Predicates::<I, F>::robust_cross_product(dx1, dy1, dx2, dy2);
         Self::eval_f(cp)
     }
