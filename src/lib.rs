@@ -311,3 +311,25 @@ where
         EX::ExtendedExponentFpt::from(input)
     }
 }
+
+pub (crate) trait GrowingVob {
+    fn fill(initial_size: usize) -> vob::Vob<u32>;
+    fn set_grow(&mut self, bit: usize, state: bool) -> bool;
+}
+
+impl GrowingVob for vob::Vob<u32> {
+    #[inline]
+    fn fill(initial_size: usize) -> Self {
+        let mut v: vob::Vob<u32> = vob::Vob::<u32>::new_with_storage_type(0);
+        v.resize(initial_size, false);
+        v
+    }
+
+    #[inline]
+    fn set_grow(&mut self, bit: usize, state: bool) -> bool {
+        if bit >= self.len() {
+            self.resize(bit + 64, false);
+        }
+        self.set(bit, state)
+    }
+}

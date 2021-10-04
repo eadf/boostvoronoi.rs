@@ -19,8 +19,8 @@ exclude = [
 num = "0.4"
 ordered-float = "2.5"
 ahash = "0.7"
-yabf = {version="0.2",default-features=false}
 num-traits = "0.2"
+vob="3.0"
 thiserror = "1.0"
 bitflags = "1.2"
 libm = "0.2"

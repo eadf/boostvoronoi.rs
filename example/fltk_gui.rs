@@ -719,20 +719,25 @@ where
         let draw_curved_as_line = config.draw_flag.contains(DrawFilterFlag::CURVE_LINE);
         let draw_infinite_edges = config.draw_flag.contains(DrawFilterFlag::INFINITE);
 
-        let mut already_drawn = yabf::Yabf::default();
+        let mut already_drawn = {
+            let l = self.diagram.edges().len();
+            let mut vb = vob::Vob::<u32>::new_with_storage_type(l);
+            vb.resize(l, false);
+            vb
+        };
 
         for it in self.diagram.edges().iter().enumerate() {
             draw::set_draw_color(enums::Color::DarkGreen);
             let edge_id = EdgeIndex(it.0);
             let edge = it.1.get();
-            if already_drawn.bit(edge_id.0) {
+            if already_drawn.get(edge_id.0).unwrap_or(false) {
                 // already done this, or rather - it's twin
                 continue;
             }
             // no point in setting current edge as drawn, the edge id will not repeat
             // already_drawn.set_bit(edge_id.0, true);
             let twin = self.diagram.edge_get_twin(edge_id)?;
-            already_drawn.set_bit(twin.0, true);
+            already_drawn.set(twin.0, true);
 
             //#[allow(unused_assignments)]
             if (!draw_primary) && edge.is_primary() {
