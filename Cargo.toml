@@ -36,7 +36,6 @@ approx = "0.5"
 # These features are only for debug purposes, should normally not be used
 [features]
 console_debug = []
-beachline_corruption_check = []
 ce_corruption_check = []
 
 [[example]]

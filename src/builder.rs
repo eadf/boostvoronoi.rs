@@ -450,8 +450,6 @@ where
 
             // Find the node in the binary search tree with left arc
             // lying above the new site point.
-            #[cfg(feature = "beachline_corruption_check")]
-            self.beach_line_.corruption_check()?;
 
             let new_key = VB::BeachLineNodeKey::<I, F>::new_1(*site_event);
             tln!("\nbeach_line_.lower_bound key  : {:?} ", site_event);
