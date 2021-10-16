@@ -15,7 +15,7 @@ use super::extended_exp_fpt as EX;
 use super::OutputType;
 #[cfg(feature = "console_debug")]
 use crate::tln;
-use crate::{BvError, GrowingVob};
+use crate::{BvError, GrowingVob, VobU32};
 use ordered_float::OrderedFloat;
 use std::cell::Cell;
 use std::cmp::Ordering;
@@ -376,7 +376,7 @@ pub(crate) struct CircleEventQueue {
     // circle events sorted by id
     c_list_: ahash::AHashMap<usize, CircleEventType>,
     c_list_next_free_index_: CircleEventIndex,
-    inactive_circle_ids_: vob::Vob<u32>, // Circle events turned inactive
+    inactive_circle_ids_: VobU32, // Circle events turned inactive
 }
 
 impl Default for CircleEventQueue {
@@ -385,7 +385,7 @@ impl Default for CircleEventQueue {
             c_: BTreeSet::new(),
             c_list_: ahash::AHashMap::new(),
             c_list_next_free_index_: CircleEventIndex(0),
-            inactive_circle_ids_: vob::Vob::<u32>::new_with_storage_type(128),
+            inactive_circle_ids_: VobU32::fill(128),
         }
     }
 }
@@ -512,7 +512,7 @@ impl CircleEventQueue {
         self.c_.clear();
         self.c_list_.clear();
         self.inactive_circle_ids_ = {
-            let mut cids = vob::Vob::new_with_storage_type(512);
+            let mut cids = VobU32::fill(512);
             cids.resize(512, false);
             cids
         }
@@ -540,7 +540,7 @@ impl CircleEventQueue {
 
     #[inline(always)]
     pub(crate) fn is_active(&self, circle_event_id: CircleEventIndex) -> bool {
-        !self.inactive_circle_ids_.get(circle_event_id.0).unwrap_or(false)
+        !self.inactive_circle_ids_.get_f(circle_event_id.0)
     }
 
     pub(crate) fn deactivate(&mut self, circle_event_id: Option<CircleEventIndex>) {
@@ -550,13 +550,13 @@ impl CircleEventQueue {
         }
         #[cfg(feature = "console_debug")]
         if let Some(circle_event_id) = circle_event_id {
-            if !self.inactive_circle_ids_.bit(circle_event_id.0) {
+            if !self.inactive_circle_ids_.get_f(circle_event_id.0) {
                 if self.c_list_.contains_key(&circle_event_id.0) {
                     tln!("deactivate {:?}", self.c_list_[&circle_event_id.0]);
                 } else {
                     tln!("circle {} not present", circle_event_id);
                 }
-                let _ = self.inactive_circle_ids_.set_bit(circle_event_id.0, true);
+                let _ = self.inactive_circle_ids_.set_grow(circle_event_id.0, true);
             }
         }
     }
