@@ -305,7 +305,7 @@ where
         tln!("-----beach_line----{}", self.beach_line_.borrow().len());
         for (i, (node_key, node_data)) in self.beach_line_.borrow().iter().enumerate() {
             t!("#{}:", i);
-            self.dbgpa_compat_node_(&node_key, node_data, ce)?;
+            self.dbgpa_compat_node_(node_key, node_data, ce)?;
         }
         tln!();
         Ok(())

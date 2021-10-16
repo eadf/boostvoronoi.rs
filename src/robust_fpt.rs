@@ -299,7 +299,7 @@ impl ops::Sub<RobustFpt> for RobustFpt {
 
     fn sub(self, _rhs: RobustFpt) -> Self {
         #[cfg(feature = "console_debug")]
-        let old_self = self.clone();
+        let old_self = self;
 
         let fpv: f64 = self.fpv_ - _rhs.fpv_;
         let re = if (!self.is_neg() && !_rhs.is_pos()) || (!self.is_pos() && !_rhs.is_neg()) {
@@ -342,7 +342,7 @@ impl ops::Sub<RobustFpt> for RobustFpt {
 impl ops::SubAssign<RobustFpt> for RobustFpt {
     fn sub_assign(&mut self, _rhs: RobustFpt) {
         #[cfg(feature = "console_debug")]
-        let old_self = self.clone();
+        let old_self = *self;
 
         let fpv = self.fpv_ - _rhs.fpv_;
         if (!self.is_neg() && !_rhs.is_pos()) || (!self.is_pos() && !_rhs.is_neg()) {

@@ -788,6 +788,7 @@ where
             c_event.0.get().y().0,
             c_event.0.get().lower_x().0
         );
+        #[allow(clippy::match_like_matches_macro)]
         if match (_site1.is_point(), _site2.is_point(), _site3.is_point()) {
             // only validate pps
             (false, true, true) => true,
@@ -1808,8 +1809,7 @@ where
             site3.is_segment()
         );
 
-        let rv = Self::circle_formation_predicate(site1, site2, site3, circle);
-        rv
+        Self::circle_formation_predicate(site1, site2, site3, circle)
     }
 
     /// Create a circle event from the given three sites.
