@@ -36,7 +36,6 @@ use std::fmt;
 use std::hash::{Hash, Hasher};
 #[allow(unused_imports)]
 use std::ops::Bound::{Excluded, Included, Unbounded};
-use std::ops::Neg;
 use std::rc::Rc;
 
 /// debug utility function, prints beach line index
@@ -79,8 +78,8 @@ pub type BeachLineNodeDataType = Rc<Cell<Option<BeachLineNodeData>>>;
 /// TODO: Rust does the opposite
 pub struct BeachLine<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     pub(crate) beach_line_:
         Rc<RefCell<cpp_map::LinkedList<BeachLineNodeKey<I, F>, BeachLineNodeDataType>>>,
@@ -88,8 +87,8 @@ where
 
 impl<I, F> Default for BeachLine<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     fn default() -> Self {
         Self {
@@ -100,8 +99,8 @@ where
 
 impl<I, F> BeachLine<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[allow(dead_code)]
     #[inline(always)]
@@ -375,8 +374,8 @@ where
 
 impl<I, F> fmt::Debug for BeachLine<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f,)?;
@@ -399,8 +398,8 @@ where
 #[derive(Copy, Clone)]
 pub struct BeachLineNodeKey<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     left_site_: VSE::SiteEvent<I, F>,
     right_site_: VSE::SiteEvent<I, F>,
@@ -408,8 +407,8 @@ where
 
 impl<I, F> fmt::Debug for BeachLineNodeKey<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "L:{:?},R:{:?}", &self.left_site(), &self.right_site())
@@ -418,8 +417,8 @@ where
 
 impl<I, F> BeachLineNodeKey<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     /// Constructs degenerate bisector, used to search an arc that is above
     /// the given site. The input to the constructor is the new site point.
@@ -454,8 +453,8 @@ where
 
 impl<I, F> PartialOrd for BeachLineNodeKey<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
@@ -464,8 +463,8 @@ where
 
 impl<I, F> Ord for BeachLineNodeKey<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     // todo: move the content of node_comparison_predicate to here
     fn cmp(&self, other: &Self) -> Ordering {
@@ -481,8 +480,8 @@ where
 
 impl<I, F> PartialEq for BeachLineNodeKey<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     // todo: node1.cmp(node2)==Ordering.Equal is not the same as node1 == node2, should it be?
     fn eq(&self, other: &Self) -> bool {
@@ -492,15 +491,15 @@ where
 
 impl<I, F> Eq for BeachLineNodeKey<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
 }
 
 impl<I, F> Hash for BeachLineNodeKey<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.left_site_.hash(state);

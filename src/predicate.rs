@@ -63,8 +63,8 @@ impl Debug for SiteIndex {
 #[derive(Default)]
 pub struct Predicates<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
@@ -74,8 +74,8 @@ where
 
 impl<I, F> Predicates<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[inline(always)]
     pub(crate) fn is_vertical_1(site: &VSE::SiteEvent<I, F>) -> bool {
@@ -177,8 +177,8 @@ enum Orientation {
 #[derive(Default)]
 pub struct OrientationTest<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
@@ -188,8 +188,8 @@ where
 
 impl<I, F> OrientationTest<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     /// Value is a determinant of two vectors (e.g. x1 * y2 - x2 * y1).
     /// Return orientation based on the sign of the determinant.
@@ -225,7 +225,7 @@ where
 #[derive(Default)]
 pub struct PointComparisonPredicate<I>
 where
-    I: InputType + Neg<Output = I>,
+    I: InputType,
 {
     #[doc(hidden)]
     pdi_: PhantomData<I>,
@@ -233,7 +233,7 @@ where
 
 impl<I> PointComparisonPredicate<I>
 where
-    I: InputType + Neg<Output = I>,
+    I: InputType,
 {
     /// returns true if lhs.x < rhs.x, if lhs.x==rhs.x it returns lhs.y < rhs.y
     #[inline(always)]
@@ -249,8 +249,8 @@ where
 #[derive(Default)]
 pub struct EventComparisonPredicate<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
@@ -260,8 +260,8 @@ where
 
 impl<I, F> EventComparisonPredicate<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     /// boolean predicate between two sites (bool int int)
     pub(crate) fn event_comparison_predicate_bii(
@@ -363,8 +363,8 @@ enum KPredicateResult {
 
 pub struct DistancePredicate<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[doc(hidden)]
     pdo_: PhantomData<F>,
@@ -374,8 +374,8 @@ where
 
 impl<I, F> DistancePredicate<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[cfg(feature = "console_debug")]
     #[allow(dead_code)]
@@ -612,8 +612,8 @@ where
 
 pub struct NodeComparisonPredicate<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
@@ -623,8 +623,8 @@ where
 
 impl<I, F> NodeComparisonPredicate<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     /// Compares nodes in the balanced binary search tree. Nodes are
     /// compared based on the y coordinates of the arcs intersection points.
@@ -749,8 +749,8 @@ where
 
 pub struct CircleExistencePredicate<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
@@ -760,8 +760,8 @@ where
 
 impl<I, F> CircleExistencePredicate<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[inline(always)]
     pub(crate) fn ppp(
@@ -884,8 +884,8 @@ where
 #[derive(Default)]
 pub struct LazyCircleFormationFunctor<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
@@ -896,8 +896,8 @@ where
 #[allow(non_snake_case)]
 impl<I, F> LazyCircleFormationFunctor<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     /// Lazy evaluation of point, point, point circle events
     fn ppp(point1: &Point<I>, point2: &Point<I>, point3: &Point<I>, c_event: &VC::CircleEventType) {
@@ -1498,7 +1498,7 @@ where
                     Predicates::<I, F>::robust_cross_product(
                         i_to_i64(segm_end2.x) - i_to_i64(segm_start2.x),
                         i_to_i64(segm_end2.y) - i_to_i64(segm_start2.y),
-                        i_to_i64(-site1.y()),
+                        -i_to_i64(site1.y()),
                         i_to_i64(site1.x()),
                     ),
                     1_f64,
@@ -1509,7 +1509,7 @@ where
                     Predicates::<I, F>::robust_cross_product(
                         i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
                         i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
-                        i_to_i64(-site1.y()),
+                        -i_to_i64(site1.y()),
                         i_to_i64(site1.x()),
                     ),
                     1_f64,
@@ -1755,8 +1755,8 @@ where
 #[derive(Default)]
 pub struct CircleFormationFunctor<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
@@ -1766,8 +1766,8 @@ where
 
 impl<I, F> CircleFormationFunctor<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     pub(crate) fn lies_outside_vertical_segment(
         c: &VC::CircleEventType,
@@ -1930,8 +1930,8 @@ where
 #[derive(Default)]
 pub struct ExactCircleFormationFunctor<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
@@ -1941,8 +1941,8 @@ where
 
 impl<I, F> ExactCircleFormationFunctor<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     /// Recompute parameters of the point, point, point circle event using high-precision library.
     fn ppp(

@@ -12,7 +12,6 @@
 use super::beach_line as VB;
 use super::extended_exp_fpt as EX;
 
-use super::OutputType;
 #[cfg(feature = "console_debug")]
 use crate::tln;
 use crate::{BvError, GrowingVob, VobU32};
@@ -21,7 +20,6 @@ use std::cell::Cell;
 use std::cmp::Ordering;
 use std::collections::BTreeSet;
 use std::fmt;
-use std::ops::Neg;
 use std::rc::Rc;
 
 /// Type-checked placeholder for usize
@@ -240,10 +238,7 @@ impl PartialEq for CircleEventC {
 
 impl Eq for CircleEventC {}
 
-impl CircleEvent
-where
-    f64: OutputType + Neg<Output = f64>,
-{
+impl CircleEvent {
     pub(crate) fn new_1(bech_line_index: VB::BeachLineIndex) -> CircleEvent {
         Self {
             center_x_: OrderedFloat(0_f64),

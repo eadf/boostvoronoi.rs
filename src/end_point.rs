@@ -14,7 +14,6 @@ use super::geometry::Point;
 use super::predicate as VP;
 use super::InputType;
 use std::cmp::Ordering;
-use std::ops::Neg;
 
 ///
 /// This was declared as "typedef std::pair<point_type, beach_line_iterator> end_point_type" in C++
@@ -22,7 +21,7 @@ use std::ops::Neg;
 #[derive(Debug)]
 pub(crate) struct EndPointPair<I>
 where
-    I: InputType + Neg<Output = I>,
+    I: InputType,
 {
     site_: Point<I>,
     beachline_index_: VB::BeachLineIndex,
@@ -30,7 +29,7 @@ where
 
 impl<I> EndPointPair<I>
 where
-    I: InputType + Neg<Output = I>,
+    I: InputType,
 {
     pub(crate) fn new(first: Point<I>, second: VB::BeachLineIndex) -> Self {
         Self {
@@ -52,7 +51,7 @@ where
 
 impl<I> PartialOrd for EndPointPair<I>
 where
-    I: InputType + Neg<Output = I>,
+    I: InputType,
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
@@ -61,7 +60,7 @@ where
 
 impl<I> Ord for EndPointPair<I>
 where
-    I: InputType + Neg<Output = I>,
+    I: InputType,
 {
     fn cmp(&self, other: &Self) -> Ordering {
         if VP::PointComparisonPredicate::<I>::point_comparison_predicate(&self.site_, &other.site_)
@@ -77,11 +76,11 @@ where
 
 impl<I> PartialEq for EndPointPair<I>
 where
-    I: InputType + Neg<Output = I>,
+    I: InputType,
 {
     fn eq(&self, other: &Self) -> bool {
         self.site_.eq(&other.site_)
     }
 }
 
-impl<I> Eq for EndPointPair<I> where I: InputType + Neg<Output = I> {}
+impl<I> Eq for EndPointPair<I> where I: InputType {}

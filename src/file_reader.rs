@@ -15,13 +15,12 @@ use crate::geometry;
 use crate::BvError;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::ops::Neg;
 use std::path::Path;
 
 #[derive(Debug)]
 enum InputData<T>
 where
-    T: super::InputType + Neg<Output = T>,
+    T: super::InputType,
 {
     Number(usize),
     Point(geometry::Point<T>),
@@ -38,7 +37,7 @@ enum StateMachine {
 
 fn line_to_data<I>(line: &str) -> Option<InputData<I>>
 where
-    I: super::InputType + Neg<Output = I>,
+    I: super::InputType,
 {
     let line = line.split(' ').collect::<Vec<&str>>();
     //tln!("line split: {:?}", line);
@@ -104,7 +103,7 @@ pub fn read_boost_input_file<I>(
     filename: &Path,
 ) -> Result<(Vec<geometry::Point<I>>, Vec<geometry::Line<I>>), BvError>
 where
-    I: super::InputType + Neg<Output = I>,
+    I: super::InputType,
 {
     if !filename.is_file() || !filename.exists() {
         return Err(BvError::ValueError(format!("{:?} not a file", filename)));
@@ -125,7 +124,7 @@ pub fn read_boost_input_buffer<I, F>(
     reader: BufReader<F>,
 ) -> Result<(Vec<geometry::Point<I>>, Vec<geometry::Line<I>>), BvError>
 where
-    I: super::InputType + Neg<Output = I>,
+    I: super::InputType,
     F: std::io::Read,
 {
     let mut points = Vec::<geometry::Point<I>>::default();

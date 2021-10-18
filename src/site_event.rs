@@ -22,7 +22,6 @@ use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
 use std::mem;
-use std::ops::Neg;
 
 pub type SiteEventIndexType = usize;
 
@@ -51,8 +50,8 @@ pub type SiteEventIndexType = usize;
 #[derive(Copy, Clone)]
 pub struct SiteEvent<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     point0_: Point<I>,
     point1_: Point<I>,
@@ -65,8 +64,8 @@ where
 
 impl<I, F> fmt::Debug for SiteEvent<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.is_point() {
@@ -98,8 +97,8 @@ where
 
 impl<I, O> PartialOrd for SiteEvent<I, O>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
+    I: InputType,
+    O: OutputType,
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(VP::EventComparisonPredicate::<I, O>::event_comparison_predicate_ii(self, other))
@@ -108,8 +107,8 @@ where
 
 impl<I, O> Ord for SiteEvent<I, O>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
+    I: InputType,
+    O: OutputType,
 {
     fn cmp(&self, other: &Self) -> Ordering {
         VP::EventComparisonPredicate::<I, O>::event_comparison_predicate_ii(self, other)
@@ -118,8 +117,8 @@ where
 
 impl<I, O> PartialEq for SiteEvent<I, O>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
+    I: InputType,
+    O: OutputType,
 {
     fn eq(&self, other: &Self) -> bool {
         (self.point0_ == other.point0_) && (self.point1_ == other.point1_)
@@ -128,15 +127,15 @@ where
 
 impl<I, O> Eq for SiteEvent<I, O>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
+    I: InputType,
+    O: OutputType,
 {
 }
 
 impl<I, O> Hash for SiteEvent<I, O>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
+    I: InputType,
+    O: OutputType,
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.point0_.hash(state);
@@ -148,8 +147,8 @@ where
 
 impl<I, F> SiteEvent<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[cfg(test)]
     /// only used by unit test code
@@ -354,8 +353,8 @@ where
 
 impl<I, O> fmt::Display for SiteEvent<I, O>
 where
-    I: InputType + Neg<Output = I>,
-    O: OutputType + Neg<Output = O>,
+    I: InputType,
+    O: OutputType,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)

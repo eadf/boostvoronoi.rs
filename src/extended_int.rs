@@ -14,12 +14,12 @@
 use super::extended_exp_fpt as EX;
 #[allow(unused_imports)]
 use crate::{t, tln};
+use num::ToPrimitive;
 use num::Zero;
 use std::cmp;
 use std::fmt;
 use std::num::Wrapping;
 use std::ops;
-use num::ToPrimitive;
 
 /// Stack allocated big integer class.
 /// Supports next set of arithmetic operations: +, -, *.
@@ -111,7 +111,6 @@ impl Zero for ExtendedInt {
 }
 
 impl ExtendedInt {
-
     /// Return the mantissa and exponent components of this integer.
     /// `value` ≈ `mantissa` * 2^`exponent`
     pub fn p(&self) -> (f64, i32) {
@@ -325,7 +324,6 @@ impl ExtendedInt {
     }
 
     fn mul_other(&mut self, e1: &Self, e2: &Self) {
-
         if e1.count_ == 0 || e2.count_ == 0 {
             self.count_ = 0;
             return;

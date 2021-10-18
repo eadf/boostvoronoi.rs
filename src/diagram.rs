@@ -27,7 +27,6 @@ use std::cell;
 use std::cmp::Ordering;
 use std::fmt;
 use std::marker::PhantomData;
-use std::ops::Neg;
 use std::rc::Rc;
 
 pub type SourceIndex = usize;
@@ -124,8 +123,8 @@ pub enum SourceCategory {
 #[derive(Copy, Clone)]
 pub struct Cell<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     // sorted_index of the site event
     id_: CellIndex,
@@ -141,8 +140,8 @@ where
 
 impl<I, F> fmt::Debug for Cell<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -158,8 +157,8 @@ where
 
 impl<I, F> Cell<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     pub fn new(id: CellIndex, source_index: SourceIndex, source_category: ColorType) -> Self {
         Cell {
@@ -247,8 +246,8 @@ where
 /// Do *NOT* use this while altering the std::cell::Cell values of next, prev or twin edges.
 pub struct EdgeNextIterator<'s, I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     diagram_: &'s Diagram<I, F>,
     start_edge_: EdgeIndex,
@@ -261,8 +260,8 @@ where
 
 impl<'s, I, F> EdgeNextIterator<'s, I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     pub(crate) fn new(diagram: &'s Diagram<I, F>, starting_edge: Option<EdgeIndex>) -> Self {
         if let Some(starting_edge) = starting_edge {
@@ -288,8 +287,8 @@ where
 
 impl<'s, I, F> Iterator for EdgeNextIterator<'s, I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     type Item = EdgeIndex;
     fn next(&mut self) -> Option<EdgeIndex> {
@@ -315,8 +314,8 @@ where
 /// Do *NOT* use this when altering the std::cell::Cell values of next, prev or twin edges.
 pub struct EdgeRotNextIterator<'s, I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     diagram_: &'s Diagram<I, F>,
     start_edge: EdgeIndex,
@@ -329,8 +328,8 @@ where
 
 impl<'s, I, F> EdgeRotNextIterator<'s, I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     pub(crate) fn new(diagram: &'s Diagram<I, F>, starting_edge: Option<EdgeIndex>) -> Self {
         if let Some(starting_edge) = starting_edge {
@@ -356,8 +355,8 @@ where
 
 impl<'s, I, F> Iterator for EdgeRotNextIterator<'s, I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     type Item = EdgeIndex;
     fn next(&mut self) -> Option<EdgeIndex> {
@@ -382,8 +381,8 @@ where
 /// Do *NOT* use this when altering the std::cell::Cell values of next, prev or twin edges.
 pub struct EdgeRotPrevIterator<'s, I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     diagram_: &'s Diagram<I, F>,
     start_edge: EdgeIndex,
@@ -396,8 +395,8 @@ where
 
 impl<'s, I, F> EdgeRotPrevIterator<'s, I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[allow(dead_code)]
     pub(crate) fn new(diagram: &'s Diagram<I, F>, starting_edge: Option<EdgeIndex>) -> Self {
@@ -424,8 +423,8 @@ where
 
 impl<'s, I, F> Iterator for EdgeRotPrevIterator<'s, I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     type Item = EdgeIndex;
     fn next(&mut self) -> Option<EdgeIndex> {
@@ -453,8 +452,8 @@ where
 #[derive(Copy, Clone)]
 pub struct Vertex<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     pub(crate) id_: VertexIndex,
     pub(crate) x_: F,
@@ -467,8 +466,8 @@ where
 
 impl<I, F> fmt::Debug for Vertex<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -485,8 +484,8 @@ where
 
 impl<I, F> Vertex<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     pub fn new_3(
         id: VertexIndex,
@@ -586,8 +585,8 @@ where
 #[derive(Copy, Clone)]
 pub struct Edge<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     id_: EdgeIndex,
     cell_: Option<CellIndex>,
@@ -604,8 +603,8 @@ where
 
 impl<I, F> fmt::Debug for Edge<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -624,8 +623,8 @@ where
 
 impl<I, F> Edge<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     // todo: this is super suspicious, doesn't this collide with SEGMENT_START_POINT & SEGMENT_END_POINT?
     const BIT_IS_LINEAR: ColorType = 0x1; // linear is opposite to curved
@@ -776,8 +775,8 @@ pub type VertexType<I, F> = Rc<cell::Cell<Vertex<I, F>>>;
 #[derive(Default, Debug)]
 pub struct Diagram<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     cells_: Vec<CellType<I, F>>,      // indexed by CellIndex
     vertices_: Vec<VertexType<I, F>>, // indexed by VertexIndex
@@ -786,8 +785,8 @@ where
 
 impl<I, F> Diagram<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     pub fn new(input_size: usize) -> Self {
         Self {
@@ -1944,8 +1943,8 @@ where
 
 impl<I, F> From<Diagram<I, F>> for SD::SyncDiagram<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     fn from(other: Diagram<I, F>) -> SD::SyncDiagram<I, F> {
         SD::SyncDiagram::new(

@@ -21,7 +21,6 @@ use super::BvError;
 
 use super::geometry::{Line, Point};
 use std::collections::BinaryHeap;
-use std::ops::Neg;
 use std::rc::Rc;
 
 use super::{InputType, OutputType};
@@ -75,8 +74,8 @@ mod tests;
 /// ```
 pub struct Builder<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     pub(crate) site_events_: Vec<VSE::SiteEvent<I, F>>,
     circle_events_: VC::CircleEventQueue,
@@ -94,8 +93,8 @@ where
 
 impl<I, F> Default for Builder<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     fn default() -> Self {
         Self {
@@ -115,8 +114,8 @@ where
 
 impl<I, F> Builder<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     pub fn with_vertices<'a, T>(&mut self, vertices: T) -> Result<(), BvError>
     where

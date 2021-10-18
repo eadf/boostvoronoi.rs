@@ -14,15 +14,14 @@ use super::diagram as VD;
 pub use super::{InputType, OutputType};
 use crate::BvError;
 use std::marker::PhantomData;
-use std::ops::Neg;
 
 /// Sync version of the boostvoronoi::diagram::VoronoiDiagram struct.
 /// This is useful when traversing the diagram in a multi threaded environment.
 #[derive(Default, Debug)]
 pub struct SyncDiagram<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     cells_: Vec<VD::Cell<I, F>>,      // indexed by CellIndex
     vertices_: Vec<VD::Vertex<I, F>>, // indexed by VertexIndex
@@ -31,8 +30,8 @@ where
 
 impl<I, F> SyncDiagram<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     pub fn new(
         cells: Vec<VD::Cell<I, F>>,
@@ -196,8 +195,8 @@ where
 /// edge.vertex()
 pub struct EdgeRotNextIterator<'s, I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     diagram_: &'s SyncDiagram<I, F>,
     starting_edge_: VD::EdgeIndex,
@@ -210,8 +209,8 @@ where
 
 impl<'s, I, F> EdgeRotNextIterator<'s, I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     pub(crate) fn new(diagram: &'s SyncDiagram<I, F>, starting_edge: VD::EdgeIndex) -> Self {
         Self {
@@ -226,8 +225,8 @@ where
 
 impl<'s, I, F> Iterator for EdgeRotNextIterator<'s, I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     type Item = VD::EdgeIndex;
     fn next(&mut self) -> Option<VD::EdgeIndex> {

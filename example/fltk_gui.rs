@@ -9,7 +9,6 @@ use fltk::{app, button, dialog, draw, enums, frame, group, menu, prelude::*, win
 use geo::prelude::Intersects;
 use ordered_float::OrderedFloat;
 use std::cell::{RefCell, RefMut};
-use std::ops::Neg;
 use std::rc::Rc;
 
 #[macro_use]
@@ -486,8 +485,8 @@ fn main() -> Result<(), BvError> {
 /// struct to help deal with the voronoi diagram input and output
 pub struct VoronoiVisualizer<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     screen_aabb: VU::Aabb2<I, F>,
     diagram: VD::Diagram<I, F>,
@@ -500,8 +499,8 @@ where
 
 impl<I, F> VoronoiVisualizer<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     pub fn default() -> Self {
         Self {

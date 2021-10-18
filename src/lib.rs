@@ -31,11 +31,10 @@
 use core::fmt::Debug;
 use extended_exp_fpt as EX;
 use extended_int as EI;
-use num::{Float, NumCast, PrimInt, Zero};
+use num::{Float, Integer, NumCast, PrimInt, Signed, Zero};
 use std::fmt;
 use std::hash::Hash;
 use std::marker::PhantomData;
-use std::ops::Neg;
 
 mod beach_line;
 pub mod builder;
@@ -48,9 +47,8 @@ pub mod extended_exp_fpt;
 // I'd prefer if this module could be pub (crate), but then the documentation examples would not work.
 pub mod extended_int;
 pub mod file_reader;
-pub(crate) mod predicate;
-// I'd prefer if this module could be pub (crate), but then the documentation examples would not work.
 pub mod geometry;
+pub(crate) mod predicate;
 pub mod robust_fpt;
 mod site_event;
 pub mod sync_diagram;
@@ -112,80 +110,27 @@ pub enum BvError {
 
 /// This is the integer input type of the algorithm. Typically i32 or i64.
 pub trait InputType:
-    fmt::Display
-    + Ord
-    + PartialOrd
-    + Eq
-    + PartialEq
-    + Hash
-    + PrimInt
-    + Copy
-    + Clone
-    + NumCast
-    + Debug
-    + Zero
-    + Default
-    + Unpin
+    fmt::Display + Hash + Integer + PrimInt + Debug + Default + Unpin + Signed
 {
 }
 
-impl<I> InputType for I where
-    I: fmt::Display
-        + Ord
-        + PartialOrd
-        + Eq
-        + PartialEq
-        + Hash
-        + PrimInt
-        + Copy
-        + Clone
-        + NumCast
-        + Debug
-        + Zero
-        + Default
-        + Unpin
-{
-}
+impl InputType for i64 {}
+impl InputType for i32 {}
 
 /// This is the floating point output type of the algorithm. Typically f32 or f64.
 pub trait OutputType:
-    Float
-    + PartialOrd
-    + PartialEq
-    + NumCast
-    + Copy
-    + Clone
-    + fmt::Display
-    + Default
-    + Debug
-    + Zero
-    + std::ops::MulAssign
-    + Unpin
+    Float + Debug + Zero + Unpin + fmt::Display + std::ops::MulAssign + Default
 {
 }
 
-impl<F> OutputType for F where
-    F: Float
-        + PartialOrd
-        + PartialEq
-        + NumCast
-        + Copy
-        + Clone
-        + fmt::Display
-        + Default
-        + Debug
-        + Zero
-        + std::ops::MulAssign
-        + Unpin
-        + Neg<Output = F>
-{
-}
+impl OutputType for f32 {}
+impl OutputType for f64 {}
 
 /// Functions for converting the integer input type to other types (i32 i64 etc.)
 #[derive(Default)]
 pub struct TypeConverter1<I>
 where
-    I: InputType + Neg<Output = I>,
+    I: InputType,
 {
     #[doc(hidden)]
     pdi_: PhantomData<I>,
@@ -193,7 +138,7 @@ where
 
 impl<I> TypeConverter1<I>
 where
-    I: InputType + Neg<Output = I>,
+    I: InputType,
 {
     #[inline(always)]
     /// Convert from the input integer type to an extended int
@@ -236,8 +181,8 @@ where
 #[derive(Default)]
 pub struct TypeConverter2<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
@@ -247,8 +192,8 @@ where
 
 impl<I, F> TypeConverter2<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[inline(always)]
     /// Convert from the input integer type to the output float type
@@ -326,7 +271,7 @@ pub(crate) trait GrowingVob {
 impl GrowingVob for VobU32 {
     #[inline]
     fn fill(initial_size: usize) -> Self {
-        let mut v= Self::new_with_storage_type(0);
+        let mut v = Self::new_with_storage_type(0);
         v.resize(initial_size, false);
         v
     }

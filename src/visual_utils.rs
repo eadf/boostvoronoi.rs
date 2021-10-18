@@ -17,13 +17,12 @@ use crate::BvError;
 use super::geometry::{Line, Point};
 use std::fmt;
 use std::marker::PhantomData;
-use std::ops::Neg;
 
 /// Utilities class, that contains set of routines handful for visualization.
 pub struct VoronoiVisualUtils<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[doc(hidden)]
     pdi_: PhantomData<I>,
@@ -33,8 +32,8 @@ where
 
 impl<I, F> VoronoiVisualUtils<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     /// Discretize parabolic Voronoi edge.
     /// Parabolic Voronoi edges are always formed by one point and one segment
@@ -182,8 +181,8 @@ where
 #[derive(PartialEq, Eq, Clone, fmt::Debug)]
 pub struct Aabb2<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     min_max_: Option<([F; 2], [F; 2])>,
     #[doc(hidden)]
@@ -192,8 +191,8 @@ where
 
 impl<I, F> Default for Aabb2<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[inline]
     fn default() -> Self {
@@ -206,8 +205,8 @@ where
 
 impl<I, F> Aabb2<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     /// Creates a new AABB with the limits defined by 'p1' & 'p2'
     pub fn new(p1: &Point<I>, p2: &Point<I>) -> Self {
@@ -378,8 +377,8 @@ where
 #[derive(PartialEq, Clone, fmt::Debug)]
 pub struct SimpleAffine<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     /// The offsets used to center the 'source' coordinate system. Typically the input geometry
     /// in this case.
@@ -395,8 +394,8 @@ where
 
 impl<I, F> Default for SimpleAffine<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     #[inline]
     fn default() -> Self {
@@ -411,8 +410,8 @@ where
 
 impl<I, F> SimpleAffine<I, F>
 where
-    I: InputType + Neg<Output = I>,
-    F: OutputType + Neg<Output = F>,
+    I: InputType,
+    F: OutputType,
 {
     pub fn new(source_aabb: &Aabb2<I, F>, dest_aabb: &Aabb2<I, F>) -> Result<Self, BvError> {
         let i32_to_f = super::TypeConverter2::<I, F>::i32_to_f;
