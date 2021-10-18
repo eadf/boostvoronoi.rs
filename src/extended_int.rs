@@ -14,10 +14,12 @@
 use super::extended_exp_fpt as EX;
 #[allow(unused_imports)]
 use crate::{t, tln};
+use num::Zero;
 use std::cmp;
 use std::fmt;
 use std::num::Wrapping;
 use std::ops;
+use num::ToPrimitive;
 
 /// Stack allocated big integer class.
 /// Supports next set of arithmetic operations: +, -, *.
@@ -94,36 +96,42 @@ impl From<i64> for ExtendedInt {
     }
 }
 
-impl ExtendedInt {
-    /// todo implement num::Zero
-    #[inline(always)]
-    pub fn zero() -> Self {
+impl Zero for ExtendedInt {
+    #[inline]
+    fn zero() -> Self {
         Self {
             chunks_: smallvec::SmallVec::<[Wrapping<u32>; 4]>::default(),
             count_: 0,
         }
     }
+    #[inline]
+    fn is_zero(&self) -> bool {
+        unimplemented!()
+    }
+}
+
+impl ExtendedInt {
 
     /// Return the mantissa and exponent components of this integer.
     /// `value` ≈ `mantissa` * 2^`exponent`
     pub fn p(&self) -> (f64, i32) {
-        let sep = num::cast::<u64, f64>(0x100000000).unwrap();
+        let sep = 0x100000000_u64 as f64;
         let mut rv = (0.0, 0);
         match self.size() {
             0 => return rv,
             1 => {
-                rv.0 = num::cast::<u32, f64>(self.chunks_.get(0).unwrap().0).unwrap();
+                rv.0 = self.chunks_.get(0).unwrap().0.to_f64().unwrap();
             }
             2 => {
-                rv.0 = num::cast::<u32, f64>(self.chunks_.get(1).unwrap().0).unwrap() * sep
-                    + num::cast::<u32, f64>(self.chunks_.get(0).unwrap().0).unwrap();
+                rv.0 = self.chunks_.get(1).unwrap().0.to_f64().unwrap() * sep
+                    + self.chunks_.get(0).unwrap().0.to_f64().unwrap();
             }
             _ => {
                 for v in self.chunks_.iter().rev().take(3) {
                     rv.0 *= sep;
-                    rv.0 += num::cast::<u32, f64>(v.0).unwrap();
+                    rv.0 += v.0.to_f64().unwrap();
                 }
-                rv.1 = ((self.size() - 3) << 5) as i32;
+                rv.1 = ((self.size() - 3) << 5).to_i32().unwrap();
             }
         }
         if self.count_ < 0 {
@@ -145,20 +153,6 @@ impl ExtendedInt {
     #[inline(always)]
     pub fn is_zero(&self) -> bool {
         self.count_ == 0
-    }
-
-    /// negates value
-    ///```
-    /// # use boostvoronoi::extended_int::ExtendedInt;
-    ///
-    /// let aa = 41232131332_f64;
-    /// let mut a = ExtendedInt::from(aa as i64);
-    /// a.negate();
-    /// approx::assert_ulps_eq!(a.d(), -aa);
-    /// ```
-    pub fn negate(&mut self) {
-        //assert_eq!(self.chunks.len(), self.size());
-        self.count_ = -self.count_;
     }
 
     #[inline(always)]
@@ -239,9 +233,6 @@ impl ExtendedInt {
             }
             self.count_ += 1;
         }
-        // Todo: remove these asserts when stable
-        //assert!(self.count >= 0);
-        //assert_eq!(self.chunks.len(), self.count as usize);
     }
 
     /// this method assumes self is an empty object
@@ -331,13 +322,9 @@ impl ExtendedInt {
         if (self.count_ as usize) < self.chunks_.len() {
             let _ = self.chunks_.pop();
         }
-        // Todo: remove these asserts when stable
-        //assert!(self.count >= 0);
-        //assert_eq!(self.chunks.len(), self.count as usize);
     }
 
     fn mul_other(&mut self, e1: &Self, e2: &Self) {
-        //fln!("->mul_other {:?} {:?} {:?}", self, e1, e2);
 
         if e1.count_ == 0 || e2.count_ == 0 {
             self.count_ = 0;
@@ -381,14 +368,9 @@ impl ExtendedInt {
             cur = nxt + (cur >> 32);
         }
         if cur != 0 {
-            //&& (self.count != N)) {
-            //assert_eq!(self.count as usize, self.chunks.len());
             self.chunks_.push(Wrapping(cur as u32));
             self.count_ += 1;
         }
-        // Todo: remove these asserts when stable
-        //assert!(self.count >= 0);
-        //assert_eq!(self.chunks.len(), self.count as usize);
     }
 }
 

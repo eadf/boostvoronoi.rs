@@ -1,7 +1,4 @@
 /target
-/cpp_projects/test_generator/Debug
-/cpp_projects/voronoi_visual/Debug/
-/cpp_projects/voronoi_visual_simple/Debug/
 **/.settings
 **/.cproject
 **/.proj
@@ -13,10 +10,10 @@ boostvoronoi.iml
 .project
 Cargo.lock
 .idea
-boost_voronoi_c++.dia~
 
 # Some C++ comparison stuff:
 compare_cpp.txt
 compare_cpp2.txt
 compare_rust.txt
 find_and_replace.py
+flamegraph.svg

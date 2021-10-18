@@ -316,7 +316,7 @@ pub(crate) type VobU32 = vob::Vob<u32>;
 
 pub(crate) trait GrowingVob {
     /// Will create a new Vob and fill it with `false`
-    fn fill(initial_size: usize) -> VobU32;
+    fn fill(initial_size: usize) -> Self;
     /// Grow to fit new size, set ´bit´ to ´state´ value
     fn set_grow(&mut self, bit: usize, state: bool) -> bool;
     /// get() with default value `false`
@@ -326,7 +326,7 @@ pub(crate) trait GrowingVob {
 impl GrowingVob for VobU32 {
     #[inline]
     fn fill(initial_size: usize) -> Self {
-        let mut v: VobU32 = Self::new_with_storage_type(0);
+        let mut v= Self::new_with_storage_type(0);
         v.resize(initial_size, false);
         v
     }
