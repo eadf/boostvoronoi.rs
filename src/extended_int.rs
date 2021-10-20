@@ -21,12 +21,15 @@ use std::fmt;
 use std::num::Wrapping;
 use std::ops;
 
+/// the default size of the SmallVec inside ExtendedInt (in units of u32)
+const EXTENDED_INT_VEC_SIZE: usize = 8;
+
 /// Stack allocated big integer class.
 /// Supports next set of arithmetic operations: +, -, *.
 /// Ported from voronoi_ctypes.hpp
 #[derive(Clone)]
 pub struct ExtendedInt {
-    chunks_: smallvec::SmallVec<[Wrapping<u32>; 4]>,
+    chunks_: smallvec::SmallVec<[Wrapping<u32>; EXTENDED_INT_VEC_SIZE]>,
     count_: i32,
 }
 
@@ -100,7 +103,7 @@ impl Zero for ExtendedInt {
     #[inline]
     fn zero() -> Self {
         Self {
-            chunks_: smallvec::SmallVec::<[Wrapping<u32>; 4]>::default(),
+            chunks_: smallvec::SmallVec::<[Wrapping<u32>; EXTENDED_INT_VEC_SIZE]>::default(),
             count_: 0,
         }
     }
