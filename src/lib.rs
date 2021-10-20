@@ -262,13 +262,13 @@ pub(crate) type VobU32 = vob::Vob<u32>;
 pub(crate) trait GrowingVob {
     /// Will create a new Vob and fill it with `false`
     fn fill(initial_size: usize) -> Self;
-    /// Grow to fit new size, set ´bit´ to ´state´ value
-    fn set_grow(&mut self, bit: usize, state: bool) -> bool;
+    /// Conditionally grow to fit required size, set ´bit´ to ´state´ value
+    fn set_grow(&mut self, bit: usize, state: bool);
     /// get() with default value `false`
     fn get_f(&self, bit: usize) -> bool;
 }
 
-impl GrowingVob for VobU32 {
+impl<T:PrimInt+Debug> GrowingVob for vob::Vob<T> {
     #[inline]
     fn fill(initial_size: usize) -> Self {
         let mut v = Self::new_with_storage_type(0);
@@ -277,11 +277,11 @@ impl GrowingVob for VobU32 {
     }
 
     #[inline]
-    fn set_grow(&mut self, bit: usize, state: bool) -> bool {
+    fn set_grow(&mut self, bit: usize, state: bool) {
         if bit >= self.len() {
-            self.resize(bit + 64, false);
+            self.resize(bit + std::mem::size_of::<T>(), false);
         }
-        self.set(bit, state)
+        let _ = self.set(bit, state);
     }
 
     #[inline]

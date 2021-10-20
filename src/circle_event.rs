@@ -481,7 +481,7 @@ impl CircleEventQueue {
         if let Some(circle) = self.pop_first() {
             if let Some(circle_id) = circle.0.get().index_ {
                 let _ = self.c_list_.remove(&circle_id.0);
-                let _ = self.inactive_circle_ids_.set_grow(circle_id.0, true);
+                self.inactive_circle_ids_.set_grow(circle_id.0, true);
             } else {
                 return Err(BvError::InternalError(format!(
                     "circle event lists corruption, circle event id {:?} not found {}:{}",
@@ -541,7 +541,7 @@ impl CircleEventQueue {
     pub(crate) fn deactivate(&mut self, circle_event_id: Option<CircleEventIndex>) {
         #[cfg(not(feature = "console_debug"))]
         if let Some(circle_event_id) = circle_event_id {
-            let _ = self.inactive_circle_ids_.set_grow(circle_event_id.0, true);
+            self.inactive_circle_ids_.set_grow(circle_event_id.0, true);
         }
         #[cfg(feature = "console_debug")]
         if let Some(circle_event_id) = circle_event_id {
@@ -551,7 +551,7 @@ impl CircleEventQueue {
                 } else {
                     tln!("circle {} not present", circle_event_id);
                 }
-                let _ = self.inactive_circle_ids_.set_grow(circle_event_id.0, true);
+                self.inactive_circle_ids_.set_grow(circle_event_id.0, true);
             }
         }
     }
