@@ -47,29 +47,10 @@ path = "example/fltk_gui.rs"
 name = "main"
 path = "example/main.rs"
 
+# this is the README.md example
 [[example]]
 name = "readme"
 path = "example/readme.rs"
-
-# this example is for development test purposes only
-[[example]]
-name = "stress_test"
-path = "example/stress_test.rs"
-required-features = ["geo"]
-
-[[example]]
-name = "debug_pps_ce"
-path = "example/debug_pps_ce.rs"
-
-[[example]]
-name = "debug_pss_ce"
-path = "example/debug_pss_ce.rs"
-
-# this example is for development test purposes only
-[[example]]
-name = "stress_test2"
-path = "example/stress_test2.rs"
-required-features = ["geo"]
 
 [build-dependencies]
 version_check = "0.9"
