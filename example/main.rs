@@ -6,7 +6,6 @@ use std::io::{BufReader, Cursor};
 type I = i64;
 type F = f64;
 
-/// This example will fail, something is wrong with the beach-line ordering
 fn main() -> Result<(), BvError> {
     #[allow(unused_variables)]
     let output = {
@@ -49,17 +48,18 @@ fn main() -> Result<(), BvError> {
         //panic!();
         vb.build()?
     };
-    /*println!();
-    for (i, v) in output.vertices().iter().enumerate() {
-        println!(
-            "vertex #{} contains a point: ({:.12}, {:.12}) ie:{:?}",
-            i,
-            v.get().x(),
-            v.get().y(),
-            v.get().get_incident_edge()?.0
-        );
+    if false {
+        println!();
+        for (i, v) in output.vertices().iter().enumerate() {
+            println!(
+                "vertex #{} contains a point: ({:.12}, {:.12}) ie:{:?}",
+                i,
+                v.get().x(),
+                v.get().y(),
+                v.get().get_incident_edge()?.0
+            );
+        }
     }
-    */
     println!("cells:{}", output.cells().len());
     println!("vertices:{}", output.vertices().len());
     println!("edges:{}", output.edges().len());
