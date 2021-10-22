@@ -408,3 +408,22 @@ where
         [vertex.x(), vertex.y()]
     }
 }
+
+#[cfg(feature = "mint")]
+impl<I:InputType> mint::IntoMint for &Point<I> {
+    type MintType = mint::Point2<I>;
+}
+
+#[cfg(feature = "mint")]
+impl<I:InputType> From<&Point<I>> for mint::Point2<I> {
+   fn from(p:&Point<I>) -> mint::Point2<I> {
+       mint::Point2::from([p.x, p.y])
+   }
+}
+
+#[cfg(feature = "mint")]
+impl<I:InputType> From<mint::Point2<I>> for Point<I>  {
+    fn from(m:mint::Point2<I>) -> Point<I> {
+        Point{x:m.x, y:m.y}
+    }
+}
