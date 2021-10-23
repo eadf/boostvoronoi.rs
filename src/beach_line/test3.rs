@@ -35,11 +35,11 @@ fn coord<I: InputType>(x: I, y: I) -> Point<I> {
     Point::<I> { x, y }
 }
 
-fn parse_site<I: InputType, F: OutputType>(site_input: &str) -> VSE::SiteEvent<I, F>
+fn parse_site<I, F>(site_input: &str) -> VSE::SiteEvent<I, F>
 where
-    I: InputType + Neg<Output = I> + std::str::FromStr,
+    I: InputType + std::str::FromStr,
     <I as std::str::FromStr>::Err: std::fmt::Debug,
-    F: OutputType + Neg<Output = F>,
+    F: OutputType,
 {
     let site = if let Some(caps) = RE_NODE_SINGLE.captures(site_input) {
         let ii = (&caps)["ii"].parse::<usize>().unwrap();
@@ -111,9 +111,9 @@ where
 
 fn parse_node<I, F>(node: &str) -> VB::BeachLineNodeKey<I, F>
 where
-    I: InputType + Neg<Output = I> + std::str::FromStr,
+    I: InputType + std::str::FromStr,
     <I as std::str::FromStr>::Err: std::fmt::Debug,
-    F: OutputType + Neg<Output = F>,
+    F: OutputType,
 {
     let caps = RE_NODE.captures(node).unwrap();
     println!("LEFT:{}", &caps["left"]);

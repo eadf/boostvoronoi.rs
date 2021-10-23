@@ -11,7 +11,7 @@
 
 //! Utilities for extended float. Supports 63 bit mantissa with 32 bit exponent.
 use super::extended_int as EI;
-use num::{Float, NumCast};
+use num::Float;
 use std::fmt;
 use std::ops;
 
@@ -22,7 +22,7 @@ use std::ops;
 #[derive(Copy, Clone)]
 pub struct ExtendedExponentFpt<F>
 where
-    F: NumCast + Float + fmt::Display + Copy + fmt::Debug + ops::Neg<Output = F>,
+    F: Float + fmt::Display + fmt::Debug,
 {
     val_: F,
     exp_: i32,

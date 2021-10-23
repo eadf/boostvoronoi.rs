@@ -268,7 +268,7 @@ pub(crate) trait GrowingVob {
     fn get_f(&self, bit: usize) -> bool;
 }
 
-impl<T:PrimInt+Debug> GrowingVob for vob::Vob<T> {
+impl<T: PrimInt + Debug> GrowingVob for vob::Vob<T> {
     #[inline]
     fn fill(initial_size: usize) -> Self {
         let mut v = Self::new_with_storage_type(0);

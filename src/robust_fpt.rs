@@ -22,7 +22,7 @@ use super::extended_exp_fpt as EX;
 use super::extended_int as EI;
 #[allow(unused_imports)]
 use crate::{t, tln};
-use num::{Float, NumCast, Zero};
+use num::{Float, Zero};
 use ordered_float::OrderedFloat;
 use std::fmt;
 use std::marker::PhantomData;
@@ -734,27 +734,21 @@ impl ops::DivAssign<RobustFpt> for RobustDif {
 /// relative error. Evaluates expressions of the next type:
 /// sum(i = 1 .. n)(A\[i\] * sqrt(B\[i\])), 1 <= n <= 4.
 #[allow(non_camel_case_types)]
-pub struct robust_sqrt_expr<
-    _fpt: NumCast + Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>,
-> {
+pub struct robust_sqrt_expr<_fpt: Float + fmt::Display + Default + fmt::Debug> {
     #[doc(hidden)]
     pdf_: PhantomData<_fpt>,
 }
 
 #[allow(non_camel_case_types)]
-impl<
-        _fpt: Clone + NumCast + Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>,
-    > Default for robust_sqrt_expr<_fpt>
-{
+impl<_fpt: Float + fmt::Display + Default + fmt::Debug> Default for robust_sqrt_expr<_fpt> {
     fn default() -> Self {
         Self { pdf_: PhantomData }
     }
 }
 
 #[allow(non_camel_case_types)]
-impl<
-        _fpt: Clone + NumCast + Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>,
-    > robust_sqrt_expr<_fpt>
+impl<_fpt: Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>>
+    robust_sqrt_expr<_fpt>
 {
     #[inline(always)]
     fn i_to_f(that: &EI::ExtendedInt) -> EX::ExtendedExponentFpt<f64> {
