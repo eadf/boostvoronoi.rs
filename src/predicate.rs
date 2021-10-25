@@ -318,7 +318,7 @@ where
         }
     }
 
-    /// boolean predicate between site and circle (integer<->float)
+    /// boolean predicate between site and circle (Bool Integer Float)
     #[allow(clippy::let_and_return)]
     pub(crate) fn event_comparison_predicate_bif(
         lhs: &VSE::SiteEvent<I, F>,
@@ -337,7 +337,7 @@ where
         rv
     }
 
-    #[allow(dead_code)]
+    /*
     #[inline(always)]
     pub(crate) fn event_comparison_predicate_if(
         lhs: &VSE::SiteEvent<I, F>,
@@ -348,7 +348,7 @@ where
         } else {
             cmp::Ordering::Greater
         }
-    }
+    }*/
 }
 
 /// Represents the result of the epsilon robust predicate. If the

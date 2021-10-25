@@ -47,120 +47,90 @@ pub type SiteEventIndexType = usize;
 ///   initial_index_ - site index among the initial input set
 /// Note: for all sites is_inverse_ flag is equal to false by default.
 
+#[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Hash, Debug)]
+enum Site<I: InputType> {
+    Point(Point<I>),
+    Segment(Point<I>, Point<I>),
+}
+
 #[derive(Copy, Clone)]
-pub struct SiteEvent<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
-    point0_: Point<I>,
-    point1_: Point<I>,
+pub struct SiteEvent<I: InputType, F: OutputType> {
+    site_: Site<I>,
     sorted_index_: SiteEventIndexType,
     initial_index_: SiteEventIndexType,
     flags_: VD::ColorType,
     #[doc(hidden)]
-    pdf_: PhantomData<F>,
+    pd_: PhantomData<F>,
 }
 
-impl<I, F> fmt::Debug for SiteEvent<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> fmt::Debug for SiteEvent<I, F> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.is_point() {
-            write!(
+        match self.site_ {
+            Site::Point(point) => write!(
                 f,
                 "#{:?}({},{}),ii:{:?},f:{:?}",
-                self.sorted_index_,
-                self.point0_.x,
-                self.point0_.y,
-                self.initial_index_,
-                self.flags_
-            )
-        } else {
-            write!(
+                self.sorted_index_, point.x, point.y, self.initial_index_, self.flags_
+            ),
+            Site::Segment(point0, point1) => write!(
                 f,
                 "#{:?}({},{}){}({},{}),ii:{:?},f:{:?}",
                 self.sorted_index_,
-                self.point0_.x,
-                self.point0_.y,
+                point0.x,
+                point0.y,
                 if self.is_inverse() { "¿" } else { "-" },
-                self.point1_.x,
-                self.point1_.y,
+                point1.x,
+                point1.y,
                 self.initial_index_,
                 self.flags_
-            )
+            ),
         }
     }
 }
 
-impl<I, O> PartialOrd for SiteEvent<I, O>
-where
-    I: InputType,
-    O: OutputType,
-{
+impl<I: InputType, F: OutputType> PartialOrd for SiteEvent<I, F> {
+    #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(VP::EventComparisonPredicate::<I, O>::event_comparison_predicate_ii(self, other))
+        Some(VP::EventComparisonPredicate::<I, F>::event_comparison_predicate_ii(self, other))
     }
 }
 
-impl<I, O> Ord for SiteEvent<I, O>
-where
-    I: InputType,
-    O: OutputType,
-{
+impl<I: InputType, F: OutputType> Ord for SiteEvent<I, F> {
+    #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
-        VP::EventComparisonPredicate::<I, O>::event_comparison_predicate_ii(self, other)
+        VP::EventComparisonPredicate::<I, F>::event_comparison_predicate_ii(self, other)
     }
 }
 
-impl<I, O> PartialEq for SiteEvent<I, O>
-where
-    I: InputType,
-    O: OutputType,
-{
+impl<I: InputType, F: OutputType> PartialEq for SiteEvent<I, F> {
+    #[inline]
     fn eq(&self, other: &Self) -> bool {
-        (self.point0_ == other.point0_) && (self.point1_ == other.point1_)
+        self.site_.eq(&other.site_)
     }
 }
 
-impl<I, O> Eq for SiteEvent<I, O>
-where
-    I: InputType,
-    O: OutputType,
-{
-}
+impl<I: InputType, F: OutputType> Eq for SiteEvent<I, F> {}
 
-impl<I, O> Hash for SiteEvent<I, O>
-where
-    I: InputType,
-    O: OutputType,
-{
+impl<I: InputType, F: OutputType> Hash for SiteEvent<I, F> {
+    /// sorted_index_ is not part of the hash
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.point0_.hash(state);
-        self.point1_.hash(state);
+        self.site_.hash(state);
         self.initial_index_.hash(state);
         self.flags_.hash(state);
     }
 }
 
-impl<I, F> SiteEvent<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> SiteEvent<I, F> {
+
     #[cfg(test)]
     /// only used by unit test code
     pub(crate) fn new_2(point: Point<I>, initial_index: SiteEventIndexType) -> SiteEvent<I, F> {
         Self {
-            point0_: point,
-            point1_: point,
+            site_: Site::Point(point),
             sorted_index_: 0,
             initial_index_: initial_index,
             flags_: VD::ColorBits::SINGLE_POINT__BIT.0,
             #[doc(hidden)]
-            pdf_: PhantomData,
+            pd_: PhantomData,
         }
     }
 
@@ -169,19 +139,22 @@ where
         b: Point<I>,
         initial_index: SiteEventIndexType,
     ) -> SiteEvent<I, F> {
+        let site = if a != b {
+            Site::Segment(a, b)
+        } else {
+            Site::Point(a)
+        };
         Self {
-            point0_: a,
-            point1_: b,
+            site_:site,
             sorted_index_: 0,
             initial_index_: initial_index,
             flags_: 0,
-            #[doc(hidden)]
-            pdf_: PhantomData,
+            pd_: PhantomData,
         }
     }
 
-    /// Only used by test code
     #[cfg(test)]
+    /// Only used by test code
     pub fn new_7(
         x1: I,
         y1: I,
@@ -191,74 +164,112 @@ where
         sorted_index: SiteEventIndexType,
         flags: VD::ColorType,
     ) -> SiteEvent<I, F> {
+        let site = if x1 == x2 && y1 == y2 {
+            Site::Point(Point { x: x1, y: y1 })
+        } else {
+            Site::Segment(Point { x: x1, y: y1 }, Point { x: x2, y: y2 })
+        };
         Self {
-            point0_: Point { x: x1, y: y1 },
-            point1_: Point { x: x2, y: y2 },
+            site_: site,
             sorted_index_: sorted_index,
             initial_index_: initial_index,
             flags_: flags,
-            pdf_: PhantomData,
+            pd_: PhantomData,
         }
     }
 
     #[cfg(feature = "ce_corruption_check")]
     #[allow(dead_code)]
     pub fn dbg(&self) {
-        if self.is_point() {
-            println!(
-                "[{},{}];",
-                num::cast::<I, f64>(self.point0().x).unwrap(),
-                num::cast::<I, f64>(self.point0().y).unwrap()
-            );
-        } else {
-            println!(
-                "[{},{},{},{}];",
-                num::cast::<I, f64>(self.point0().x).unwrap(),
-                num::cast::<I, f64>(self.point0().y).unwrap(),
-                num::cast::<I, f64>(self.point1().x).unwrap(),
-                num::cast::<I, f64>(self.point1().y).unwrap()
-            );
+        let i2f = super::TypeConverter1::<I>::i_to_f64;
+        match &self.site_ {
+            Site::Point(point0) => {
+                println!(
+                    "[{},{}];",
+                    i2f(point0.x),
+                    i2f(point0.y)
+                );
+            },
+            Site::Segment(point0, point1) => {
+                println!(
+                    "[{},{},{},{}];",
+                    i2f(point0.x),
+                    i2f(point0.y),
+                    i2f(point1.x),
+                    i2f(point1.y)
+                );
+            }
         }
     }
 
     #[inline(always)]
-    pub fn x(&self) -> I {
-        self.point0_.x
+    pub (crate) fn x(&self) -> I {
+        self.x0()
     }
 
     #[inline(always)]
-    pub fn y(&self) -> I {
-        self.point0_.y
+    pub (crate) fn y(&self) -> I {
+        self.y0()
     }
 
     #[inline(always)]
     pub fn x0(&self) -> I {
-        self.point0_.x
+        match &self.site_ {
+            Site::Point(p) => p.x,
+            Site::Segment(p, _) => p.x,
+        }
     }
 
     #[inline(always)]
     pub fn y0(&self) -> I {
-        self.point0_.y
+        match &self.site_ {
+            Site::Point( p) => p.y,
+            Site::Segment( p, _) => p.y,
+        }
     }
 
     #[inline(always)]
     pub fn x1(&self) -> I {
-        self.point1_.x
+        match &self.site_ {
+            Site::Point( p) => {
+                // todo: This should not happen (but it happens in some tests)
+                // debug_assert!(false, "Site was not a segment");
+                p.x
+            },
+            Site::Segment(_, p) => p.x,
+        }
     }
 
     #[inline(always)]
     pub fn y1(&self) -> I {
-        self.point1_.y
+        match &self.site_ {
+            Site::Point( p) => {
+                // todo: This should not happen (but it happens in some tests)
+                // debug_assert!(false, "Site was not a segment");
+                p.y
+            },
+            Site::Segment(_, p) => p.y,
+        }
     }
 
     #[inline(always)]
-    pub fn point0(&self) -> &Point<I> {
-        &self.point0_
+    pub (crate) fn point0(&self) -> &Point<I> {
+        match &self.site_ {
+            Site::Point(p) => p,
+            Site::Segment(p, _) => p,
+        }
     }
 
     #[inline(always)]
-    pub fn point1(&self) -> &Point<I> {
-        &self.point1_
+    pub (crate) fn point1(&self) -> &Point<I> {
+        match &self.site_ {
+            Site::Point( p) => {
+                // todo: This should not happen (but it happens in some tests)
+                // debug_assert!(false, "Site was not a segment");
+                p
+            },
+            Site::Segment(_, p) => p,
+        }
     }
 
     #[inline(always)]
@@ -283,7 +294,15 @@ where
 
     // todo this looks suspicious
     pub(crate) fn inverse(&mut self) -> &mut Self {
-        mem::swap(&mut self.point0_, &mut self.point1_);
+        match &mut self.site_ {
+            Site::Segment(p0, p1) => {
+                mem::swap(p0, p1);
+            }
+            _ => {
+                debug_assert!(false, "inverse() should never be called on points");
+            }
+        }
+
         self.flags_ ^= VD::ColorBits::IS_INVERSE__BIT.0;
         self
     }
@@ -303,14 +322,19 @@ where
         self.flags_ = flags;
     }
 
+    #[allow(dead_code)]
     #[inline(always)]
     pub fn is_point(&self) -> bool {
-        (self.point0_.x == self.point1_.x) && (self.point0_.y == self.point1_.y)
+        !self.is_segment()
     }
 
     #[inline(always)]
+    /// Returns true if the site is a segment, false if it is a point
     pub fn is_segment(&self) -> bool {
-        (self.point0_.x != self.point1_.x) || (self.point0_.y != self.point1_.y)
+        match self.site_ {
+            Site::Point(_) => false,
+            Site::Segment(_, _) => true,
+        }
     }
 
     #[allow(unknown_lints)]
@@ -351,11 +375,7 @@ where
     }
 }
 
-impl<I, O> fmt::Display for SiteEvent<I, O>
-where
-    I: InputType,
-    O: OutputType,
-{
+impl<I: InputType, F: OutputType> fmt::Display for SiteEvent<I, F> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
     }

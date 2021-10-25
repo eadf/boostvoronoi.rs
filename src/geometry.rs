@@ -13,7 +13,7 @@ use std::fmt;
 use std::hash;
 
 /// A really simple 2d coordinate container type - integer only
-#[derive(Copy, Clone, cmp::PartialEq, cmp::Eq, Hash)]
+#[derive(Copy, Clone, cmp::PartialEq, cmp::PartialOrd, cmp::Eq, Hash)]
 pub struct Point<T: InputType> {
     pub x: T,
     pub y: T,
