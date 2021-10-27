@@ -128,17 +128,13 @@ impl OutputType for f64 {}
 
 /// Functions for converting the integer input type to other types (i32 i64 etc.)
 #[derive(Default)]
-pub struct TypeConverter1<I>
-where
-    I: InputType,
+pub struct TypeConverter1<I: InputType>
 {
     #[doc(hidden)]
     pdi_: PhantomData<I>,
 }
 
-impl<I> TypeConverter1<I>
-where
-    I: InputType,
+impl<I: InputType> TypeConverter1<I>
 {
     #[inline(always)]
     /// Convert from the input integer type to an extended int
@@ -179,10 +175,7 @@ where
 
 /// Functions for converting the integer and float input type to other types.
 #[derive(Default)]
-pub struct TypeConverter2<I, F>
-where
-    I: InputType,
-    F: OutputType,
+pub struct TypeConverter2<I:InputType, F:OutputType>
 {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
@@ -190,10 +183,7 @@ where
     pdi_: PhantomData<I>,
 }
 
-impl<I, F> TypeConverter2<I, F>
-where
-    I: InputType,
-    F: OutputType,
+impl<I: InputType, F:OutputType> TypeConverter2<I, F>
 {
     #[inline(always)]
     /// Convert from the input integer type to the output float type
