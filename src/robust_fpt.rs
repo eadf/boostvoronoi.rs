@@ -18,8 +18,8 @@ mod robustdif_tests;
 #[cfg(test)]
 mod robustfpt_tests;
 
-use super::extended_exp_fpt as EX;
-use super::extended_int as EI;
+use crate::extended_exp_fpt as EX;
+use crate::extended_int as EI;
 #[allow(unused_imports)]
 use crate::{t, tln};
 use num::{Float, Zero};
@@ -173,7 +173,7 @@ impl RobustFpt {
     /// let a = robust_fpt::RobustFpt::new_1(aa);
     /// assert_eq!(a.is_neg(), false);
     /// ```
-    //#[inline(always)]
+    #[inline(always)]
     pub fn is_neg(&self) -> bool {
         is_neg_f(self.fpv_)
     }
@@ -226,20 +226,17 @@ impl ops::Add<RobustFpt> for RobustFpt {
             if re.is_nan() {
                 tln!("re.is_nan() self:{:?}, _rhs:{:?}", self, _rhs);
             }
-            assert!(fpv.is_finite());
-            assert!(!re.is_nan());
         }
+        debug_assert!(fpv.is_finite());
+        debug_assert!(!re.is_nan());
         Self { fpv_: fpv, re_: re }
     }
 }
 
 impl ops::AddAssign<RobustFpt> for RobustFpt {
     fn add_assign(&mut self, _rhs: RobustFpt) {
-        #[cfg(feature = "console_debug")]
-        {
-            assert!(self.fpv_.is_finite());
-            assert!(_rhs.fpv_.is_finite());
-        }
+        debug_assert!(self.fpv_.is_finite());
+        debug_assert!(_rhs.fpv_.is_finite());
 
         let fpv: f64 = self.fpv_ + _rhs.fpv_;
         let re = if (!self.is_neg() && !_rhs.is_neg()) || (!self.is_pos() && !_rhs.is_pos()) {
@@ -256,8 +253,7 @@ impl ops::AddAssign<RobustFpt> for RobustFpt {
         };
         self.fpv_ = fpv;
         self.re_ = re;
-        #[cfg(feature = "console_debug")]
-        assert!(self.fpv_.is_finite());
+        debug_assert!(self.fpv_.is_finite());
     }
 }
 
@@ -286,11 +282,8 @@ impl ops::MulAssign<RobustFpt> for RobustFpt {
         self.re_ = self.re_ + _rhs.re_ + OrderedFloat(ROUNDING_ERROR);
         self.fpv_ = self.fpv_ * _rhs.fpv_;
 
-        #[cfg(feature = "console_debug")]
-        {
-            assert!(self.fpv_.is_finite());
-            assert!(!self.re_.is_nan());
-        }
+        debug_assert!(self.fpv_.is_finite());
+        debug_assert!(!self.re_.is_nan());
     }
 }
 
@@ -332,8 +325,8 @@ impl ops::Sub<RobustFpt> for RobustFpt {
                     old_self
                 );
             }
-            assert!(self.fpv_.is_finite());
-            assert!(!self.re_.is_nan());
+            debug_assert!(self.fpv_.is_finite());
+            debug_assert!(!self.re_.is_nan());
         }
         Self { fpv_: fpv, re_: re }
     }
@@ -376,8 +369,8 @@ impl ops::SubAssign<RobustFpt> for RobustFpt {
                     old_self
                 );
             }
-            assert!(self.fpv_.is_finite());
-            assert!(!self.re_.is_nan());
+            debug_assert!(self.fpv_.is_finite());
+            debug_assert!(!self.re_.is_nan());
         }
     }
 }
@@ -397,11 +390,10 @@ impl ops::Div<RobustFpt> for RobustFpt {
     fn div(self, _rhs: RobustFpt) -> Self {
         let fpv: f64 = self.fpv_ / _rhs.fpv_;
         let re = self.re_ + _rhs.re_ + OrderedFloat(ROUNDING_ERROR);
-        #[cfg(feature = "console_debug")]
-        {
-            assert!(fpv.is_finite());
-            assert!(!re.is_nan());
-        }
+
+        debug_assert!(fpv.is_finite());
+        debug_assert!(!re.is_nan());
+
         Self { fpv_: fpv, re_: re }
     }
 }
@@ -410,11 +402,9 @@ impl ops::DivAssign<RobustFpt> for RobustFpt {
     fn div_assign(&mut self, _rhs: RobustFpt) {
         self.re_ = self.re_ + _rhs.re_ + OrderedFloat(ROUNDING_ERROR);
         self.fpv_ = self.fpv_ / _rhs.fpv_;
-        #[cfg(feature = "console_debug")]
-        {
-            assert!(self.fpv_.is_finite());
-            assert!(!self.re_.is_nan());
-        }
+
+        debug_assert!(self.fpv_.is_finite());
+        debug_assert!(!self.re_.is_nan());
     }
 }
 

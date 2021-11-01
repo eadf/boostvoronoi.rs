@@ -14,18 +14,16 @@
 #[cfg(test)]
 mod tests;
 
-use super::beach_line as VB;
-use super::circle_event as VC;
-use super::ctypes::UlpComparison;
-use super::extended_exp_fpt as EX;
-use super::extended_int as EI;
-use super::geometry::Point;
-use super::robust_fpt as RF;
-use super::site_event as VSE;
-use super::TypeConverter1 as TC1;
-use super::TypeConverter2 as TC2;
-use super::{InputType, OutputType};
-use crate::{t, tln};
+use crate::beach_line as VB;
+use crate::circle_event as VC;
+use crate::ctypes::UlpComparison;
+use crate::extended_exp_fpt as EX;
+use crate::extended_int as EI;
+use crate::robust_fpt as RF;
+use crate::site_event as VSE;
+use crate::TypeConverter1 as TC1;
+use crate::TypeConverter2 as TC2;
+use crate::{geometry::Point, t, tln, InputType, OutputType};
 use num::{Float, NumCast, PrimInt, Zero};
 use std::cmp;
 use std::fmt::{Debug, Display};
@@ -61,22 +59,14 @@ impl Debug for SiteIndex {
 /// be converted to the 32-bit signed integer without precision loss.
 /// Todo! give this a lookover
 #[derive(Default)]
-pub struct Predicates<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct Predicates<I: InputType, F: OutputType> {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
     #[doc(hidden)]
     pdi_: PhantomData<I>,
 }
 
-impl<I, F> Predicates<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> Predicates<I, F> {
     #[inline(always)]
     pub(crate) fn is_vertical_1(site: &VSE::SiteEvent<I, F>) -> bool {
         Self::is_vertical_2(site.point0(), site.point1())
@@ -175,22 +165,14 @@ enum Orientation {
 }
 
 #[derive(Default)]
-pub struct OrientationTest<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct OrientationTest<I: InputType, F: OutputType> {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
     #[doc(hidden)]
     pdi_: PhantomData<I>,
 }
 
-impl<I, F> OrientationTest<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> OrientationTest<I, F> {
     /// Value is a determinant of two vectors (e.g. x1 * y2 - x2 * y1).
     /// Return orientation based on the sign of the determinant.
     #[inline(always)]
@@ -223,18 +205,12 @@ where
 }
 
 #[derive(Default)]
-pub struct PointComparisonPredicate<I>
-where
-    I: InputType,
-{
+pub struct PointComparisonPredicate<I: InputType> {
     #[doc(hidden)]
     pdi_: PhantomData<I>,
 }
 
-impl<I> PointComparisonPredicate<I>
-where
-    I: InputType,
-{
+impl<I: InputType> PointComparisonPredicate<I> {
     /// returns true if lhs.x < rhs.x, if lhs.x==rhs.x it returns lhs.y < rhs.y
     #[inline(always)]
     pub(crate) fn point_comparison_predicate(lhs: &Point<I>, rhs: &Point<I>) -> bool {
@@ -247,22 +223,14 @@ where
 }
 
 #[derive(Default)]
-pub struct EventComparisonPredicate<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct EventComparisonPredicate<I: InputType, F: OutputType> {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
     #[doc(hidden)]
     pdi_: PhantomData<I>,
 }
 
-impl<I, F> EventComparisonPredicate<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> EventComparisonPredicate<I, F> {
     /// boolean predicate between two sites (bool int int)
     pub(crate) fn event_comparison_predicate_bii(
         lhs: &VSE::SiteEvent<I, F>,
@@ -361,22 +329,14 @@ enum KPredicateResult {
     MORE,      // = 1
 }
 
-pub struct DistancePredicate<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct DistancePredicate<I: InputType, F: OutputType> {
     #[doc(hidden)]
     pdo_: PhantomData<F>,
     #[doc(hidden)]
     pdi_: PhantomData<I>,
 }
 
-impl<I, F> DistancePredicate<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> DistancePredicate<I, F> {
     #[cfg(feature = "console_debug")]
     #[allow(dead_code)]
     #[inline(always)]
@@ -610,22 +570,14 @@ where
     }
 }
 
-pub struct NodeComparisonPredicate<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct NodeComparisonPredicate<I: InputType, F: OutputType> {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
     #[doc(hidden)]
     pdi_: PhantomData<I>,
 }
 
-impl<I, F> NodeComparisonPredicate<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> NodeComparisonPredicate<I, F> {
     /// Compares nodes in the balanced binary search tree. Nodes are
     /// compared based on the y coordinates of the arcs intersection points.
     /// Nodes with less y coordinate of the intersection point go first.
@@ -747,22 +699,14 @@ where
     }
 }
 
-pub struct CircleExistencePredicate<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct CircleExistencePredicate<I: InputType, F: OutputType> {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
     #[doc(hidden)]
     pdi_: PhantomData<I>,
 }
 
-impl<I, F> CircleExistencePredicate<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> CircleExistencePredicate<I, F> {
     #[inline(always)]
     pub(crate) fn ppp(
         site1: &VSE::SiteEvent<I, F>,
@@ -882,11 +826,7 @@ where
 }
 
 #[derive(Default)]
-pub struct LazyCircleFormationFunctor<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct LazyCircleFormationFunctor<I: InputType, F: OutputType> {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
     #[doc(hidden)]
@@ -894,11 +834,7 @@ where
 }
 
 #[allow(non_snake_case)]
-impl<I, F> LazyCircleFormationFunctor<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
     /// Lazy evaluation of point, point, point circle events
     fn ppp(point1: &Point<I>, point2: &Point<I>, point3: &Point<I>, c_event: &VC::CircleEventType) {
         let i_to_f64 = TC1::<I>::i_to_f64;
@@ -1753,22 +1689,14 @@ where
 }
 
 #[derive(Default)]
-pub struct CircleFormationFunctor<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct CircleFormationFunctor<I: InputType, F: OutputType> {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
     #[doc(hidden)]
     pdi_: PhantomData<I>,
 }
 
-impl<I, F> CircleFormationFunctor<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> CircleFormationFunctor<I, F> {
     pub(crate) fn lies_outside_vertical_segment(
         c: &VC::CircleEventType,
         s: &VSE::SiteEvent<I, F>,
@@ -1928,22 +1856,14 @@ where
 }
 
 #[derive(Default)]
-pub struct ExactCircleFormationFunctor<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct ExactCircleFormationFunctor<I: InputType, F: OutputType> {
     #[doc(hidden)]
     pdf_: PhantomData<F>,
     #[doc(hidden)]
     pdi_: PhantomData<I>,
 }
 
-impl<I, F> ExactCircleFormationFunctor<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
     /// Recompute parameters of the point, point, point circle event using high-precision library.
     fn ppp(
         point1: &Point<I>,

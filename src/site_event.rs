@@ -1,4 +1,4 @@
-// Boost.Polygon library voronoi_diagram.hpp header file
+// Boost.Polygon library detail/voronoi_structures.hpp header file
 
 //          Copyright Andrii Sydorchuk 2010-2012.
 // Distributed under the Boost Software License, Version 1.0.
@@ -12,8 +12,8 @@
 #[cfg(test)]
 mod tests;
 
-use super::diagram as VD;
-use super::predicate as VP;
+use crate::diagram as VD;
+use crate::predicate as VP;
 use std::cmp::Ordering;
 
 use super::geometry::Point;
@@ -120,7 +120,6 @@ impl<I: InputType, F: OutputType> Hash for SiteEvent<I, F> {
 }
 
 impl<I: InputType, F: OutputType> SiteEvent<I, F> {
-
     #[cfg(test)]
     /// only used by unit test code
     pub(crate) fn new_2(point: Point<I>, initial_index: SiteEventIndexType) -> SiteEvent<I, F> {
@@ -145,7 +144,7 @@ impl<I: InputType, F: OutputType> SiteEvent<I, F> {
             Site::Point(a)
         };
         Self {
-            site_:site,
+            site_: site,
             sorted_index_: 0,
             initial_index_: initial_index,
             flags_: 0,
@@ -184,12 +183,8 @@ impl<I: InputType, F: OutputType> SiteEvent<I, F> {
         let i2f = super::TypeConverter1::<I>::i_to_f64;
         match &self.site_ {
             Site::Point(point0) => {
-                println!(
-                    "[{},{}];",
-                    i2f(point0.x),
-                    i2f(point0.y)
-                );
-            },
+                println!("[{},{}];", i2f(point0.x), i2f(point0.y));
+            }
             Site::Segment(point0, point1) => {
                 println!(
                     "[{},{},{},{}];",
@@ -203,12 +198,12 @@ impl<I: InputType, F: OutputType> SiteEvent<I, F> {
     }
 
     #[inline(always)]
-    pub (crate) fn x(&self) -> I {
+    pub(crate) fn x(&self) -> I {
         self.x0()
     }
 
     #[inline(always)]
-    pub (crate) fn y(&self) -> I {
+    pub(crate) fn y(&self) -> I {
         self.y0()
     }
 
@@ -223,19 +218,19 @@ impl<I: InputType, F: OutputType> SiteEvent<I, F> {
     #[inline(always)]
     pub fn y0(&self) -> I {
         match &self.site_ {
-            Site::Point( p) => p.y,
-            Site::Segment( p, _) => p.y,
+            Site::Point(p) => p.y,
+            Site::Segment(p, _) => p.y,
         }
     }
 
     #[inline(always)]
     pub fn x1(&self) -> I {
         match &self.site_ {
-            Site::Point( p) => {
+            Site::Point(p) => {
                 // todo: This should not happen (but it happens in some tests)
                 // debug_assert!(false, "Site was not a segment");
                 p.x
-            },
+            }
             Site::Segment(_, p) => p.x,
         }
     }
@@ -243,17 +238,17 @@ impl<I: InputType, F: OutputType> SiteEvent<I, F> {
     #[inline(always)]
     pub fn y1(&self) -> I {
         match &self.site_ {
-            Site::Point( p) => {
+            Site::Point(p) => {
                 // todo: This should not happen (but it happens in some tests)
                 // debug_assert!(false, "Site was not a segment");
                 p.y
-            },
+            }
             Site::Segment(_, p) => p.y,
         }
     }
 
     #[inline(always)]
-    pub (crate) fn point0(&self) -> &Point<I> {
+    pub(crate) fn point0(&self) -> &Point<I> {
         match &self.site_ {
             Site::Point(p) => p,
             Site::Segment(p, _) => p,
@@ -261,13 +256,13 @@ impl<I: InputType, F: OutputType> SiteEvent<I, F> {
     }
 
     #[inline(always)]
-    pub (crate) fn point1(&self) -> &Point<I> {
+    pub(crate) fn point1(&self) -> &Point<I> {
         match &self.site_ {
-            Site::Point( p) => {
+            Site::Point(p) => {
                 // todo: This should not happen (but it happens in some tests)
                 // debug_assert!(false, "Site was not a segment");
                 p
-            },
+            }
             Site::Segment(_, p) => p,
         }
     }

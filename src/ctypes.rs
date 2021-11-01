@@ -1,4 +1,4 @@
-// Boost.Polygon library detail/robust_fpt.hpp header file
+// Boost.Polygon library detail/voronoi_ctypes.hpp header file
 
 //          Copyright Andrii Sydorchuk 2010-2012.
 // Distributed under the Boost Software License, Version 1.0.

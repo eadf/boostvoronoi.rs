@@ -12,16 +12,16 @@
 //! A std::cell::Cell based version of the output data.
 //! See <https://www.boost.org/doc/libs/1_76_0/libs/polygon/doc/voronoi_diagram.htm> for diagram description.
 
-use super::circle_event as VC;
-use super::ctypes as CT;
-use super::site_event as VSE;
-use super::visual_utils as VU;
-use super::TypeConverter2 as TC2;
+use crate::circle_event as VC;
+use crate::ctypes as CT;
+use crate::site_event as VSE;
+use crate::visual_utils as VU;
+use crate::TypeConverter2 as TC2;
 use crate::{sync_diagram as SD, BvError};
 
-pub use super::{InputType, OutputType};
 #[allow(unused_imports)]
 use crate::{t, tln};
+pub use crate::{InputType, OutputType};
 use num::NumCast;
 use std::cell;
 use std::cmp::Ordering;

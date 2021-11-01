@@ -1,3 +1,5 @@
+// Boost.Polygon library detail/voronoi_structures.hpp header file
+//
 //          Copyright Eadf (github.com/eadf) 2021.
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
@@ -5,12 +7,9 @@
 
 //! Some basic geometry data structures together with From trait implementations.
 
-use super::diagram::Vertex;
-use super::InputType;
-use crate::OutputType;
+use crate::{diagram::Vertex, InputType, OutputType};
 use std::cmp;
 use std::fmt;
-use std::hash;
 
 /// A really simple 2d coordinate container type - integer only
 #[derive(Copy, Clone, cmp::PartialEq, cmp::PartialOrd, cmp::Eq, Hash)]
@@ -19,10 +18,7 @@ pub struct Point<T: InputType> {
     pub y: T,
 }
 
-impl<T> Point<T>
-where
-    T: InputType + fmt::Display + hash::Hash,
-{
+impl<T: InputType> Point<T> {
     /// Got "conflicting implementations of trait `std::convert::From..."
     /// So i picked the name as_f64 for this conversion
     pub fn as_f64(&self) -> [f64; 2] {
@@ -56,10 +52,7 @@ impl<T: InputType> From<Point<T>> for [f64; 2] {
     }
 }
 
-impl<T> fmt::Debug for Point<T>
-where
-    T: InputType + fmt::Display + hash::Hash,
-{
+impl<T: InputType> fmt::Debug for Point<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "({:.12},{:.12})", self.x, self.y,)
     }
@@ -154,11 +147,7 @@ impl<T: InputType + geo::CoordNum> From<&Point<T>> for geo::Coordinate<T> {
 }
 
 #[cfg(feature = "geo")]
-impl<I, F> From<&Vertex<I, F>> for geo::Coordinate<F>
-where
-    I: InputType,
-    F: OutputType + geo::CoordFloat,
-{
+impl<I: InputType, F: OutputType + geo::CoordFloat> From<&Vertex<I, F>> for geo::Coordinate<F> {
     /// Converts to geo::Coordinate from &boostvoronoi::diagram::Vertex
     /// ```
     /// # use boostvoronoi::geometry::*;
@@ -255,11 +244,7 @@ impl<T: InputType + cgmath::BaseNum> From<Point<T>> for cgmath::Point2<T> {
 }
 
 #[cfg(feature = "cgmath")]
-impl<I, F> From<&Vertex<I, F>> for cgmath::Point2<F>
-where
-    I: InputType,
-    F: OutputType + cgmath::BaseNum,
-{
+impl<I: InputType, F: OutputType + cgmath::BaseNum> From<&Vertex<I, F>> for cgmath::Point2<F> {
     /// Converts to cgmath::Point2 from &boostvoronoi::diagram::Vertex
     /// ```
     /// # use boostvoronoi::geometry::*;
@@ -286,11 +271,7 @@ pub struct Line<T: InputType> {
     pub end: Point<T>,
 }
 
-impl<T, IT> From<[IT; 2]> for Line<T>
-where
-    T: InputType,
-    IT: Copy + Into<Point<T>>,
-{
+impl<T: InputType, IT: Copy + Into<Point<T>>> From<[IT; 2]> for Line<T> {
     fn from(coordinate: [IT; 2]) -> Line<T> {
         Line::<T> {
             start: coordinate[0].into(),
@@ -387,11 +368,7 @@ impl<T: InputType> From<&[T; 4]> for Line<T> {
     }
 }
 
-impl<I, F> From<&Vertex<I, F>> for [F; 2]
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> From<&Vertex<I, F>> for [F; 2] {
     /// Converts to \[T;2\] from &boostvoronoi::diagram::Vertex
     /// ```
     /// # use boostvoronoi::geometry::*;

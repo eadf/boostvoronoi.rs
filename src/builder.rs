@@ -11,21 +11,20 @@
 
 //! Contains the builder code.
 
-use super::beach_line as VB;
-use super::circle_event as VC;
-use super::diagram as VD;
-use super::end_point as VEP;
-use super::predicate as VP;
-use super::site_event as VSE;
-use super::BvError;
+use crate::beach_line as VB;
+use crate::circle_event as VC;
+use crate::diagram as VD;
+use crate::end_point as VEP;
+use crate::predicate as VP;
+use crate::site_event as VSE;
+use crate::{
+    geometry::{Line, Point},
+    t, tln, BvError, InputType, OutputType,
+};
 
-use super::geometry::{Line, Point};
+use cpp_map::PIterator;
 use std::collections::BinaryHeap;
 use std::rc::Rc;
-
-use super::{InputType, OutputType};
-use crate::{t, tln};
-use cpp_map::PIterator;
 
 #[cfg(test)]
 mod tests;

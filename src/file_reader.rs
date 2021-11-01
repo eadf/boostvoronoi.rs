@@ -11,8 +11,7 @@
 
 //! Utility for reading example files.
 
-use crate::geometry;
-use crate::BvError;
+use crate::{geometry, BvError};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;

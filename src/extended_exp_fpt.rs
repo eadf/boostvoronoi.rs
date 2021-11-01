@@ -1,4 +1,4 @@
-// Boost.Polygon library detail/robust_fpt.hpp header file
+// Boost.Polygon library detail/voronoi_structures.hpp header file
 
 //          Copyright Andrii Sydorchuk 2010-2012.
 // Distributed under the Boost Software License, Version 1.0.
@@ -10,7 +10,7 @@
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 //! Utilities for extended float. Supports 63 bit mantissa with 32 bit exponent.
-use super::extended_int as EI;
+use crate::extended_int as EI;
 use num::Float;
 use std::fmt;
 use std::ops;

@@ -10,29 +10,21 @@
 //! A Sync version of the output data.
 //! See <https://www.boost.org/doc/libs/1_76_0/libs/polygon/doc/voronoi_diagram.htm> for diagram description.
 
-use super::diagram as VD;
-pub use super::{InputType, OutputType};
+use crate::diagram as VD;
 use crate::BvError;
+pub use crate::{InputType, OutputType};
 use std::marker::PhantomData;
 
 /// Sync version of the boostvoronoi::diagram::VoronoiDiagram struct.
 /// This is useful when traversing the diagram in a multi threaded environment.
 #[derive(Default, Debug)]
-pub struct SyncDiagram<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct SyncDiagram<I: InputType, F: OutputType> {
     cells_: Vec<VD::Cell<I, F>>,      // indexed by CellIndex
     vertices_: Vec<VD::Vertex<I, F>>, // indexed by VertexIndex
     edges_: Vec<VD::Edge<I, F>>,      // indexed by EdgeIndex
 }
 
-impl<I, F> SyncDiagram<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> SyncDiagram<I, F> {
     pub fn new(
         cells: Vec<VD::Cell<I, F>>,
         vertices: Vec<VD::Vertex<I, F>>,
@@ -193,11 +185,7 @@ where
 
 /// Iterator over edges pointing away from the vertex indicated by the initial edge.
 /// edge.vertex()
-pub struct EdgeRotNextIterator<'s, I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct EdgeRotNextIterator<'s, I: InputType, F: OutputType> {
     diagram_: &'s SyncDiagram<I, F>,
     starting_edge_: VD::EdgeIndex,
     next_edge_: Option<VD::EdgeIndex>,
@@ -207,11 +195,7 @@ where
     pdf_: PhantomData<F>,
 }
 
-impl<'s, I, F> EdgeRotNextIterator<'s, I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<'s, I: InputType, F: OutputType> EdgeRotNextIterator<'s, I, F> {
     pub(crate) fn new(diagram: &'s SyncDiagram<I, F>, starting_edge: VD::EdgeIndex) -> Self {
         Self {
             diagram_: diagram,
@@ -223,11 +207,7 @@ where
     }
 }
 
-impl<'s, I, F> Iterator for EdgeRotNextIterator<'s, I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<'s, I: InputType, F: OutputType> Iterator for EdgeRotNextIterator<'s, I, F> {
     type Item = VD::EdgeIndex;
     fn next(&mut self) -> Option<VD::EdgeIndex> {
         let rv = self.next_edge_;

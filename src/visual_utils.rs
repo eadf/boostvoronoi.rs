@@ -11,10 +11,10 @@
 
 //! Graphical utilities.
 
-use super::{InputType, OutputType};
-use crate::BvError;
-
-use super::geometry::{Line, Point};
+use crate::{
+    geometry::{Line, Point},
+    BvError, InputType, OutputType,
+};
 use std::fmt;
 use std::marker::PhantomData;
 

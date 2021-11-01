@@ -1,4 +1,4 @@
-// Boost.Polygon library detail/robust_fpt.hpp header file
+// Boost.Polygon library detail/voronoi_structures.hpp header file
 
 //          Copyright Andrii Sydorchuk 2010-2012.
 // Distributed under the Boost Software License, Version 1.0.
@@ -9,10 +9,10 @@
 
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
-use super::beach_line as VB;
-use super::geometry::Point;
-use super::predicate as VP;
-use super::InputType;
+use crate::beach_line as VB;
+use crate::geometry::Point;
+use crate::predicate as VP;
+use crate::InputType;
 use std::cmp::Ordering;
 
 ///

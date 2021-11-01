@@ -1,4 +1,4 @@
-// Boost.Polygon library detail/robust_fpt.hpp header file
+// Boost.Polygon library detail/voronoi_structures.hpp header file
 
 //          Copyright Andrii Sydorchuk 2010-2012.
 // Distributed under the Boost Software License, Version 1.0.
@@ -11,7 +11,7 @@
 
 //! Utilities for big integers. Supports next set of arithmetic operations: +, -, *.
 
-use super::extended_exp_fpt as EX;
+use crate::extended_exp_fpt as EX;
 #[allow(unused_imports)]
 use crate::{t, tln};
 use num::ToPrimitive;

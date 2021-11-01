@@ -1,4 +1,4 @@
-// Boost.Polygon library detail/robust_fpt.hpp header file
+// Boost.Polygon library detail/voronoi_structures.hpp header file
 
 //          Copyright Andrii Sydorchuk 2010-2012.
 // Distributed under the Boost Software License, Version 1.0.
@@ -17,17 +17,17 @@ mod test3;
 #[cfg(test)]
 mod tests1;
 
-use super::circle_event as VC;
-use super::diagram as VD;
-use super::predicate as VP;
-use super::site_event as VSE;
+use crate::circle_event as VC;
+use crate::diagram as VD;
+use crate::predicate as VP;
+use crate::site_event as VSE;
 
-use super::{InputType, OutputType};
 #[allow(unused_imports)]
 use crate::predicate::NodeComparisonPredicate;
 use crate::BvError;
 #[allow(unused_imports)]
 use crate::{t, tln};
+use crate::{InputType, OutputType};
 #[allow(unused_imports)]
 use itertools::Itertools;
 use std::cell::{Cell, RefCell};
