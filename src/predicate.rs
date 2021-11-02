@@ -25,6 +25,7 @@ use crate::TypeConverter1 as TC1;
 use crate::TypeConverter2 as TC2;
 use crate::{geometry::Point, t, tln, InputType, OutputType};
 use num::{Float, NumCast, PrimInt, Zero};
+use num_traits::One;
 use std::cmp;
 use std::fmt::{Debug, Display};
 use std::marker::PhantomData;
@@ -2028,7 +2029,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
             ca[0] = &denom * &sum_x * 2 + &numer * &vec_x;
             cb[0] = segm_len.clone();
             ca[1] = &denom * &sum_ab * 2 + &numer * &teta;
-            cb[1] = EI::ExtendedInt::from(1);
+            cb[1] = EI::ExtendedInt::one();
             ca[2] = &denom * &sum_y * 2 + &numer * &vec_y;
             let inv_denom = EX::ExtendedExponentFpt::from(1f64) / bi_to_ext(&denom);
             if recompute_c_x {
@@ -2066,7 +2067,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
 
         if recompute_c_y || recompute_lower_x {
             ca[2] = sum_y * &denom * &denom + &teta * &sum_ab * &vec_y;
-            cb[2] = EI::ExtendedInt::from(1);
+            cb[2] = EI::ExtendedInt::one();
             ca[3] = if segment_index == SiteIndex::Two {
                 -vec_y
             } else {
@@ -2082,7 +2083,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
             cb[0] = cb[0].clone() * &segm_len;
             cb[1] = cb[1].clone() * &segm_len;
             ca[2] = sum_ab * (&denom * &denom + &teta * &teta);
-            cb[2] = EI::ExtendedInt::from(1);
+            cb[2] = EI::ExtendedInt::one();
             ca[3] = if segment_index == SiteIndex::Two {
                 -teta
             } else {
@@ -2441,7 +2442,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
             }
 
             if recompute_lower_x {
-                cB[3] = EI::ExtendedInt::from(1);
+                cB[3] = EI::ExtendedInt::one();
                 let lower_x = sqrt_expr_.eval4(&cA, &cB);
                 c_event.set_lower_x_xf(lower_x / denom);
             }

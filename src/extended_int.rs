@@ -33,6 +33,13 @@ pub struct ExtendedInt {
     count_: i32,
 }
 
+impl num_traits::One for ExtendedInt {
+    #[inline]
+    fn one() -> Self {
+        Self::from(1_i32)
+    }
+}
+
 impl From<i32> for ExtendedInt {
     #[inline]
     /// ```
