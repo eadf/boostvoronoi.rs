@@ -74,22 +74,12 @@ pub type BeachLineNodeDataType = Rc<Cell<Option<BeachLineNodeData>>>;
 ///
 /// The ordering of beach_line_vec_ is intentionally reversed, pop() will return the last element.
 /// Before this change the beach-line ordering was unpredictable.
-/// TODO: C++ map does not overwrite already existing (key,value) pairs.
-/// TODO: Rust does the opposite
-pub struct BeachLine<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct BeachLine<I: InputType, F: OutputType> {
     pub(crate) beach_line_:
         Rc<RefCell<cpp_map::LinkedList<BeachLineNodeKey<I, F>, BeachLineNodeDataType>>>,
 }
 
-impl<I, F> Default for BeachLine<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> Default for BeachLine<I, F> {
     fn default() -> Self {
         Self {
             beach_line_: Rc::from(RefCell::from(cpp_map::LinkedList::default())),
@@ -97,11 +87,7 @@ where
     }
 }
 
-impl<I, F> BeachLine<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> BeachLine<I, F> {
     #[allow(dead_code)]
     #[inline(always)]
     pub(crate) fn len(&self) -> usize {
@@ -372,11 +358,7 @@ where
     }
 }
 
-impl<I, F> fmt::Debug for BeachLine<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> fmt::Debug for BeachLine<I, F> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f,)?;
         for (index, node) in self.beach_line_.borrow().iter().enumerate() {
@@ -396,30 +378,18 @@ where
 /// The one site is considered to be newer than the other one if it was
 /// processed by the algorithm later (has greater index).
 #[derive(Copy, Clone)]
-pub struct BeachLineNodeKey<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct BeachLineNodeKey<I: InputType, F: OutputType> {
     left_site_: VSE::SiteEvent<I, F>,
     right_site_: VSE::SiteEvent<I, F>,
 }
 
-impl<I, F> fmt::Debug for BeachLineNodeKey<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> fmt::Debug for BeachLineNodeKey<I, F> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "L:{:?},R:{:?}", &self.left_site(), &self.right_site())
     }
 }
 
-impl<I, F> BeachLineNodeKey<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> BeachLineNodeKey<I, F> {
     /// Constructs degenerate bisector, used to search an arc that is above
     /// the given site. The input to the constructor is the new site point.
     pub fn new_1(new_site: VSE::SiteEvent<I, F>) -> Self {
@@ -451,21 +421,13 @@ where
     }
 }
 
-impl<I, F> PartialOrd for BeachLineNodeKey<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> PartialOrd for BeachLineNodeKey<I, F> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<I, F> Ord for BeachLineNodeKey<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> Ord for BeachLineNodeKey<I, F> {
     // todo: move the content of node_comparison_predicate to here
     fn cmp(&self, other: &Self) -> Ordering {
         if VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(self, other) {
@@ -478,29 +440,16 @@ where
     }
 }
 
-impl<I, F> PartialEq for BeachLineNodeKey<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> PartialEq for BeachLineNodeKey<I, F> {
     // todo: node1.cmp(node2)==Ordering.Equal is not the same as node1 == node2, should it be?
     fn eq(&self, other: &Self) -> bool {
         self.left_site_ == other.left_site_ && self.right_site_ == other.right_site_
     }
 }
 
-impl<I, F> Eq for BeachLineNodeKey<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
-}
+impl<I: InputType, F: OutputType> Eq for BeachLineNodeKey<I, F> {}
 
-impl<I, F> Hash for BeachLineNodeKey<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> Hash for BeachLineNodeKey<I, F> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.left_site_.hash(state);
         self.right_site_.hash(state);
