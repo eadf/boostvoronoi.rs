@@ -14,8 +14,7 @@
 use crate::extended_exp_fpt as EX;
 #[allow(unused_imports)]
 use crate::{t, tln};
-use num::ToPrimitive;
-use num::Zero;
+use num::{One, ToPrimitive, Zero};
 use std::cmp;
 use std::fmt;
 use std::num::Wrapping;
@@ -31,13 +30,6 @@ const EXTENDED_INT_VEC_SIZE: usize = 8;
 pub struct ExtendedInt {
     chunks_: smallvec::SmallVec<[Wrapping<u32>; EXTENDED_INT_VEC_SIZE]>,
     count_: i32,
-}
-
-impl num_traits::One for ExtendedInt {
-    #[inline]
-    fn one() -> Self {
-        Self::from(1_i32)
-    }
 }
 
 impl From<i32> for ExtendedInt {
@@ -103,6 +95,13 @@ impl From<i64> for ExtendedInt {
             _ => (),
         }
         rv
+    }
+}
+
+impl One for ExtendedInt {
+    #[inline]
+    fn one() -> Self {
+        Self::from(1_i32)
     }
 }
 
@@ -355,7 +354,6 @@ impl ExtendedInt {
             self.chunks_.push(Wrapping(0));
         }
 
-        //dbg!(self.count);
         for shift in 0..(self.count_ as usize) {
             nxt = 0;
             for (first, c1_first) in c1.iter().enumerate().take(shift + 1) {

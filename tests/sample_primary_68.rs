@@ -20,7 +20,7 @@ type F = f64;
 //#[ignore]
 #[test]
 fn sample_primary_068() -> Result<(), BvError> {
-    let output: VS::SyncDiagram<I, F> = {
+    let output: VS::SyncDiagram<F> = {
         let input = r#"0
 87
 -50021 -49808 -49940 -49833

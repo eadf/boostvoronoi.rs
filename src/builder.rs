@@ -71,17 +71,13 @@ mod tests;
 /// // this will generate a the list of cells, edges and circle events (aka vertices)
 /// let result = vb.build().unwrap();
 /// ```
-pub struct Builder<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct Builder<I: InputType, F: OutputType> {
     pub(crate) site_events_: Vec<VSE::SiteEvent<I, F>>,
     circle_events_: VC::CircleEventQueue,
     end_points_: BinaryHeap<VEP::EndPointPair<I>>,
     pub(crate) beach_line_: VB::BeachLine<I, F>,
     // The number of input sites if points and segments are counted as one.
-    // (segments generates two site events so we can't use the lenght of the list)
+    // (segments generates two site events so we can't use the length of the list)
     index_: usize,
     segments_added_: bool, // make sure eventual vertices are added before segments
     #[cfg(feature = "console_debug")]
@@ -90,11 +86,7 @@ where
     debug_site_counter_: isize, // Just for debugging purposes
 }
 
-impl<I, F> Default for Builder<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> Default for Builder<I, F> {
     fn default() -> Self {
         Self {
             site_events_: Vec::new(),
@@ -111,11 +103,7 @@ where
     }
 }
 
-impl<I, F> Builder<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> Builder<I, F> {
     pub fn with_vertices<'a, T>(&mut self, vertices: T) -> Result<(), BvError>
     where
         I: 'a,
@@ -169,13 +157,13 @@ where
 
     #[deprecated(since = "0.9.0", note = "Please use the build() function instead")]
     /// Run sweep-line algorithm and fill output data structure.
-    pub fn construct(&mut self) -> Result<VD::Diagram<I, F>, BvError> {
+    pub fn construct(&mut self) -> Result<VD::Diagram<F>, BvError> {
         self.build()
     }
 
     /// Run sweep-line algorithm and fill output data structure.
-    pub fn build(&mut self) -> Result<VD::Diagram<I, F>, BvError> {
-        let mut output: VD::Diagram<I, F> = VD::Diagram::<I, F>::new(self.site_events_.len());
+    pub fn build(&mut self) -> Result<VD::Diagram<F>, BvError> {
+        let mut output: VD::Diagram<F> = VD::Diagram::<F>::new(self.site_events_.len());
 
         let mut site_event_iterator_: VSE::SiteEventIndexType = self.init_sites_queue();
 
@@ -211,7 +199,7 @@ where
                 self.process_site_event(&mut site_event_iterator_, &mut output)?;
             } else if site_event_iterator_ == self.site_events_.len() {
                 self.process_circle_event(&mut output)?;
-            } else if VP::EventComparisonPredicate::<I, F>::event_comparison_predicate_bif(
+            } else if VP::EventComparisonPredicate::event_comparison_predicate_bif::<I, F>(
                 &self.site_events_[site_event_iterator_],
                 // we checked with !is_empty(), unwrap is safe
                 &self.circle_events_.peek().unwrap().0.get(),
@@ -227,14 +215,14 @@ where
         self.beach_line_.clear();
 
         // Finish construction.
-        output._build();
+        output.build_();
         Ok(output)
     }
 
     pub(crate) fn init_sites_queue(&mut self) -> VSE::SiteEventIndexType {
         // Sort site events.
         self.site_events_
-            .sort_by(VP::EventComparisonPredicate::<I, F>::event_comparison_predicate_ii);
+            .sort_by(VP::EventComparisonPredicate::event_comparison_predicate_ii::<I, F>);
 
         // Remove duplicates.
         self.site_events_.dedup();
@@ -256,7 +244,7 @@ where
     pub(crate) fn init_beach_line(
         &mut self,
         site_event_iterator_: &mut VSE::SiteEventIndexType,
-        output: &mut VD::Diagram<I, F>,
+        output: &mut VD::Diagram<F>,
     ) -> Result<(), BvError> {
         if self.site_events_.is_empty() {
             return Ok(());
@@ -270,11 +258,11 @@ where
             let mut skip = 0;
 
             while *site_event_iterator_ < self.site_events_.len()
-                && VP::Predicates::<I, F>::is_vertical_2(
+                && VP::Predicates::is_vertical_2::<I, F>(
                     self.site_events_[*site_event_iterator_].point0(),
                     self.site_events_[0].point0(),
                 )
-                && VP::Predicates::<I, F>::is_vertical_1(&self.site_events_[*site_event_iterator_])
+                && VP::Predicates::is_vertical_1::<I, F>(&self.site_events_[*site_event_iterator_])
             {
                 *site_event_iterator_ += 1;
                 skip += 1;
@@ -296,7 +284,7 @@ where
     fn init_beach_line_default(
         &mut self,
         site_event_iterator_: &mut VSE::SiteEventIndexType,
-        output: &mut VD::Diagram<I, F>,
+        output: &mut VD::Diagram<F>,
     ) -> Result<(), BvError> {
         // Get the first and the second site event.
         let first = *site_event_iterator_ - 1;
@@ -321,7 +309,7 @@ where
     fn init_beach_line_collinear_sites(
         &mut self,
         site_event_iterator_: &VSE::SiteEventIndexType,
-        output: &mut VD::Diagram<I, F>,
+        output: &mut VD::Diagram<F>,
     ) -> Result<(), BvError> {
         let mut it_first: VSE::SiteEventIndexType = 0;
         let mut it_second: VSE::SiteEventIndexType = 1;
@@ -333,7 +321,7 @@ where
             let new_node_key = VB::BeachLineNodeKey::<I, F>::new_2(*first, *second);
 
             // Update the output.
-            let edge = output._insert_new_edge_2(*first, *second).0;
+            let edge = output.insert_new_edge_2_(*first, *second).0;
 
             // Insert a new bisector into the beach line.
             #[cfg(feature = "console_debug")]
@@ -375,7 +363,7 @@ where
     pub(crate) fn process_site_event(
         &mut self,
         site_event_iterator_: &mut VSE::SiteEventIndexType,
-        output: &mut VD::Diagram<I, F>,
+        output: &mut VD::Diagram<F>,
     ) -> Result<(), BvError> {
         #[cfg(feature = "console_debug")]
         {
@@ -604,7 +592,7 @@ where
     /// map data structure keeps correct ordering.
     pub(crate) fn process_circle_event(
         &mut self,
-        output: &mut VD::Diagram<I, F>,
+        output: &mut VD::Diagram<F>,
     ) -> Result<(), BvError> {
         #[cfg(feature = "console_debug")]
         {
@@ -723,7 +711,7 @@ where
         // Insert the new bisector into the beach line.
         {
             let edge = output
-                ._insert_new_edge_5(site1, site3, circle_event, bisector1, bisector2)
+                .insert_new_edge_5_(site1, site3, circle_event, bisector1, bisector2)
                 .0;
             let data = if let Some(ref mut node) = it_first.get_v()?.get() {
                 let _ = node.set_edge_id(edge);
@@ -835,7 +823,7 @@ where
         site_arc2: VSE::SiteEvent<I, F>,
         site_event: VSE::SiteEvent<I, F>,
         position: usize,
-        output: &mut VD::Diagram<I, F>,
+        output: &mut VD::Diagram<F>,
     ) -> Result<VB::BeachLineIndex, BvError> {
         tln!(
             "->insert_new_arc(\n  site_arc1:{:?}\n  ,site_arc2:{:?}\n  ,site_event:{:?}",
@@ -855,7 +843,7 @@ where
 
         tln!("new bl key:{:?}", new_right_node);
         // Update the output.
-        let edges = output._insert_new_edge_2(site_arc2, site_event);
+        let edges = output.insert_new_edge_2_(site_arc2, site_event);
 
         #[cfg(not(feature = "console_debug"))]
         let _ = self.beach_line_.insert(
@@ -934,7 +922,7 @@ where
         let c_event = VC::CircleEvent::new_1(bisector_node);
         let c_event = VC::CircleEventC::new_1(c_event);
 
-        if VP::CircleFormationFunctor::<I, F>::circle_formation_predicate(
+        if VP::CircleFormationFunctor::circle_formation_predicate::<I, F>(
             &site1, &site2, &site3, &c_event,
         ) {
             // Add the new circle event to the circle events queue.
@@ -978,13 +966,13 @@ where
 
 /// Helper function: converts a slice of \[\[integer,integer\]\] into input data for the Builder.
 /// You should use the From traits instead, this function performs a (potentially) redundant type conversion.
-pub fn to_points<I: InputType, F: InputType>(points: &[[I; 2]]) -> Vec<Point<F>> {
+pub fn to_points<I1: InputType, I2: InputType>(points: &[[I1; 2]]) -> Vec<Point<I2>> {
     points
         .iter()
         .map(|x| {
             [
-                num::cast::<I, F>(x[0]).unwrap(),
-                num::cast::<I, F>(x[1]).unwrap(),
+                num::cast::<I1, I2>(x[0]).unwrap(),
+                num::cast::<I1, I2>(x[1]).unwrap(),
             ]
             .into()
         })
@@ -993,15 +981,15 @@ pub fn to_points<I: InputType, F: InputType>(points: &[[I; 2]]) -> Vec<Point<F>>
 
 /// helper function: converts and casts a slice of \[\[integer,integer,integer,integer\]\] into
 /// You should use the From traits instead, this function performs a (potentially) redundant type conversion.
-pub fn to_segments<T1: InputType, T2: InputType>(segments: &[[T1; 4]]) -> Vec<Line<T2>> {
+pub fn to_segments<I1: InputType, I2: InputType>(segments: &[[I1; 4]]) -> Vec<Line<I2>> {
     segments
         .iter()
         .map(|x| {
             [
-                num::cast::<T1, T2>(x[0]).unwrap(),
-                num::cast::<T1, T2>(x[1]).unwrap(),
-                num::cast::<T1, T2>(x[2]).unwrap(),
-                num::cast::<T1, T2>(x[3]).unwrap(),
+                num::cast::<I1, I2>(x[0]).unwrap(),
+                num::cast::<I1, I2>(x[1]).unwrap(),
+                num::cast::<I1, I2>(x[2]).unwrap(),
+                num::cast::<I1, I2>(x[3]).unwrap(),
             ]
             .into()
         })
@@ -1011,20 +999,20 @@ pub fn to_segments<T1: InputType, T2: InputType>(segments: &[[T1; 4]]) -> Vec<Li
 /// helper function: converts and casts a slice of \[\[integer,integer,integer,integer\]\] into
 /// input data for the Builder.
 /// You should use the From traits instead, this function performs a (potentially) redundant type conversion.
-pub fn to_segments_offset<T1: InputType, T2: InputType>(
-    points: &[[T1; 4]],
+pub fn to_segments_offset<I1: InputType, I2: InputType>(
+    points: &[[I1; 4]],
     scale_x: f64,
     scale_y: f64,
     dx: i64,
     dy: i64,
-) -> Vec<Line<T2>> {
-    let fx = |x: T1| {
-        num::cast::<f64, T2>(num::cast::<T1, f64>(x).unwrap() * scale_x).unwrap()
-            + num::cast::<i64, T2>(dx).unwrap()
+) -> Vec<Line<I2>> {
+    let fx = |x: I1| {
+        num::cast::<f64, I2>(num::cast::<I1, f64>(x).unwrap() * scale_x).unwrap()
+            + num::cast::<i64, I2>(dx).unwrap()
     };
-    let fy = |y: T1| {
-        num::cast::<f64, T2>(num::cast::<T1, f64>(y).unwrap() * scale_y).unwrap()
-            + num::cast::<i64, T2>(dy).unwrap()
+    let fy = |y: I1| {
+        num::cast::<f64, I2>(num::cast::<I1, f64>(y).unwrap() * scale_y).unwrap()
+            + num::cast::<i64, I2>(dy).unwrap()
     };
     points
         .iter()

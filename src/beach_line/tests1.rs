@@ -66,7 +66,7 @@ fn beachline_2() -> Result<(), BvError> {
         let coord = |x, y| Point { x, y };
 
         let _v = vec![coord(10, 18), coord(12, 3), coord(4, 21), coord(8, 62)];
-        let mut output: VD::Diagram<I, F> = VD::Diagram::<I, F>::default();
+        let mut output: VD::Diagram<F> = VD::Diagram::<F>::default();
 
         let mut b = Builder::<I, F>::default();
         b.with_vertices(_v.iter()).unwrap();
@@ -103,7 +103,7 @@ fn beachline_3() -> Result<(), BvError> {
 
     {
         let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 50 })];
-        let mut output: VD::Diagram<I, F> = VD::Diagram::<I, F>::default();
+        let mut output: VD::Diagram<F> = VD::Diagram::<F>::default();
 
         let mut b = Builder::<I, F>::default();
         b.with_segments(_s.iter()).unwrap();
@@ -176,7 +176,7 @@ fn beachline_4() {
 
     dbg!(mykey, node1);
 
-    let is_less = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(&node1, &mykey);
+    let is_less = VP::NodeComparisonPredicate::node_comparison_predicate::<I, F>(&node1, &mykey);
     dbg!(is_less);
     assert_eq!(is_less, true);
     let cmp = mykey.cmp(&node1);
@@ -187,7 +187,7 @@ fn beachline_4() {
     assert_eq!(cmp, Ordering::Less);
 
     println!();
-    let is_less = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(&node2, &mykey);
+    let is_less = VP::NodeComparisonPredicate::node_comparison_predicate::<I, F>(&node2, &mykey);
     dbg!(mykey, node2, is_less);
     assert_eq!(is_less, false);
     let cmp = mykey.cmp(&node2);

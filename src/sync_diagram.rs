@@ -13,23 +13,18 @@
 use crate::diagram as VD;
 use crate::BvError;
 pub use crate::{InputType, OutputType};
-use std::marker::PhantomData;
 
 /// Sync version of the boostvoronoi::diagram::VoronoiDiagram struct.
 /// This is useful when traversing the diagram in a multi threaded environment.
 #[derive(Default, Debug)]
-pub struct SyncDiagram<I: InputType, F: OutputType> {
-    cells_: Vec<VD::Cell<I, F>>,      // indexed by CellIndex
-    vertices_: Vec<VD::Vertex<I, F>>, // indexed by VertexIndex
-    edges_: Vec<VD::Edge<I, F>>,      // indexed by EdgeIndex
+pub struct SyncDiagram<F: OutputType> {
+    cells_: Vec<VD::Cell>,         // indexed by CellIndex
+    vertices_: Vec<VD::Vertex<F>>, // indexed by VertexIndex
+    edges_: Vec<VD::Edge>,         // indexed by EdgeIndex
 }
 
-impl<I: InputType, F: OutputType> SyncDiagram<I, F> {
-    pub fn new(
-        cells: Vec<VD::Cell<I, F>>,
-        vertices: Vec<VD::Vertex<I, F>>,
-        edges: Vec<VD::Edge<I, F>>,
-    ) -> Self {
+impl<F: OutputType> SyncDiagram<F> {
+    pub fn new(cells: Vec<VD::Cell>, vertices: Vec<VD::Vertex<F>>, edges: Vec<VD::Edge>) -> Self {
         Self {
             cells_: cells,
             vertices_: vertices,
@@ -39,14 +34,14 @@ impl<I: InputType, F: OutputType> SyncDiagram<I, F> {
 
     /// Returns a reference to the list of cells
     #[inline]
-    pub fn cells(&self) -> &Vec<VD::Cell<I, F>> {
+    pub fn cells(&self) -> &Vec<VD::Cell> {
         &self.cells_
     }
 
     #[inline]
     /// Returns an edge iterator, the edges will all originate at the same vertex as 'edge_id'.
     /// 'edge_id' will be the first edge returned by the iterator.
-    pub fn edge_rot_next_iterator(&self, edge_id: VD::EdgeIndex) -> EdgeRotNextIterator<'_, I, F> {
+    pub fn edge_rot_next_iterator(&self, edge_id: VD::EdgeIndex) -> EdgeRotNextIterator<'_, F> {
         EdgeRotNextIterator::new(self, edge_id)
     }
 
@@ -114,19 +109,19 @@ impl<I: InputType, F: OutputType> SyncDiagram<I, F> {
         Ok(!self.edge_is_finite(edge_id)?)
     }
 
-    pub fn edges(&self) -> &Vec<VD::Edge<I, F>> {
+    pub fn edges(&self) -> &Vec<VD::Edge> {
         &self.edges_
     }
 
     #[inline]
-    pub fn edge_get(&self, edge_id: VD::EdgeIndex) -> Result<&VD::Edge<I, F>, BvError> {
+    pub fn edge_get(&self, edge_id: VD::EdgeIndex) -> Result<&VD::Edge, BvError> {
         self.edges_
             .get(edge_id.0)
             .ok_or_else(|| BvError::IdError(format!("The edge id {} does not exists", edge_id.0)))
     }
 
     #[inline]
-    pub fn edge_get_mut(&mut self, edge_id: VD::EdgeIndex) -> Result<&mut VD::Edge<I, F>, BvError> {
+    pub fn edge_get_mut(&mut self, edge_id: VD::EdgeIndex) -> Result<&mut VD::Edge, BvError> {
         self.edges_
             .get_mut(edge_id.0)
             .ok_or_else(|| BvError::IdError(format!("The edge id {} does not exists", edge_id.0)))
@@ -151,7 +146,7 @@ impl<I: InputType, F: OutputType> SyncDiagram<I, F> {
     }
 
     #[inline]
-    pub fn cell_get(&self, cell_id: VD::CellIndex) -> Result<&VD::Cell<I, F>, BvError> {
+    pub fn cell_get(&self, cell_id: VD::CellIndex) -> Result<&VD::Cell, BvError> {
         self.cells_
             .get(cell_id.0)
             .ok_or_else(|| BvError::IdError(format!("The cell id {} does not exists", cell_id.0)))
@@ -159,13 +154,13 @@ impl<I: InputType, F: OutputType> SyncDiagram<I, F> {
 
     #[inline]
     /// Returns a reference to all of the vertices
-    pub fn vertices(&self) -> &Vec<VD::Vertex<I, F>> {
+    pub fn vertices(&self) -> &Vec<VD::Vertex<F>> {
         &self.vertices_
     }
 
     #[inline]
     /// Returns a reference to a vertex
-    pub fn vertex_get(&self, vertex_id: VD::VertexIndex) -> Result<&VD::Vertex<I, F>, BvError> {
+    pub fn vertex_get(&self, vertex_id: VD::VertexIndex) -> Result<&VD::Vertex<F>, BvError> {
         self.vertices_.get(vertex_id.0).ok_or_else(|| {
             BvError::IdError(format!("The vertex id {} does not exists", vertex_id.0))
         })
@@ -176,7 +171,7 @@ impl<I: InputType, F: OutputType> SyncDiagram<I, F> {
     pub fn vertex_get_mut(
         &mut self,
         vertex_id: VD::VertexIndex,
-    ) -> Result<&mut VD::Vertex<I, F>, BvError> {
+    ) -> Result<&mut VD::Vertex<F>, BvError> {
         self.vertices_.get_mut(vertex_id.0).ok_or_else(|| {
             BvError::IdError(format!("The vertex id {} does not exists", vertex_id.0))
         })
@@ -185,29 +180,23 @@ impl<I: InputType, F: OutputType> SyncDiagram<I, F> {
 
 /// Iterator over edges pointing away from the vertex indicated by the initial edge.
 /// edge.vertex()
-pub struct EdgeRotNextIterator<'s, I: InputType, F: OutputType> {
-    diagram_: &'s SyncDiagram<I, F>,
+pub struct EdgeRotNextIterator<'s, F: OutputType> {
+    diagram_: &'s SyncDiagram<F>,
     starting_edge_: VD::EdgeIndex,
     next_edge_: Option<VD::EdgeIndex>,
-    #[doc(hidden)]
-    pdi_: PhantomData<I>,
-    #[doc(hidden)]
-    pdf_: PhantomData<F>,
 }
 
-impl<'s, I: InputType, F: OutputType> EdgeRotNextIterator<'s, I, F> {
-    pub(crate) fn new(diagram: &'s SyncDiagram<I, F>, starting_edge: VD::EdgeIndex) -> Self {
+impl<'s, F: OutputType> EdgeRotNextIterator<'s, F> {
+    pub(crate) fn new(diagram: &'s SyncDiagram<F>, starting_edge: VD::EdgeIndex) -> Self {
         Self {
             diagram_: diagram,
             starting_edge_: starting_edge,
             next_edge_: Some(starting_edge),
-            pdf_: PhantomData,
-            pdi_: PhantomData,
         }
     }
 }
 
-impl<'s, I: InputType, F: OutputType> Iterator for EdgeRotNextIterator<'s, I, F> {
+impl<'s, F: OutputType> Iterator for EdgeRotNextIterator<'s, F> {
     type Item = VD::EdgeIndex;
     fn next(&mut self) -> Option<VD::EdgeIndex> {
         let rv = self.next_edge_;

@@ -178,9 +178,6 @@ fn sqrt_1() {
 
 #[test]
 fn sqrt_2() {
-    type F1 = f32;
-    let sqrte = RF::robust_sqrt_expr::<F1>::default();
-
     let mut ca: [EI::ExtendedInt; 5] = [
         EI::ExtendedInt::zero(),
         EI::ExtendedInt::zero(),
@@ -201,7 +198,7 @@ fn sqrt_2() {
     ca[0] = EI::ExtendedInt::from(2);
     cb[0] = EI::ExtendedInt::from(9);
 
-    let a = sqrte.eval1(&ca[..], &cb[..]);
+    let a = RF::RobustSqrtExpr::eval1(&ca[..], &cb[..]);
 
     approx::assert_ulps_eq!(a.d(), 2.0 * 3.0);
     //assert_eq!(a.re(), 4.0, "a.re fail");
@@ -209,9 +206,6 @@ fn sqrt_2() {
 
 #[test]
 fn sqrt_3() {
-    type F1 = f32;
-    let sqrte = RF::robust_sqrt_expr::<F1>::default();
-
     let mut ca: [EI::ExtendedInt; 5] = [
         EI::ExtendedInt::zero(),
         EI::ExtendedInt::zero(),
@@ -234,7 +228,7 @@ fn sqrt_3() {
     ca[1] = EI::ExtendedInt::from(2);
     cb[1] = EI::ExtendedInt::from(25);
 
-    let a = sqrte.eval2(&ca[..], &cb[..]);
+    let a = RF::RobustSqrtExpr::eval2(&ca[..], &cb[..]);
 
     approx::assert_ulps_eq!(a.d(), 3.0 * 4.0 + 2.0 * 5.0);
     //assert_eq!(a.re(), 7.0, "a.re fail");
@@ -242,10 +236,6 @@ fn sqrt_3() {
 
 #[test]
 fn sqrt_4() {
-    type F1 = f32;
-
-    let sqrte = RF::robust_sqrt_expr::<F1>::default();
-
     let mut ca: [EI::ExtendedInt; 5] = [
         EI::ExtendedInt::zero(),
         EI::ExtendedInt::zero(),
@@ -270,7 +260,7 @@ fn sqrt_4() {
     ca[2] = EI::ExtendedInt::from(7);
     cb[2] = EI::ExtendedInt::from(49);
 
-    let a = sqrte.eval3(&ca[..], &cb[..]);
+    let a = RF::RobustSqrtExpr::eval3(&ca[..], &cb[..]);
 
     approx::assert_ulps_eq!(a.d(), 3.0 * 4.0 + 2.0 * 5.0 + 7.0 * 7.0);
     //assert_eq!(a.re(), 7.0, "a.re fail");
@@ -278,9 +268,6 @@ fn sqrt_4() {
 
 #[test]
 fn sqrt_5() {
-    type F2 = f64;
-    let sqrte = RF::robust_sqrt_expr::<F2>::default();
-
     let ca: [EI::ExtendedInt; 5] = [
         EI::ExtendedInt::from(3),
         EI::ExtendedInt::from(2),
@@ -298,16 +285,13 @@ fn sqrt_5() {
 
     // A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]) +
     // A[2] * sqrt(B[2]) + A[3] * sqrt(B[3]).
-    let a = sqrte.eval4(&ca[..], &cb[..]);
+    let a = RF::RobustSqrtExpr::eval4(&ca[..], &cb[..]);
 
     approx::assert_ulps_eq!(a.d(), 3.0 * 4.0 + 2.0 * 5.0 + 7.0 * 7.0 + 8.0 * 8.0);
 }
 
 #[test]
 fn sqrt_6() {
-    type F2 = f64;
-    let sqrte = RF::robust_sqrt_expr::<F2>::default();
-
     let ca: [EI::ExtendedInt; 5] = [
         EI::ExtendedInt::from(20205600),
         EI::ExtendedInt::from(12),
@@ -323,15 +307,12 @@ fn sqrt_6() {
         EI::ExtendedInt::zero(),
     ];
 
-    let a = sqrte.eval4(&ca[..], &cb[..]);
+    let a = RF::RobustSqrtExpr::eval4(&ca[..], &cb[..]);
     approx::assert_ulps_eq!(a.d().floor(), 2085350584.0.floor());
 }
 
 #[test]
 fn sqrt_7() {
-    type F2 = f64;
-    let sqrte = RF::robust_sqrt_expr::<F2>::default();
-
     let ca: [EI::ExtendedInt; 5] = [
         EI::ExtendedInt::from(74125000i64),
         EI::ExtendedInt::from(17),
@@ -347,6 +328,6 @@ fn sqrt_7() {
         EI::ExtendedInt::zero(),
     ];
 
-    let a = sqrte.eval4(&ca[..], &cb[..]);
+    let a = RF::RobustSqrtExpr::eval4(&ca[..], &cb[..]);
     approx::assert_ulps_eq!(a.d().floor(), 3537324513.0.floor());
 }

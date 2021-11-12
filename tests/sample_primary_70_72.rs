@@ -19,7 +19,7 @@ type F = f64;
 
 #[test]
 fn sample_primary_070() -> Result<(), BvError> {
-    let output: VS::SyncDiagram<I, F> = {
+    let output: VS::SyncDiagram<F> = {
         let input = r#"1
 -49400 -49572
 2
@@ -92,7 +92,7 @@ fn sample_primary_070() -> Result<(), BvError> {
 
 #[test]
 fn sample_primary_071() -> Result<(), BvError> {
-    let output: VS::SyncDiagram<I, F> = {
+    let output: VS::SyncDiagram<F> = {
         let input = r#"0
 90
 -50051 -49552 -49991 -49625
@@ -3489,7 +3489,7 @@ fn sample_primary_071() -> Result<(), BvError> {
 
 #[test]
 fn sample_primary_072() -> Result<(), BvError> {
-    let output: VS::SyncDiagram<I, F> = {
+    let output: VS::SyncDiagram<F> = {
         let input = r#"0
 3
 1403829871 74 1403829871 275

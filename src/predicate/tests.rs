@@ -33,7 +33,7 @@ where
 {
     let test_node = new_key::<I, F>(x1, y1, si1, x2, y2, si2);
 
-    let is_less = VP::NodeComparisonPredicate::<I, F>::node_comparison_predicate(a_key, &test_node);
+    let is_less = VP::NodeComparisonPredicate::node_comparison_predicate::<I, F>(a_key, &test_node);
     dbg!(&a_key, &test_node, is_less, expect);
     expect == is_less
 }
@@ -48,7 +48,7 @@ fn cross_product_1() {
     let b1 = -9;
     let b2 = 4;
 
-    let x = VP::Predicates::<I, F>::robust_cross_product(a1, b1, a2, b2);
+    let x = VP::Predicates::robust_cross_product::<I, F>(a1, b1, a2, b2);
     assert_eq!(x, 9.0);
 }
 
@@ -148,7 +148,7 @@ fn node_4() {
 fn distance_predicate_pp() {
     type I = i32;
     type F = f32;
-    let pp = super::DistancePredicate::<I, F>::pp;
+    let pp = super::DistancePredicate::pp::<I, F>;
     let new_site = VSE::SiteEvent::<I, F>::new_7;
     let new_point = |x, y| Point::<I> { x, y };
 
@@ -183,7 +183,7 @@ fn distance_predicate_pp() {
 fn distance_predicate_ps_32() {
     type I = i32;
     type F = f32;
-    let ps = super::DistancePredicate::<I, F>::ps;
+    let ps = super::DistancePredicate::ps::<I, F>;
     let new_site = VSE::SiteEvent::<I, F>::new_7;
     let new_point = |x, y| Point::<I> { x, y };
 
@@ -347,7 +347,7 @@ fn distance_predicate_ps_32() {
 fn distance_predicate_ps_64() {
     type I = i32;
     type F = f64;
-    let ps = super::DistancePredicate::<I, F>::ps;
+    let ps = super::DistancePredicate::ps::<I, F>;
     let new_site = VSE::SiteEvent::<I, F>::new_7;
     let new_point = |x, y| Point::<I> { x, y };
 
@@ -511,7 +511,7 @@ fn distance_predicate_ps_64() {
 fn distance_predicate_ss_32() {
     type I = i32;
     type F = f32;
-    let ss = super::DistancePredicate::<I, F>::ss;
+    let ss = super::DistancePredicate::ss::<I, F>;
     let new_site = VSE::SiteEvent::<I, F>::new_7;
     let new_point = |x, y| Point::<I> { x, y };
 
@@ -593,7 +593,7 @@ fn distance_predicate_ss_32() {
 fn distance_predicate_ss_64() {
     type I = i32;
     type F = f64;
-    let ss = super::DistancePredicate::<I, F>::ss;
+    let ss = super::DistancePredicate::ss::<I, F>;
     let new_site = VSE::SiteEvent::<I, F>::new_7;
     let new_point = |x, y| Point::<I> { x, y };
 

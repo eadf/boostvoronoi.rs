@@ -130,7 +130,7 @@ impl OutputType for f64 {}
 #[derive(Default)]
 pub struct TypeConverter1<I: InputType> {
     #[doc(hidden)]
-    pdi_: PhantomData<I>,
+    pdi_: PhantomData<fn(I) -> I>,
 }
 
 impl<I: InputType> TypeConverter1<I> {
@@ -175,9 +175,9 @@ impl<I: InputType> TypeConverter1<I> {
 #[derive(Default)]
 pub struct TypeConverter2<I: InputType, F: OutputType> {
     #[doc(hidden)]
-    pdf_: PhantomData<F>,
+    pdf_: PhantomData<fn(F) -> F>,
     #[doc(hidden)]
-    pdi_: PhantomData<I>,
+    pdi_: PhantomData<fn(I) -> I>,
 }
 
 impl<I: InputType, F: OutputType> TypeConverter2<I, F> {

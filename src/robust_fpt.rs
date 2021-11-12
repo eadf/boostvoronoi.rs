@@ -21,11 +21,10 @@ mod robustfpt_tests;
 use crate::extended_exp_fpt as EX;
 use crate::extended_int as EI;
 #[allow(unused_imports)]
-use crate::{t, tln};
+use crate::{t, tln, OutputType};
 use num::{Float, Zero};
 use ordered_float::OrderedFloat;
 use std::fmt;
-use std::marker::PhantomData;
 use std::ops;
 
 /// Rounding error is at most 1 EPS.
@@ -690,20 +689,6 @@ impl ops::MulAssign<RobustDif> for RobustDif {
     }
 }
 
-/*
-TODO: This must be wrong, but also - it's not used
-impl ops::DivAssign<f64> for RobustDif {
-    fn div_assign(&mut self, _rhs: f64) {
-        if is_neg_f(_rhs) {
-            self.swap();
-        }
-        let rhs = RobustFpt::new_1(-_rhs);
-
-        self.positive_sum_ /= rhs;
-        self.negative_sum_ /= rhs;
-    }
-}*/
-
 impl fmt::Debug for RobustDif {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_fmt(format_args!(
@@ -723,23 +708,10 @@ impl ops::DivAssign<RobustFpt> for RobustDif {
 /// Used to compute expressions that operate with sqrts with predefined
 /// relative error. Evaluates expressions of the next type:
 /// sum(i = 1 .. n)(A\[i\] * sqrt(B\[i\])), 1 <= n <= 4.
-#[allow(non_camel_case_types)]
-pub struct robust_sqrt_expr<_fpt: Float + fmt::Display + Default + fmt::Debug> {
-    #[doc(hidden)]
-    pdf_: PhantomData<_fpt>,
-}
+#[derive(Default)]
+pub struct RobustSqrtExpr {}
 
-#[allow(non_camel_case_types)]
-impl<_fpt: Float + fmt::Display + Default + fmt::Debug> Default for robust_sqrt_expr<_fpt> {
-    fn default() -> Self {
-        Self { pdf_: PhantomData }
-    }
-}
-
-#[allow(non_camel_case_types)]
-impl<_fpt: Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>>
-    robust_sqrt_expr<_fpt>
-{
+impl RobustSqrtExpr {
     #[inline(always)]
     fn i_to_f(that: &EI::ExtendedInt) -> EX::ExtendedExponentFpt<f64> {
         EX::ExtendedExponentFpt::<f64>::from(that)
@@ -747,11 +719,7 @@ impl<_fpt: Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>
 
     /// Evaluates expression (re = 4 EPS):
     /// A\[0\] * sqrt(B\[0\]).
-    pub fn eval1(
-        &self,
-        a: &[EI::ExtendedInt],
-        b: &[EI::ExtendedInt],
-    ) -> EX::ExtendedExponentFpt<f64> {
+    pub fn eval1(a: &[EI::ExtendedInt], b: &[EI::ExtendedInt]) -> EX::ExtendedExponentFpt<f64> {
         let a = Self::i_to_f(&a[0]);
         let b = Self::i_to_f(&b[0]);
         //tln!("eval1:");
@@ -762,13 +730,9 @@ impl<_fpt: Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>
 
     // Evaluates expression (re = 7 EPS):
     // A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]).
-    pub fn eval2(
-        &self,
-        a: &[EI::ExtendedInt],
-        b: &[EI::ExtendedInt],
-    ) -> EX::ExtendedExponentFpt<f64> {
-        let ra = self.eval1(a, b);
-        let rb = self.eval1(&a[1..], &b[1..]);
+    pub fn eval2(a: &[EI::ExtendedInt], b: &[EI::ExtendedInt]) -> EX::ExtendedExponentFpt<f64> {
+        let ra = Self::eval1(a, b);
+        let rb = Self::eval1(&a[1..], &b[1..]);
 
         if ra.is_zero()
             || rb.is_zero()
@@ -787,13 +751,9 @@ impl<_fpt: Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>
 
     /// Evaluates expression (re = 16 EPS):
     /// A\[0\] * sqrt(B\[0\]) + A\[1\] * sqrt(B\[1\]) + A\[2\] * sqrt(B\[2\]).
-    pub fn eval3(
-        &self,
-        a: &[EI::ExtendedInt],
-        b: &[EI::ExtendedInt],
-    ) -> EX::ExtendedExponentFpt<f64> {
-        let ra = self.eval2(a, b);
-        let rb = self.eval1(&a[2..], &b[2..]);
+    pub fn eval3(a: &[EI::ExtendedInt], b: &[EI::ExtendedInt]) -> EX::ExtendedExponentFpt<f64> {
+        let ra = Self::eval2(a, b);
+        let rb = Self::eval1(&a[2..], &b[2..]);
 
         if ra.is_zero()
             || rb.is_zero()
@@ -810,7 +770,7 @@ impl<_fpt: Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>
         ta[1] = &a[0] * &a[1] * &EI::ExtendedInt::from(2_i32);
         tb[1] = &b[0] * &b[1];
 
-        let nom = self.eval2(&ta[..], &tb[..]);
+        let nom = Self::eval2(&ta[..], &tb[..]);
         let div = ra - rb;
         nom / div
     }
@@ -818,13 +778,9 @@ impl<_fpt: Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>
     /// Evaluates expression (re = 25 EPS):
     /// A\[0\] * sqrt(B\[0\]) + A\[1\] * sqrt(B\[1\]) +
     /// A\[2\] * sqrt(B\[2\]) + A\[3\] * sqrt(B\[3\]).
-    pub fn eval4(
-        &self,
-        a: &[EI::ExtendedInt],
-        b: &[EI::ExtendedInt],
-    ) -> EX::ExtendedExponentFpt<f64> {
-        let ra = self.eval2(a, b);
-        let rb = self.eval2(&a[2..], &b[2..]);
+    pub fn eval4(a: &[EI::ExtendedInt], b: &[EI::ExtendedInt]) -> EX::ExtendedExponentFpt<f64> {
+        let ra = Self::eval2(a, b);
+        let rb = Self::eval2(&a[2..], &b[2..]);
 
         if ra.is_zero()
             || rb.is_zero()
@@ -852,7 +808,7 @@ impl<_fpt: Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>
         tb[1] = &b[0] * &b[1];
         ta[2] = &a[2] * &a[3] * &EI::ExtendedInt::from(-2_i32);
         tb[2] = &b[2] * &b[3];
-        self.eval3(&ta, &tb) / (ra - rb)
+        Self::eval3(&ta, &tb) / (ra - rb)
     }
 
     /// Evaluates A\[0] * sqrt(B\[0\]) + A\[1\] * sqrt(B\[1\]) +
@@ -860,15 +816,14 @@ impl<_fpt: Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>
     /// B\[3\] = B\[0\] * B\[1\].
     #[allow(non_snake_case)]
     pub fn sqrt_expr_evaluator_pss3(
-        &mut self,
         A: &[EI::ExtendedInt],
         B: &[EI::ExtendedInt],
     ) -> EX::ExtendedExponentFpt<f64> {
         let mut cA: [EI::ExtendedInt; 2] = [EI::ExtendedInt::zero(), EI::ExtendedInt::zero()];
         let mut cB: [EI::ExtendedInt; 2] = [EI::ExtendedInt::zero(), EI::ExtendedInt::zero()];
 
-        let lh = self.eval2(A, B);
-        let rh = self.eval2(&A[2..], &B[2..]);
+        let lh = Self::eval2(A, B);
+        let rh = Self::eval2(&A[2..], &B[2..]);
 
         if lh.is_zero()
             || rh.is_zero()
@@ -883,7 +838,7 @@ impl<_fpt: Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>
         cB[0] = EI::ExtendedInt::from(1);
         cA[1] = (&A[0] * &A[1] - &A[2] * &A[3]) * &EI::ExtendedInt::from(2_i32);
         cB[1] = B[3].clone();
-        let numer = self.eval2(&cA, &cB);
+        let numer = Self::eval2(&cA, &cB);
         let divisor = lh - rh;
         numer / divisor
     }
@@ -892,7 +847,6 @@ impl<_fpt: Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>
     ///           A\[2\] * sqrt(B\[3\] * (sqrt(B\[0\] * B\[1\]) + B\[2\])).
     #[allow(non_snake_case)]
     pub fn sqrt_expr_evaluator_pss4(
-        &mut self,
         A: &[EI::ExtendedInt],
         B: &[EI::ExtendedInt],
     ) -> EX::ExtendedExponentFpt<f64> {
@@ -909,12 +863,12 @@ impl<_fpt: Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>
             EI::ExtendedInt::zero(),
         ];
         if A[3].is_zero() {
-            let lh = self.eval2(A, B);
+            let lh = Self::eval2(A, B);
             cA[0] = EI::ExtendedInt::from(1);
             cB[0] = &B[0] * &B[1];
             cA[1] = B[2].clone();
             cB[1] = EI::ExtendedInt::from(1);
-            let rh = self.eval1(&A[2..], &B[3..]) * self.eval2(&cA, &cB).sqrt();
+            let rh = Self::eval1(&A[2..], &B[3..]) * Self::eval2(&cA, &cB).sqrt();
             if lh.is_zero()
                 || rh.is_zero()
                 || (!lh.is_neg() && !rh.is_neg())
@@ -926,7 +880,7 @@ impl<_fpt: Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>
             cB[0] = EI::ExtendedInt::from(1_i32);
             cA[1] = &A[0] * &A[1] * &EI::ExtendedInt::from(2_i32) - &A[2] * &A[2] * &B[3];
             cB[1] = &B[0] * &B[1];
-            let numer = self.eval2(&cA, &cB);
+            let numer = Self::eval2(&cA, &cB);
 
             return numer / (lh - rh);
         }
@@ -934,14 +888,14 @@ impl<_fpt: Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>
         cB[0] = &B[0] * &B[1];
         cA[1] = B[2].clone();
         cB[1] = EI::ExtendedInt::from(1);
-        let rh = self.eval1(&A[2..], &B[3..]) * (self.eval2(&cA, &cB).sqrt());
+        let rh = Self::eval1(&A[2..], &B[3..]) * (Self::eval2(&cA, &cB).sqrt());
         cA[0] = A[0].clone();
         cB[0] = B[0].clone();
         cA[1] = A[1].clone();
         cB[1] = B[1].clone();
         cA[2] = A[3].clone();
         cB[2] = EI::ExtendedInt::from(1);
-        let lh = self.eval3(&cA, &cB);
+        let lh = Self::eval3(&cA, &cB);
 
         if lh.is_zero()
             || rh.is_zero()
@@ -956,7 +910,7 @@ impl<_fpt: Float + fmt::Display + Default + fmt::Debug + ops::Neg<Output = _fpt>
             - &A[2] * &A[2] * &B[2] * &B[3];
         cA[3] = &A[0] * &A[1] * &EI::ExtendedInt::from(2_i32) - &A[2] * &A[2] * &B[3];
         cB[3] = &B[0] * &B[1];
-        let numer = self.sqrt_expr_evaluator_pss3(&cA, &cB);
+        let numer = Self::sqrt_expr_evaluator_pss3(&cA, &cB);
 
         numer / (lh - rh)
     }

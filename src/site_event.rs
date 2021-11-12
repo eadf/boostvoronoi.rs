@@ -60,7 +60,7 @@ pub struct SiteEvent<I: InputType, F: OutputType> {
     initial_index_: SiteEventIndexType,
     flags_: VD::ColorType,
     #[doc(hidden)]
-    pd_: PhantomData<F>,
+    pd_: PhantomData<fn(F) -> F>,
 }
 
 impl<I: InputType, F: OutputType> fmt::Debug for SiteEvent<I, F> {
@@ -90,14 +90,14 @@ impl<I: InputType, F: OutputType> fmt::Debug for SiteEvent<I, F> {
 impl<I: InputType, F: OutputType> PartialOrd for SiteEvent<I, F> {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(VP::EventComparisonPredicate::<I, F>::event_comparison_predicate_ii(self, other))
+        Some(VP::EventComparisonPredicate::event_comparison_predicate_ii::<I, F>(self, other))
     }
 }
 
 impl<I: InputType, F: OutputType> Ord for SiteEvent<I, F> {
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
-        VP::EventComparisonPredicate::<I, F>::event_comparison_predicate_ii(self, other)
+        VP::EventComparisonPredicate::event_comparison_predicate_ii::<I, F>(self, other)
     }
 }
 
@@ -111,6 +111,7 @@ impl<I: InputType, F: OutputType> PartialEq for SiteEvent<I, F> {
 impl<I: InputType, F: OutputType> Eq for SiteEvent<I, F> {}
 
 impl<I: InputType, F: OutputType> Hash for SiteEvent<I, F> {
+    #[inline]
     /// sorted_index_ is not part of the hash
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.site_.hash(state);

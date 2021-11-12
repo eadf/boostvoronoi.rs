@@ -60,21 +60,19 @@ impl Debug for SiteIndex {
 /// be converted to the 32-bit signed integer without precision loss.
 /// Todo! give this a lookover
 #[derive(Default)]
-pub struct Predicates<I: InputType, F: OutputType> {
-    #[doc(hidden)]
-    pdf_: PhantomData<F>,
-    #[doc(hidden)]
-    pdi_: PhantomData<I>,
-}
+pub struct Predicates {}
 
-impl<I: InputType, F: OutputType> Predicates<I, F> {
+impl Predicates {
     #[inline(always)]
-    pub(crate) fn is_vertical_1(site: &VSE::SiteEvent<I, F>) -> bool {
-        Self::is_vertical_2(site.point0(), site.point1())
+    pub(crate) fn is_vertical_1<I: InputType, F: OutputType>(site: &VSE::SiteEvent<I, F>) -> bool {
+        Self::is_vertical_2::<I, F>(site.point0(), site.point1())
     }
 
     #[inline(always)]
-    pub(crate) fn is_vertical_2(point1: &Point<I>, point2: &Point<I>) -> bool {
+    pub(crate) fn is_vertical_2<I: InputType, F: OutputType>(
+        point1: &Point<I>,
+        point2: &Point<I>,
+    ) -> bool {
         point1.x == point2.x
     }
 
@@ -83,7 +81,12 @@ impl<I: InputType, F: OutputType> Predicates<I, F> {
     /// with epsilon relative error equal to 1EPS.
     /// TODO: this is supposed to use u32 if I==i32
     #[inline(always)]
-    pub(crate) fn robust_cross_product(a1: i64, b1: i64, a2: i64, b2: i64) -> f64 {
+    pub(crate) fn robust_cross_product<I: InputType, F: OutputType>(
+        a1: i64,
+        b1: i64,
+        a2: i64,
+        b2: i64,
+    ) -> f64 {
         robust_cross_product_f::<i64, f64>(a1, b1, a2, b2)
     }
 
@@ -166,18 +169,13 @@ enum Orientation {
 }
 
 #[derive(Default)]
-pub struct OrientationTest<I: InputType, F: OutputType> {
-    #[doc(hidden)]
-    pdf_: PhantomData<F>,
-    #[doc(hidden)]
-    pdi_: PhantomData<I>,
-}
+pub struct OrientationTest {}
 
-impl<I: InputType, F: OutputType> OrientationTest<I, F> {
+impl OrientationTest {
     /// Value is a determinant of two vectors (e.g. x1 * y2 - x2 * y1).
     /// Return orientation based on the sign of the determinant.
     #[inline(always)]
-    fn eval_f(value: f64) -> Orientation {
+    fn eval_f<I: InputType, F: OutputType>(value: f64) -> Orientation {
         if value.is_zero() {
             return Orientation::Collinear;
         }
@@ -188,18 +186,27 @@ impl<I: InputType, F: OutputType> OrientationTest<I, F> {
     }
 
     #[inline(always)]
-    fn eval_p(point1: &Point<I>, point2: &Point<I>, point3: &Point<I>) -> Orientation {
+    fn eval_p<I: InputType, F: OutputType>(
+        point1: &Point<I>,
+        point2: &Point<I>,
+        point3: &Point<I>,
+    ) -> Orientation {
         let dx1: i64 = TC1::<I>::i_to_i64(point1.x) - TC1::<I>::i_to_i64(point2.x);
         let dx2: i64 = TC1::<I>::i_to_i64(point2.x) - TC1::<I>::i_to_i64(point3.x);
         let dy1: i64 = TC1::<I>::i_to_i64(point1.y) - TC1::<I>::i_to_i64(point2.y);
         let dy2: i64 = TC1::<I>::i_to_i64(point2.y) - TC1::<I>::i_to_i64(point3.y);
-        let cp: f64 = Predicates::<I, F>::robust_cross_product(dx1, dy1, dx2, dy2);
-        Self::eval_f(cp)
+        let cp: f64 = Predicates::robust_cross_product::<I, F>(dx1, dy1, dx2, dy2);
+        Self::eval_f::<I, F>(cp)
     }
 
     #[inline(always)]
-    fn eval_i(dif_x1: i64, dif_y1: i64, dif_x2: i64, dif_y2: i64) -> Orientation {
-        Self::eval_f(Predicates::<I, F>::robust_cross_product(
+    fn eval_i<I: InputType, F: OutputType>(
+        dif_x1: i64,
+        dif_y1: i64,
+        dif_x2: i64,
+        dif_y2: i64,
+    ) -> Orientation {
+        Self::eval_f::<I, F>(Predicates::robust_cross_product::<I, F>(
             dif_x1, dif_y1, dif_x2, dif_y2,
         ))
     }
@@ -208,7 +215,7 @@ impl<I: InputType, F: OutputType> OrientationTest<I, F> {
 #[derive(Default)]
 pub struct PointComparisonPredicate<I: InputType> {
     #[doc(hidden)]
-    pdi_: PhantomData<I>,
+    pdi_: PhantomData<fn(I) -> I>,
 }
 
 impl<I: InputType> PointComparisonPredicate<I> {
@@ -224,16 +231,11 @@ impl<I: InputType> PointComparisonPredicate<I> {
 }
 
 #[derive(Default)]
-pub struct EventComparisonPredicate<I: InputType, F: OutputType> {
-    #[doc(hidden)]
-    pdf_: PhantomData<F>,
-    #[doc(hidden)]
-    pdi_: PhantomData<I>,
-}
+pub struct EventComparisonPredicate {}
 
-impl<I: InputType, F: OutputType> EventComparisonPredicate<I, F> {
+impl EventComparisonPredicate {
     /// boolean predicate between two sites (bool int int)
-    pub(crate) fn event_comparison_predicate_bii(
+    pub(crate) fn event_comparison_predicate_bii<I: InputType, F: OutputType>(
         lhs: &VSE::SiteEvent<I, F>,
         rhs: &VSE::SiteEvent<I, F>,
     ) -> bool {
@@ -244,30 +246,30 @@ impl<I: InputType, F: OutputType> EventComparisonPredicate<I, F> {
             if !rhs.is_segment() {
                 return lhs.y0() < rhs.y0();
             }
-            if Predicates::<I, F>::is_vertical_2(rhs.point0(), rhs.point1()) {
+            if Predicates::is_vertical_2::<I, F>(rhs.point0(), rhs.point1()) {
                 return lhs.y0() <= rhs.y0();
             }
             true
         } else {
-            if Predicates::<I, F>::is_vertical_2(rhs.point0(), rhs.point1()) {
-                if Predicates::<I, F>::is_vertical_2(lhs.point0(), lhs.point1()) {
+            if Predicates::is_vertical_2::<I, F>(rhs.point0(), rhs.point1()) {
+                if Predicates::is_vertical_2::<I, F>(lhs.point0(), lhs.point1()) {
                     return lhs.y0() < rhs.y0();
                 }
                 return false;
             }
-            if Predicates::<I, F>::is_vertical_2(lhs.point0(), lhs.point1()) {
+            if Predicates::is_vertical_2::<I, F>(lhs.point0(), lhs.point1()) {
                 return true;
             }
             if lhs.y0() != rhs.y0() {
                 return lhs.y0() < rhs.y0();
             }
-            return OrientationTest::<I, F>::eval_p(lhs.point1(), lhs.point0(), rhs.point1())
+            return OrientationTest::eval_p::<I, F>(lhs.point1(), lhs.point0(), rhs.point1())
                 == Orientation::Left;
         }
     }
 
     /// cmp::Ordering predicate between two sites (int int)
-    pub(crate) fn event_comparison_predicate_ii(
+    pub(crate) fn event_comparison_predicate_ii<I: InputType, F: OutputType>(
         lhs: &VSE::SiteEvent<I, F>,
         rhs: &VSE::SiteEvent<I, F>,
     ) -> cmp::Ordering {
@@ -289,13 +291,13 @@ impl<I: InputType, F: OutputType> EventComparisonPredicate<I, F> {
 
     /// boolean predicate between site and circle (Bool Integer Float)
     #[allow(clippy::let_and_return)]
-    pub(crate) fn event_comparison_predicate_bif(
+    pub(crate) fn event_comparison_predicate_bif<I: InputType, F: OutputType>(
         lhs: &VSE::SiteEvent<I, F>,
         rhs: &VC::CircleEvent,
     ) -> bool {
         let lhs = TC1::<I>::i_to_f64(lhs.x0());
         let rhs = rhs.lower_x().into_inner();
-        let ulps = Predicates::<I, F>::ulps();
+        let ulps = Predicates::ulps();
         let rv = UlpComparison::ulp_comparison(lhs, rhs, ulps) == cmp::Ordering::Less;
         tln!(
             "event_comparison_predicate_bif lhs:{:.12} rhs:{:.12} -> {}",
@@ -305,19 +307,6 @@ impl<I: InputType, F: OutputType> EventComparisonPredicate<I, F> {
         );
         rv
     }
-
-    /*
-    #[inline(always)]
-    pub(crate) fn event_comparison_predicate_if(
-        lhs: &VSE::SiteEvent<I, F>,
-        rhs: &VC::CircleEvent,
-    ) -> cmp::Ordering {
-        if Self::event_comparison_predicate_bif(lhs, rhs) {
-            cmp::Ordering::Less
-        } else {
-            cmp::Ordering::Greater
-        }
-    }*/
 }
 
 /// Represents the result of the epsilon robust predicate. If the
@@ -330,21 +319,16 @@ enum KPredicateResult {
     MORE,      // = 1
 }
 
-pub struct DistancePredicate<I: InputType, F: OutputType> {
-    #[doc(hidden)]
-    pdo_: PhantomData<F>,
-    #[doc(hidden)]
-    pdi_: PhantomData<I>,
-}
+pub struct DistancePredicate {}
 
-impl<I: InputType, F: OutputType> DistancePredicate<I, F> {
+impl DistancePredicate {
     #[cfg(feature = "console_debug")]
     #[allow(dead_code)]
     #[inline(always)]
     /// Returns true if a horizontal line going through a new site intersects
     /// right arc at first, else returns false. If horizontal line goes
     /// through intersection point of the given two arcs returns false also.
-    pub(crate) fn distance_predicate_fake(
+    pub(crate) fn distance_predicate_fake<I: InputType, F: OutputType>(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
         new_point: &Point<I>,
@@ -360,7 +344,7 @@ impl<I: InputType, F: OutputType> DistancePredicate<I, F> {
         rv
     }
 
-    pub(crate) fn distance_predicate(
+    pub(crate) fn distance_predicate<I: InputType, F: OutputType>(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
         new_point: &Point<I>,
@@ -382,7 +366,7 @@ impl<I: InputType, F: OutputType> DistancePredicate<I, F> {
     /// Returns true if a horizontal line going through the new point site
     /// intersects right arc at first, else returns false. If horizontal line
     /// goes through intersection point of the given two arcs returns false.
-    fn pp(
+    fn pp<I: InputType, F: OutputType>(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
         new_point: &Point<I>,
@@ -417,7 +401,7 @@ impl<I: InputType, F: OutputType> DistancePredicate<I, F> {
         dist1 < dist2
     }
 
-    fn ps(
+    fn ps<I: InputType, F: OutputType>(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
         new_point: &Point<I>,
@@ -435,40 +419,46 @@ impl<I: InputType, F: OutputType> DistancePredicate<I, F> {
         reverse_order ^ (dist1 < dist2)
     }
 
-    fn ss(
+    fn ss<I: InputType, F: OutputType>(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
         new_point: &Point<I>,
     ) -> bool {
         // Handle temporary segment sites.
         if left_site.sorted_index() == right_site.sorted_index() {
-            return OrientationTest::<I, F>::eval_p(
+            return OrientationTest::eval_p::<I, F>(
                 left_site.point0(),
                 left_site.point1(),
                 new_point,
             ) == Orientation::Left;
         }
 
-        let dist1 = Self::find_distance_to_segment_arc(left_site, new_point);
-        let dist2 = Self::find_distance_to_segment_arc(right_site, new_point);
+        let dist1 = Self::find_distance_to_segment_arc::<I, F>(left_site, new_point);
+        let dist2 = Self::find_distance_to_segment_arc::<I, F>(right_site, new_point);
 
         // The undefined ulp range is equal to 7EPS + 7EPS <= 14ULP.
         dist1 < dist2
     }
 
     #[inline(always)]
-    fn find_distance_to_point_arc(site: &VSE::SiteEvent<I, F>, point: &Point<I>) -> f64 {
+    fn find_distance_to_point_arc<I: InputType, F: OutputType>(
+        site: &VSE::SiteEvent<I, F>,
+        point: &Point<I>,
+    ) -> f64 {
         let dx = TC1::<I>::i_to_f64(site.x()) - TC1::<I>::i_to_f64(point.x);
         let dy = TC1::<I>::i_to_f64(site.y()) - TC1::<I>::i_to_f64(point.y);
         // The relative error is at most 3EPS.
         (dx * dx + dy * dy) / (dx * 2_f64)
     }
 
-    fn find_distance_to_segment_arc(site: &VSE::SiteEvent<I, F>, point: &Point<I>) -> f64 {
+    fn find_distance_to_segment_arc<I: InputType, F: OutputType>(
+        site: &VSE::SiteEvent<I, F>,
+        point: &Point<I>,
+    ) -> f64 {
         let i_to_i64 = TC1::<I>::i_to_i64;
         let i_to_f64 = TC1::<I>::i_to_f64;
 
-        if Predicates::<I, F>::is_vertical_1(site) {
+        if Predicates::is_vertical_1::<I, F>(site) {
             (TC1::<I>::i_to_f64(site.x()) - TC1::<I>::i_to_f64(point.x)) * 0.5_f64
         } else {
             let segment0: &Point<I> = site.point0();
@@ -484,7 +474,7 @@ impl<I: InputType, F: OutputType> DistancePredicate<I, F> {
                 k = (k - b1) / (a1 * a1);
             }
             // The relative error is at most 7EPS.
-            k * Predicates::<I, F>::robust_cross_product(
+            k * Predicates::robust_cross_product::<I, F>(
                 i_to_i64(segment1.x) - i_to_i64(segment0.x),
                 i_to_i64(segment1.y) - i_to_i64(segment0.y),
                 i_to_i64(point.x) - i_to_i64(segment0.x),
@@ -493,7 +483,7 @@ impl<I: InputType, F: OutputType> DistancePredicate<I, F> {
         }
     }
 
-    fn fast_ps(
+    fn fast_ps<I: InputType, F: OutputType>(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
         new_point: &Point<I>,
@@ -506,7 +496,7 @@ impl<I: InputType, F: OutputType> DistancePredicate<I, F> {
         let segment_start: &Point<I> = right_site.point0();
         let segment_end: &Point<I> = right_site.point1();
         let eval: Orientation =
-            OrientationTest::<I, F>::eval_p(segment_start, segment_end, new_point);
+            OrientationTest::eval_p::<I, F>(segment_start, segment_end, new_point);
         if eval != Orientation::Right {
             return if !right_site.is_inverse() {
                 KPredicateResult::LESS
@@ -520,7 +510,7 @@ impl<I: InputType, F: OutputType> DistancePredicate<I, F> {
         let a = i_to_f64(segment_end.x) - i_to_f64(segment_start.x);
         let b = i_to_f64(segment_end.y) - i_to_f64(segment_start.y);
 
-        if Predicates::<I, F>::is_vertical_1(right_site) {
+        if Predicates::is_vertical_1::<I, F>(right_site) {
             if new_point.y < site_point.y && !reverse_order {
                 return KPredicateResult::MORE;
             } else if new_point.y > site_point.y && reverse_order {
@@ -528,7 +518,7 @@ impl<I: InputType, F: OutputType> DistancePredicate<I, F> {
             }
             return KPredicateResult::UNDEFINED;
         } else {
-            let orientation = OrientationTest::<I, F>::eval_i(
+            let orientation = OrientationTest::eval_i::<I, F>(
                 i_to_i64(segment_end.x) - i_to_i64(segment_start.x),
                 i_to_i64(segment_end.y) - i_to_i64(segment_start.y),
                 i_to_i64(new_point.x) - i_to_i64(site_point.x),
@@ -571,37 +561,32 @@ impl<I: InputType, F: OutputType> DistancePredicate<I, F> {
     }
 }
 
-pub struct NodeComparisonPredicate<I: InputType, F: OutputType> {
-    #[doc(hidden)]
-    pdf_: PhantomData<F>,
-    #[doc(hidden)]
-    pdi_: PhantomData<I>,
-}
+pub struct NodeComparisonPredicate {}
 
-impl<I: InputType, F: OutputType> NodeComparisonPredicate<I, F> {
+impl NodeComparisonPredicate {
     /// Compares nodes in the balanced binary search tree. Nodes are
     /// compared based on the y coordinates of the arcs intersection points.
     /// Nodes with less y coordinate of the intersection point go first.
     /// Comparison is only called during the new site events processing.
     /// That's why one of the nodes will always lie on the sweepline and may
     /// be represented as a straight horizontal line.
-    pub fn node_comparison_predicate(
+    pub fn node_comparison_predicate<I: InputType, F: OutputType>(
         node1: &VB::BeachLineNodeKey<I, F>,
         node2: &VB::BeachLineNodeKey<I, F>,
     ) -> bool {
         // Get x coordinate of the rightmost site from both nodes.
         let site1: &VSE::SiteEvent<I, F> =
-            NodeComparisonPredicate::<I, F>::get_comparison_site_(node1);
+            NodeComparisonPredicate::get_comparison_site_::<I, F>(node1);
         let site2: &VSE::SiteEvent<I, F> =
-            NodeComparisonPredicate::<I, F>::get_comparison_site_(node2);
-        let point1: &Point<I> = NodeComparisonPredicate::<I, F>::get_comparison_point_(site1);
-        let point2: &Point<I> = NodeComparisonPredicate::<I, F>::get_comparison_point_(site2);
+            NodeComparisonPredicate::get_comparison_site_::<I, F>(node2);
+        let point1: &Point<I> = NodeComparisonPredicate::get_comparison_point_::<I, F>(site1);
+        let point2: &Point<I> = NodeComparisonPredicate::get_comparison_point_::<I, F>(site2);
         let rv = {
             match point1.x.cmp(&point2.x) {
                 cmp::Ordering::Less => {
                     //tln!("point1.x < point2.x {}<{}", point1.x, point2.x);
                     // The second node contains a new site.
-                    DistancePredicate::<I, F>::distance_predicate(
+                    DistancePredicate::distance_predicate::<I, F>(
                         node1.left_site(),
                         node1.right_site(),
                         point2,
@@ -610,7 +595,7 @@ impl<I: InputType, F: OutputType> NodeComparisonPredicate<I, F> {
                 cmp::Ordering::Greater => {
                     //tln!( "point1.x > point2.x");
                     // The first node contains a new site.
-                    !DistancePredicate::<I, F>::distance_predicate(
+                    !DistancePredicate::distance_predicate::<I, F>(
                         node2.left_site(),
                         node2.right_site(),
                         point1,
@@ -666,7 +651,9 @@ impl<I: InputType, F: OutputType> NodeComparisonPredicate<I, F> {
     }
 
     /// Get the newer site.
-    fn get_comparison_site_(node: &VB::BeachLineNodeKey<I, F>) -> &VSE::SiteEvent<I, F> {
+    fn get_comparison_site_<I: InputType, F: OutputType>(
+        node: &VB::BeachLineNodeKey<I, F>,
+    ) -> &VSE::SiteEvent<I, F> {
         if node.left_site().sorted_index() > node.right_site().sorted_index() {
             node.left_site()
         } else {
@@ -674,7 +661,9 @@ impl<I: InputType, F: OutputType> NodeComparisonPredicate<I, F> {
         }
     }
 
-    fn get_comparison_point_(site: &VSE::SiteEvent<I, F>) -> &Point<I> {
+    fn get_comparison_point_<I: InputType, F: OutputType>(
+        site: &VSE::SiteEvent<I, F>,
+    ) -> &Point<I> {
         if PointComparisonPredicate::<I>::point_comparison_predicate(site.point0(), site.point1()) {
             site.point0()
         } else {
@@ -683,14 +672,17 @@ impl<I: InputType, F: OutputType> NodeComparisonPredicate<I, F> {
     }
 
     /// Get comparison pair: tuple of y coordinate and direction of the newer site.
-    fn get_comparison_y_(node: &VB::BeachLineNodeKey<I, F>, is_new_node: bool) -> (I, i8) {
+    fn get_comparison_y_<I: InputType, F: OutputType>(
+        node: &VB::BeachLineNodeKey<I, F>,
+        is_new_node: bool,
+    ) -> (I, i8) {
         if node.left_site().sorted_index() == node.right_site().sorted_index() {
             return (node.left_site().y0(), 0);
         }
         if node.left_site().sorted_index() > node.right_site().sorted_index() {
             if !is_new_node
                 && node.left_site().is_segment()
-                && Predicates::<I, F>::is_vertical_1(node.left_site())
+                && Predicates::is_vertical_1::<I, F>(node.left_site())
             {
                 return (node.left_site().y0(), 1);
             }
@@ -700,27 +692,22 @@ impl<I: InputType, F: OutputType> NodeComparisonPredicate<I, F> {
     }
 }
 
-pub struct CircleExistencePredicate<I: InputType, F: OutputType> {
-    #[doc(hidden)]
-    pdf_: PhantomData<F>,
-    #[doc(hidden)]
-    pdi_: PhantomData<I>,
-}
+pub struct CircleExistencePredicate {}
 
-impl<I: InputType, F: OutputType> CircleExistencePredicate<I, F> {
+impl CircleExistencePredicate {
     #[inline(always)]
-    pub(crate) fn ppp(
+    pub(crate) fn ppp<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
     ) -> bool {
-        OrientationTest::<I, F>::eval_p(site1.point0(), site2.point0(), site3.point0())
+        OrientationTest::eval_p::<I, F>(site1.point0(), site2.point0(), site3.point0())
             == Orientation::Right
     }
 
     #[cfg(all(feature = "geo", feature = "ce_corruption_check"))]
     #[inline(always)]
-    pub(crate) fn validate_circle_formation_predicate(
+    pub(crate) fn validate_circle_formation_predicate<I: InputType, F: OutputType>(
         _site1: &VSE::SiteEvent<I, F>,
         _site2: &VSE::SiteEvent<I, F>,
         _site3: &VSE::SiteEvent<I, F>,
@@ -763,7 +750,7 @@ impl<I: InputType, F: OutputType> CircleExistencePredicate<I, F> {
     }
 
     #[inline(always)]
-    fn pps(
+    fn pps<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
@@ -772,9 +759,9 @@ impl<I: InputType, F: OutputType> CircleExistencePredicate<I, F> {
         #[allow(clippy::suspicious_operation_groupings)]
         if segment_index != SiteIndex::Two {
             let orient1 =
-                OrientationTest::<I, F>::eval_p(site1.point0(), site2.point0(), site3.point0());
+                OrientationTest::eval_p::<I, F>(site1.point0(), site2.point0(), site3.point0());
             let orient2 =
-                OrientationTest::<I, F>::eval_p(site1.point0(), site2.point0(), site3.point1());
+                OrientationTest::eval_p::<I, F>(site1.point0(), site2.point0(), site3.point1());
             if segment_index == SiteIndex::One && site1.x0() >= site2.x0() {
                 if orient1 != Orientation::Right {
                     return false;
@@ -793,7 +780,7 @@ impl<I: InputType, F: OutputType> CircleExistencePredicate<I, F> {
     }
 
     #[inline(always)]
-    fn pss(
+    fn pss<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
@@ -807,7 +794,7 @@ impl<I: InputType, F: OutputType> CircleExistencePredicate<I, F> {
                 return false;
             }
             if site2.is_inverse() == site3.is_inverse()
-                && OrientationTest::<I, F>::eval_p(site2.point0(), site1.point0(), site3.point1())
+                && OrientationTest::eval_p::<I, F>(site2.point0(), site1.point0(), site3.point1())
                     != Orientation::Right
             {
                 return false;
@@ -816,7 +803,7 @@ impl<I: InputType, F: OutputType> CircleExistencePredicate<I, F> {
         true
     }
 
-    pub(crate) fn sss(
+    pub(crate) fn sss<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
@@ -827,17 +814,17 @@ impl<I: InputType, F: OutputType> CircleExistencePredicate<I, F> {
 }
 
 #[derive(Default)]
-pub struct LazyCircleFormationFunctor<I: InputType, F: OutputType> {
-    #[doc(hidden)]
-    pdf_: PhantomData<F>,
-    #[doc(hidden)]
-    pdi_: PhantomData<I>,
-}
+pub struct LazyCircleFormationFunctor {}
 
 #[allow(non_snake_case)]
-impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
+impl LazyCircleFormationFunctor {
     /// Lazy evaluation of point, point, point circle events
-    fn ppp(point1: &Point<I>, point2: &Point<I>, point3: &Point<I>, c_event: &VC::CircleEventType) {
+    fn ppp<I: InputType, F: OutputType>(
+        point1: &Point<I>,
+        point2: &Point<I>,
+        point3: &Point<I>,
+        c_event: &VC::CircleEventType,
+    ) {
         let i_to_f64 = TC1::<I>::i_to_f64;
         let i_to_i64 = TC1::<I>::i_to_i64;
 
@@ -845,7 +832,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
         let dif_x2 = i_to_f64(point2.x) - i_to_f64(point3.x);
         let dif_y1 = i_to_f64(point1.y) - i_to_f64(point2.y);
         let dif_y2 = i_to_f64(point2.y) - i_to_f64(point3.y);
-        let orientation = Predicates::<I, F>::robust_cross_product(
+        let orientation = Predicates::robust_cross_product::<I, F>(
             i_to_i64(point1.x) - i_to_i64(point2.x),
             i_to_i64(point2.x) - i_to_i64(point3.x),
             i_to_i64(point1.y) - i_to_i64(point2.y),
@@ -886,7 +873,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
             c_y.dif().fpv() * inv_orientation.fpv(),
             lower_x.dif().fpv() * inv_orientation.fpv(),
         );
-        let ulps = Predicates::<I, F>::ulps() as f64;
+        let ulps = Predicates::ulps() as f64;
         let recompute_c_x = c_x.dif().ulp() > ulps;
         let recompute_c_y = c_y.dif().ulp() > ulps;
         let recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -898,7 +885,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
         }
 
         if recompute_c_x || recompute_c_y || recompute_lower_x {
-            ExactCircleFormationFunctor::<I, F>::ppp(
+            ExactCircleFormationFunctor::ppp::<I, F>(
                 point1,
                 point2,
                 point3,
@@ -913,7 +900,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
     /// Lazy evaluation of point, point, segment circle events
     #[allow(unknown_lints)]
     #[allow(clippy::branches_sharing_code)] // false positive
-    fn pps(
+    fn pps<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
@@ -935,7 +922,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
         let vec_y = i_to_f64(site1.x()) - i_to_f64(site2.x());
 
         let teta = RF::RobustFpt::new_2(
-            Predicates::<I, F>::robust_cross_product(
+            Predicates::robust_cross_product::<I, F>(
                 i_to_i64(site3.y1()) - i_to_i64(site3.y0()),
                 i_to_i64(site3.x0()) - i_to_i64(site3.x1()),
                 i_to_i64(site2.x()) - i_to_i64(site1.x()),
@@ -944,7 +931,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
             1_f64,
         );
         let A = RF::RobustFpt::new_2(
-            Predicates::<I, F>::robust_cross_product(
+            Predicates::robust_cross_product::<I, F>(
                 i_to_i64(site3.y0()) - i_to_i64(site3.y1()),
                 i_to_i64(site3.x0()) - i_to_i64(site3.x1()),
                 i_to_i64(site3.y1()) - i_to_i64(site1.y()),
@@ -953,7 +940,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
             1_f64,
         );
         let B = RF::RobustFpt::new_2(
-            Predicates::<I, F>::robust_cross_product(
+            Predicates::robust_cross_product::<I, F>(
                 i_to_i64(site3.y0()) - i_to_i64(site3.y1()),
                 i_to_i64(site3.x0()) - i_to_i64(site3.x1()),
                 i_to_i64(site3.y1()) - i_to_i64(site2.y()),
@@ -962,7 +949,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
             1_f64,
         );
         let denom = RF::RobustFpt::new_2(
-            Predicates::<I, F>::robust_cross_product(
+            Predicates::robust_cross_product::<I, F>(
                 i_to_i64(site1.y()) - i_to_i64(site2.y()),
                 i_to_i64(site1.x()) - i_to_i64(site2.x()),
                 i_to_i64(site3.y1()) - i_to_i64(site3.y0()),
@@ -974,7 +961,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
             RF::RobustFpt::new_2(1_f64 / (line_a * line_a + line_b * line_b).sqrt(), 3_f64);
         let mut t = RF::RobustDif::default();
         tln!("0t:{:?}", t);
-        if OrientationTest::<I, F>::eval_f(denom.fpv()) == Orientation::Collinear {
+        if OrientationTest::eval_f::<I, F>(denom.fpv()) == Orientation::Collinear {
             t += teta / (RF::RobustFpt::new_1(8_f64) * A);
             tln!("1t:{:?}", t);
             t -= A / (RF::RobustFpt::new_1(2_f64) * teta);
@@ -1042,7 +1029,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
 
         tln!("  c_x:{:?}, c_y:{:?}, l_x:{:?}", c_x, c_y, lower_x);
 
-        let ulps = Predicates::<I, F>::ulps() as f64;
+        let ulps = Predicates::ulps() as f64;
         let recompute_c_x = c_x.dif().ulp() > ulps;
         let recompute_c_y = c_y.dif().ulp() > ulps;
         let recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1061,7 +1048,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
         }
 
         if recompute_c_x || recompute_c_y || recompute_lower_x {
-            ExactCircleFormationFunctor::<I, F>::pps(
+            ExactCircleFormationFunctor::pps::<I, F>(
                 site1,
                 site2,
                 site3,
@@ -1142,7 +1129,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
                 }
                 match segment_index {
                     SiteIndex::One => {
-                        LazyCircleFormationFunctor::<I, F>::ppp(
+                        LazyCircleFormationFunctor::ppp::<I, F>(
                             site_3_point,
                             site1.point0(),
                             site2.point0(),
@@ -1150,7 +1137,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
                         );
                     }
                     SiteIndex::Two => {
-                        LazyCircleFormationFunctor::<I, F>::ppp(
+                        LazyCircleFormationFunctor::ppp::<I, F>(
                             site1.point0(),
                             site_3_point,
                             site2.point0(),
@@ -1158,7 +1145,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
                         );
                     }
                     SiteIndex::Three => {
-                        LazyCircleFormationFunctor::<I, F>::ppp(
+                        LazyCircleFormationFunctor::ppp::<I, F>(
                             site1.point0(),
                             site2.point0(),
                             site_3_point,
@@ -1196,7 +1183,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
 
     /// Lazy evaluation of point, segment, segment circle events
     #[allow(unused_parens)]
-    fn pss(
+    fn pss<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
@@ -1244,7 +1231,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
         let recompute_lower_x: bool;
 
         let orientation = RF::RobustFpt::new_2(
-            Predicates::<I, F>::robust_cross_product(
+            Predicates::robust_cross_product::<I, F>(
                 i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
                 i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
                 i_to_i64(segm_end2.y) - i_to_i64(segm_start2.y),
@@ -1253,14 +1240,14 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
             1_f64,
         );
         let is_collinear =
-            OrientationTest::<I, F>::eval_f(orientation.fpv()) == Orientation::Collinear;
+            OrientationTest::eval_f::<I, F>(orientation.fpv()) == Orientation::Collinear;
         #[allow(unknown_lints)] // for +stable
         #[allow(clippy::branches_sharing_code)] // false positive
         if is_collinear {
             tln!("  LazyCircleFormationFunctor::pss collinear");
             let a = RF::RobustFpt::new_2(a1 * a1 + b1 * b1, 2_f64);
             let c = RF::RobustFpt::new_2(
-                Predicates::<I, F>::robust_cross_product(
+                Predicates::robust_cross_product::<I, F>(
                     i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
                     i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
                     i_to_i64(segm_start2.y) - i_to_i64(segm_start1.y),
@@ -1269,12 +1256,12 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
                 1_f64,
             );
             let det = RF::RobustFpt::new_2(
-                Predicates::<I, F>::robust_cross_product(
+                Predicates::robust_cross_product::<I, F>(
                     i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
                     i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
                     i_to_i64(site1.x()) - i_to_i64(segm_start1.x),
                     i_to_i64(site1.y()) - i_to_i64(segm_start1.y),
-                ) * Predicates::<I, F>::robust_cross_product(
+                ) * Predicates::robust_cross_product::<I, F>(
                     i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
                     i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
                     i_to_i64(site1.y()) - i_to_i64(segm_start2.y),
@@ -1325,7 +1312,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
             } else {
                 lower_x += RF::RobustFpt::new_1(0.5) * c / a.sqrt();
             }
-            let ulps = Predicates::<I, F>::ulps() as f64;
+            let ulps = Predicates::ulps() as f64;
             recompute_c_x = c_x.dif().ulp() > ulps;
             recompute_c_y = c_y.dif().ulp() > ulps;
             recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1354,7 +1341,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
             let sqr_sum1 = RF::RobustFpt::new_2((a1 * a1 + b1 * b1).sqrt(), 2_f64);
             let sqr_sum2 = RF::RobustFpt::new_2((a2 * a2 + b2 * b2).sqrt(), 2_f64);
             let mut a = RF::RobustFpt::new_2(
-                Predicates::<I, F>::robust_cross_product(
+                Predicates::robust_cross_product::<I, F>(
                     i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
                     i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
                     i_to_i64(segm_start2.y) - i_to_i64(segm_end2.y),
@@ -1371,7 +1358,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
                 tln!("2: a:{:?}", a);
             }
             let or1 = RF::RobustFpt::new_2(
-                Predicates::<I, F>::robust_cross_product(
+                Predicates::robust_cross_product::<I, F>(
                     i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
                     i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
                     i_to_i64(segm_end1.y) - i_to_i64(site1.y()),
@@ -1380,7 +1367,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
                 1_f64,
             );
             let or2 = RF::RobustFpt::new_2(
-                Predicates::<I, F>::robust_cross_product(
+                Predicates::robust_cross_product::<I, F>(
                     i_to_i64(segm_end2.x) - i_to_i64(segm_start2.x),
                     i_to_i64(segm_end2.y) - i_to_i64(segm_start2.y),
                     i_to_i64(segm_end2.x) - i_to_i64(site1.x()),
@@ -1390,7 +1377,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
             );
             let det = RF::RobustFpt::new_1(2_f64) * a * or1 * or2;
             let c1 = RF::RobustFpt::new_2(
-                Predicates::<I, F>::robust_cross_product(
+                Predicates::robust_cross_product::<I, F>(
                     i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
                     i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
                     i_to_i64(segm_end1.y),
@@ -1399,7 +1386,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
                 1_f64,
             );
             let c2 = RF::RobustFpt::new_2(
-                Predicates::<I, F>::robust_cross_product(
+                Predicates::robust_cross_product::<I, F>(
                     i_to_i64(segm_end2.x) - i_to_i64(segm_start2.x),
                     i_to_i64(segm_end2.y) - i_to_i64(segm_start2.y),
                     i_to_i64(segm_end2.x),
@@ -1432,7 +1419,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
             tln!("4: b:{:?}", b);
             b -= sqr_sum1
                 * RF::RobustFpt::new_2(
-                    Predicates::<I, F>::robust_cross_product(
+                    Predicates::robust_cross_product::<I, F>(
                         i_to_i64(segm_end2.x) - i_to_i64(segm_start2.x),
                         i_to_i64(segm_end2.y) - i_to_i64(segm_start2.y),
                         -i_to_i64(site1.y()),
@@ -1443,7 +1430,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
             tln!("5: b:{:?}", b);
             b -= sqr_sum2
                 * RF::RobustFpt::new_2(
-                    Predicates::<I, F>::robust_cross_product(
+                    Predicates::robust_cross_product::<I, F>(
                         i_to_i64(segm_end1.x) - i_to_i64(segm_start1.x),
                         i_to_i64(segm_end1.y) - i_to_i64(segm_start1.y),
                         -i_to_i64(site1.y()),
@@ -1505,7 +1492,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
                 lower_x.dif().ulp()
             );*/
 
-            let ulps = Predicates::<I, F>::ulps() as f64;
+            let ulps = Predicates::ulps() as f64;
             recompute_c_x = c_x.dif().ulp() > ulps;
             recompute_c_y = c_y.dif().ulp() > ulps;
             recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1539,7 +1526,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
     }
 
     /// Lazy evaluation of segment, segment, segment circle events
-    fn sss(
+    fn sss<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
@@ -1551,7 +1538,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
         let a1 = RF::RobustFpt::new_1(i_to_f64(site1.x1()) - i_to_f64(site1.x0()));
         let b1 = RF::RobustFpt::new_1(i_to_f64(site1.y1()) - i_to_f64(site1.y0()));
         let c1 = RF::RobustFpt::new_2(
-            Predicates::<I, F>::robust_cross_product(
+            Predicates::robust_cross_product::<I, F>(
                 i_to_i64(site1.x0()),
                 i_to_i64(site1.y0()),
                 i_to_i64(site1.x1()),
@@ -1563,7 +1550,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
         let a2 = RF::RobustFpt::new_1(i_to_f64(site2.x1()) - i_to_f64(site2.x0()));
         let b2 = RF::RobustFpt::new_1(i_to_f64(site2.y1()) - i_to_f64(site2.y0()));
         let c2 = RF::RobustFpt::new_2(
-            Predicates::<I, F>::robust_cross_product(
+            Predicates::robust_cross_product::<I, F>(
                 i_to_i64(site2.x0()),
                 i_to_i64(site2.y0()),
                 i_to_i64(site2.x1()),
@@ -1575,7 +1562,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
         let a3 = RF::RobustFpt::new_1(i_to_f64(site3.x1()) - i_to_f64(site3.x0()));
         let b3 = RF::RobustFpt::new_1(i_to_f64(site3.y1()) - i_to_f64(site3.y0()));
         let c3 = RF::RobustFpt::new_2(
-            Predicates::<I, F>::robust_cross_product(
+            Predicates::robust_cross_product::<I, F>(
                 i_to_i64(site3.x0()),
                 i_to_i64(site3.y0()),
                 i_to_i64(site3.x1()),
@@ -1588,7 +1575,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
         let len2 = (a2 * a2 + b2 * b2).sqrt();
         let len3 = (a3 * a3 + b3 * b3).sqrt();
         let cross_12 = RF::RobustFpt::new_2(
-            Predicates::<I, F>::robust_cross_product(
+            Predicates::robust_cross_product::<I, F>(
                 i_to_i64(site1.x1()) - i_to_i64(site1.x0()),
                 i_to_i64(site1.y1()) - i_to_i64(site1.y0()),
                 i_to_i64(site2.x1()) - i_to_i64(site2.x0()),
@@ -1597,7 +1584,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
             1_f64,
         );
         let cross_23 = RF::RobustFpt::new_2(
-            Predicates::<I, F>::robust_cross_product(
+            Predicates::robust_cross_product::<I, F>(
                 i_to_i64(site2.x1()) - i_to_i64(site2.x0()),
                 i_to_i64(site2.y1()) - i_to_i64(site2.y0()),
                 i_to_i64(site3.x1()) - i_to_i64(site3.x0()),
@@ -1606,7 +1593,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
             1_f64,
         );
         let cross_31 = RF::RobustFpt::new_2(
-            Predicates::<I, F>::robust_cross_product(
+            Predicates::robust_cross_product::<I, F>(
                 i_to_i64(site3.x1()) - i_to_i64(site3.x0()),
                 i_to_i64(site3.y1()) - i_to_i64(site3.y0()),
                 i_to_i64(site1.x1()) - i_to_i64(site1.x0()),
@@ -1651,7 +1638,7 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
         let c_y_dif = c_y.dif() / denom_dif;
         let lower_x_dif = lower_x.dif() / denom_dif;
 
-        let ulps = Predicates::<I, F>::ulps() as f64;
+        let ulps = Predicates::ulps() as f64;
         let recompute_c_x = c_x_dif.ulp() > ulps;
         let recompute_c_y = c_y_dif.ulp() > ulps;
         let recompute_lower_x = lower_x_dif.ulp() > ulps;
@@ -1690,21 +1677,16 @@ impl<I: InputType, F: OutputType> LazyCircleFormationFunctor<I, F> {
 }
 
 #[derive(Default)]
-pub struct CircleFormationFunctor<I: InputType, F: OutputType> {
-    #[doc(hidden)]
-    pdf_: PhantomData<F>,
-    #[doc(hidden)]
-    pdi_: PhantomData<I>,
-}
+pub struct CircleFormationFunctor {}
 
-impl<I: InputType, F: OutputType> CircleFormationFunctor<I, F> {
-    pub(crate) fn lies_outside_vertical_segment(
+impl CircleFormationFunctor {
+    pub(crate) fn lies_outside_vertical_segment<I: InputType, F: OutputType>(
         c: &VC::CircleEventType,
         s: &VSE::SiteEvent<I, F>,
     ) -> bool {
         let i_to_f64 = TC1::<I>::i_to_f64;
 
-        if !s.is_segment() || !Predicates::<I, F>::is_vertical_1(s) {
+        if !s.is_segment() || !Predicates::is_vertical_1::<I, F>(s) {
             return false;
         }
         let y0 = i_to_f64(if s.is_inverse() { s.y1() } else { s.y0() });
@@ -1718,7 +1700,7 @@ impl<I: InputType, F: OutputType> CircleFormationFunctor<I, F> {
     #[cfg(feature = "console_debug")]
     #[allow(dead_code)]
     #[inline(always)]
-    pub(crate) fn circle_formation_predicate_fake(
+    pub(crate) fn circle_formation_predicate_fake<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
@@ -1744,7 +1726,7 @@ impl<I: InputType, F: OutputType> CircleFormationFunctor<I, F> {
     /// Create a circle event from the given three sites.
     /// Returns true if the circle event exists, else false.
     /// If exists circle event is saved into the c_event variable.
-    pub(crate) fn circle_formation_predicate(
+    pub(crate) fn circle_formation_predicate<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
@@ -1754,10 +1736,10 @@ impl<I: InputType, F: OutputType> CircleFormationFunctor<I, F> {
             if !site2.is_segment() {
                 if !site3.is_segment() {
                     // (point, point, point) sites.
-                    if !CircleExistencePredicate::<I, F>::ppp(site1, site2, site3) {
+                    if !CircleExistencePredicate::ppp::<I, F>(site1, site2, site3) {
                         return false;
                     }
-                    LazyCircleFormationFunctor::<I, F>::ppp(
+                    LazyCircleFormationFunctor::ppp::<I, F>(
                         site1.point0(),
                         site2.point0(),
                         site3.point0(),
@@ -1765,11 +1747,11 @@ impl<I: InputType, F: OutputType> CircleFormationFunctor<I, F> {
                     );
                 } else {
                     // (point, point, segment) sites.
-                    if !CircleExistencePredicate::<I, F>::pps(site1, site2, site3, SiteIndex::Three)
+                    if !CircleExistencePredicate::pps::<I, F>(site1, site2, site3, SiteIndex::Three)
                     {
                         return false;
                     }
-                    LazyCircleFormationFunctor::<I, F>::pps(
+                    LazyCircleFormationFunctor::pps::<I, F>(
                         site1,
                         site2,
                         site3,
@@ -1779,10 +1761,10 @@ impl<I: InputType, F: OutputType> CircleFormationFunctor<I, F> {
                 }
             } else if !site3.is_segment() {
                 // (point, segment, point) sites.
-                if !CircleExistencePredicate::<I, F>::pps(site1, site3, site2, SiteIndex::Two) {
+                if !CircleExistencePredicate::pps::<I, F>(site1, site3, site2, SiteIndex::Two) {
                     return false;
                 }
-                LazyCircleFormationFunctor::<I, F>::pps(
+                LazyCircleFormationFunctor::pps::<I, F>(
                     site1,
                     site3,
                     site2,
@@ -1791,10 +1773,10 @@ impl<I: InputType, F: OutputType> CircleFormationFunctor<I, F> {
                 );
             } else {
                 // (point, segment, segment) sites.
-                if !CircleExistencePredicate::<I, F>::pss(site1, site2, site3, SiteIndex::One) {
+                if !CircleExistencePredicate::pss::<I, F>(site1, site2, site3, SiteIndex::One) {
                     return false;
                 }
-                LazyCircleFormationFunctor::<I, F>::pss(
+                LazyCircleFormationFunctor::pss::<I, F>(
                     site1,
                     site2,
                     site3,
@@ -1805,10 +1787,10 @@ impl<I: InputType, F: OutputType> CircleFormationFunctor<I, F> {
         } else if !site2.is_segment() {
             if !site3.is_segment() {
                 // (segment, point, point) sites.
-                if !CircleExistencePredicate::<I, F>::pps(site2, site3, site1, SiteIndex::One) {
+                if !CircleExistencePredicate::pps::<I, F>(site2, site3, site1, SiteIndex::One) {
                     return false;
                 }
-                LazyCircleFormationFunctor::<I, F>::pps(
+                LazyCircleFormationFunctor::pps::<I, F>(
                     site2,
                     site3,
                     site1,
@@ -1817,10 +1799,10 @@ impl<I: InputType, F: OutputType> CircleFormationFunctor<I, F> {
                 );
             } else {
                 // (segment, point, segment) sites.
-                if !CircleExistencePredicate::<I, F>::pss(site2, site1, site3, SiteIndex::Two) {
+                if !CircleExistencePredicate::pss::<I, F>(site2, site1, site3, SiteIndex::Two) {
                     return false;
                 }
-                LazyCircleFormationFunctor::<I, F>::pss(
+                LazyCircleFormationFunctor::pss::<I, F>(
                     site2,
                     site1,
                     site3,
@@ -1830,16 +1812,16 @@ impl<I: InputType, F: OutputType> CircleFormationFunctor<I, F> {
             }
         } else if !site3.is_segment() {
             // (segment, segment, point) sites.
-            if !CircleExistencePredicate::<I, F>::pss(site3, site1, site2, SiteIndex::Three) {
+            if !CircleExistencePredicate::pss::<I, F>(site3, site1, site2, SiteIndex::Three) {
                 return false;
             }
-            LazyCircleFormationFunctor::<I, F>::pss(site3, site1, site2, SiteIndex::Three, circle);
+            LazyCircleFormationFunctor::pss::<I, F>(site3, site1, site2, SiteIndex::Three, circle);
         } else {
             // (segment, segment, segment) sites.
-            if !CircleExistencePredicate::<I, F>::sss(site1, site2, site3) {
+            if !CircleExistencePredicate::sss::<I, F>(site1, site2, site3) {
                 return false;
             }
-            LazyCircleFormationFunctor::<I, F>::sss(site1, site2, site3, circle);
+            LazyCircleFormationFunctor::sss::<I, F>(site1, site2, site3, circle);
         }
 
         if Self::lies_outside_vertical_segment(circle, site1)
@@ -1849,7 +1831,7 @@ impl<I: InputType, F: OutputType> CircleFormationFunctor<I, F> {
             return false;
         }
         #[cfg(all(feature = "geo", feature = "ce_corruption_check"))]
-        CircleExistencePredicate::<I, F>::validate_circle_formation_predicate(
+        CircleExistencePredicate::validate_circle_formation_predicate::<I, F>(
             site1, site2, site3, circle,
         );
         true
@@ -1857,16 +1839,11 @@ impl<I: InputType, F: OutputType> CircleFormationFunctor<I, F> {
 }
 
 #[derive(Default)]
-pub struct ExactCircleFormationFunctor<I: InputType, F: OutputType> {
-    #[doc(hidden)]
-    pdf_: PhantomData<F>,
-    #[doc(hidden)]
-    pdi_: PhantomData<I>,
-}
+pub struct ExactCircleFormationFunctor {}
 
-impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
+impl ExactCircleFormationFunctor {
     /// Recompute parameters of the point, point, point circle event using high-precision library.
-    fn ppp(
+    fn ppp<I: InputType, F: OutputType>(
         point1: &Point<I>,
         point2: &Point<I>,
         point3: &Point<I>,
@@ -1956,7 +1933,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
 
     /// Recompute parameters of the point, point, segment circle event using high-precision library.
     #[allow(clippy::too_many_arguments)]
-    fn pps(
+    fn pps<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
@@ -1985,8 +1962,6 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
 
         let bi_to_ext = TC2::<I, F>::xi_to_xf;
         let i_to_bi = TC1::<I>::i_to_xi;
-
-        let sqrt_expr_ = RF::robust_sqrt_expr::<f64>::default();
 
         // Todo: is 5 the correct size?
         let mut ca: [EI::ExtendedInt; 5] = [
@@ -2040,7 +2015,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
             }
             if recompute_lower_x {
                 c_event.set_lower_x_xf(
-                    sqrt_expr_.eval2(&ca, &cb) * inv_denom * 0.25f64
+                    RF::RobustSqrtExpr::eval2(&ca, &cb) * inv_denom * 0.25f64
                         / (bi_to_ext(&segm_len).sqrt()),
                 );
             }
@@ -2061,7 +2036,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
             };
             cb[1] = det.clone();
             if recompute_c_x {
-                c_event.set_x_xf(sqrt_expr_.eval2(&ca, &cb) * inv_denom_sqr * 0.5f64);
+                c_event.set_x_xf(RF::RobustSqrtExpr::eval2(&ca, &cb) * inv_denom_sqr * 0.5f64);
             }
         }
 
@@ -2075,13 +2050,15 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
             };
             cb[3] = det.clone();
             if recompute_c_y {
-                c_event.set_y_xf(sqrt_expr_.eval2(&ca[2..], &cb[2..]) * inv_denom_sqr * 0.5f64);
+                c_event.set_y_xf(
+                    RF::RobustSqrtExpr::eval2(&ca[2..], &cb[2..]) * inv_denom_sqr * 0.5f64,
+                );
             }
         }
 
         if recompute_lower_x {
-            cb[0] = cb[0].clone() * &segm_len;
-            cb[1] = cb[1].clone() * &segm_len;
+            cb[0] = &cb[0] * &segm_len;
+            cb[1] = &cb[1] * &segm_len;
             ca[2] = sum_ab * (&denom * &denom + &teta * &teta);
             cb[2] = EI::ExtendedInt::one();
             ca[3] = if segment_index == SiteIndex::Two {
@@ -2101,7 +2078,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
             tln!(" cb[3]:{:?}", cb[3]);
             tln!(" segm_len:{:.12}", segm_len.d());
 
-            let eval4 = sqrt_expr_.eval4(&ca, &cb);
+            let eval4 = RF::RobustSqrtExpr::eval4(&ca, &cb);
             tln!("eval4:{:.12}", eval4.d());
 
             c_event.set_lower_x_xf(eval4 * inv_denom_sqr * 0.5f64 / segm_len);
@@ -2121,7 +2098,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
     /// Recompute parameters of the point, segment, segment circle event using high-precision library.
     #[allow(non_snake_case)]
     #[allow(clippy::too_many_arguments)]
-    fn pss(
+    fn pss<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
@@ -2133,7 +2110,6 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
     ) {
         let i_to_xi = TC1::<I>::i_to_xi;
         let xi_to_xf = TC2::<I, F>::xi_to_xf;
-        let mut sqrt_expr_ = RF::robust_sqrt_expr::<f64>::default();
 
         let mut c: [EI::ExtendedInt; 2] = [EI::ExtendedInt::zero(), EI::ExtendedInt::zero()];
         let mut cA: [EI::ExtendedInt; 4] = [
@@ -2213,7 +2189,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
                             - (i_to_xi(site1.x()) * EI::ExtendedInt::from(2_i32)))
                     + &b[0] * &b[0] * (i_to_xi(site1.y()) * EI::ExtendedInt::from(2_i32));
                 tln!("cA[1]={:?}", cA[1]);
-                let c_y = sqrt_expr_.eval2(&cA, &cB);
+                let c_y = RF::RobustSqrtExpr::eval2(&cA, &cB);
                 tln!("c_y={:?}", c_y);
                 tln!("denom={:?}", denom);
                 c_event.set_y_xf(c_y / denom);
@@ -2236,7 +2212,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
                 tln!(" cA[1]={:.0}", cA[1].d());
 
                 if recompute_c_x {
-                    let c_x = sqrt_expr_.eval2(&cA, &cB);
+                    let c_x = RF::RobustSqrtExpr::eval2(&cA, &cB);
                     tln!(" c_x={:.0}", c_x.d());
                     tln!(" denom={:.0}", denom.d());
                     tln!(" c_x/denom={:.0}", (c_x / denom).d());
@@ -2251,7 +2227,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
                         c[0].clone()
                     };
                     cB[2] = &a[0] * &a[0] + &b[0] * &b[0];
-                    let lower_x = sqrt_expr_.eval3(&cA, &cB);
+                    let lower_x = RF::RobustSqrtExpr::eval3(&cA, &cB);
                     c_event.set_lower_x_xf(lower_x / denom);
                 }
             }
@@ -2303,14 +2279,14 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
         cB[3] = (&a[0] * &dy - &b[0] * &dx)
             * (&a[1] * &dy - &b[1] * &dx)
             * &EI::ExtendedInt::from(-2_i32);
-        let temp = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
+        let temp = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
         let denom = temp * xi_to_xf(&orientation);
 
         if recompute_c_y {
             cA[0] = &b[1] * &(&dx * &dx + &dy * &dy) - &iy * &(&dx * &a[1] + &dy * &b[1]);
             cA[1] = &b[0] * &(&dx * &dx + &dy * &dy) - &iy * &(&dx * &a[0] + &dy * &b[0]);
             cA[2] = iy * &sign;
-            let cy = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
+            let cy = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
             c_event.set_y_xf(cy / denom);
         }
 
@@ -2320,7 +2296,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
             cA[2] = ix * &sign;
 
             if recompute_c_x {
-                let cx = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA, &cB);
+                let cx = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA, &cB);
                 c_event.set_x_xf(cx / denom);
             }
 
@@ -2328,7 +2304,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
                 cA[3] = orientation
                     * (&dx * &dx + &dy * &dy)
                     * &EI::ExtendedInt::from(if temp.is_neg() { -1_i32 } else { 1 });
-                let lower_x = sqrt_expr_.sqrt_expr_evaluator_pss4(&cA, &cB);
+                let lower_x = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA, &cB);
                 c_event.set_lower_x_xf(lower_x / denom);
             }
         }
@@ -2354,7 +2330,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
     #[allow(non_snake_case)]
     #[allow(clippy::many_single_char_names)]
     #[allow(clippy::suspicious_operation_groupings)]
-    fn sss(
+    fn sss<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
@@ -2367,7 +2343,6 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
             site1, site2, site3, recompute_c_x,recompute_c_y, recompute_lower_x);
 
         let i_to_bi = TC1::<I>::i_to_xi;
-        let sqrt_expr_ = RF::robust_sqrt_expr::<f64>::default();
 
         let mut cA: [EI::ExtendedInt; 4] = [
             EI::ExtendedInt::zero(),
@@ -2413,7 +2388,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
             let k = (i + 2) % 3;
             *cA_i = &a[j] * &b[k] - &a[k] * &b[j];
         }
-        let denom = sqrt_expr_.eval3(&cA, &cB);
+        let denom = RF::RobustSqrtExpr::eval3(&cA, &cB);
 
         if recompute_c_y {
             for (i, cA_i) in cA.iter_mut().enumerate().take(3) {
@@ -2421,7 +2396,7 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
                 let k = (i + 2) % 3;
                 *cA_i = &b[j] * &c[k] - &b[k] * &c[j];
             }
-            let c_y = sqrt_expr_.eval3(&cA, &cB);
+            let c_y = RF::RobustSqrtExpr::eval3(&cA, &cB);
             c_event.set_y_xf(c_y / denom);
         }
 
@@ -2432,18 +2407,18 @@ impl<I: InputType, F: OutputType> ExactCircleFormationFunctor<I, F> {
                 let k = (i + 2) % 3;
                 cA[i] = &a[j] * &c[k] - &a[k] * &c[j];
                 if recompute_lower_x {
-                    cA[3] = cA[3].clone() + &cA[i] * &b[i];
+                    cA[3] = &cA[3] + &(&cA[i] * &b[i]);
                 }
             }
 
             if recompute_c_x {
-                let c_x = sqrt_expr_.eval3(&cA, &cB);
+                let c_x = RF::RobustSqrtExpr::eval3(&cA, &cB);
                 c_event.set_x_xf(c_x / denom);
             }
 
             if recompute_lower_x {
                 cB[3] = EI::ExtendedInt::one();
-                let lower_x = sqrt_expr_.eval4(&cA, &cB);
+                let lower_x = RF::RobustSqrtExpr::eval4(&cA, &cB);
                 c_event.set_lower_x_xf(lower_x / denom);
             }
         }

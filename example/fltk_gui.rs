@@ -77,12 +77,17 @@ pub enum GuiMessage {
     MenuChoice(Example),
 }
 
+/// The integer input type used by the voronoi builder
+type IType = i32;
+/// The integer output type used by the voronoi builder
+type FType = f64;
+
 #[allow(dead_code)]
 struct SharedData {
     draw_flag: DrawFilterFlag,
     last_message: Option<GuiMessage>,
-    visualizer: VoronoiVisualizer<i32, f64>,
-    last_click: Option<geometry::Point<i32>>,
+    visualizer: VoronoiVisualizer<IType, FType>,
+    last_click: Option<geometry::Point<IType>>,
 }
 
 /// The Offscreen is slightly offset from the window.
@@ -271,7 +276,7 @@ fn main() -> Result<(), BvError> {
         let cl = Rc::clone(&shared_data_rc);
         let mut shared_data_bm = cl.borrow_mut();
         shared_data_bm.visualizer.read_data(Example::Complex);
-        let _ = shared_data_bm.visualizer.build();
+        let _ = shared_data_bm.visualizer.build()?;
         shared_data_bm.visualizer.re_calculate_affine()?;
     }
 
@@ -316,7 +321,7 @@ fn main() -> Result<(), BvError> {
             let reverse_middle = shared_data_bm
                 .visualizer
                 .affine
-                .reverse_transform(mouse_position.0 as f64, mouse_position.1 as f64);
+                .reverse_transform::<IType>(mouse_position.0 as f64, mouse_position.1 as f64);
             if reverse_middle.is_err() {
                 println!("{:?}", reverse_middle.err().unwrap());
                 return false;
@@ -382,7 +387,7 @@ fn main() -> Result<(), BvError> {
                     if !shared_data_bm.visualizer.self_intersecting_check(&line) {
                         shared_data_bm.visualizer.segment_data_.push(line);
 
-                        let _ = shared_data_bm.visualizer.build();
+                        let _ = shared_data_bm.visualizer.build().unwrap();
 
                         if app::event_key_down(enums::Key::from_char('L')) {
                             shared_data_bm.last_click = None;
@@ -410,7 +415,7 @@ fn main() -> Result<(), BvError> {
                         let point = geometry::Point::from(point.unwrap());
                         shared_data_bm.visualizer.point_data_.push(point);
                     }
-                    let _ = shared_data_bm.visualizer.build();
+                    let _ = shared_data_bm.visualizer.build().unwrap();
 
                     shared_data_bm.last_click = None;
                     app::redraw();
@@ -442,7 +447,7 @@ fn main() -> Result<(), BvError> {
                 let point = shared_data_b
                     .visualizer
                     .affine
-                    .reverse_transform(mouse_position.0 as f64, mouse_position.1 as f64);
+                    .reverse_transform::<IType>(mouse_position.0 as f64, mouse_position.1 as f64);
                 if let Ok(point) = point {
                     x_label.set_label(&point[0].to_string());
                     y_label.set_label(&point[1].to_string());
@@ -483,30 +488,22 @@ fn main() -> Result<(), BvError> {
 }
 
 /// struct to help deal with the voronoi diagram input and output
-pub struct VoronoiVisualizer<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
-    screen_aabb: VU::Aabb2<I, F>,
-    diagram: VD::Diagram<I, F>,
-    points_aabb: VU::Aabb2<I, F>,
+pub struct VoronoiVisualizer<I: InputType, F: OutputType> {
+    screen_aabb: VU::Aabb2<F>,
+    diagram: VD::Diagram<F>,
+    points_aabb: VU::Aabb2<F>,
 
     point_data_: Vec<geometry::Point<I>>,
     segment_data_: Vec<geometry::Line<I>>,
-    affine: VU::SimpleAffine<I, F>,
+    affine: VU::SimpleAffine<F>,
 }
 
-impl<I, F> VoronoiVisualizer<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
     pub fn default() -> Self {
         Self {
-            screen_aabb: VU::Aabb2::<I, F>::new_from_i32(0, 0, FW, FH),
-            diagram: VD::Diagram::<I, F>::new(0),
-            points_aabb: VU::Aabb2::<I, F>::default(),
+            screen_aabb: VU::Aabb2::<F>::new_from_i32::<I>(0, 0, FW, FH),
+            diagram: VD::Diagram::<F>::new(0),
+            points_aabb: VU::Aabb2::<F>::default(),
             point_data_: Vec::<geometry::Point<I>>::new(),
             segment_data_: Vec::<geometry::Line<I>>::new(),
             affine: VU::SimpleAffine::default(),
@@ -516,7 +513,7 @@ where
     /// recalculates the affine transformation, this should not be done every time
     /// the diagram is re-calculated or the screen will move around when adding new edges and points.
     pub fn re_calculate_affine(&mut self) -> Result<(), BvError> {
-        self.affine = VU::SimpleAffine::new(&self.points_aabb, &self.screen_aabb)?;
+        self.affine = VU::SimpleAffine::new::<I>(&self.points_aabb, &self.screen_aabb)?;
 
         // Flip the z axis because fltk uses quadrant 4 when drawing
         self.affine.scale[1] *= F::from(-1.0).unwrap();
@@ -569,7 +566,7 @@ where
             for l in self.segment_data_.iter() {
                 aabb.update_line(l);
             }
-            aabb.grow_percent(20);
+            aabb.grow_percent::<I>(20);
             aabb
         };
 
@@ -647,7 +644,7 @@ where
     }
 
     /// Draw input points and endpoints of the input segments.
-    fn draw_input_points(&self, affine: &VU::SimpleAffine<I, F>) {
+    fn draw_input_points(&self, affine: &VU::SimpleAffine<F>) {
         let draw = |point: [F; 2]| {
             draw::draw_circle(Self::f1_to_f64(point[0]), Self::f1_to_f64(point[1]), 2.0);
         };
@@ -663,7 +660,7 @@ where
     }
 
     /// Draw input segments.
-    fn draw_input_segments(&self, affine: &VU::SimpleAffine<I, F>) {
+    fn draw_input_segments(&self, affine: &VU::SimpleAffine<F>) {
         for i in self.segment_data_.iter() {
             let sp = affine.transform_p(&i.start);
             let ep = affine.transform_p(&i.end);
@@ -677,7 +674,7 @@ where
     }
 
     /// Draw voronoi vertices aka circle events.
-    fn draw_vertices(&self, config: &SharedData, affine: &VU::SimpleAffine<I, F>) {
+    fn draw_vertices(&self, config: &SharedData, affine: &VU::SimpleAffine<F>) {
         let draw = |x: f64, y: f64| {
             draw::draw_circle(x, y, 1.0);
         };
@@ -706,11 +703,7 @@ where
     }
 
     /// Draw voronoi edges.
-    fn draw_edges(
-        &self,
-        config: &SharedData,
-        affine: &VU::SimpleAffine<I, F>,
-    ) -> Result<(), BvError> {
+    fn draw_edges(&self, config: &SharedData, affine: &VU::SimpleAffine<F>) -> Result<(), BvError> {
         let draw_external = config.draw_flag.contains(DrawFilterFlag::EXTERNAL);
         let draw_primary = config.draw_flag.contains(DrawFilterFlag::PRIMARY);
         let draw_secondary = config.draw_flag.contains(DrawFilterFlag::SECONDARY);
@@ -832,7 +825,7 @@ where
 
     fn clip_infinite_edge(
         &self,
-        affine: &VU::SimpleAffine<I, F>,
+        affine: &VU::SimpleAffine<F>,
         edge_id: VD::EdgeIndex,
         clipped_edge: &mut Vec<[F; 2]>,
     ) -> Result<(), BvError> {
@@ -922,7 +915,7 @@ where
     /// sampled_edge should be 'screen' coordinates, i.e. affine transformed from voronoi output
     fn sample_curved_edge(
         &self,
-        affine: &VU::SimpleAffine<I, F>,
+        affine: &VU::SimpleAffine<F>,
         edge_id: VD::EdgeIndex,
         sampled_edge: &mut Vec<[F; 2]>,
     ) -> Result<(), BvError> {
@@ -944,7 +937,7 @@ where
         } else {
             self.retrieve_segment(cell_id)?
         };
-        VU::VoronoiVisualUtils::<I, F>::discretize(&point, segment, max_dist, affine, sampled_edge);
+        VU::VoronoiVisualUtils::discretize::<I, F>(&point, segment, max_dist, affine, sampled_edge);
         Ok(())
     }
 

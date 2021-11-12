@@ -18,7 +18,7 @@ type F = f64;
 
 #[test]
 fn pps_problem_1() -> Result<(), BvError> {
-    let output: VD::Diagram<I, F> = {
+    let output: VD::Diagram<F> = {
         let input = r#"0
 3
 -5138 -5149 -5038 -5142
@@ -134,7 +134,7 @@ fn pps_problem_1() -> Result<(), BvError> {
 
 #[test]
 fn pps_problem_2() -> Result<(), BvError> {
-    let output: VD::Diagram<I, F> = {
+    let output: VD::Diagram<F> = {
         let input = r#"0
 3
 -5205 -5210 -5095 -5152
@@ -250,7 +250,7 @@ fn pps_problem_2() -> Result<(), BvError> {
 
 #[test]
 fn pps_problem_3() -> Result<(), BvError> {
-    let output: VD::Diagram<I, F> = {
+    let output: VD::Diagram<F> = {
         let input = r#"0
 3
 759 -242 631 128
@@ -366,7 +366,7 @@ fn pps_problem_3() -> Result<(), BvError> {
 
 #[test]
 fn pps_problem_4() -> Result<(), BvError> {
-    let output: VD::Diagram<I, F> = {
+    let output: VD::Diagram<F> = {
         let input = r#"0
 3
 580 -833 552 -566
@@ -482,7 +482,7 @@ fn pps_problem_4() -> Result<(), BvError> {
 
 #[test]
 fn pps_problem_5() -> Result<(), BvError> {
-    let output: VD::Diagram<I, F> = {
+    let output: VD::Diagram<F> = {
         let input = r#"0
 3
 963 -74 -944 707
@@ -598,7 +598,7 @@ fn pps_problem_5() -> Result<(), BvError> {
 
 #[test]
 fn pps_problem_6() -> Result<(), BvError> {
-    let output: VD::Diagram<I, F> = {
+    let output: VD::Diagram<F> = {
         let input = r#"0
 3
 415 -54 955 703
@@ -714,7 +714,7 @@ fn pps_problem_6() -> Result<(), BvError> {
 
 #[test]
 fn pps_problem_7() -> Result<(), BvError> {
-    let output: VD::Diagram<I, F> = {
+    let output: VD::Diagram<F> = {
         let input = r#"0
 3
 365 113 741 366

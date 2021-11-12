@@ -16,25 +16,11 @@ use crate::{
     BvError, InputType, OutputType,
 };
 use std::fmt;
-use std::marker::PhantomData;
 
 /// Utilities class, that contains set of routines handful for visualization.
-pub struct VoronoiVisualUtils<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
-    #[doc(hidden)]
-    pdi_: PhantomData<I>,
-    #[doc(hidden)]
-    pdo_: PhantomData<F>,
-}
+pub struct VoronoiVisualUtils {}
 
-impl<I, F> VoronoiVisualUtils<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl VoronoiVisualUtils {
     /// Discretize parabolic Voronoi edge.
     /// Parabolic Voronoi edges are always formed by one point and one segment
     /// from the initial input set.
@@ -53,11 +39,11 @@ where
     ///
     /// Important:
     ///   discretization should contain both edge endpoints initially.
-    pub fn discretize(
+    pub fn discretize<I: InputType, F: OutputType>(
         point: &Point<I>,
         segment: &Line<I>,
         max_dist: F,
-        affine: &SimpleAffine<I, F>,
+        affine: &SimpleAffine<F>,
         discretization: &mut Vec<[F; 2]>,
     ) {
         // no need to discretize infinitely small distances
@@ -97,18 +83,18 @@ where
         // Use stack to avoid recursion.
         let mut point_stack = vec![projection_end];
         let mut cur_x = projection_start;
-        let mut cur_y = Self::parabola_y(cur_x, rot_x, rot_y);
+        let mut cur_y = Self::parabola_y::<I, F>(cur_x, rot_x, rot_y);
 
         // Adjust max_dist parameter in the transformed space.
         let max_dist_transformed = max_dist * max_dist * sqr_segment_length;
         while !point_stack.is_empty() {
             let new_x = point_stack[point_stack.len() - 1]; // was .top();
-            let new_y = Self::parabola_y(new_x, rot_x, rot_y);
+            let new_y = Self::parabola_y::<I, F>(new_x, rot_x, rot_y);
 
             // Compute coordinates of the point of the parabola that is
             // furthest from the current line segment.
             let mid_x = (new_y - cur_y) / (new_x - cur_x) * rot_y + rot_x;
-            let mid_y = Self::parabola_y(mid_x, rot_x, rot_y);
+            let mid_y = Self::parabola_y::<I, F>(mid_x, rot_x, rot_y);
 
             // Compute maximum distance between the given parabolic arc
             // and line segment that discretize it.
@@ -143,7 +129,7 @@ where
     /// Compute y(x) = ((x - a) * (x - a) + b * b) / (2 * b).
     #[inline(always)]
     #[allow(clippy::suspicious_operation_groupings)]
-    fn parabola_y(x: F, a: F, b: F) -> F {
+    fn parabola_y<I: InputType, F: OutputType>(x: F, a: F, b: F) -> F {
         ((x - a) * (x - a) + b * b) / (b + b)
     }
 
@@ -154,8 +140,8 @@ where
     // sqrt computation during transformation from the initial space to the
     // transformed one and vice versa. The assumption is made that projection of
     // the point lies between the start-point and endpoint of the segment.
-    pub fn get_point_projection(
-        affine: &SimpleAffine<I, F>,
+    pub fn get_point_projection<I: InputType, F: OutputType>(
+        affine: &SimpleAffine<F>,
         point: &[F; 2],
         segment: &Line<I>,
     ) -> F {
@@ -171,7 +157,7 @@ where
     }
 
     #[inline(always)]
-    pub fn cast_io(value: I) -> F {
+    pub fn cast_io<I: InputType, F: OutputType>(value: I) -> F {
         super::TypeConverter2::<I, F>::i_to_f(value)
     }
 }
@@ -179,37 +165,20 @@ where
 /// A simple 2d AABB
 /// If min_max is none no data has not been assigned.
 #[derive(PartialEq, Eq, Clone, fmt::Debug)]
-pub struct Aabb2<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct Aabb2<F: OutputType> {
     min_max_: Option<([F; 2], [F; 2])>,
-    #[doc(hidden)]
-    pdi_: PhantomData<I>,
 }
 
-impl<I, F> Default for Aabb2<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<F: OutputType> Default for Aabb2<F> {
     #[inline]
     fn default() -> Self {
-        Self {
-            min_max_: None,
-            pdi_: PhantomData,
-        }
+        Self { min_max_: None }
     }
 }
 
-impl<I, F> Aabb2<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<F: OutputType> Aabb2<F> {
     /// Creates a new AABB with the limits defined by 'p1' & 'p2'
-    pub fn new(p1: &Point<I>, p2: &Point<I>) -> Self {
+    pub fn new<I: InputType>(p1: &Point<I>, p2: &Point<I>) -> Self {
         let mut rv = Self::default();
         rv.update_point(p1);
         rv.update_point(p2);
@@ -217,22 +186,22 @@ where
     }
 
     /// Creates a new AABB with i32 coordinates
-    pub fn new_from_i32(x1: i32, y1: i32, x2: i32, y2: i32) -> Self {
+    pub fn new_from_i32<I: InputType>(x1: i32, y1: i32, x2: i32, y2: i32) -> Self {
         let mut rv = Self::default();
-        rv.update_coordinate(x1, y1);
-        rv.update_coordinate(x2, y2);
+        rv.update_coordinate::<I>(x1, y1);
+        rv.update_coordinate::<I>(x2, y2);
         rv
     }
 
     #[inline(always)]
-    pub fn update_point(&mut self, point: &Point<I>) {
+    pub fn update_point<I: InputType>(&mut self, point: &Point<I>) {
         let x = super::TypeConverter2::i_to_f(point.x);
         let y = super::TypeConverter2::i_to_f(point.y);
         self.update_vertex(x, y);
     }
 
     #[inline(always)]
-    pub fn update_coordinate(&mut self, x: i32, y: i32) {
+    pub fn update_coordinate<I: InputType>(&mut self, x: i32, y: i32) {
         let x = super::TypeConverter2::<I, F>::i32_to_f(x);
         let y = super::TypeConverter2::<I, F>::i32_to_f(y);
         self.update_vertex(x, y);
@@ -278,7 +247,7 @@ where
     }
 
     #[inline(always)]
-    pub fn update_line(&mut self, line: &Line<I>) {
+    pub fn update_line<I: InputType>(&mut self, line: &Line<I>) {
         self.update_point(&line.start);
         self.update_point(&line.end);
     }
@@ -301,7 +270,7 @@ where
 
     /// grows the aabb uniformly by some percent.
     /// method does nothing if not initialized
-    pub fn grow_percent(&mut self, percent: i32) {
+    pub fn grow_percent<I: InputType>(&mut self, percent: i32) {
         if self.min_max_.is_some() {
             let size_x = self.get_high().unwrap()[0] - self.get_low().unwrap()[0];
             let size_y = self.get_high().unwrap()[1] - self.get_low().unwrap()[1];
@@ -328,12 +297,12 @@ where
     /// let p0 = Point::from([0,0]);
     /// let p1 = Point::from([1,1]);
     ///
-    /// let aabb = Aabb2::<i32,f32>::new(&p0,&p1);
+    /// let aabb = Aabb2::<f32>::new(&p0,&p1);
     /// assert!(aabb.contains_point(&Point::from([1,1])).unwrap_or(false));
     /// assert!(!aabb.contains_point(&Point::from([2,1])).unwrap_or(true));
     /// ```
     #[inline]
-    pub fn contains_point(&self, point: &Point<I>) -> Option<bool> {
+    pub fn contains_point<I: InputType>(&self, point: &Point<I>) -> Option<bool> {
         if let Some(min_max) = self.min_max_ {
             let x = super::TypeConverter2::<I, F>::i_to_f(point.x);
             let y = super::TypeConverter2::<I, F>::i_to_f(point.y);
@@ -353,12 +322,12 @@ where
     /// let p0 = Point::from([0,0]);
     /// let p1 = Point::from([10,10]);
     ///
-    /// let aabb = Aabb2::<i32,f32>::new(&p0,&p1);
+    /// let aabb = Aabb2::<f32>::new(&p0,&p1);
     /// assert!( aabb.contains_line(&Line::from([1,1,10,10])).unwrap_or(false));
     /// assert!(!aabb.contains_line(&Line::from([1,-1,10,10])).unwrap_or(true));
     /// ```
     #[inline]
-    pub fn contains_line(&self, line: &Line<I>) -> Option<bool> {
+    pub fn contains_line<I: InputType>(&self, line: &Line<I>) -> Option<bool> {
         if self.min_max_.is_some() {
             // unwrap is safe now
             Some(
@@ -375,11 +344,7 @@ where
 /// Inadvertently it also serves as a type converter F<->I<->i32
 /// It can pan and zoom but not rotate.
 #[derive(PartialEq, Clone, fmt::Debug)]
-pub struct SimpleAffine<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+pub struct SimpleAffine<F: OutputType> {
     /// The offsets used to center the 'source' coordinate system. Typically the input geometry
     /// in this case.
     to_center_: [F; 2],
@@ -388,32 +353,24 @@ where
     /// The offsets needed to center coordinates of interest on the 'dest' coordinate system.
     /// i.e. the screen coordinate system.
     pub to_offset: [F; 2],
-    #[doc(hidden)]
-    pdi_: PhantomData<I>,
 }
 
-impl<I, F> Default for SimpleAffine<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
+impl<F: OutputType> Default for SimpleAffine<F> {
     #[inline]
     fn default() -> Self {
         Self {
             to_center_: [F::zero(), F::zero()],
             scale: [F::one(), F::one()],
             to_offset: [F::zero(), F::zero()],
-            pdi_: PhantomData,
         }
     }
 }
 
-impl<I, F> SimpleAffine<I, F>
-where
-    I: InputType,
-    F: OutputType,
-{
-    pub fn new(source_aabb: &Aabb2<I, F>, dest_aabb: &Aabb2<I, F>) -> Result<Self, BvError> {
+impl<F: OutputType> SimpleAffine<F> {
+    pub fn new<I: InputType>(
+        source_aabb: &Aabb2<F>,
+        dest_aabb: &Aabb2<F>,
+    ) -> Result<Self, BvError> {
         let i32_to_f = super::TypeConverter2::<I, F>::i32_to_f;
         let min_dim = i32_to_f(10);
 
@@ -450,7 +407,6 @@ where
                             to_center_: source_aabb_center,
                             scale: [scale, scale],
                             to_offset: dest_aabb_center,
-                            pdi_: PhantomData,
                         });
                     }
                 }
@@ -465,7 +421,7 @@ where
 
     /// transform from destination coordinate system to source coordinate system
     #[inline(always)]
-    pub fn reverse_transform(&self, x: F, y: F) -> Result<[I; 2], BvError> {
+    pub fn reverse_transform<I: InputType>(&self, x: F, y: F) -> Result<[I; 2], BvError> {
         let x = self.reverse_transform_x(x)?;
         let y = self.reverse_transform_y(y)?;
         Ok([x, y])
@@ -473,7 +429,7 @@ where
 
     /// transform from destination coordinate system to source coordinate system
     #[inline(always)]
-    pub fn reverse_transform_x(&self, x: F) -> Result<I, BvError> {
+    pub fn reverse_transform_x<I: InputType>(&self, x: F) -> Result<I, BvError> {
         super::TypeConverter2::<I, F>::try_f_to_i(
             ((x - self.to_offset[0]) / self.scale[0] - self.to_center_[0]).round(),
         )
@@ -481,7 +437,7 @@ where
 
     /// transform from dest coordinate system to source coordinate system
     #[inline(always)]
-    pub fn reverse_transform_y(&self, y: F) -> Result<I, BvError> {
+    pub fn reverse_transform_y<I: InputType>(&self, y: F) -> Result<I, BvError> {
         super::TypeConverter2::<I, F>::try_f_to_i(
             ((y - self.to_offset[1]) / self.scale[1] - self.to_center_[1]).round(),
         )
@@ -509,7 +465,7 @@ where
 
     /// transform from source coordinate system to dest coordinate system
     #[inline(always)]
-    pub fn transform_i(&self, point: [I; 2]) -> [F; 2] {
+    pub fn transform_i<I: InputType>(&self, point: [I; 2]) -> [F; 2] {
         [self.transform_ix(point[0]), self.transform_iy(point[1])]
     }
 
@@ -521,14 +477,14 @@ where
 
     /// transform from source coordinate system to dest coordinate system
     #[inline(always)]
-    pub fn transform_p(&self, point: &Point<I>) -> [F; 2] {
+    pub fn transform_p<I: InputType>(&self, point: &Point<I>) -> [F; 2] {
         [self.transform_ix(point.x), self.transform_iy(point.y)]
     }
 
     /// transform from source coordinate system to dest coordinate system
     /// integer x coordinate
     #[inline(always)]
-    pub fn transform_ix(&self, x: I) -> F {
+    pub fn transform_ix<I: InputType>(&self, x: I) -> F {
         (super::TypeConverter2::<I, F>::i_to_f(x) + self.to_center_[0]) * self.scale[0]
             + self.to_offset[0]
     }
@@ -536,7 +492,7 @@ where
     /// transform from source coordinate system to dest coordinate system
     /// integer y coordinate
     #[inline(always)]
-    pub fn transform_iy(&self, y: I) -> F {
+    pub fn transform_iy<I: InputType>(&self, y: I) -> F {
         (super::TypeConverter2::<I, F>::i_to_f(y) + self.to_center_[1]) * self.scale[1]
             + self.to_offset[1]
     }

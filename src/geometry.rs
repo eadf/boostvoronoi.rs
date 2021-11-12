@@ -147,19 +147,19 @@ impl<T: InputType + geo::CoordNum> From<&Point<T>> for geo::Coordinate<T> {
 }
 
 #[cfg(feature = "geo")]
-impl<I: InputType, F: OutputType + geo::CoordFloat> From<&Vertex<I, F>> for geo::Coordinate<F> {
+impl<F: OutputType + geo::CoordFloat> From<&Vertex<F>> for geo::Coordinate<F> {
     /// Converts to geo::Coordinate from &boostvoronoi::diagram::Vertex
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// # use boostvoronoi::diagram::Vertex;
     /// # use boostvoronoi::diagram::VertexIndex;
     ///
-    /// let v = Vertex::<i32,f32>::new_3(VertexIndex(0),1.0,2.0,false).get();
+    /// let v = Vertex::<f32>::new_3(VertexIndex(0),1.0,2.0,false).get();
     /// let c = geo::Coordinate::<f32>::from(&v);
     /// assert_eq!(v.x(),c.x);
     /// assert_eq!(v.y(),c.y);
     /// ```
-    fn from(vertex: &Vertex<I, F>) -> geo::Coordinate<F> {
+    fn from(vertex: &Vertex<F>) -> geo::Coordinate<F> {
         geo::Coordinate {
             x: vertex.x(),
             y: vertex.y(),
@@ -244,19 +244,19 @@ impl<T: InputType + cgmath::BaseNum> From<Point<T>> for cgmath::Point2<T> {
 }
 
 #[cfg(feature = "cgmath")]
-impl<I: InputType, F: OutputType + cgmath::BaseNum> From<&Vertex<I, F>> for cgmath::Point2<F> {
+impl<F: OutputType + cgmath::BaseNum> From<&Vertex<F>> for cgmath::Point2<F> {
     /// Converts to cgmath::Point2 from &boostvoronoi::diagram::Vertex
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// # use boostvoronoi::diagram::Vertex;
     /// # use boostvoronoi::diagram::VertexIndex;
     ///
-    /// let v = Vertex::<i32,f32>::new_3(VertexIndex(0),1.0,2.0,false).get();
+    /// let v = Vertex::<f32>::new_3(VertexIndex(0),1.0,2.0,false).get();
     /// let p = cgmath::Point2::<f32>::from(&v);
     /// assert_eq!(v.x(),p.x);
     /// assert_eq!(v.y(),p.y);
     /// ```
-    fn from(vertex: &Vertex<I, F>) -> cgmath::Point2<F> {
+    fn from(vertex: &Vertex<F>) -> cgmath::Point2<F> {
         cgmath::Point2 {
             x: vertex.x(),
             y: vertex.y(),
@@ -368,19 +368,19 @@ impl<T: InputType> From<&[T; 4]> for Line<T> {
     }
 }
 
-impl<I: InputType, F: OutputType> From<&Vertex<I, F>> for [F; 2] {
+impl<F: OutputType> From<&Vertex<F>> for [F; 2] {
     /// Converts to \[T;2\] from &boostvoronoi::diagram::Vertex
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// # use boostvoronoi::diagram::Vertex;
     /// # use boostvoronoi::diagram::VertexIndex;
     ///
-    /// let v = Vertex::<i32,f32>::new_3(VertexIndex(0),1.0,2.0,false).get();
+    /// let v = Vertex::<f32>::new_3(VertexIndex(0),1.0,2.0,false).get();
     /// let a = <[f32;2]>::from(&v);
     /// assert_eq!(v.x(),a[0]);
     /// assert_eq!(v.y(),a[1]);
     /// ```
-    fn from(vertex: &Vertex<I, F>) -> [F; 2] {
+    fn from(vertex: &Vertex<F>) -> [F; 2] {
         [vertex.x(), vertex.y()]
     }
 }
@@ -422,24 +422,24 @@ impl<I: InputType> From<mint::Point2<I>> for Point<I> {
 }
 
 #[cfg(feature = "mint")]
-impl<I: InputType, F: OutputType> mint::IntoMint for &Vertex<I, F> {
+impl<F: OutputType> mint::IntoMint for &Vertex<F> {
     type MintType = mint::Point2<F>;
 }
 
 #[cfg(feature = "mint")]
-impl<I: InputType, F: OutputType> From<&Vertex<I, F>> for mint::Point2<F> {
+impl<F: OutputType> From<&Vertex<F>> for mint::Point2<F> {
     /// Converts to mint::Point2 from &boostvoronoi::diagram::Vertex
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// # use boostvoronoi::diagram::Vertex;
     /// # use boostvoronoi::diagram::VertexIndex;
     ///
-    /// let v = Vertex::<i32,f32>::new_3(VertexIndex(0),1.0,2.0,false).get();
+    /// let v = Vertex::<f32>::new_3(VertexIndex(0),1.0,2.0,false).get();
     /// let p = mint::Point2::<f32>::from(&v);
     /// assert_eq!(v.x(),p.x);
     /// assert_eq!(v.y(),p.y);
     /// ```
-    fn from(vertex: &Vertex<I, F>) -> mint::Point2<F> {
+    fn from(vertex: &Vertex<F>) -> mint::Point2<F> {
         mint::Point2 {
             x: vertex.x(),
             y: vertex.y(),
