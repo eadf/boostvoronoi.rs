@@ -15,15 +15,15 @@ use std::cmp::Ordering;
 /// then they are ordered the same way when their bits are reinterpreted as
 /// sign-magnitude integers. Values are considered to be almost equal if
 /// their integer bits reinterpretations differ in not more than maxUlps units.
-/// todo: replace with some function from approx
 pub(crate) struct UlpComparison {}
 
 impl UlpComparison {
     #[inline]
+    /// todo: replace with some function from approx
     pub(crate) fn ulp_comparison(a: f64, b: f64, max_ulps: u64) -> Ordering {
         // Reinterpret double bits as 64-bit "signed" integer.
-        let mut ll_a: u64 = unsafe { std::mem::transmute::<f64, u64>(a) };
-        let mut ll_b: u64 = unsafe { std::mem::transmute::<f64, u64>(b) };
+        let mut ll_a: u64 = a.to_bits();
+        let mut ll_b: u64 = b.to_bits();
 
         // Positive 0.0 is integer zero. Negative 0.0 is 0x8000000000000000.
         // Map negative zero to an integer zero representation - making it
