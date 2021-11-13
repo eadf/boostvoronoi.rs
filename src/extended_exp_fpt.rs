@@ -10,8 +10,7 @@
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 //! Utilities for extended float. Supports 63 bit mantissa with 32 bit exponent.
-use crate::extended_int as EI;
-use num::Float;
+use crate::{extended_int as EI, OutputType};
 use std::fmt;
 use std::ops;
 
@@ -20,10 +19,7 @@ use std::ops;
 /// numbers or NaNs.
 /// Ported from the class extended_exponent_fpt in voronoi_ctypes.hpp
 #[derive(Copy, Clone)]
-pub struct ExtendedExponentFpt<F>
-where
-    F: Float + fmt::Display + fmt::Debug,
-{
+pub struct ExtendedExponentFpt<F:OutputType> {
     val_: F,
     exp_: i32,
 }

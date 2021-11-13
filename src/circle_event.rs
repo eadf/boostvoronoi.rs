@@ -144,22 +144,22 @@ impl Ord for CircleEvent {
     }
 }
 
-/// Wrapper object that lets me implement Ord on a Cell<CircleEvent<O>>
+/// Wrapper that makes it possible to implement Ord on a std::cell::Cell<CircleEvent>
 #[derive(Clone)]
-pub struct CircleEventC(pub Cell<CircleEvent>, pub(crate) Option<VB::BeachLineIndex>);
+pub struct CircleEventCell(pub Cell<CircleEvent>);
 
-impl fmt::Debug for CircleEventC {
+impl fmt::Debug for CircleEventCell {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "CE{:?}", self.0.get())
     }
 }
 
-impl CircleEventC {
-    pub(crate) fn new_1(c: CircleEvent) -> Rc<Self> {
-        let cc = Self(Cell::new(c), Some(c.beach_line_index_.unwrap())); // todo
-        Rc::<Self>::new(cc)
+impl CircleEventCell {
+    pub(crate) fn new(bech_line_index: VB::BeachLineIndex) -> Self {
+        Self(Cell::new(CircleEvent::new(bech_line_index)))
     }
 
+    #[inline]
     /// sets the coordinates inside the Cell.
     pub(crate) fn set_3_ext(
         &self,
@@ -172,6 +172,7 @@ impl CircleEventC {
         self.0.set(selfc);
     }
 
+    #[inline]
     /// sets the coordinates inside the Cell.
     pub(crate) fn set_3_raw(&self, x: f64, y: f64, lower_x: f64) {
         let mut selfc = self.0.get();
@@ -179,6 +180,7 @@ impl CircleEventC {
         self.0.set(selfc);
     }
 
+    #[inline]
     /// sets the x coordinates inside the Cell.
     pub(crate) fn set_x_xf(&self, x: EX::ExtendedExponentFpt<f64>) {
         let mut selfc = self.0.get();
@@ -186,6 +188,7 @@ impl CircleEventC {
         self.0.set(selfc);
     }
 
+    #[inline]
     /// sets the y coordinate inside the Cell.
     pub(crate) fn set_y_xf(&self, y: EX::ExtendedExponentFpt<f64>) {
         let mut selfc = self.0.get();
@@ -193,6 +196,7 @@ impl CircleEventC {
         self.0.set(selfc);
     }
 
+    #[inline]
     /// sets the y coordinate inside the Cell.
     pub(crate) fn set_lower_x_xf(&self, x: EX::ExtendedExponentFpt<f64>) {
         let mut selfc: CircleEvent = self.0.get();
@@ -200,24 +204,28 @@ impl CircleEventC {
         self.0.set(selfc);
     }
 
+    #[inline]
+    /// sets the site_point flag
     pub(crate) fn set_is_site_point(&self) {
         let mut selfc = self.0.get();
         selfc.is_site_point_ = true;
         self.0.set(selfc)
     }
-    #[allow(dead_code)]
-    pub(crate) fn is_site_point(&self) -> bool {
-        self.0.get().is_site_point_
+
+    #[inline]
+    /// Returns the beach line index
+    pub(crate) fn beach_line_index(&self) -> Option<VB::BeachLineIndex> {
+        self.0.get().beach_line_index_
     }
 }
 
-impl PartialOrd for CircleEventC {
+impl PartialOrd for CircleEventCell {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for CircleEventC {
+impl Ord for CircleEventCell {
     fn cmp(&self, other: &Self) -> Ordering {
         let cell_self = self.0.get();
         let cell_other = other.0.get();
@@ -225,7 +233,7 @@ impl Ord for CircleEventC {
     }
 }
 
-impl PartialEq for CircleEventC {
+impl PartialEq for CircleEventCell {
     fn eq(&self, other: &Self) -> bool {
         let c_self = self.0.get();
         let c_other = other.0.get();
@@ -236,10 +244,10 @@ impl PartialEq for CircleEventC {
     }
 }
 
-impl Eq for CircleEventC {}
+impl Eq for CircleEventCell {}
 
 impl CircleEvent {
-    pub(crate) fn new_1(bech_line_index: VB::BeachLineIndex) -> CircleEvent {
+    pub(crate) fn new(bech_line_index: VB::BeachLineIndex) -> CircleEvent {
         Self {
             center_x_: OrderedFloat(0_f64),
             center_y_: OrderedFloat(0_f64),
@@ -356,7 +364,7 @@ impl CircleEvent {
     }
 }
 
-pub type CircleEventType = Rc<CircleEventC>;
+pub type CircleEventType = Rc<CircleEventCell>;
 
 /// Event queue data structure, holds circle events.
 /// During algorithm run, some of the circle events disappear (become
@@ -518,7 +526,7 @@ impl CircleEventQueue {
     /// Insert Rc ref into the list
     /// Insert Rc wrapped object in self.c_
     /// return a Rc ref of the inserted element
-    pub(crate) fn associate_and_push(&mut self, cc: CircleEventType) -> Rc<CircleEventC> {
+    pub(crate) fn associate_and_push(&mut self, cc: CircleEventType) -> Rc<CircleEventCell> {
         {
             let mut c = cc.0.get();
             let _ = c.set_index(self.c_list_next_free_index_);

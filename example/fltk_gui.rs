@@ -82,7 +82,6 @@ type IType = i32;
 /// The integer output type used by the voronoi builder
 type FType = f64;
 
-#[allow(dead_code)]
 struct SharedData {
     draw_flag: DrawFilterFlag,
     last_message: Option<GuiMessage>,

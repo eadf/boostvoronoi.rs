@@ -64,9 +64,9 @@ impl VoronoiVisualUtils {
         // Compute x-coordinates of the endpoints of the edge
         // in the transformed space.
         let projection_start =
-            sqr_segment_length * Self::get_point_projection(affine, &discretization[0], segment);
+            sqr_segment_length * Self::point_projection(affine, &discretization[0], segment);
         let projection_end =
-            sqr_segment_length * Self::get_point_projection(affine, &discretization[1], segment);
+            sqr_segment_length * Self::point_projection(affine, &discretization[1], segment);
 
         // Compute parabola parameters in the transformed space.
         // Parabola has next representation:
@@ -140,7 +140,7 @@ impl VoronoiVisualUtils {
     // sqrt computation during transformation from the initial space to the
     // transformed one and vice versa. The assumption is made that projection of
     // the point lies between the start-point and endpoint of the segment.
-    pub fn get_point_projection<I: InputType, F: OutputType>(
+    pub fn point_projection<I: InputType, F: OutputType>(
         affine: &SimpleAffine<F>,
         point: &[F; 2],
         segment: &Line<I>,

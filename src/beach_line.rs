@@ -88,7 +88,7 @@ impl<I: InputType, F: OutputType> Default for BeachLine<I, F> {
 }
 
 impl<I: InputType, F: OutputType> BeachLine<I, F> {
-    #[allow(dead_code)]
+    #[cfg(feature = "console_debug")]
     #[inline(always)]
     pub(crate) fn len(&self) -> usize {
         self.beach_line_.borrow().len()

@@ -416,8 +416,8 @@ impl<F: OutputType> Vertex<F> {
         let x2: f64 = NumCast::from(other.x()).unwrap();
         let y2: f64 = NumCast::from(other.y()).unwrap();
 
-        CT::UlpComparison::ulp_comparison(x1, x2, ulp) == Ordering::Equal
-            && CT::UlpComparison::ulp_comparison(y1, y2, ulp) == Ordering::Equal
+        CT::ulp_comparison(x1, x2, ulp) == Ordering::Equal
+            && CT::ulp_comparison(y1, y2, ulp) == Ordering::Equal
     }
 
     pub fn get_id(&self) -> VertexIndex {

@@ -16,7 +16,7 @@ mod tests;
 
 use crate::beach_line as VB;
 use crate::circle_event as VC;
-use crate::ctypes::UlpComparison;
+use crate::ctypes::ulp_comparison;
 use crate::extended_exp_fpt as EX;
 use crate::extended_int as EI;
 use crate::robust_fpt as RF;
@@ -298,7 +298,7 @@ impl EventComparisonPredicate {
         let lhs = TC1::<I>::i_to_f64(lhs.x0());
         let rhs = rhs.lower_x().into_inner();
         let ulps = Predicates::ulps();
-        let rv = UlpComparison::ulp_comparison(lhs, rhs, ulps) == cmp::Ordering::Less;
+        let rv = ulp_comparison(lhs, rhs, ulps) == cmp::Ordering::Less;
         tln!(
             "event_comparison_predicate_bif lhs:{:.12} rhs:{:.12} -> {}",
             lhs,
@@ -543,7 +543,7 @@ impl DistancePredicate {
         let fast_left_expr = a * (dif_y + dif_x) * (dif_y - dif_x);
         let fast_right_expr = 2_f64 * b * dif_x * dif_y;
 
-        let expr_cmp = UlpComparison::ulp_comparison(fast_left_expr, fast_right_expr, 4);
+        let expr_cmp = ulp_comparison(fast_left_expr, fast_right_expr, 4);
 
         if expr_cmp != cmp::Ordering::Equal {
             if (expr_cmp == cmp::Ordering::Greater) ^ reverse_order {
@@ -816,7 +816,6 @@ impl CircleExistencePredicate {
 #[derive(Default)]
 pub struct LazyCircleFormationFunctor {}
 
-#[allow(non_snake_case)]
 impl LazyCircleFormationFunctor {
     /// Lazy evaluation of point, point, point circle events
     fn ppp<I: InputType, F: OutputType>(
@@ -898,8 +897,6 @@ impl LazyCircleFormationFunctor {
     }
 
     /// Lazy evaluation of point, point, segment circle events
-    #[allow(unknown_lints)]
-    #[allow(clippy::branches_sharing_code)] // false positive
     fn pps<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
@@ -930,7 +927,7 @@ impl LazyCircleFormationFunctor {
             ),
             1_f64,
         );
-        let A = RF::RobustFpt::new_2(
+        let a = RF::RobustFpt::new_2(
             Predicates::robust_cross_product::<I, F>(
                 i_to_i64(site3.y0()) - i_to_i64(site3.y1()),
                 i_to_i64(site3.x0()) - i_to_i64(site3.x1()),
@@ -939,7 +936,7 @@ impl LazyCircleFormationFunctor {
             ),
             1_f64,
         );
-        let B = RF::RobustFpt::new_2(
+        let b = RF::RobustFpt::new_2(
             Predicates::robust_cross_product::<I, F>(
                 i_to_i64(site3.y0()) - i_to_i64(site3.y1()),
                 i_to_i64(site3.x0()) - i_to_i64(site3.x1()),
@@ -962,12 +959,12 @@ impl LazyCircleFormationFunctor {
         let mut t = RF::RobustDif::default();
         tln!("0t:{:?}", t);
         if OrientationTest::eval_f::<I, F>(denom.fpv()) == Orientation::Collinear {
-            t += teta / (RF::RobustFpt::new_1(8_f64) * A);
+            t += teta / (RF::RobustFpt::new_1(8_f64) * a);
             tln!("1t:{:?}", t);
-            t -= A / (RF::RobustFpt::new_1(2_f64) * teta);
+            t -= a / (RF::RobustFpt::new_1(2_f64) * teta);
             tln!("2t:{:?}", t);
         } else {
-            let det = ((teta * teta + denom * denom) * A * B).sqrt();
+            let det = ((teta * teta + denom * denom) * a * b).sqrt();
             //tln!("det:{:?}", det);
             if segment_index == SiteIndex::Two {
                 tln!("3 det:{:?}", det);
@@ -980,9 +977,9 @@ impl LazyCircleFormationFunctor {
                 tln!("4t:{:?}", t);
             }
             tln!("5teta:{:?}", teta);
-            tln!("A:{:?}", A);
-            tln!("B:{:?}", B);
-            t += teta * (A + B) / (RF::RobustFpt::new_1(2_f64) * denom * denom);
+            tln!("A:{:?}", a);
+            tln!("B:{:?}", b);
+            t += teta * (a + b) / (RF::RobustFpt::new_1(2_f64) * denom * denom);
             tln!("5t:{:?}", t);
         }
         tln!("6t:{:?}", t);
@@ -1241,8 +1238,6 @@ impl LazyCircleFormationFunctor {
         );
         let is_collinear =
             OrientationTest::eval_f::<I, F>(orientation.fpv()) == Orientation::Collinear;
-        #[allow(unknown_lints)] // for +stable
-        #[allow(clippy::branches_sharing_code)] // false positive
         if is_collinear {
             tln!("  LazyCircleFormationFunctor::pss collinear");
             let a = RF::RobustFpt::new_2(a1 * a1 + b1 * b1, 2_f64);
@@ -1693,8 +1688,8 @@ impl CircleFormationFunctor {
         let y1 = i_to_f64(if s.is_inverse() { s.y0() } else { s.y1() });
         let cc_y = c.0.get().y().into_inner();
 
-        UlpComparison::ulp_comparison(cc_y, y0, 64) == cmp::Ordering::Less
-            || UlpComparison::ulp_comparison(cc_y, y1, 64) == cmp::Ordering::Greater
+        ulp_comparison(cc_y, y0, 64) == cmp::Ordering::Less
+            || ulp_comparison(cc_y, y1, 64) == cmp::Ordering::Greater
     }
 
     #[cfg(feature = "console_debug")]

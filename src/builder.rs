@@ -622,7 +622,15 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
                 line!()
             )));
         }
-        let mut it_first = self.beach_line_.get_pointer(e.1.unwrap())?;
+        let mut it_first = self
+            .beach_line_
+            .get_pointer(e.beach_line_index().ok_or_else(|| {
+                BvError::InternalError(format!(
+                    "No beachline index found for circle event. {}:{}",
+                    file!(),
+                    line!()
+                ))
+            })?)?;
         let mut it_last = it_first.clone();
         #[cfg(feature = "console_debug")]
         {
@@ -919,8 +927,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
         bisector_node: VB::BeachLineIndex,
     ) -> Result<(), BvError> {
         // Check if the three input sites create a circle event.
-        let c_event = VC::CircleEvent::new_1(bisector_node);
-        let c_event = VC::CircleEventC::new_1(c_event);
+        let c_event = Rc::new(VC::CircleEventCell::new(bisector_node));
 
         if VP::CircleFormationFunctor::circle_formation_predicate::<I, F>(
             &site1, &site2, &site3, &c_event,
