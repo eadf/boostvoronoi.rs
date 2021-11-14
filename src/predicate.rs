@@ -857,7 +857,7 @@ impl LazyCircleFormationFunctor {
             num::cast::<f32, f64>(5.0f32).unwrap(),
         );
 
-        c_event.set_3_raw(
+        c_event.cell_set_3_raw(
             c_x.dif().fpv() * inv_orientation.fpv(),
             c_y.dif().fpv() * inv_orientation.fpv(),
             lower_x.dif().fpv() * inv_orientation.fpv(),
@@ -1010,7 +1010,7 @@ impl LazyCircleFormationFunctor {
                 lower_x.dif().fpv()
             );
         }
-        c_event.set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
+        c_event.cell_set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
 
         tln!("  c_x:{:?}, c_y:{:?}, l_x:{:?}", c_x, c_y, lower_x);
 
@@ -1196,10 +1196,10 @@ impl LazyCircleFormationFunctor {
         if (site1.point0() == site2.point0() || site1.point0() == site2.point1())
             && (site1.point0() == site3.point0() || site1.point0() == site3.point1())
         {
-            c_event.set_is_site_point();
+            c_event.cell_set_is_site_point();
             let x = cast::<I, f64>(site1.point0().x);
             let y = cast::<I, f64>(site1.point0().y);
-            c_event.set_3_raw(x, y, x);
+            c_event.cell_set_3_raw(x, y, x);
             tln!("<-LazyCircleFormationFunctor::pss shortcut");
             return;
         }
@@ -1321,7 +1321,7 @@ impl LazyCircleFormationFunctor {
                 assert!(!c_y.dif().ulp().is_nan());
                 assert!(!lower_x.dif().ulp().is_nan());
             }
-            c_event.set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
+            c_event.cell_set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
         } else {
             tln!("  LazyCircleFormationFunctor::pss !collinear");
             let sqr_sum1 = RF::RobustFpt::new_2((a1 * a1 + b1 * b1).sqrt(), 2_f64);
@@ -1489,7 +1489,7 @@ impl LazyCircleFormationFunctor {
                 assert!(!lower_x.dif().ulp().is_nan());
             }
             // Todo! Is this correct? it was let c_event = ...
-            c_event.set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
+            c_event.cell_set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
         }
 
         if recompute_c_x || recompute_c_y || recompute_lower_x {
@@ -1632,7 +1632,7 @@ impl LazyCircleFormationFunctor {
             assert!(!c_y.dif().ulp().is_nan());
             assert!(!lower_x.dif().ulp().is_nan());
         }
-        c_event.set_3_raw(c_x_dif.fpv(), c_y_dif.fpv(), lower_x_dif.fpv());
+        c_event.cell_set_3_raw(c_x_dif.fpv(), c_y_dif.fpv(), lower_x_dif.fpv());
 
         if recompute_c_x || recompute_c_y || recompute_lower_x {
             ExactCircleFormationFunctor::sss(
@@ -1858,7 +1858,7 @@ impl ExactCircleFormationFunctor {
 
         if recompute_c_x || recompute_lower_x {
             let c_x: EI::ExtendedInt = &numer1 * &dif_y[1] - &numer2 * &dif_y[0];
-            circle.set_x_xf(EX::ExtendedExponentFpt::from(&c_x) * inv_denom);
+            circle.cell_set_x_xf(EX::ExtendedExponentFpt::from(&c_x) * inv_denom);
 
             if recompute_lower_x {
                 // Evaluate radius of the circle.
@@ -1876,22 +1876,22 @@ impl ExactCircleFormationFunctor {
 
                 if !tmp_circle_x.is_neg() {
                     if !inv_denom.is_neg() {
-                        circle.set_lower_x_xf(tmp_circle_x + r * inv_denom);
+                        circle.cell_set_lower_x_xf(tmp_circle_x + r * inv_denom);
                     } else {
-                        circle.set_lower_x_xf(tmp_circle_x - r * inv_denom);
+                        circle.cell_set_lower_x_xf(tmp_circle_x - r * inv_denom);
                     }
                 } else {
                     let numer: EI::ExtendedInt = &c_x * &c_x - &sqr_r;
                     let lower_x = EX::ExtendedExponentFpt::from(numer) * inv_denom
                         / (EX::ExtendedExponentFpt::from(c_x) + r);
-                    circle.set_lower_x_xf(lower_x);
+                    circle.cell_set_lower_x_xf(lower_x);
                 }
             }
         }
 
         if recompute_c_y {
             let c_y: EI::ExtendedInt = &numer2 * &dif_x[0] - &numer1 * &dif_x[1];
-            circle.set_y_xf(EX::ExtendedExponentFpt::from(c_y) * inv_denom);
+            circle.cell_set_y_xf(EX::ExtendedExponentFpt::from(c_y) * inv_denom);
         }
         #[cfg(feature = "console_debug")]
         {
@@ -1982,13 +1982,13 @@ impl ExactCircleFormationFunctor {
             let inv_denom =
                 EX::ExtendedExponentFpt::from(1f64) / EX::ExtendedExponentFpt::from(&denom);
             if recompute_c_x {
-                c_event.set_x_xf(EX::ExtendedExponentFpt::from(&ca[0]) * inv_denom / 4_f64);
+                c_event.cell_set_x_xf(EX::ExtendedExponentFpt::from(&ca[0]) * inv_denom / 4_f64);
             }
             if recompute_c_y {
-                c_event.set_y_xf(EX::ExtendedExponentFpt::from(&ca[2]) * inv_denom / 4_f64);
+                c_event.cell_set_y_xf(EX::ExtendedExponentFpt::from(&ca[2]) * inv_denom / 4_f64);
             }
             if recompute_lower_x {
-                c_event.set_lower_x_xf(
+                c_event.cell_set_lower_x_xf(
                     RF::RobustSqrtExpr::eval2(&ca, &cb) * inv_denom * 0.25f64
                         / (EX::ExtendedExponentFpt::from(&segm_len).sqrt()),
                 );
@@ -2011,7 +2011,7 @@ impl ExactCircleFormationFunctor {
             };
             cb[1] = det.clone();
             if recompute_c_x {
-                c_event.set_x_xf(RF::RobustSqrtExpr::eval2(&ca, &cb) * inv_denom_sqr * 0.5f64);
+                c_event.cell_set_x_xf(RF::RobustSqrtExpr::eval2(&ca, &cb) * inv_denom_sqr * 0.5f64);
             }
         }
 
@@ -2025,7 +2025,7 @@ impl ExactCircleFormationFunctor {
             };
             cb[3] = det.clone();
             if recompute_c_y {
-                c_event.set_y_xf(
+                c_event.cell_set_y_xf(
                     RF::RobustSqrtExpr::eval2(&ca[2..], &cb[2..]) * inv_denom_sqr * 0.5f64,
                 );
             }
@@ -2056,7 +2056,7 @@ impl ExactCircleFormationFunctor {
             let eval4 = RF::RobustSqrtExpr::eval4(&ca, &cb);
             tln!("eval4:{:.12}", eval4.d());
 
-            c_event.set_lower_x_xf(eval4 * inv_denom_sqr * 0.5f64 / segm_len);
+            c_event.cell_set_lower_x_xf(eval4 * inv_denom_sqr * 0.5f64 / segm_len);
         }
         #[cfg(feature = "console_debug")]
         {
@@ -2172,7 +2172,7 @@ impl ExactCircleFormationFunctor {
                 let c_y = RF::RobustSqrtExpr::eval2(&cA, &cB);
                 tln!("c_y={:?}", c_y);
                 tln!("denom={:?}", denom);
-                c_event.set_y_xf(c_y / denom);
+                c_event.cell_set_y_xf(c_y / denom);
             }
 
             if recompute_c_x || recompute_lower_x {
@@ -2198,7 +2198,7 @@ impl ExactCircleFormationFunctor {
                     tln!(" denom={:.0}", denom.d());
                     tln!(" c_x/denom={:.0}", (c_x / denom).d());
 
-                    c_event.set_x_xf(c_x / denom);
+                    c_event.cell_set_x_xf(c_x / denom);
                 }
 
                 if recompute_lower_x {
@@ -2209,7 +2209,7 @@ impl ExactCircleFormationFunctor {
                     };
                     cB[2] = &a[0] * &a[0] + &b[0] * &b[0];
                     let lower_x = RF::RobustSqrtExpr::eval3(&cA, &cB);
-                    c_event.set_lower_x_xf(lower_x / denom);
+                    c_event.cell_set_lower_x_xf(lower_x / denom);
                 }
             }
             return;
@@ -2229,7 +2229,7 @@ impl ExactCircleFormationFunctor {
             let denom = EX::ExtendedExponentFpt::from(&orientation);
             let c_x = EX::ExtendedExponentFpt::from(&ix) / denom;
             let c_y = EX::ExtendedExponentFpt::from(&iy) / denom;
-            c_event.set_3_ext(c_x, c_y, c_x);
+            c_event.cell_set_3_ext(c_x, c_y, c_x);
             return;
         }
 
@@ -2266,7 +2266,7 @@ impl ExactCircleFormationFunctor {
             cA[1] = (&dx * &dx + &dy * &dy)*&b[0] - (&dx * &a[0] + &dy * &b[0])*&iy;
             cA[2] = iy * &sign;
             let cy = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
-            c_event.set_y_xf(cy / denom);
+            c_event.cell_set_y_xf(cy / denom);
         }
 
         if recompute_c_x || recompute_lower_x {
@@ -2276,7 +2276,7 @@ impl ExactCircleFormationFunctor {
 
             if recompute_c_x {
                 let cx = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA, &cB);
-                c_event.set_x_xf(cx / denom);
+                c_event.cell_set_x_xf(cx / denom);
             }
 
             if recompute_lower_x {
@@ -2284,7 +2284,7 @@ impl ExactCircleFormationFunctor {
                     * (&dx * &dx + &dy * &dy)
                     * EI::ExtendedInt::from(if temp.is_neg() { -1_i32 } else { 1 });
                 let lower_x = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA, &cB);
-                c_event.set_lower_x_xf(lower_x / denom);
+                c_event.cell_set_lower_x_xf(lower_x / denom);
             }
         }
         #[cfg(feature = "console_debug")]
@@ -2376,7 +2376,7 @@ impl ExactCircleFormationFunctor {
                 *cA_i = &b[j] * &c[k] - &b[k] * &c[j];
             }
             let c_y = RF::RobustSqrtExpr::eval3(&cA, &cB);
-            c_event.set_y_xf(c_y / denom);
+            c_event.cell_set_y_xf(c_y / denom);
         }
 
         if recompute_c_x || recompute_lower_x {
@@ -2392,13 +2392,13 @@ impl ExactCircleFormationFunctor {
 
             if recompute_c_x {
                 let c_x = RF::RobustSqrtExpr::eval3(&cA, &cB);
-                c_event.set_x_xf(c_x / denom);
+                c_event.cell_set_x_xf(c_x / denom);
             }
 
             if recompute_lower_x {
                 cB[3] = EI::ExtendedInt::one();
                 let lower_x = RF::RobustSqrtExpr::eval4(&cA, &cB);
-                c_event.set_lower_x_xf(lower_x / denom);
+                c_event.cell_set_lower_x_xf(lower_x / denom);
             }
         }
         #[cfg(feature = "console_debug")]

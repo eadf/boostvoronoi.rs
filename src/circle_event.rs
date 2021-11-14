@@ -161,7 +161,7 @@ impl CircleEventCell {
 
     #[inline]
     /// sets the coordinates inside the Cell.
-    pub(crate) fn set_3_ext(
+    pub(crate) fn cell_set_3_ext(
         &self,
         x: EX::ExtendedExponentFpt<f64>,
         y: EX::ExtendedExponentFpt<f64>,
@@ -174,7 +174,7 @@ impl CircleEventCell {
 
     #[inline]
     /// sets the coordinates inside the Cell.
-    pub(crate) fn set_3_raw(&self, x: f64, y: f64, lower_x: f64) {
+    pub(crate) fn cell_set_3_raw(&self, x: f64, y: f64, lower_x: f64) {
         let mut selfc = self.0.get();
         selfc.set_3_raw(x, y, lower_x);
         self.0.set(selfc);
@@ -182,7 +182,7 @@ impl CircleEventCell {
 
     #[inline]
     /// sets the x coordinates inside the Cell.
-    pub(crate) fn set_x_xf(&self, x: EX::ExtendedExponentFpt<f64>) {
+    pub(crate) fn cell_set_x_xf(&self, x: EX::ExtendedExponentFpt<f64>) {
         let mut selfc = self.0.get();
         let _ = selfc.set_x_raw(x.d());
         self.0.set(selfc);
@@ -190,7 +190,7 @@ impl CircleEventCell {
 
     #[inline]
     /// sets the y coordinate inside the Cell.
-    pub(crate) fn set_y_xf(&self, y: EX::ExtendedExponentFpt<f64>) {
+    pub(crate) fn cell_set_y_xf(&self, y: EX::ExtendedExponentFpt<f64>) {
         let mut selfc = self.0.get();
         let _ = selfc.set_raw_y(y.d());
         self.0.set(selfc);
@@ -198,7 +198,7 @@ impl CircleEventCell {
 
     #[inline]
     /// sets the y coordinate inside the Cell.
-    pub(crate) fn set_lower_x_xf(&self, x: EX::ExtendedExponentFpt<f64>) {
+    pub(crate) fn cell_set_lower_x_xf(&self, x: EX::ExtendedExponentFpt<f64>) {
         let mut selfc: CircleEvent = self.0.get();
         let _ = selfc.set_raw_lower_x(x.d());
         self.0.set(selfc);
@@ -206,7 +206,7 @@ impl CircleEventCell {
 
     #[inline]
     /// sets the site_point flag
-    pub(crate) fn set_is_site_point(&self) {
+    pub(crate) fn cell_set_is_site_point(&self) {
         let mut selfc = self.0.get();
         selfc.is_site_point_ = true;
         self.0.set(selfc)
