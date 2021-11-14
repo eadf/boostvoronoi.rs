@@ -12,6 +12,7 @@
 //! Graphical utilities.
 
 use crate::{
+    cast,
     geometry::{Line, Point},
     BvError, InputType, OutputType,
 };
@@ -158,7 +159,7 @@ impl VoronoiVisualUtils {
 
     #[inline(always)]
     pub fn cast_io<I: InputType, F: OutputType>(value: I) -> F {
-        super::TypeConverter2::<I, F>::i_to_f(value)
+        cast::<I, F>(value)
     }
 }
 
@@ -195,16 +196,14 @@ impl<F: OutputType> Aabb2<F> {
 
     #[inline(always)]
     pub fn update_point<I: InputType>(&mut self, point: &Point<I>) {
-        let x = super::TypeConverter2::i_to_f(point.x);
-        let y = super::TypeConverter2::i_to_f(point.y);
+        let x = cast::<I, F>(point.x);
+        let y = cast::<I, F>(point.y);
         self.update_vertex(x, y);
     }
 
     #[inline(always)]
     pub fn update_coordinate<I: InputType>(&mut self, x: i32, y: i32) {
-        let x = super::TypeConverter2::<I, F>::i32_to_f(x);
-        let y = super::TypeConverter2::<I, F>::i32_to_f(y);
-        self.update_vertex(x, y);
+        self.update_vertex(cast::<i32, F>(x), cast::<i32, F>(y));
     }
 
     #[inline]
@@ -276,7 +275,7 @@ impl<F: OutputType> Aabb2<F> {
             let size_y = self.get_high().unwrap()[1] - self.get_low().unwrap()[1];
             let size = if size_x > size_y { size_x } else { size_y };
 
-            let delta = size * super::TypeConverter2::<I, F>::f32_to_f((percent as f32) / 100.0);
+            let delta = size * cast::<f32, F>((percent as f32) / 100.0);
 
             let mut p = self.get_high().unwrap();
             p[0] = p[0] + delta;
@@ -304,8 +303,8 @@ impl<F: OutputType> Aabb2<F> {
     #[inline]
     pub fn contains_point<I: InputType>(&self, point: &Point<I>) -> Option<bool> {
         if let Some(min_max) = self.min_max_ {
-            let x = super::TypeConverter2::<I, F>::i_to_f(point.x);
-            let y = super::TypeConverter2::<I, F>::i_to_f(point.y);
+            let x = cast::<I, F>(point.x);
+            let y = cast::<I, F>(point.y);
 
             Some(x >= min_max.0[0] && x <= min_max.1[0] && y >= min_max.0[1] && y <= min_max.1[1])
         } else {
@@ -329,7 +328,7 @@ impl<F: OutputType> Aabb2<F> {
     #[inline]
     pub fn contains_line<I: InputType>(&self, line: &Line<I>) -> Option<bool> {
         if self.min_max_.is_some() {
-            // unwrap is safe now
+            // unwrap is now safe
             Some(
                 self.contains_point(&line.start).unwrap()
                     && self.contains_point(&line.end).unwrap(),
@@ -371,8 +370,7 @@ impl<F: OutputType> SimpleAffine<F> {
         source_aabb: &Aabb2<F>,
         dest_aabb: &Aabb2<F>,
     ) -> Result<Self, BvError> {
-        let i32_to_f = super::TypeConverter2::<I, F>::i32_to_f;
-        let min_dim = i32_to_f(10);
+        let min_dim = cast::<i32, F>(10);
 
         if let Some(s_low) = source_aabb.get_low() {
             if let Some(s_high) = source_aabb.get_high() {
@@ -381,8 +379,8 @@ impl<F: OutputType> SimpleAffine<F> {
                         //println!("s_low:{:?},s_high:{:?},d_low:{:?},d_high:{:?}", s_low, s_high, d_low, d_high);
 
                         let source_aabb_center = [
-                            -(s_low[0] + s_high[0]) / i32_to_f(2_i32),
-                            -(s_low[1] + s_high[1]) / i32_to_f(2_i32),
+                            -(s_low[0] + s_high[0]) / cast::<i32, F>(2_i32),
+                            -(s_low[1] + s_high[1]) / cast::<i32, F>(2_i32),
                         ];
                         let source_aabb_size = [
                             (s_high[0] - s_low[0]).max(min_dim),
@@ -390,8 +388,8 @@ impl<F: OutputType> SimpleAffine<F> {
                         ];
 
                         let dest_aabb_center = [
-                            (d_low[0] + d_high[0]) / super::TypeConverter2::<I, F>::i32_to_f(2_i32),
-                            (d_low[1] + d_high[1]) / super::TypeConverter2::<I, F>::i32_to_f(2_i32),
+                            (d_low[0] + d_high[0]) / cast::<i32, F>(2_i32),
+                            (d_low[1] + d_high[1]) / cast::<i32, F>(2_i32),
                         ];
                         let dest_aabb_size = [
                             (d_high[0] - d_low[0]).max(min_dim),
@@ -430,7 +428,7 @@ impl<F: OutputType> SimpleAffine<F> {
     /// transform from destination coordinate system to source coordinate system
     #[inline(always)]
     pub fn reverse_transform_x<I: InputType>(&self, x: F) -> Result<I, BvError> {
-        super::TypeConverter2::<I, F>::try_f_to_i(
+        super::try_cast::<F, I>(
             ((x - self.to_offset[0]) / self.scale[0] - self.to_center_[0]).round(),
         )
     }
@@ -438,7 +436,7 @@ impl<F: OutputType> SimpleAffine<F> {
     /// transform from dest coordinate system to source coordinate system
     #[inline(always)]
     pub fn reverse_transform_y<I: InputType>(&self, y: F) -> Result<I, BvError> {
-        super::TypeConverter2::<I, F>::try_f_to_i(
+        super::try_cast::<F, I>(
             ((y - self.to_offset[1]) / self.scale[1] - self.to_center_[1]).round(),
         )
     }
@@ -485,16 +483,14 @@ impl<F: OutputType> SimpleAffine<F> {
     /// integer x coordinate
     #[inline(always)]
     pub fn transform_ix<I: InputType>(&self, x: I) -> F {
-        (super::TypeConverter2::<I, F>::i_to_f(x) + self.to_center_[0]) * self.scale[0]
-            + self.to_offset[0]
+        (cast::<I, F>(x) + self.to_center_[0]) * self.scale[0] + self.to_offset[0]
     }
 
     /// transform from source coordinate system to dest coordinate system
     /// integer y coordinate
     #[inline(always)]
     pub fn transform_iy<I: InputType>(&self, y: I) -> F {
-        (super::TypeConverter2::<I, F>::i_to_f(y) + self.to_center_[1]) * self.scale[1]
-            + self.to_offset[1]
+        (cast::<I, F>(y) + self.to_center_[1]) * self.scale[1] + self.to_offset[1]
     }
 
     /// transform from source coordinate system to destination coordinate system

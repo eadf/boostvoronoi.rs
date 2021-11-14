@@ -16,12 +16,11 @@ use crate::circle_event as VC;
 use crate::ctypes as CT;
 use crate::site_event as VSE;
 use crate::visual_utils as VU;
-use crate::TypeConverter2 as TC2;
 use crate::{sync_diagram as SD, BvError};
 
+pub use crate::{cast, InputType, OutputType};
 #[allow(unused_imports)]
 use crate::{t, tln};
-pub use crate::{InputType, OutputType};
 use num::NumCast;
 use std::cell;
 use std::cmp::Ordering;
@@ -1524,8 +1523,8 @@ impl<F: OutputType> Diagram<F> {
 
         // Add a new Voronoi vertex.
         let new_vertex_id = self.vertex_new_2_(
-            TC2::<I, F>::f64_to_f(circle.raw_x()),
-            TC2::<I, F>::f64_to_f(circle.raw_y()),
+            cast::<f64, F>(circle.raw_x()),
+            cast::<f64, F>(circle.raw_y()),
             circle.is_site_point(),
         );
 

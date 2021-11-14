@@ -19,7 +19,7 @@ use std::ops;
 /// numbers or NaNs.
 /// Ported from the class extended_exponent_fpt in voronoi_ctypes.hpp
 #[derive(Copy, Clone)]
-pub struct ExtendedExponentFpt<F:OutputType> {
+pub struct ExtendedExponentFpt<F: OutputType> {
     val_: F,
     exp_: i32,
 }
@@ -27,19 +27,37 @@ const MAX_SIGNIFICANT_EXP_DIF_F64: i32 = 54;
 
 impl From<&EI::ExtendedInt> for ExtendedExponentFpt<f64> {
     #[inline]
-    /// converts to ExtendedExponentFpt::<f64>
+    /// converts to ExtendedExponentFpt::<f64> from &ExtendedInt
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     /// # use boostvoronoi::extended_exp_fpt::ExtendedExponentFpt;
     ///
     /// let aa = 41232131332_f64;
-    /// let mut a = ExtendedInt::from(aa as i64);
+    /// let a = ExtendedInt::from(aa as i64);
     /// let e = ExtendedExponentFpt::from(&a);
     /// approx::assert_ulps_eq!(e.d(), aa);
     /// ```
     fn from(that: &EI::ExtendedInt) -> Self {
         let p = that.p();
-        Self::new2(p.0, p.1)
+        Self::new(p.0, p.1)
+    }
+}
+
+impl From<EI::ExtendedInt> for ExtendedExponentFpt<f64> {
+    #[inline]
+    /// converts to ExtendedExponentFpt::<f64> from ExtendedInt
+    /// ```
+    /// # use boostvoronoi::extended_int::ExtendedInt;
+    /// # use boostvoronoi::extended_exp_fpt::ExtendedExponentFpt;
+    ///
+    /// let aa = 41232131332_f64;
+    /// let a = ExtendedInt::from(aa as i64);
+    /// let e = ExtendedExponentFpt::from(a);
+    /// approx::assert_ulps_eq!(e.d(), aa);
+    /// ```
+    fn from(that: EI::ExtendedInt) -> Self {
+        let p = that.p();
+        Self::new(p.0, p.1)
     }
 }
 
@@ -72,7 +90,7 @@ impl From<f64> for ExtendedExponentFpt<f64> {
     /// ```
     fn from(that: f64) -> ExtendedExponentFpt<f64> {
         let rv = libm::frexp(that);
-        Self::new2(rv.0, rv.1)
+        Self::new(rv.0, rv.1)
     }
 }
 
@@ -83,11 +101,11 @@ impl ExtendedExponentFpt<f64> {
     /// ```
     /// # use boostvoronoi::extended_exp_fpt::ExtendedExponentFpt;
     ///
-    /// let a = ExtendedExponentFpt::<f64>::new2(1.0, 12);
+    /// let a = ExtendedExponentFpt::<f64>::new(1.0, 12);
     /// approx::assert_ulps_eq!(a.d(), 4096.0);
     /// ```
     #[inline]
-    pub fn new2(val: f64, exp: i32) -> Self {
+    pub fn new(val: f64, exp: i32) -> Self {
         let fr = libm::frexp(val);
         Self {
             val_: fr.0,
@@ -180,7 +198,7 @@ impl ExtendedExponentFpt<f64> {
             exp -= 1;
         }
 
-        Self::new2(val.sqrt(), exp >> 1)
+        Self::new(val.sqrt(), exp >> 1)
     }
 
     /// A to-float operation.
@@ -262,11 +280,11 @@ impl ops::Add for ExtendedExponentFpt<f64> {
         if self.exp_ >= that.exp_ {
             let exp_dif = self.exp_ - that.exp_;
             let val = libm::ldexp(self.val_, exp_dif) + that.val_;
-            Self::new2(val, that.exp_)
+            Self::new(val, that.exp_)
         } else {
             let exp_dif = that.exp_ - self.exp_;
             let val = libm::ldexp(that.val_, exp_dif) + self.val_;
-            Self::new2(val, self.exp_)
+            Self::new(val, self.exp_)
         }
     }
 }
@@ -294,7 +312,7 @@ impl ops::Sub for ExtendedExponentFpt<f64> {
     /// ```
     fn sub(self, that: Self) -> Self {
         if self.val_ == 0.0 || that.exp_ > self.exp_ + MAX_SIGNIFICANT_EXP_DIF_F64 {
-            return Self::new2(-that.val_, that.exp_);
+            return Self::new(-that.val_, that.exp_);
         }
         if that.val_ == 0.0 || self.exp_ > that.exp_ + MAX_SIGNIFICANT_EXP_DIF_F64 {
             return self;
@@ -302,11 +320,11 @@ impl ops::Sub for ExtendedExponentFpt<f64> {
         if self.exp_ >= that.exp_ {
             let exp_dif = self.exp_ - that.exp_;
             let val = libm::ldexp(self.val_, exp_dif) - that.val_;
-            Self::new2(val, that.exp_)
+            Self::new(val, that.exp_)
         } else {
             let exp_dif = that.exp_ - self.exp_;
             let val = libm::ldexp(-that.val_, exp_dif) + self.val_;
-            Self::new2(val, self.exp_)
+            Self::new(val, self.exp_)
         }
     }
 }
@@ -333,7 +351,7 @@ impl ops::Mul for ExtendedExponentFpt<f64> {
     fn mul(self, that: Self) -> Self {
         let val = self.val_ * that.val_;
         let exp = self.exp_ + that.exp_;
-        Self::new2(val, exp)
+        Self::new(val, exp)
     }
 }
 
@@ -384,7 +402,7 @@ impl ops::Div for ExtendedExponentFpt<f64> {
     fn div(self, that: Self) -> Self {
         let val = self.val_ / that.val_;
         let exp = self.exp_ - that.exp_;
-        Self::new2(val, exp)
+        Self::new(val, exp)
     }
 }
 
@@ -409,7 +427,7 @@ impl ops::Div<f64> for ExtendedExponentFpt<f64> {
         let that = Self::from(that);
         let val = self.val_ / that.val_;
         let exp = self.exp_ - that.exp_;
-        Self::new2(val, exp)
+        Self::new(val, exp)
     }
 }
 

@@ -11,7 +11,7 @@
 
 //! Utility for reading example files.
 
-use crate::{geometry, BvError};
+use crate::{cast, geometry, BvError};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
@@ -52,8 +52,8 @@ where
             if let Ok(x1) = line[0].parse::<i32>() {
                 if let Ok(y1) = line[1].parse::<i32>() {
                     return Some(InputData::Point(geometry::Point::<I> {
-                        x: super::TypeConverter1::<I>::i32_to_i(x1),
-                        y: super::TypeConverter1::<I>::i32_to_i(y1),
+                        x: cast::<i32, I>(x1),
+                        y: cast::<i32, I>(y1),
                     }));
                 } else {
                     println!("failed to parse {}, ignoring line", line[1]);
@@ -68,10 +68,10 @@ where
                     if let Ok(x2) = line[2].parse::<i32>() {
                         if let Ok(y2) = line[3].parse::<i32>() {
                             return Some(InputData::Line(geometry::Line::<I>::from([
-                                super::TypeConverter1::<I>::i32_to_i(x1),
-                                super::TypeConverter1::<I>::i32_to_i(y1),
-                                super::TypeConverter1::<I>::i32_to_i(x2),
-                                super::TypeConverter1::<I>::i32_to_i(y2),
+                                cast::<i32, I>(x1),
+                                cast::<i32, I>(y1),
+                                cast::<i32, I>(x2),
+                                cast::<i32, I>(y2),
                             ])));
                         } else {
                             println!("failed to parse {}, ignoring line", line[3]);

@@ -4,7 +4,7 @@ use boostvoronoi::diagram::EdgeIndex;
 use boostvoronoi::file_reader;
 use boostvoronoi::visual_utils as VU;
 use boostvoronoi::BvError;
-use boostvoronoi::{geometry, InputType, OutputType, TypeConverter1, TypeConverter2};
+use boostvoronoi::{cast, geometry, try_cast, InputType, OutputType};
 use fltk::{app, button, dialog, draw, enums, frame, group, menu, prelude::*, window};
 use geo::prelude::Intersects;
 use ordered_float::OrderedFloat;
@@ -645,7 +645,7 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
     /// Draw input points and endpoints of the input segments.
     fn draw_input_points(&self, affine: &VU::SimpleAffine<F>) {
         let draw = |point: [F; 2]| {
-            draw::draw_circle(Self::f1_to_f64(point[0]), Self::f1_to_f64(point[1]), 2.0);
+            draw::draw_circle(cast::<F, f64>(point[0]), cast::<F, f64>(point[1]), 2.0);
         };
 
         for i in self.point_data_.iter() {
@@ -664,10 +664,10 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
             let sp = affine.transform_p(&i.start);
             let ep = affine.transform_p(&i.end);
             draw::draw_line(
-                Self::f_to_i32(sp[0]),
-                Self::f_to_i32(sp[1]),
-                Self::f_to_i32(ep[0]),
-                Self::f_to_i32(ep[1]),
+                cast::<F, i32>(sp[0]),
+                cast::<F, i32>(sp[1]),
+                cast::<F, i32>(ep[0]),
+                cast::<F, i32>(ep[1]),
             );
         }
     }
@@ -695,8 +695,8 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
             }
 
             draw(
-                Self::f1_to_f64(affine.transform_x(vertex.x())),
-                Self::f1_to_f64(affine.transform_y(vertex.y())),
+                cast::<F, f64>(affine.transform_x(vertex.x())),
+                cast::<F, f64>(affine.transform_y(vertex.y())),
             );
         }
     }
@@ -778,10 +778,10 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
                 if edge.is_curved() {
                     if draw_curved_as_line {
                         for i in 0..samples.len() - 1 {
-                            if let Ok(x1) = Self::try_f_to_i32(samples[i][0]) {
-                                if let Ok(y1) = Self::try_f_to_i32(samples[i][1]) {
-                                    if let Ok(x2) = Self::try_f_to_i32(samples[i + 1][0]) {
-                                        if let Ok(y2) = Self::try_f_to_i32(samples[i + 1][1]) {
+                            if let Ok(x1) = try_cast::<F, i32>(samples[i][0]) {
+                                if let Ok(y1) = try_cast::<F, i32>(samples[i][1]) {
+                                    if let Ok(x2) = try_cast::<F, i32>(samples[i + 1][0]) {
+                                        if let Ok(y2) = try_cast::<F, i32>(samples[i + 1][1]) {
                                             draw::draw_line(x1, y1, x2, y2);
                                         }
                                     }
@@ -798,19 +798,19 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
             }
             if samples.len() > 1 {
                 for i in 0..samples.len() - 1 {
-                    let x1 = Self::try_f_to_i32(samples[i][0]);
+                    let x1 = try_cast::<F, i32>(samples[i][0]);
                     if x1.is_err() {
                         break;
                     }
-                    let y1 = Self::try_f_to_i32(samples[i][1]);
+                    let y1 = try_cast::<F, i32>(samples[i][1]);
                     if y1.is_err() {
                         break;
                     }
-                    let x2 = Self::try_f_to_i32(samples[i + 1][0]);
+                    let x2 = try_cast::<F, i32>(samples[i + 1][0]);
                     if x2.is_err() {
                         break;
                     }
-                    let y2 = Self::try_f_to_i32(samples[i + 1][1]);
+                    let y2 = try_cast::<F, i32>(samples[i + 1][1]);
                     if y2.is_err() {
                         break;
                     }
@@ -845,17 +845,17 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
         if cell1.contains_point() && cell2.contains_point() {
             let p1 = self.retrieve_point(cell1_id)?;
             let p2 = self.retrieve_point(cell2_id)?;
-            origin[0] = (Self::i_to_f(p1.x) + Self::i_to_f(p2.x)) * Self::f64_to_f(0.5);
-            origin[1] = (Self::i_to_f(p1.y) + Self::i_to_f(p2.y)) * Self::f64_to_f(0.5);
-            direction[0] = Self::i_to_f(p1.y) - Self::i_to_f(p2.y);
-            direction[1] = Self::i_to_f(p2.x) - Self::i_to_f(p1.x);
+            origin[0] = (cast::<I, F>(p1.x) + cast::<I, F>(p2.x)) * cast::<f64, F>(0.5);
+            origin[1] = (cast::<I, F>(p1.y) + cast::<I, F>(p2.y)) * cast::<f64, F>(0.5);
+            direction[0] = cast::<I, F>(p1.y) - cast::<I, F>(p2.y);
+            direction[1] = cast::<I, F>(p2.x) - cast::<I, F>(p1.x);
         } else {
             origin = if cell1.contains_segment() {
                 let p = self.retrieve_point(cell2_id)?;
-                [Self::i_to_f(p.x), Self::i_to_f(p.y)]
+                [cast::<I, F>(p.x), cast::<I, F>(p.y)]
             } else {
                 let p = self.retrieve_point(cell1_id)?;
-                [Self::i_to_f(p.x), Self::i_to_f(p.y)]
+                [cast::<I, F>(p.x), cast::<I, F>(p.y)]
             };
             let segment = if cell1.contains_segment() {
                 self.retrieve_segment(cell1_id)?
@@ -864,20 +864,20 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
             };
             let dx = segment.end.x - segment.start.x;
             let dy = segment.end.y - segment.start.y;
-            if ([Self::i_to_f(segment.start.x), Self::i_to_f(segment.start.y)] == origin)
+            if ([cast::<I, F>(segment.start.x), cast::<I, F>(segment.start.y)] == origin)
                 ^ cell1.contains_point()
             {
-                direction[0] = Self::i_to_f(dy);
-                direction[1] = Self::i_to_f(-dx);
+                direction[0] = cast::<I, F>(dy);
+                direction[1] = cast::<I, F>(-dx);
             } else {
-                direction[0] = Self::i_to_f(-dy);
-                direction[1] = Self::i_to_f(dx);
+                direction[0] = cast::<I, F>(-dy);
+                direction[1] = cast::<I, F>(dx);
             }
         }
 
         let side =
-            Self::i_to_f(affine.reverse_transform_x(self.screen_aabb.get_high().unwrap()[0])?)
-                - Self::i_to_f(affine.reverse_transform_x(self.screen_aabb.get_low().unwrap()[0])?);
+            cast::<I, F>(affine.reverse_transform_x(self.screen_aabb.get_high().unwrap()[0])?)
+                - cast::<I, F>(affine.reverse_transform_x(self.screen_aabb.get_low().unwrap()[0])?);
         // absolute value is taken in case the affine transform flips one coordinate
         let side = side.abs();
         let coefficient = side / Self::max_f(direction[0].abs(), direction[1].abs());
@@ -918,7 +918,7 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
         edge_id: VD::EdgeIndex,
         sampled_edge: &mut Vec<[F; 2]>,
     ) -> Result<(), BvError> {
-        let max_dist = Self::f64_to_f(1E-3)
+        let max_dist = cast::<f64, F>(1E-3)
             * (self.screen_aabb.get_high().unwrap()[0] - self.screen_aabb.get_low().unwrap()[0]);
 
         let cell_id = self.diagram.edge_get_cell(edge_id)?;
@@ -1394,12 +1394,12 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
     /// I wonder why my nice geo::Line::from(geometry::Line) does not work here, feature gated?.
     fn line_i_to_f64(value: &geometry::Line<I>) -> geo::Line<f64> {
         let ps = geo::Coordinate {
-            x: Self::i_to_f64(value.start.x),
-            y: Self::i_to_f64(value.start.y),
+            x: cast::<I, f64>(value.start.x),
+            y: cast::<I, f64>(value.start.y),
         };
         let pe = geo::Coordinate {
-            x: Self::i_to_f64(value.end.x),
-            y: Self::i_to_f64(value.end.y),
+            x: cast::<I, f64>(value.end.x),
+            y: cast::<I, f64>(value.end.y),
         };
         geo::Line::<f64>::new(ps, pe)
     }
@@ -1407,44 +1407,5 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
     #[inline(always)]
     fn max_f(a: F, b: F) -> F {
         OrderedFloat(a).max(OrderedFloat(b)).into_inner()
-    }
-
-    #[inline(always)]
-    pub fn i_to_f(value: I) -> F {
-        TypeConverter2::<I, F>::i_to_f(value)
-    }
-    #[inline(always)]
-    pub fn f_to_i32(value: F) -> i32 {
-        TypeConverter2::<I, F>::f_to_i32(value)
-    }
-
-    #[inline(always)]
-    pub fn f64_to_f(value: f64) -> F {
-        TypeConverter2::<I, F>::f64_to_f(value)
-    }
-
-    #[inline(always)]
-    pub fn f_to_i(value: F) -> I {
-        TypeConverter2::<I, F>::f_to_i(value)
-    }
-
-    #[inline(always)]
-    pub fn i_to_f64(value: I) -> f64 {
-        TypeConverter1::<I>::i_to_f64(value)
-    }
-
-    #[inline(always)]
-    pub fn try_f_to_i32(value: F) -> Result<i32, BvError> {
-        TypeConverter2::<I, F>::try_f_to_i32(value)
-    }
-
-    #[inline(always)]
-    pub fn f1_to_f64(v: F) -> f64 {
-        num::cast::<F, f64>(v).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn f1_to_f64o(v: F) -> OrderedFloat<f64> {
-        OrderedFloat(num::cast::<F, f64>(v).unwrap())
     }
 }

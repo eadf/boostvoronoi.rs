@@ -3,7 +3,6 @@ use super::RobustFpt;
 use crate::extended_exp_fpt as EX;
 use crate::extended_int as EI;
 use crate::robust_fpt as RF;
-use crate::TypeConverter2 as TC;
 use num::{Float, Num, NumCast, Zero};
 
 #[test]

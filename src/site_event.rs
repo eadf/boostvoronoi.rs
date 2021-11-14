@@ -181,18 +181,21 @@ impl<I: InputType, F: OutputType> SiteEvent<I, F> {
     #[cfg(feature = "ce_corruption_check")]
     #[allow(dead_code)]
     pub fn dbg(&self) {
-        let i2f = super::TypeConverter1::<I>::i_to_f64;
         match &self.site_ {
             Site::Point(point0) => {
-                println!("[{},{}];", i2f(point0.x), i2f(point0.y));
+                println!(
+                    "[{},{}];",
+                    super::cast::<I, f64>(point0.x),
+                    super::cast::<I, f64>(point0.y)
+                );
             }
             Site::Segment(point0, point1) => {
                 println!(
                     "[{},{},{},{}];",
-                    i2f(point0.x),
-                    i2f(point0.y),
-                    i2f(point1.x),
-                    i2f(point1.y)
+                    super::cast::<I, f64>(point0.x),
+                    super::cast::<I, f64>(point0.y),
+                    super::cast::<I, f64>(point1.x),
+                    super::cast::<I, f64>(point1.y)
                 );
             }
         }

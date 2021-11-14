@@ -11,7 +11,6 @@
 
 use std::cmp::Ordering;
 
-
 #[inline]
 /// If two floating-point numbers in the same format are ordered (x < y),
 /// then they are ordered the same way when their bits are reinterpreted as

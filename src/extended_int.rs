@@ -181,7 +181,7 @@ impl ExtendedInt {
     /// ```
     pub fn e(&self) -> EX::ExtendedExponentFpt<f64> {
         let p = self.p();
-        EX::ExtendedExponentFpt::<f64>::new2(p.0, p.1)
+        EX::ExtendedExponentFpt::<f64>::new(p.0, p.1)
     }
 
     #[inline(always)]

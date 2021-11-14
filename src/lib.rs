@@ -29,13 +29,10 @@
 #![cfg_attr(feature = "map_first_last", feature(map_first_last))]
 
 use core::fmt::Debug;
-use extended_exp_fpt as EX;
 use extended_int as EI;
 use num::{Float, Integer, NumCast, PrimInt, Signed, Zero};
 use std::fmt;
 use std::hash::Hash;
-use std::marker::PhantomData;
-
 mod beach_line;
 pub mod builder;
 mod circle_event;
@@ -126,121 +123,32 @@ pub trait OutputType:
 impl OutputType for f32 {}
 impl OutputType for f64 {}
 
-/// Functions for converting the integer input type to other types (i32 i64 etc.)
-#[derive(Default)]
-pub struct TypeConverter1<I: InputType> {
-    #[doc(hidden)]
-    pdi_: PhantomData<fn(I) -> I>,
+#[inline(always)]
+/// Convert from the input integer type to an extended int
+pub(crate) fn cast_i_to_xi<I: InputType>(input: I) -> EI::ExtendedInt {
+    EI::ExtendedInt::from(num::cast::<I, i64>(input).unwrap())
 }
 
-impl<I: InputType> TypeConverter1<I> {
-    #[inline(always)]
-    /// Convert from the input integer type to an extended int
-    pub fn i_to_xi(input: I) -> EI::ExtendedInt {
-        EI::ExtendedInt::from(num::cast::<I, i64>(input).unwrap())
-    }
-
-    #[inline(always)]
-    /// Convert from i32 to the input integer type
-    pub fn i32_to_i(input: i32) -> I {
-        num::cast::<i32, I>(input).unwrap()
-    }
-
-    #[inline(always)]
-    /// Convert from the input integer type to a i32
-    pub fn i_to_i32(input: I) -> i32 {
-        num::cast::<I, i32>(input).unwrap()
-    }
-
-    #[inline(always)]
-    /// Convert from the input integer type to a i64
-    pub fn i_to_i64(input: I) -> i64 {
-        num::cast::<I, i64>(input).unwrap()
-    }
-
-    #[inline(always)]
-    /// Convert from the input integer type to a f32
-    pub fn i_to_f32(input: I) -> f32 {
-        num::cast::<I, f32>(input).unwrap()
-    }
-
-    #[inline(always)]
-    /// Convert from the input integer type to a f64
-    pub fn i_to_f64(input: I) -> f64 {
-        NumCast::from(input).unwrap()
-    }
+#[inline(always)]
+/// Convert from one numeric type to another.
+/// # Panics
+/// panics if the conversion fails
+pub fn cast<T: NumCast, U: NumCast>(n: T) -> U {
+    NumCast::from(n).unwrap()
 }
 
-/// Functions for converting the integer and float input type to other types.
-#[derive(Default)]
-pub struct TypeConverter2<I: InputType, F: OutputType> {
-    #[doc(hidden)]
-    pdf_: PhantomData<fn(F) -> F>,
-    #[doc(hidden)]
-    pdi_: PhantomData<fn(I) -> I>,
-}
-
-impl<I: InputType, F: OutputType> TypeConverter2<I, F> {
-    #[inline(always)]
-    /// Convert from the input integer type to the output float type
-    pub fn i_to_f(input: I) -> F {
-        num::cast::<I, F>(input).unwrap()
-    }
-
-    #[inline(always)]
-    /// Convert from the output float type to i32
-    pub fn f_to_i32(input: F) -> i32 {
-        num::cast::<F, i32>(input).unwrap()
-    }
-
-    #[inline(always)]
-    /// Try to convert from the output float type to i32
-    pub fn try_f_to_i32(input: F) -> Result<i32, BvError> {
-        num::cast::<F, i32>(input).ok_or_else(|| {
-            BvError::NumberConversion(format!("Could not convert {:?} to int32", input))
-        })
-    }
-
-    #[inline(always)]
-    pub fn f_to_i(input: F) -> I {
-        num::cast::<F, I>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn try_f_to_i(input: F) -> Result<I, BvError> {
-        num::cast::<F, I>(input)
-            .ok_or_else(|| BvError::NumberConversion(format!("Could not convert {:?} to I", input)))
-    }
-
-    #[inline(always)]
-    pub fn f_to_f64(input: F) -> f64 {
-        num::cast::<F, f64>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn f_to_f32(input: F) -> f32 {
-        num::cast::<F, f32>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn i32_to_f(input: i32) -> F {
-        num::cast::<i32, F>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn f32_to_f(input: f32) -> F {
-        num::cast::<f32, F>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn f64_to_f(input: f64) -> F {
-        num::cast::<f64, F>(input).unwrap()
-    }
-
-    #[inline(always)]
-    pub fn xi_to_xf(input: &EI::ExtendedInt) -> EX::ExtendedExponentFpt<f64> {
-        EX::ExtendedExponentFpt::from(input)
-    }
+#[inline(always)]
+/// Try to convert from one numeric type to another
+/// # Errors
+/// Will return an BvError::NumberConversion if the conversion fails
+pub fn try_cast<T: NumCast + Debug + Copy, U: NumCast>(n: T) -> Result<U, BvError> {
+    NumCast::from(n).ok_or_else(|| {
+        BvError::NumberConversion(format!(
+            "Could not convert {:?} to {}",
+            n,
+            std::any::type_name::<U>()
+        ))
+    })
 }
 
 pub(crate) type VobU32 = vob::Vob<u32>;
