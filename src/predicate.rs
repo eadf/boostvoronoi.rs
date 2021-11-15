@@ -15,20 +15,18 @@
 mod tests;
 
 use crate::beach_line as VB;
-use crate::cast;
 use crate::circle_event as VC;
 use crate::ctypes::ulp_comparison;
 use crate::extended_exp_fpt as EX;
 use crate::extended_int as EI;
 use crate::robust_fpt as RF;
 use crate::site_event as VSE;
-use crate::{geometry::Point, t, tln, InputType, OutputType};
-use num::{Float, NumCast, PrimInt, Zero};
+use crate::{cast, geometry::Point, t, tln, InputType, OutputType};
+use num::Zero;
 use num_traits::One;
 use std::cmp;
-use std::fmt::{Debug, Display};
+use std::fmt::Debug;
 use std::marker::PhantomData;
-use std::ops::Neg;
 
 // TODO: how to make these generic?
 const ULPS: u64 = 64;
@@ -104,59 +102,35 @@ impl Predicates {
 /// It was mathematically proven that the result is correct
 /// with epsilon relative error equal to 1EPS.
 #[inline]
-fn robust_cross_product_f<T, U>(s_a1: T, s_b1: T, s_a2: T, s_b2: T) -> U
-where
-    T: PrimInt
-        + PartialOrd
-        + PartialEq
-        + NumCast
-        + Copy
-        + Clone
-        + Display
-        + Default
-        + Debug
-        + Zero
-        + Neg<Output = T>,
-    U: Float
-        + PartialOrd
-        + PartialEq
-        + NumCast
-        + Copy
-        + Clone
-        + Display
-        + Default
-        + Debug
-        + Zero
-        + Neg<Output = U>,
-{
+fn robust_cross_product_f<I: InputType, F: OutputType>(s_a1: I, s_b1: I, s_a2: I, s_b2: I) -> F {
     // Why can't *all* integers implement is_negative()? E.g u64 would just always return false.
     // It would make it easier to implement generic code
-    let u_a1 = if s_a1 < T::zero() { -s_a1 } else { s_a1 };
-    let u_b1 = if s_b1 < T::zero() { -s_b1 } else { s_b1 };
-    let u_a2 = if s_a2 < T::zero() { -s_a2 } else { s_a2 };
-    let u_b2 = if s_b2 < T::zero() { -s_b2 } else { s_b2 };
+    let u_a1 = if s_a1 < I::zero() { -s_a1 } else { s_a1 };
+    let u_b1 = if s_b1 < I::zero() { -s_b1 } else { s_b1 };
+    let u_a2 = if s_a2 < I::zero() { -s_a2 } else { s_a2 };
+    let u_b2 = if s_b2 < I::zero() { -s_b2 } else { s_b2 };
 
     let l = u_a1 * u_b2;
     let r = u_b1 * u_a2;
 
-    if (s_a1 < T::zero()) ^ (s_b2 < T::zero()) {
-        return if (s_a2 < T::zero()) ^ (s_b1 < T::zero()) {
+    if (s_a1 < I::zero()) ^ (s_b2 < I::zero()) {
+        return if (s_a2 < I::zero()) ^ (s_b1 < I::zero()) {
             if l > r {
-                -num::cast::<T, U>(l - r).unwrap()
+                -num::cast::<I, F>(l - r).unwrap()
             } else {
-                num::cast::<T, U>(r - l).unwrap()
+                num::cast::<I, F>(r - l).unwrap()
             }
         } else {
-            -num::cast::<T, U>(l + r).unwrap()
+            -num::cast::<I, F>(l + r).unwrap()
         };
     }
-    if (s_a2 < T::zero()) ^ (s_b1 < T::zero()) {
-        return num::cast::<T, U>(l + r).unwrap();
+    if (s_a2 < I::zero()) ^ (s_b1 < I::zero()) {
+        return num::cast::<I, F>(l + r).unwrap();
     }
     if l < r {
-        -num::cast::<T, U>(r - l).unwrap()
+        -num::cast::<I, F>(r - l).unwrap()
     } else {
-        num::cast::<T, U>(l - r).unwrap()
+        num::cast::<I, F>(l - r).unwrap()
     }
 }
 
@@ -568,10 +542,8 @@ impl NodeComparisonPredicate {
         node2: &VB::BeachLineNodeKey<I, F>,
     ) -> bool {
         // Get x coordinate of the rightmost site from both nodes.
-        let site1: &VSE::SiteEvent<I, F> =
-            NodeComparisonPredicate::comparison_site_::<I, F>(node1);
-        let site2: &VSE::SiteEvent<I, F> =
-            NodeComparisonPredicate::comparison_site_::<I, F>(node2);
+        let site1: &VSE::SiteEvent<I, F> = NodeComparisonPredicate::comparison_site_::<I, F>(node1);
+        let site2: &VSE::SiteEvent<I, F> = NodeComparisonPredicate::comparison_site_::<I, F>(node2);
         let point1: &Point<I> = NodeComparisonPredicate::comparison_point_::<I, F>(site1);
         let point2: &Point<I> = NodeComparisonPredicate::comparison_point_::<I, F>(site2);
         let rv = {
@@ -654,9 +626,7 @@ impl NodeComparisonPredicate {
         }
     }
 
-    fn comparison_point_<I: InputType, F: OutputType>(
-        site: &VSE::SiteEvent<I, F>,
-    ) -> &Point<I> {
+    fn comparison_point_<I: InputType, F: OutputType>(site: &VSE::SiteEvent<I, F>) -> &Point<I> {
         if PointComparisonPredicate::<I>::point_comparison_predicate(site.point0(), site.point1()) {
             site.point0()
         } else {
@@ -701,9 +671,9 @@ impl CircleExistencePredicate {
     #[cfg(all(feature = "geo", feature = "ce_corruption_check"))]
     #[inline(always)]
     pub(crate) fn validate_circle_formation_predicate<I: InputType, F: OutputType>(
-        _site1: &VSE::SiteEvent<I, F>,
-        _site2: &VSE::SiteEvent<I, F>,
-        _site3: &VSE::SiteEvent<I, F>,
+        site1: &VSE::SiteEvent<I, F>,
+        site2: &VSE::SiteEvent<I, F>,
+        site3: &VSE::SiteEvent<I, F>,
         c_event: &VC::CircleEventType,
     ) {
         // only do this if the circle event is outside the site event x range.
@@ -714,7 +684,7 @@ impl CircleExistencePredicate {
             c_event.0.get().lower_x().0
         );
         #[allow(clippy::match_like_matches_macro)]
-        if match (_site1.is_point(), _site2.is_point(), _site3.is_point()) {
+        if match (site1.is_point(), site2.is_point(), site3.is_point()) {
             // only validate pps
             (false, true, true) => true,
             (true, false, true) => true,
@@ -727,16 +697,16 @@ impl CircleExistencePredicate {
                 x: c_event.0.get().x().0 as f64,
                 y: c_event.0.get().y().0 as f64,
             };
-            let d1 = _site1.distance_to_point(c.x, c.y);
-            let d2 = _site2.distance_to_point(c.x, c.y);
-            let d3 = _site3.distance_to_point(c.x, c.y);
+            let d1 = site1.distance_to_point(c.x, c.y);
+            let d2 = site2.distance_to_point(c.x, c.y);
+            let d3 = site3.distance_to_point(c.x, c.y);
 
             if d1.abs_diff_ne(&d2, 0.001) || d1.abs_diff_ne(&d3, 0.001) {
                 println!("circle_formation_predicate should return false but doesn't");
                 println!("c={:?} lx:{}", c, c_event.0.get().lower_x().0);
-                println!("site1:{:?} distance={:.12}", _site1, d1);
-                println!("site2:{:?} distance={:.12}", _site2, d2);
-                println!("site3:{:?}, distance={:.12}", _site3, d3);
+                println!("site1:{:?} distance={:.12}", site1, d1);
+                println!("site2:{:?} distance={:.12}", site2, d2);
+                println!("site3:{:?}, distance={:.12}", site3, d3);
                 println!("there were no three point vertex!");
             }
         }
@@ -2203,7 +2173,7 @@ impl ExactCircleFormationFunctor {
 
                 if recompute_lower_x {
                     cA[2] = if c[0].is_neg() {
-                        c[0].clone() * EI::ExtendedInt::from(-1_i32)
+                        -(c[0].clone())
                     } else {
                         c[0].clone()
                     };
@@ -2233,17 +2203,17 @@ impl ExactCircleFormationFunctor {
             return;
         }
 
-        let sign: EI::ExtendedInt =
-            EI::ExtendedInt::from(if point_index == SiteIndex::Two { 1 } else { -1 })
-                * EI::ExtendedInt::from(if orientation.is_neg() { 1_i32 } else { -1 });
-        // todo: remove -1*-1
+        let sign: EI::ExtendedInt = EI::ExtendedInt::from(
+            if point_index == SiteIndex::Two { 1 } else { -1 }
+                * if orientation.is_neg() { 1 } else { -1 },
+        );
         tln!(" a[1]={:?}", &a[1]);
         tln!(" b[1]={:?}", &b[1]);
-        tln!(" cA[0]={:?}", EI::ExtendedInt::from(-1) * &a[1] * &dx);
-        tln!(" cA[1]={:?}", EI::ExtendedInt::from(-1) * &b[1] * &dy);
+        tln!(" cA[0]={:?}", -(&a[1] * &dx));
+        tln!(" cA[1]={:?}", -(&b[1] * &dy));
 
-        cA[0] = (EI::ExtendedInt::from(-1) * &a[1] * &dx) - (&b[1] * &dy);
-        cA[1] = (EI::ExtendedInt::from(-1) * &a[0] * &dx) - (&b[0] * &dy);
+        cA[0] = (-(&a[1] * &dx)) - (&b[1] * &dy);
+        cA[1] = (-(&a[0] * &dx)) - (&b[0] * &dy);
         cA[2] = sign.clone();
         cA[3] = EI::ExtendedInt::zero();
 
@@ -2262,16 +2232,16 @@ impl ExactCircleFormationFunctor {
         let denom = temp * EX::ExtendedExponentFpt::from(&orientation);
 
         if recompute_c_y {
-            cA[0] = (&dx * &dx + &dy * &dy)*&b[1] - (&dx * &a[1] + &dy * &b[1])*&iy;
-            cA[1] = (&dx * &dx + &dy * &dy)*&b[0] - (&dx * &a[0] + &dy * &b[0])*&iy;
+            cA[0] = (&dx * &dx + &dy * &dy) * &b[1] - (&dx * &a[1] + &dy * &b[1]) * &iy;
+            cA[1] = (&dx * &dx + &dy * &dy) * &b[0] - (&dx * &a[0] + &dy * &b[0]) * &iy;
             cA[2] = iy * &sign;
             let cy = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
             c_event.cell_set_y_xf(cy / denom);
         }
 
         if recompute_c_x || recompute_lower_x {
-            cA[0] = (&dx * &dx + &dy * &dy)*&a[1] - (&dx * &a[1] + &dy * &b[1])*&ix;
-            cA[1] = (&dx * &dx + &dy * &dy)*&a[0] - (&dx * &a[0] + &dy * &b[0])*&ix;
+            cA[0] = (&dx * &dx + &dy * &dy) * &a[1] - (&dx * &a[1] + &dy * &b[1]) * &ix;
+            cA[1] = (&dx * &dx + &dy * &dy) * &a[0] - (&dx * &a[0] + &dy * &b[0]) * &ix;
             cA[2] = ix * &sign;
 
             if recompute_c_x {
@@ -2280,9 +2250,11 @@ impl ExactCircleFormationFunctor {
             }
 
             if recompute_lower_x {
-                cA[3] = orientation
-                    * (&dx * &dx + &dy * &dy)
-                    * EI::ExtendedInt::from(if temp.is_neg() { -1_i32 } else { 1 });
+                cA[3] = if temp.is_neg() {
+                    -orientation
+                } else {
+                    orientation
+                } * (&dx * &dx + &dy * &dy);
                 let lower_x = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA, &cB);
                 c_event.cell_set_lower_x_xf(lower_x / denom);
             }
@@ -2321,8 +2293,6 @@ impl ExactCircleFormationFunctor {
         tln!(">ExactCircleFormationFunctor:sss site1:{:?} site2:{:?}, site3:{:?}, recompute_c_x:{} recompute_c_y:{}, recompute_lower_x:{}",
             site1, site2, site3, recompute_c_x,recompute_c_y, recompute_lower_x);
 
-        let i_to_bi = super::cast_i_to_xi;
-
         let mut cA: [EI::ExtendedInt; 4] = [
             EI::ExtendedInt::zero(),
             EI::ExtendedInt::zero(),
@@ -2340,23 +2310,23 @@ impl ExactCircleFormationFunctor {
         // cB - corresponds to the squared length.
 
         let a = [
-            i_to_bi(site1.x1()) - i_to_bi(site1.x0()),
-            i_to_bi(site2.x1()) - i_to_bi(site2.x0()),
-            i_to_bi(site3.x1()) - i_to_bi(site3.x0()),
+            super::cast_i_to_xi(site1.x1()) - super::cast_i_to_xi(site1.x0()),
+            super::cast_i_to_xi(site2.x1()) - super::cast_i_to_xi(site2.x0()),
+            super::cast_i_to_xi(site3.x1()) - super::cast_i_to_xi(site3.x0()),
         ];
         let b = [
-            i_to_bi(site1.y1()) - i_to_bi(site1.y0()),
-            i_to_bi(site2.y1()) - i_to_bi(site2.y0()),
-            i_to_bi(site3.y1()) - i_to_bi(site3.y0()),
+            super::cast_i_to_xi(site1.y1()) - super::cast_i_to_xi(site1.y0()),
+            super::cast_i_to_xi(site2.y1()) - super::cast_i_to_xi(site2.y0()),
+            super::cast_i_to_xi(site3.y1()) - super::cast_i_to_xi(site3.y0()),
         ];
 
         let c = [
-            &i_to_bi(site1.x0()) * &i_to_bi(site1.y1())
-                - &i_to_bi(site1.y0()) * &i_to_bi(site1.x1()),
-            &i_to_bi(site2.x0()) * &i_to_bi(site2.y1())
-                - &i_to_bi(site2.y0()) * &i_to_bi(site2.x1()),
-            &i_to_bi(site3.x0()) * &i_to_bi(site3.y1())
-                - &i_to_bi(site3.y0()) * &i_to_bi(site3.x1()),
+            &super::cast_i_to_xi(site1.x0()) * &super::cast_i_to_xi(site1.y1())
+                - &super::cast_i_to_xi(site1.y0()) * &super::cast_i_to_xi(site1.x1()),
+            &super::cast_i_to_xi(site2.x0()) * &super::cast_i_to_xi(site2.y1())
+                - &super::cast_i_to_xi(site2.y0()) * &super::cast_i_to_xi(site2.x1()),
+            &super::cast_i_to_xi(site3.x0()) * &super::cast_i_to_xi(site3.y1())
+                - &super::cast_i_to_xi(site3.y0()) * &super::cast_i_to_xi(site3.x1()),
         ];
 
         for (i, aa) in a.iter().enumerate().take(3) {

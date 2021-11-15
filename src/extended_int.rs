@@ -589,7 +589,7 @@ impl<'b> ops::Mul<i32> for ExtendedInt {
 
 impl ops::Neg for ExtendedInt {
     type Output = Self;
-    /// Negates value of `self` returning a new object containing the result
+    /// Negates the value of `self`
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///
@@ -598,7 +598,6 @@ impl ops::Neg for ExtendedInt {
     /// approx::assert_ulps_eq!(a.d(), -aa);
     ///```
     fn neg(mut self) -> Self {
-        //let mut rv = self.clone();
         self.count_ = -self.count_;
         self
     }
