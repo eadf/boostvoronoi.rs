@@ -17,9 +17,12 @@ use crate::diagram as VD;
 use crate::end_point as VEP;
 use crate::predicate as VP;
 use crate::site_event as VSE;
+#[cfg(feature = "console_debug")]
+use crate::t;
 use crate::{
+    cast,
     geometry::{Line, Point},
-    t, tln, BvError, InputType, OutputType,
+    tln, BvError, InputType, OutputType,
 };
 
 use cpp_map::PIterator;
@@ -155,20 +158,14 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
         Ok(())
     }
 
-    #[deprecated(since = "0.9.0", note = "Please use the build() function instead")]
-    /// Run sweep-line algorithm and fill output data structure.
-    pub fn construct(&mut self) -> Result<VD::Diagram<F>, BvError> {
-        self.build()
-    }
-
     /// Run sweep-line algorithm and fill output data structure.
     pub fn build(&mut self) -> Result<VD::Diagram<F>, BvError> {
         let mut output: VD::Diagram<F> = VD::Diagram::<F>::new(self.site_events_.len());
 
         let mut site_event_iterator_: VSE::SiteEventIndexType = self.init_sites_queue();
 
-        t!("********************************************************************************");
-        tln!("\n->build()");
+        tln!("********************************************************************************");
+        tln!("->build()");
         tln!("********************************************************************************");
 
         self.init_beach_line(&mut site_event_iterator_, &mut output)?;
@@ -214,8 +211,8 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
 
         self.beach_line_.clear();
 
-        // Finish construction.
-        output.build_();
+        // Finish the diagram construction.
+        output.finish();
         Ok(output)
     }
 
@@ -976,27 +973,22 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
 pub fn to_points<I1: InputType, I2: InputType>(points: &[[I1; 2]]) -> Vec<Point<I2>> {
     points
         .iter()
-        .map(|x| {
-            [
-                num::cast::<I1, I2>(x[0]).unwrap(),
-                num::cast::<I1, I2>(x[1]).unwrap(),
-            ]
-            .into()
-        })
+        .map(|x| [cast::<I1, I2>(x[0]), cast::<I1, I2>(x[1])].into())
         .collect()
 }
 
 /// helper function: converts and casts a slice of \[\[integer,integer,integer,integer\]\] into
+/// input data for the Builder.
 /// You should use the From traits instead, this function performs a (potentially) redundant type conversion.
 pub fn to_segments<I1: InputType, I2: InputType>(segments: &[[I1; 4]]) -> Vec<Line<I2>> {
     segments
         .iter()
         .map(|x| {
             [
-                num::cast::<I1, I2>(x[0]).unwrap(),
-                num::cast::<I1, I2>(x[1]).unwrap(),
-                num::cast::<I1, I2>(x[2]).unwrap(),
-                num::cast::<I1, I2>(x[3]).unwrap(),
+                cast::<I1, I2>(x[0]),
+                cast::<I1, I2>(x[1]),
+                cast::<I1, I2>(x[2]),
+                cast::<I1, I2>(x[3]),
             ]
             .into()
         })
@@ -1013,14 +1005,8 @@ pub fn to_segments_offset<I1: InputType, I2: InputType>(
     dx: i64,
     dy: i64,
 ) -> Vec<Line<I2>> {
-    let fx = |x: I1| {
-        num::cast::<f64, I2>(num::cast::<I1, f64>(x).unwrap() * scale_x).unwrap()
-            + num::cast::<i64, I2>(dx).unwrap()
-    };
-    let fy = |y: I1| {
-        num::cast::<f64, I2>(num::cast::<I1, f64>(y).unwrap() * scale_y).unwrap()
-            + num::cast::<i64, I2>(dy).unwrap()
-    };
+    let fx = |x: I1| cast::<f64, I2>(cast::<I1, f64>(x) * scale_x) + cast::<i64, I2>(dx);
+    let fy = |y: I1| cast::<f64, I2>(cast::<I1, f64>(y) * scale_y) + cast::<i64, I2>(dy);
     points
         .iter()
         .map(|x| Line {

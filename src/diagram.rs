@@ -1570,7 +1570,7 @@ impl<F: OutputType> Diagram<F> {
 
     /// Make sure the diagram is consistent. Removes degenerate edges, connects incident
     /// edges etc. etc
-    pub(crate) fn build_(&mut self) {
+    pub(crate) fn finish(&mut self) {
         // Remove degenerate edges.
         #[cfg(feature = "console_debug")]
         self.debug_print_edges("b4 degenerate");

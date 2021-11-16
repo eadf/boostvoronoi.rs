@@ -317,6 +317,7 @@ impl DistancePredicate {
         rv
     }
 
+    // todo: return Ordering
     pub(crate) fn distance_predicate<I: InputType, F: OutputType>(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
