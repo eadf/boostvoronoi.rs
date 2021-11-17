@@ -98,15 +98,25 @@ impl Default for RobustFpt {
     }
 }
 
-impl RobustFpt {
-    pub fn new_1(fpv: f64) -> Self {
+/// Creates a new RobustFpt from a `f64`
+/// ```
+/// # use boostvoronoi::robust_fpt::*;
+/// let f = 1.0f64;
+/// let r = RobustFpt::from(f);
+/// assert_eq!(r.fpv(),f);
+/// ```
+impl From<f64> for RobustFpt {
+    fn from(value: f64) -> Self {
         Self {
-            fpv_: fpv,
+            fpv_: value,
             re_: OrderedFloat(0_f64),
         }
     }
+}
 
-    pub fn new_2(fpv: f64, error: f64) -> Self {
+impl RobustFpt {
+
+    pub fn new(fpv: f64, error: f64) -> Self {
         Self {
             fpv_: fpv,
             re_: OrderedFloat(error),
@@ -142,15 +152,15 @@ impl RobustFpt {
     /// # use boostvoronoi::robust_fpt;
     /// println!("is_pos()");
     /// let aa:f64 = 0_f64;
-    /// let a = robust_fpt::RobustFpt::new_1(aa);
+    /// let a = robust_fpt::RobustFpt::from(aa);
     /// assert_eq!(a.is_pos(), false);
     ///
     /// let aa:f64 = -0_f64;
-    /// let a = robust_fpt::RobustFpt::new_1(aa);
+    /// let a = robust_fpt::RobustFpt::from(aa);
     /// assert_eq!(a.is_pos(), false);
     ///
     /// let aa:f64 = f64::MIN_POSITIVE;
-    /// let a = robust_fpt::RobustFpt::new_1(aa);
+    /// let a = robust_fpt::RobustFpt::from(aa);
     /// assert_eq!(a.is_pos(), aa.is_sign_positive());
     /// ```
     #[inline(always)]
@@ -165,11 +175,11 @@ impl RobustFpt {
     ///
     /// println!("is_neg()");
     /// let aa:f64 = 0_f64;
-    /// let a = robust_fpt::RobustFpt::new_1(aa);
+    /// let a = robust_fpt::RobustFpt::from(aa);
     /// assert_eq!(a.is_neg(), aa.is_sign_negative());
     ///
     /// let aa:f64 = -0_f64;
-    /// let a = robust_fpt::RobustFpt::new_1(aa);
+    /// let a = robust_fpt::RobustFpt::from(aa);
     /// assert_eq!(a.is_neg(), false);
     /// ```
     #[inline(always)]
@@ -260,7 +270,7 @@ impl ops::Mul<f64> for RobustFpt {
     type Output = RobustFpt;
     // Todo make this more efficient
     fn mul(self, _rhs: f64) -> Self {
-        let _rhs = RobustFpt::new_1(_rhs);
+        let _rhs = RobustFpt::from(_rhs);
         self * _rhs
     }
 }
@@ -378,7 +388,7 @@ impl ops::Div<f64> for RobustFpt {
     type Output = RobustFpt;
 
     fn div(self, _rhs: f64) -> Self {
-        let _rhs = RobustFpt::new_1(_rhs);
+        let _rhs = RobustFpt::from(_rhs);
         self / _rhs
     }
 }
@@ -458,13 +468,13 @@ impl RobustDif {
     pub fn new_1(value: f64) -> Self {
         if is_pos_f(value) {
             Self {
-                positive_sum_: RobustFpt::new_1(value),
+                positive_sum_: RobustFpt::from(value),
                 negative_sum_: RobustFpt::default(),
             }
         } else {
             Self {
                 positive_sum_: RobustFpt::default(),
-                negative_sum_: RobustFpt::new_1(value),
+                negative_sum_: RobustFpt::from(value),
             }
         }
     }
@@ -477,8 +487,8 @@ impl RobustDif {
             assert!(!neg.is_sign_negative());
         }
         Self {
-            positive_sum_: RobustFpt::new_1(pos),
-            negative_sum_: RobustFpt::new_1(neg),
+            positive_sum_: RobustFpt::from(pos),
+            negative_sum_: RobustFpt::from(neg),
         }
     }
 
@@ -556,7 +566,7 @@ impl ops::Sub<RobustDif> for RobustDif {
 /// Converts to RobustDif from RobustFpt
 /// ```
 /// # use boostvoronoi::robust_fpt::*;
-/// let s = RobustFpt::new_1(1.0);
+/// let s = RobustFpt::from(1.0);
 /// let d = RobustDif::from(s);
 /// assert_eq!(s.fpv(),d.dif().fpv());
 /// ```
@@ -626,7 +636,7 @@ impl ops::Mul<f64> for RobustDif {
     type Output = RobustDif;
 
     fn mul(self, _rhs: f64) -> Self {
-        let rhs = RobustFpt::new_1(_rhs);
+        let rhs = RobustFpt::from(_rhs);
         if is_pos_f(_rhs) {
             Self {
                 positive_sum_: self.positive_sum_ * rhs,

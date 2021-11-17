@@ -798,7 +798,7 @@ impl LazyCircleFormationFunctor {
             cast::<I, i64>(point1.y) - cast::<I, i64>(point2.y),
             cast::<I, i64>(point2.y) - cast::<I, i64>(point3.y),
         );
-        let inv_orientation: RF::RobustFpt = RF::RobustFpt::new_2(
+        let inv_orientation: RF::RobustFpt = RF::RobustFpt::new(
             num::cast::<f32, f64>(0.5f32).unwrap() / orientation,
             num::cast::<f32, f64>(2.0f32).unwrap(),
         );
@@ -811,16 +811,16 @@ impl LazyCircleFormationFunctor {
         let mut c_x = RF::RobustDif::new();
         let mut c_y = RF::RobustDif::new();
         let error = 2_f64;
-        c_x += RF::RobustFpt::new_2(dif_x1 * sum_x1 * dif_y2, error);
-        c_x += RF::RobustFpt::new_2(dif_y1 * sum_y1 * dif_y2, error);
-        c_x -= RF::RobustFpt::new_2(dif_x2 * sum_x2 * dif_y1, error);
-        c_x -= RF::RobustFpt::new_2(dif_y2 * sum_y2 * dif_y1, error);
-        c_y += RF::RobustFpt::new_2(dif_x2 * sum_x2 * dif_x1, error);
-        c_y += RF::RobustFpt::new_2(dif_y2 * sum_y2 * dif_x1, error);
-        c_y -= RF::RobustFpt::new_2(dif_x1 * sum_x1 * dif_x2, error);
-        c_y -= RF::RobustFpt::new_2(dif_y1 * sum_y1 * dif_x2, error);
+        c_x += RF::RobustFpt::new(dif_x1 * sum_x1 * dif_y2, error);
+        c_x += RF::RobustFpt::new(dif_y1 * sum_y1 * dif_y2, error);
+        c_x -= RF::RobustFpt::new(dif_x2 * sum_x2 * dif_y1, error);
+        c_x -= RF::RobustFpt::new(dif_y2 * sum_y2 * dif_y1, error);
+        c_y += RF::RobustFpt::new(dif_x2 * sum_x2 * dif_x1, error);
+        c_y += RF::RobustFpt::new(dif_y2 * sum_y2 * dif_x1, error);
+        c_y -= RF::RobustFpt::new(dif_x1 * sum_x1 * dif_x2, error);
+        c_y -= RF::RobustFpt::new(dif_y1 * sum_y1 * dif_x2, error);
         let mut lower_x = RF::RobustDif::new_from(c_x);
-        lower_x -= RF::RobustFpt::new_2(
+        lower_x -= RF::RobustFpt::new(
             ((dif_x1 * dif_x1 + dif_y1 * dif_y1)
                 * (dif_x2 * dif_x2 + dif_y2 * dif_y2)
                 * (dif_x3 * dif_x3 + dif_y3 * dif_y3))
@@ -877,7 +877,7 @@ impl LazyCircleFormationFunctor {
         let vec_x = cast::<I, f64>(site2.y()) - cast::<I, f64>(site1.y());
         let vec_y = cast::<I, f64>(site1.x()) - cast::<I, f64>(site2.x());
 
-        let teta = RF::RobustFpt::new_2(
+        let teta = RF::RobustFpt::new(
             Predicates::robust_cross_product::<I, F>(
                 cast::<I, i64>(site3.y1()) - cast::<I, i64>(site3.y0()),
                 cast::<I, i64>(site3.x0()) - cast::<I, i64>(site3.x1()),
@@ -886,7 +886,7 @@ impl LazyCircleFormationFunctor {
             ),
             1_f64,
         );
-        let a = RF::RobustFpt::new_2(
+        let a = RF::RobustFpt::new(
             Predicates::robust_cross_product::<I, F>(
                 cast::<I, i64>(site3.y0()) - cast::<I, i64>(site3.y1()),
                 cast::<I, i64>(site3.x0()) - cast::<I, i64>(site3.x1()),
@@ -895,7 +895,7 @@ impl LazyCircleFormationFunctor {
             ),
             1_f64,
         );
-        let b = RF::RobustFpt::new_2(
+        let b = RF::RobustFpt::new(
             Predicates::robust_cross_product::<I, F>(
                 cast::<I, i64>(site3.y0()) - cast::<I, i64>(site3.y1()),
                 cast::<I, i64>(site3.x0()) - cast::<I, i64>(site3.x1()),
@@ -904,7 +904,7 @@ impl LazyCircleFormationFunctor {
             ),
             1_f64,
         );
-        let denom = RF::RobustFpt::new_2(
+        let denom = RF::RobustFpt::new(
             Predicates::robust_cross_product::<I, F>(
                 cast::<I, i64>(site1.y()) - cast::<I, i64>(site2.y()),
                 cast::<I, i64>(site1.x()) - cast::<I, i64>(site2.x()),
@@ -914,13 +914,13 @@ impl LazyCircleFormationFunctor {
             1_f64,
         );
         let inv_segm_len =
-            RF::RobustFpt::new_2(1_f64 / (line_a * line_a + line_b * line_b).sqrt(), 3_f64);
+            RF::RobustFpt::new(1_f64 / (line_a * line_a + line_b * line_b).sqrt(), 3_f64);
         let mut t = RF::RobustDif::default();
         tln!("0t:{:?}", t);
         if OrientationTest::eval_f::<I, F>(denom.fpv()) == Orientation::Collinear {
-            t += teta / (RF::RobustFpt::new_1(8_f64) * a);
+            t += teta / (RF::RobustFpt::from(8_f64) * a);
             tln!("1t:{:?}", t);
-            t -= a / (RF::RobustFpt::new_1(2_f64) * teta);
+            t -= a / (RF::RobustFpt::from(2_f64) * teta);
             tln!("2t:{:?}", t);
         } else {
             let det = ((teta * teta + denom * denom) * a * b).sqrt();
@@ -938,26 +938,26 @@ impl LazyCircleFormationFunctor {
             tln!("5teta:{:?}", teta);
             tln!("A:{:?}", a);
             tln!("B:{:?}", b);
-            t += teta * (a + b) / (RF::RobustFpt::new_1(2_f64) * denom * denom);
+            t += teta * (a + b) / (RF::RobustFpt::from(2_f64) * denom * denom);
             tln!("5t:{:?}", t);
         }
         tln!("6t:{:?}", t);
         let mut c_x = RF::RobustDif::default();
         tln!("0: c_x:{:?}", c_x);
         let mut c_y = RF::RobustDif::default();
-        c_x += RF::RobustFpt::new_1(0.5 * (cast::<I, f64>(site1.x()) + cast::<I, f64>(site2.x())));
+        c_x += RF::RobustFpt::from(0.5 * (cast::<I, f64>(site1.x()) + cast::<I, f64>(site2.x())));
         tln!("1: c_x:{:?}", c_x);
-        c_x += t * RF::RobustFpt::new_1(vec_x);
+        c_x += t * RF::RobustFpt::from(vec_x);
         tln!("2: c_x:{:?}", c_x);
-        c_y += RF::RobustFpt::new_1(0.5 * (cast::<I, f64>(site1.y()) + cast::<I, f64>(site2.y())));
-        c_y += t * RF::RobustFpt::new_1(vec_y);
+        c_y += RF::RobustFpt::from(0.5 * (cast::<I, f64>(site1.y()) + cast::<I, f64>(site2.y())));
+        c_y += t * RF::RobustFpt::from(vec_y);
 
         let mut r = RF::RobustDif::default();
         let mut lower_x = RF::RobustDif::new_from(c_x);
-        r -= RF::RobustFpt::new_1(line_a) * RF::RobustFpt::new_1(cast::<I, f64>(site3.x0()));
-        r -= RF::RobustFpt::new_1(line_b) * RF::RobustFpt::new_1(cast::<I, f64>(site3.y0()));
-        r += c_x * RF::RobustFpt::new_1(line_a);
-        r += c_y * RF::RobustFpt::new_1(line_b);
+        r -= RF::RobustFpt::from(line_a) * RF::RobustFpt::from(cast::<I, f64>(site3.x0()));
+        r -= RF::RobustFpt::from(line_b) * RF::RobustFpt::from(cast::<I, f64>(site3.y0()));
+        r += c_x * RF::RobustFpt::from(line_a);
+        r += c_y * RF::RobustFpt::from(line_b);
         if r.positive().fpv() < r.negative().fpv() {
             r = -r;
         }
@@ -1183,7 +1183,7 @@ impl LazyCircleFormationFunctor {
         let recompute_c_y: bool;
         let recompute_lower_x: bool;
 
-        let orientation = RF::RobustFpt::new_2(
+        let orientation = RF::RobustFpt::new(
             Predicates::robust_cross_product::<I, F>(
                 cast::<I, i64>(segm_end1.y) - cast::<I, i64>(segm_start1.y),
                 cast::<I, i64>(segm_end1.x) - cast::<I, i64>(segm_start1.x),
@@ -1196,8 +1196,8 @@ impl LazyCircleFormationFunctor {
             OrientationTest::eval_f::<I, F>(orientation.fpv()) == Orientation::Collinear;
         if is_collinear {
             tln!("  LazyCircleFormationFunctor::pss collinear");
-            let a = RF::RobustFpt::new_2(a1 * a1 + b1 * b1, 2_f64);
-            let c = RF::RobustFpt::new_2(
+            let a = RF::RobustFpt::new(a1 * a1 + b1 * b1, 2_f64);
+            let c = RF::RobustFpt::new(
                 Predicates::robust_cross_product::<I, F>(
                     cast::<I, i64>(segm_end1.y) - cast::<I, i64>(segm_start1.y),
                     cast::<I, i64>(segm_end1.x) - cast::<I, i64>(segm_start1.x),
@@ -1206,7 +1206,7 @@ impl LazyCircleFormationFunctor {
                 ),
                 1_f64,
             );
-            let det = RF::RobustFpt::new_2(
+            let det = RF::RobustFpt::new(
                 Predicates::robust_cross_product::<I, F>(
                     cast::<I, i64>(segm_end1.x) - cast::<I, i64>(segm_start1.x),
                     cast::<I, i64>(segm_end1.y) - cast::<I, i64>(segm_start1.y),
@@ -1231,13 +1231,13 @@ impl LazyCircleFormationFunctor {
             }
 
             let mut t = RF::RobustDif::default();
-            t -= RF::RobustFpt::new_1(a1)
-                * RF::RobustFpt::new_1(
+            t -= RF::RobustFpt::from(a1)
+                * RF::RobustFpt::from(
                     (cast::<I, f64>(segm_start1.x) + cast::<I, f64>(segm_start2.x)) * 0.5
                         - cast::<I, f64>(site1.x()),
                 );
-            t -= RF::RobustFpt::new_1(b1)
-                * RF::RobustFpt::new_1(
+            t -= RF::RobustFpt::from(b1)
+                * RF::RobustFpt::from(
                     (cast::<I, f64>(segm_start1.y) + cast::<I, f64>(segm_start2.y)) * 0.5
                         - cast::<I, f64>(site1.y()),
                 );
@@ -1250,24 +1250,24 @@ impl LazyCircleFormationFunctor {
             let mut c_x = RF::RobustDif::default();
             let mut c_y = RF::RobustDif::default();
             //tln!("ulps0: x:{:.12}, y:{:.12}", c_x.dif().fpv(), c_y.dif().fpv());
-            c_x += RF::RobustFpt::new_1(
+            c_x += RF::RobustFpt::from(
                 0.5 * (cast::<I, f64>(segm_start1.x) + cast::<I, f64>(segm_start2.x)),
             );
             //tln!("ulps1: x:{:.12}, y:{:.12}", c_x.dif().fpv(), c_y.dif().fpv());
-            //tln!("ulps1.5: 1:{:.12}, 2:{:.12}", RF::RobustFpt::new_1(a1).fpv(), t.dif().fpv());
-            //tln!("ulps1.6: 1:{:.12}", (t*RF::RobustFpt::new_1(a1)).dif().fpv());
-            c_x += t * RF::RobustFpt::new_1(a1);
-            c_y += RF::RobustFpt::new_1(
+            //tln!("ulps1.5: 1:{:.12}, 2:{:.12}", RF::RobustFpt::from(a1).fpv(), t.dif().fpv());
+            //tln!("ulps1.6: 1:{:.12}", (t*RF::RobustFpt::from(a1)).dif().fpv());
+            c_x += t * RF::RobustFpt::from(a1);
+            c_y += RF::RobustFpt::from(
                 0.5 * (cast::<I, f64>(segm_start1.y) + cast::<I, f64>(segm_start2.y)),
             );
             //tln!("ulps2: x:{:.12}, y:{:.12}", c_x.dif().fpv(), c_y.dif().fpv());
-            c_y += t * RF::RobustFpt::new_1(b1);
+            c_y += t * RF::RobustFpt::from(b1);
             //tln!("ulps3: x:{:.12}, y:{:.12}", c_x.dif().fpv(), c_y.dif().fpv());
             let mut lower_x = RF::RobustDif::new_from(c_x);
             if c.is_neg() {
-                lower_x -= RF::RobustFpt::new_1(0.5) * c / a.sqrt();
+                lower_x -= RF::RobustFpt::from(0.5) * c / a.sqrt();
             } else {
-                lower_x += RF::RobustFpt::new_1(0.5) * c / a.sqrt();
+                lower_x += RF::RobustFpt::from(0.5) * c / a.sqrt();
             }
             let ulps = Predicates::ulps() as f64;
             recompute_c_x = c_x.dif().ulp() > ulps;
@@ -1295,9 +1295,9 @@ impl LazyCircleFormationFunctor {
             c_event.cell_set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
         } else {
             tln!("  LazyCircleFormationFunctor::pss !collinear");
-            let sqr_sum1 = RF::RobustFpt::new_2((a1 * a1 + b1 * b1).sqrt(), 2_f64);
-            let sqr_sum2 = RF::RobustFpt::new_2((a2 * a2 + b2 * b2).sqrt(), 2_f64);
-            let mut a = RF::RobustFpt::new_2(
+            let sqr_sum1 = RF::RobustFpt::new((a1 * a1 + b1 * b1).sqrt(), 2_f64);
+            let sqr_sum2 = RF::RobustFpt::new((a2 * a2 + b2 * b2).sqrt(), 2_f64);
+            let mut a = RF::RobustFpt::new(
                 Predicates::robust_cross_product::<I, F>(
                     cast::<I, i64>(segm_end1.x) - cast::<I, i64>(segm_start1.x),
                     cast::<I, i64>(segm_end1.y) - cast::<I, i64>(segm_start1.y),
@@ -1314,7 +1314,7 @@ impl LazyCircleFormationFunctor {
                 a = (orientation * orientation) / (sqr_sum1 * sqr_sum2 - a);
                 tln!("2: a:{:?}", a);
             }
-            let or1 = RF::RobustFpt::new_2(
+            let or1 = RF::RobustFpt::new(
                 Predicates::robust_cross_product::<I, F>(
                     cast::<I, i64>(segm_end1.y) - cast::<I, i64>(segm_start1.y),
                     cast::<I, i64>(segm_end1.x) - cast::<I, i64>(segm_start1.x),
@@ -1323,7 +1323,7 @@ impl LazyCircleFormationFunctor {
                 ),
                 1_f64,
             );
-            let or2 = RF::RobustFpt::new_2(
+            let or2 = RF::RobustFpt::new(
                 Predicates::robust_cross_product::<I, F>(
                     cast::<I, i64>(segm_end2.x) - cast::<I, i64>(segm_start2.x),
                     cast::<I, i64>(segm_end2.y) - cast::<I, i64>(segm_start2.y),
@@ -1332,8 +1332,8 @@ impl LazyCircleFormationFunctor {
                 ),
                 1_f64,
             );
-            let det = RF::RobustFpt::new_1(2_f64) * a * or1 * or2;
-            let c1 = RF::RobustFpt::new_2(
+            let det = RF::RobustFpt::from(2_f64) * a * or1 * or2;
+            let c1 = RF::RobustFpt::new(
                 Predicates::robust_cross_product::<I, F>(
                     cast::<I, i64>(segm_end1.y) - cast::<I, i64>(segm_start1.y),
                     cast::<I, i64>(segm_end1.x) - cast::<I, i64>(segm_start1.x),
@@ -1342,7 +1342,7 @@ impl LazyCircleFormationFunctor {
                 ),
                 1_f64,
             );
-            let c2 = RF::RobustFpt::new_2(
+            let c2 = RF::RobustFpt::new(
                 Predicates::robust_cross_product::<I, F>(
                     cast::<I, i64>(segm_end2.x) - cast::<I, i64>(segm_start2.x),
                     cast::<I, i64>(segm_end2.y) - cast::<I, i64>(segm_start2.y),
@@ -1351,7 +1351,7 @@ impl LazyCircleFormationFunctor {
                 ),
                 1_f64,
             );
-            let inv_orientation = RF::RobustFpt::new_1(1_f64) / orientation;
+            let inv_orientation = RF::RobustFpt::from(1_f64) / orientation;
             let mut t = RF::RobustDif::default();
             tln!("0: t:{:?}", t);
             let mut b = RF::RobustDif::default();
@@ -1359,23 +1359,23 @@ impl LazyCircleFormationFunctor {
             let mut ix = RF::RobustDif::default();
             let mut iy = RF::RobustDif::default();
 
-            ix += RF::RobustFpt::new_1(a2) * c1 * inv_orientation;
-            ix += RF::RobustFpt::new_1(a1) * c2 * inv_orientation;
-            iy += RF::RobustFpt::new_1(b1) * c2 * inv_orientation;
-            iy += RF::RobustFpt::new_1(b2) * c1 * inv_orientation;
+            ix += RF::RobustFpt::from(a2) * c1 * inv_orientation;
+            ix += RF::RobustFpt::from(a1) * c2 * inv_orientation;
+            iy += RF::RobustFpt::from(b1) * c2 * inv_orientation;
+            iy += RF::RobustFpt::from(b2) * c1 * inv_orientation;
             tln!("1: ix:{:?}", ix);
-            tln!("1: s:{:?}", RF::RobustFpt::new_1(a1) * sqr_sum2);
-            tln!("1: p:{:?}", ix * (RF::RobustFpt::new_1(a1) * sqr_sum2));
-            b += ix * (RF::RobustFpt::new_1(a1) * sqr_sum2);
+            tln!("1: s:{:?}", RF::RobustFpt::from(a1) * sqr_sum2);
+            tln!("1: p:{:?}", ix * (RF::RobustFpt::from(a1) * sqr_sum2));
+            b += ix * (RF::RobustFpt::from(a1) * sqr_sum2);
             tln!("1: b:{:?}", b);
-            b += ix * (RF::RobustFpt::new_1(a2) * sqr_sum1);
+            b += ix * (RF::RobustFpt::from(a2) * sqr_sum1);
             tln!("2: b:{:?}", b);
-            b += iy * (RF::RobustFpt::new_1(b1) * sqr_sum2);
+            b += iy * (RF::RobustFpt::from(b1) * sqr_sum2);
             tln!("3: b:{:?}", b);
-            b += iy * (RF::RobustFpt::new_1(b2) * sqr_sum1);
+            b += iy * (RF::RobustFpt::from(b2) * sqr_sum1);
             tln!("4: b:{:?}", b);
             b -= sqr_sum1
-                * RF::RobustFpt::new_2(
+                * RF::RobustFpt::new(
                     Predicates::robust_cross_product::<I, F>(
                         cast::<I, i64>(segm_end2.x) - cast::<I, i64>(segm_start2.x),
                         cast::<I, i64>(segm_end2.y) - cast::<I, i64>(segm_start2.y),
@@ -1386,7 +1386,7 @@ impl LazyCircleFormationFunctor {
                 );
             tln!("5: b:{:?}", b);
             b -= sqr_sum2
-                * RF::RobustFpt::new_2(
+                * RF::RobustFpt::new(
                     Predicates::robust_cross_product::<I, F>(
                         cast::<I, i64>(segm_end1.x) - cast::<I, i64>(segm_start1.x),
                         cast::<I, i64>(segm_end1.y) - cast::<I, i64>(segm_start1.y),
@@ -1419,12 +1419,12 @@ impl LazyCircleFormationFunctor {
             let mut c_y = RF::RobustDif::new_from(iy);
             tln!("0: c_x:{:?}", c_x);
             tln!("0: t:{:?}", t);
-            c_x += t * (RF::RobustFpt::new_1(a1) * sqr_sum2);
+            c_x += t * (RF::RobustFpt::from(a1) * sqr_sum2);
             tln!("1: c_x:{:?}", c_x);
-            c_x += t * (RF::RobustFpt::new_1(a2) * sqr_sum1);
+            c_x += t * (RF::RobustFpt::from(a2) * sqr_sum1);
             tln!("2: c_x:{:?}", c_x);
-            c_y += t * (RF::RobustFpt::new_1(b1) * sqr_sum2);
-            c_y += t * (RF::RobustFpt::new_1(b2) * sqr_sum1);
+            c_y += t * (RF::RobustFpt::from(b1) * sqr_sum2);
+            c_y += t * (RF::RobustFpt::from(b2) * sqr_sum1);
 
             if t.positive().fpv() < t.negative().fpv() {
                 t = -t;
@@ -1484,9 +1484,9 @@ impl LazyCircleFormationFunctor {
         site3: &VSE::SiteEvent<I, F>,
         c_event: &VC::CircleEventType,
     ) {
-        let a1 = RF::RobustFpt::new_1(cast::<I, f64>(site1.x1()) - cast::<I, f64>(site1.x0()));
-        let b1 = RF::RobustFpt::new_1(cast::<I, f64>(site1.y1()) - cast::<I, f64>(site1.y0()));
-        let c1 = RF::RobustFpt::new_2(
+        let a1 = RF::RobustFpt::from(cast::<I, f64>(site1.x1()) - cast::<I, f64>(site1.x0()));
+        let b1 = RF::RobustFpt::from(cast::<I, f64>(site1.y1()) - cast::<I, f64>(site1.y0()));
+        let c1 = RF::RobustFpt::new(
             Predicates::robust_cross_product::<I, F>(
                 cast::<I, i64>(site1.x0()),
                 cast::<I, i64>(site1.y0()),
@@ -1496,9 +1496,9 @@ impl LazyCircleFormationFunctor {
             1_f64,
         );
 
-        let a2 = RF::RobustFpt::new_1(cast::<I, f64>(site2.x1()) - cast::<I, f64>(site2.x0()));
-        let b2 = RF::RobustFpt::new_1(cast::<I, f64>(site2.y1()) - cast::<I, f64>(site2.y0()));
-        let c2 = RF::RobustFpt::new_2(
+        let a2 = RF::RobustFpt::from(cast::<I, f64>(site2.x1()) - cast::<I, f64>(site2.x0()));
+        let b2 = RF::RobustFpt::from(cast::<I, f64>(site2.y1()) - cast::<I, f64>(site2.y0()));
+        let c2 = RF::RobustFpt::new(
             Predicates::robust_cross_product::<I, F>(
                 cast::<I, i64>(site2.x0()),
                 cast::<I, i64>(site2.y0()),
@@ -1508,9 +1508,9 @@ impl LazyCircleFormationFunctor {
             1_f64,
         );
 
-        let a3 = RF::RobustFpt::new_1(cast::<I, f64>(site3.x1()) - cast::<I, f64>(site3.x0()));
-        let b3 = RF::RobustFpt::new_1(cast::<I, f64>(site3.y1()) - cast::<I, f64>(site3.y0()));
-        let c3 = RF::RobustFpt::new_2(
+        let a3 = RF::RobustFpt::from(cast::<I, f64>(site3.x1()) - cast::<I, f64>(site3.x0()));
+        let b3 = RF::RobustFpt::from(cast::<I, f64>(site3.y1()) - cast::<I, f64>(site3.y0()));
+        let c3 = RF::RobustFpt::new(
             Predicates::robust_cross_product::<I, F>(
                 cast::<I, i64>(site3.x0()),
                 cast::<I, i64>(site3.y0()),
@@ -1523,7 +1523,7 @@ impl LazyCircleFormationFunctor {
         let len1 = (a1 * a1 + b1 * b1).sqrt();
         let len2 = (a2 * a2 + b2 * b2).sqrt();
         let len3 = (a3 * a3 + b3 * b3).sqrt();
-        let cross_12 = RF::RobustFpt::new_2(
+        let cross_12 = RF::RobustFpt::new(
             Predicates::robust_cross_product::<I, F>(
                 cast::<I, i64>(site1.x1()) - cast::<I, i64>(site1.x0()),
                 cast::<I, i64>(site1.y1()) - cast::<I, i64>(site1.y0()),
@@ -1532,7 +1532,7 @@ impl LazyCircleFormationFunctor {
             ),
             1_f64,
         );
-        let cross_23 = RF::RobustFpt::new_2(
+        let cross_23 = RF::RobustFpt::new(
             Predicates::robust_cross_product::<I, F>(
                 cast::<I, i64>(site2.x1()) - cast::<I, i64>(site2.x0()),
                 cast::<I, i64>(site2.y1()) - cast::<I, i64>(site2.y0()),
@@ -1541,7 +1541,7 @@ impl LazyCircleFormationFunctor {
             ),
             1_f64,
         );
-        let cross_31 = RF::RobustFpt::new_2(
+        let cross_31 = RF::RobustFpt::new(
             Predicates::robust_cross_product::<I, F>(
                 cast::<I, i64>(site3.x1()) - cast::<I, i64>(site3.x0()),
                 cast::<I, i64>(site3.y1()) - cast::<I, i64>(site3.y0()),

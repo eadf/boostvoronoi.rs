@@ -14,8 +14,8 @@ fn sum_1() {
             let a_: f64 = NumCast::from(a_).unwrap();
             let b_: f64 = NumCast::from(b_).unwrap();
 
-            let a = RobustFpt::new_1(a_);
-            let b = RobustFpt::new_1(b_);
+            let a = RobustFpt::from(a_);
+            let b = RobustFpt::from(b_);
             let s = a + b;
             approx::assert_ulps_eq!(s.fpv(), a_ + b_);
             let s = a - b;
@@ -36,8 +36,8 @@ fn sum_2() {
             let b_: f64 = NumCast::from(b_).unwrap();
             //let c_: f64 = NumCast::from(b_).unwrap();
 
-            let mut a = RobustFpt::new_1(a_);
-            let b = RobustFpt::new_1(b_);
+            let mut a = RobustFpt::from(a_);
+            let b = RobustFpt::from(b_);
             a += b;
             approx::assert_ulps_eq!(a.fpv(), a_ + b_);
             a -= b;
@@ -59,8 +59,8 @@ fn sum_2() {
 fn sub_1() {
     let a_: f64 = 5.;
     let b_: f64 = 4.;
-    let a = RobustFpt::new_1(a_);
-    let b = RobustFpt::new_1(b_);
+    let a = RobustFpt::from(a_);
+    let b = RobustFpt::from(b_);
     let s = a - b;
     approx::assert_ulps_eq!(s.fpv(), a_ - b_);
     approx::assert_ulps_eq!(s.fpv(), 1.0)
@@ -68,8 +68,8 @@ fn sub_1() {
 
 #[test]
 fn sub_2() {
-    let mut a = RobustFpt::new_1(6.);
-    let b = RobustFpt::new_1(2.);
+    let mut a = RobustFpt::from(6.);
+    let b = RobustFpt::from(2.);
     a -= b;
     approx::assert_ulps_eq!(a.fpv(), 4.0)
 }
@@ -114,8 +114,8 @@ fn mul_1() {
             let a_: f64 = NumCast::from(a_).unwrap();
             let b_: f64 = NumCast::from(b_).unwrap();
 
-            let a = RobustFpt::new_1(a_);
-            let b = RobustFpt::new_1(b_);
+            let a = RobustFpt::from(a_);
+            let b = RobustFpt::from(b_);
             let s = a * b;
             approx::assert_ulps_eq!(s.fpv(), a_ * b_);
             if !b_.is_zero() {
@@ -134,13 +134,13 @@ fn mul_2() {
             let a_: f64 = NumCast::from(a_).unwrap();
             let b_: f64 = NumCast::from(b_).unwrap();
 
-            let mut a = RobustFpt::new_1(a_);
-            let b = RobustFpt::new_1(b_);
+            let mut a = RobustFpt::from(a_);
+            let b = RobustFpt::from(b_);
             a *= b;
             approx::assert_ulps_eq!(a.fpv(), a_ * b_);
             if !b_.is_zero() {
-                let mut a = RobustFpt::new_1(a_);
-                let b = RobustFpt::new_1(b_);
+                let mut a = RobustFpt::from(a_);
+                let b = RobustFpt::from(b_);
                 a /= b;
                 approx::assert_ulps_eq!(a.fpv(), a_ / b_);
             }
@@ -150,23 +150,23 @@ fn mul_2() {
 
 #[test]
 fn div_1() {
-    let a = RobustFpt::new_1(12.);
-    let b = RobustFpt::new_1(4.);
+    let a = RobustFpt::from(12.);
+    let b = RobustFpt::from(4.);
     let s = a / b;
     approx::assert_ulps_eq!(s.fpv(), 3.0)
 }
 
 #[test]
 fn div_2() {
-    let mut a = RobustFpt::new_1(6.);
-    let b = RobustFpt::new_1(2.);
+    let mut a = RobustFpt::from(6.);
+    let b = RobustFpt::from(2.);
     a /= b;
     approx::assert_ulps_eq!(a.fpv(), 3.0)
 }
 
 #[test]
 fn sqrt_1() {
-    let a = RobustFpt::new_1(9.0f64);
+    let a = RobustFpt::from(9.0f64);
     let b = a.sqrt();
     approx::assert_ulps_eq!(b.fpv(), 3.0);
     //assert_eq!(b.re(), 1.0 / 2.0 + 1.0, "a.re fail");

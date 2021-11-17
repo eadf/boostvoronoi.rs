@@ -19,18 +19,12 @@ use std::cmp::Ordering;
 /// This was declared as "typedef std::pair<point_type, beach_line_iterator> end_point_type" in C++
 ///
 #[derive(Debug)]
-pub(crate) struct EndPointPair<I>
-where
-    I: InputType,
-{
+pub(crate) struct EndPointPair<I: InputType> {
     site_: Point<I>,
     beachline_index_: VB::BeachLineIndex,
 }
 
-impl<I> EndPointPair<I>
-where
-    I: InputType,
-{
+impl<I: InputType> EndPointPair<I> {
     pub(crate) fn new(first: Point<I>, second: VB::BeachLineIndex) -> Self {
         Self {
             site_: first,
@@ -49,19 +43,13 @@ where
     }
 }
 
-impl<I> PartialOrd for EndPointPair<I>
-where
-    I: InputType,
-{
+impl<I: InputType> PartialOrd for EndPointPair<I> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<I> Ord for EndPointPair<I>
-where
-    I: InputType,
-{
+impl<I: InputType> Ord for EndPointPair<I> {
     fn cmp(&self, other: &Self) -> Ordering {
         if VP::PointComparisonPredicate::<I>::point_comparison_predicate(&self.site_, &other.site_)
         {
@@ -74,10 +62,7 @@ where
     }
 }
 
-impl<I> PartialEq for EndPointPair<I>
-where
-    I: InputType,
-{
+impl<I: InputType> PartialEq for EndPointPair<I> {
     fn eq(&self, other: &Self) -> bool {
         self.site_.eq(&other.site_)
     }

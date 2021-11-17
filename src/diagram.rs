@@ -1388,7 +1388,6 @@ impl<F: OutputType> Diagram<F> {
     }
 
     #[inline]
-    // todo replace with _edge_get_next
     fn edge_get_next_(&self, edge_id: Option<EdgeIndex>) -> Option<EdgeIndex> {
         let _ = edge_id?;
         self.edges_
@@ -1574,6 +1573,7 @@ impl<F: OutputType> Diagram<F> {
         // Remove degenerate edges.
         #[cfg(feature = "console_debug")]
         self.debug_print_edges("b4 degenerate");
+
         if !self.edges_.is_empty() {
             let mut last_edge: usize = 0;
             let mut it: usize = last_edge;
