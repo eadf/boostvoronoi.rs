@@ -808,8 +808,8 @@ impl LazyCircleFormationFunctor {
         let sum_y2: f64 = cast::<I, f64>(point2.y) + cast::<I, f64>(point3.y);
         let dif_x3: f64 = cast::<I, f64>(point1.x) - cast::<I, f64>(point3.x);
         let dif_y3: f64 = cast::<I, f64>(point1.y) - cast::<I, f64>(point3.y);
-        let mut c_x = RF::RobustDif::new();
-        let mut c_y = RF::RobustDif::new();
+        let mut c_x = RF::RobustDif::default();
+        let mut c_y = RF::RobustDif::default();
         let error = 2_f64;
         c_x += RF::RobustFpt::new(dif_x1 * sum_x1 * dif_y2, error);
         c_x += RF::RobustFpt::new(dif_y1 * sum_y1 * dif_y2, error);
@@ -819,7 +819,7 @@ impl LazyCircleFormationFunctor {
         c_y += RF::RobustFpt::new(dif_y2 * sum_y2 * dif_x1, error);
         c_y -= RF::RobustFpt::new(dif_x1 * sum_x1 * dif_x2, error);
         c_y -= RF::RobustFpt::new(dif_y1 * sum_y1 * dif_x2, error);
-        let mut lower_x = RF::RobustDif::new_from(c_x);
+        let mut lower_x = c_x;
         lower_x -= RF::RobustFpt::new(
             ((dif_x1 * dif_x1 + dif_y1 * dif_y1)
                 * (dif_x2 * dif_x2 + dif_y2 * dif_y2)
@@ -953,7 +953,7 @@ impl LazyCircleFormationFunctor {
         c_y += t * RF::RobustFpt::from(vec_y);
 
         let mut r = RF::RobustDif::default();
-        let mut lower_x = RF::RobustDif::new_from(c_x);
+        let mut lower_x = c_x;
         r -= RF::RobustFpt::from(line_a) * RF::RobustFpt::from(cast::<I, f64>(site3.x0()));
         r -= RF::RobustFpt::from(line_b) * RF::RobustFpt::from(cast::<I, f64>(site3.y0()));
         r += c_x * RF::RobustFpt::from(line_a);
@@ -1263,7 +1263,7 @@ impl LazyCircleFormationFunctor {
             //tln!("ulps2: x:{:.12}, y:{:.12}", c_x.dif().fpv(), c_y.dif().fpv());
             c_y += t * RF::RobustFpt::from(b1);
             //tln!("ulps3: x:{:.12}, y:{:.12}", c_x.dif().fpv(), c_y.dif().fpv());
-            let mut lower_x = RF::RobustDif::new_from(c_x);
+            let mut lower_x = c_x;
             if c.is_neg() {
                 lower_x -= RF::RobustFpt::from(0.5) * c / a.sqrt();
             } else {
@@ -1415,8 +1415,8 @@ impl LazyCircleFormationFunctor {
                 t.dif().fpv(),
                 det.fpv()
             );
-            let mut c_x = RF::RobustDif::new_from(ix);
-            let mut c_y = RF::RobustDif::new_from(iy);
+            let mut c_x = ix;
+            let mut c_y = iy;
             tln!("0: c_x:{:?}", c_x);
             tln!("0: t:{:?}", t);
             c_x += t * (RF::RobustFpt::from(a1) * sqr_sum2);
@@ -1429,7 +1429,7 @@ impl LazyCircleFormationFunctor {
             if t.positive().fpv() < t.negative().fpv() {
                 t = -t;
             }
-            let mut lower_x = RF::RobustDif::new_from(c_x);
+            let mut lower_x = c_x;
             if orientation.is_neg() {
                 lower_x -= t * orientation;
             } else {
@@ -1552,18 +1552,18 @@ impl LazyCircleFormationFunctor {
         );
 
         // denom = cross_12 * len3 + cross_23 * len1 + cross_31 * len2.
-        let mut denom = RF::RobustDif::new();
+        let mut denom = RF::RobustDif::default();
         denom += cross_12 * len3;
         denom += cross_23 * len1;
         denom += cross_31 * len2;
 
         // denom * r = (b2 * c_x - a2 * c_y - c2 * denom) / len2.
-        let mut r = RF::RobustDif::new();
+        let mut r = RF::RobustDif::default();
         r -= cross_12 * c3;
         r -= cross_23 * c1;
         r -= cross_31 * c2;
 
-        let mut c_x = RF::RobustDif::new();
+        let mut c_x = RF::RobustDif::default();
         c_x += a1 * c2 * len3;
         c_x -= a2 * c1 * len3;
         c_x += a2 * c3 * len1;
@@ -1571,7 +1571,7 @@ impl LazyCircleFormationFunctor {
         c_x += a3 * c1 * len2;
         c_x -= a1 * c3 * len2;
 
-        let mut c_y = RF::RobustDif::new();
+        let mut c_y = RF::RobustDif::default();
         c_y += b1 * c2 * len3;
         c_y -= b2 * c1 * len3;
         c_y += b2 * c3 * len1;
