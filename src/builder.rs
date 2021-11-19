@@ -107,6 +107,8 @@ impl<I: InputType, F: OutputType> Default for Builder<I, F> {
 }
 
 impl<I: InputType, F: OutputType> Builder<I, F> {
+    /// Inserts vertices.
+    /// This should be done before inserting segments.
     pub fn with_vertices<'a, T>(&mut self, vertices: T) -> Result<(), BvError>
     where
         I: 'a,
@@ -126,6 +128,8 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
         Ok(())
     }
 
+    /// Inserts segments.
+    /// This should be done after inserting vertices.
     pub fn with_segments<'a, T>(&mut self, segments: T) -> Result<(), BvError>
     where
         I: 'a,

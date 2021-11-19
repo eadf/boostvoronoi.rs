@@ -407,8 +407,8 @@ impl DistancePredicate {
             ) == Orientation::Left;
         }
 
-        let dist1 = Self::find_distance_to_segment_arc::<I, F>(left_site, new_point);
-        let dist2 = Self::find_distance_to_segment_arc::<I, F>(right_site, new_point);
+        let dist1 = Self::find_distance_to_segment_arc(left_site, new_point);
+        let dist2 = Self::find_distance_to_segment_arc(right_site, new_point);
 
         // The undefined ulp range is equal to 7EPS + 7EPS <= 14ULP.
         dist1 < dist2
@@ -432,8 +432,8 @@ impl DistancePredicate {
         if Predicates::is_vertical_1::<I, F>(site) {
             (cast::<I, f64>(site.x()) - cast::<I, f64>(point.x)) * 0.5_f64
         } else {
-            let segment0: &Point<I> = site.point0();
-            let segment1: &Point<I> = site.point1();
+            let segment0 = site.point0();
+            let segment1 = site.point1();
             let a1: f64 = cast::<I, f64>(segment1.x) - cast::<I, f64>(segment0.x);
             let b1: f64 = cast::<I, f64>(segment1.y) - cast::<I, f64>(segment0.y);
             let mut k: f64 = (a1 * a1 + b1 * b1).sqrt();
@@ -478,7 +478,7 @@ impl DistancePredicate {
         let a = cast::<I, f64>(segment_end.x) - cast::<I, f64>(segment_start.x);
         let b = cast::<I, f64>(segment_end.y) - cast::<I, f64>(segment_start.y);
 
-        if Predicates::is_vertical_1::<I, F>(right_site) {
+        if Predicates::is_vertical_1(right_site) {
             if new_point.y < site_point.y && !reverse_order {
                 return KPredicateResult::MORE;
             } else if new_point.y > site_point.y && reverse_order {
@@ -543,16 +543,16 @@ impl NodeComparisonPredicate {
         node2: &VB::BeachLineNodeKey<I, F>,
     ) -> bool {
         // Get x coordinate of the rightmost site from both nodes.
-        let site1: &VSE::SiteEvent<I, F> = NodeComparisonPredicate::comparison_site_::<I, F>(node1);
-        let site2: &VSE::SiteEvent<I, F> = NodeComparisonPredicate::comparison_site_::<I, F>(node2);
-        let point1: &Point<I> = NodeComparisonPredicate::comparison_point_::<I, F>(site1);
-        let point2: &Point<I> = NodeComparisonPredicate::comparison_point_::<I, F>(site2);
+        let site1 = NodeComparisonPredicate::comparison_site_(node1);
+        let site2 = NodeComparisonPredicate::comparison_site_(node2);
+        let point1 = NodeComparisonPredicate::comparison_point_(site1);
+        let point2 = NodeComparisonPredicate::comparison_point_(site2);
         let rv = {
             match point1.x.cmp(&point2.x) {
                 cmp::Ordering::Less => {
                     //tln!("point1.x < point2.x {}<{}", point1.x, point2.x);
                     // The second node contains a new site.
-                    DistancePredicate::distance_predicate::<I, F>(
+                    DistancePredicate::distance_predicate(
                         node1.left_site(),
                         node1.right_site(),
                         point2,
@@ -561,7 +561,7 @@ impl NodeComparisonPredicate {
                 cmp::Ordering::Greater => {
                     //tln!( "point1.x > point2.x");
                     // The first node contains a new site.
-                    !DistancePredicate::distance_predicate::<I, F>(
+                    !DistancePredicate::distance_predicate(
                         node2.left_site(),
                         node2.right_site(),
                         point1,
@@ -616,6 +616,7 @@ impl NodeComparisonPredicate {
         rv
     }
 
+    #[inline(always)]
     /// Get the newer site.
     fn comparison_site_<I: InputType, F: OutputType>(
         node: &VB::BeachLineNodeKey<I, F>,
@@ -627,14 +628,17 @@ impl NodeComparisonPredicate {
         }
     }
 
+    #[inline(always)]
+    /// returns the point with lowest x, or point with lowest y if x are equal
     fn comparison_point_<I: InputType, F: OutputType>(site: &VSE::SiteEvent<I, F>) -> &Point<I> {
-        if PointComparisonPredicate::<I>::point_comparison_predicate(site.point0(), site.point1()) {
+        if PointComparisonPredicate::point_comparison_predicate(site.point0(), site.point1()) {
             site.point0()
         } else {
             site.point1()
         }
     }
 
+    #[inline(always)]
     /// Get comparison pair: tuple of y coordinate and direction of the newer site.
     fn comparison_y_<I: InputType, F: OutputType>(
         node: &VB::BeachLineNodeKey<I, F>,

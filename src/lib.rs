@@ -39,9 +39,9 @@ mod circle_event;
 mod ctypes;
 pub mod diagram;
 mod end_point;
-// I'd prefer if this module could be pub (crate), but then the documentation examples would not work.
+// I'd prefer if this module could be pub(crate), but then the documentation examples would not work.
 pub mod extended_exp_fpt;
-// I'd prefer if this module could be pub (crate), but then the documentation examples would not work.
+// I'd prefer if this module could be pub(crate), but then the documentation examples would not work.
 pub mod extended_int;
 pub mod file_reader;
 pub mod geometry;
