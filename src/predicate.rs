@@ -116,21 +116,21 @@ fn robust_cross_product_f<I: InputType, F: OutputType>(s_a1: I, s_b1: I, s_a2: I
     if (s_a1 < I::zero()) ^ (s_b2 < I::zero()) {
         return if (s_a2 < I::zero()) ^ (s_b1 < I::zero()) {
             if l > r {
-                -num::cast::<I, F>(l - r).unwrap()
+                -cast::<I, F>(l - r)
             } else {
-                num::cast::<I, F>(r - l).unwrap()
+                cast::<I, F>(r - l)
             }
         } else {
-            -num::cast::<I, F>(l + r).unwrap()
+            -cast::<I, F>(l + r)
         };
     }
     if (s_a2 < I::zero()) ^ (s_b1 < I::zero()) {
-        return num::cast::<I, F>(l + r).unwrap();
+        return cast::<I, F>(l + r);
     }
     if l < r {
-        -num::cast::<I, F>(r - l).unwrap()
+        -cast::<I, F>(r - l)
     } else {
-        num::cast::<I, F>(l - r).unwrap()
+        cast::<I, F>(l - r)
     }
 }
 
@@ -799,8 +799,8 @@ impl LazyCircleFormationFunctor {
             cast::<I, i64>(point2.y) - cast::<I, i64>(point3.y),
         );
         let inv_orientation: RF::RobustFpt = RF::RobustFpt::new(
-            num::cast::<f32, f64>(0.5f32).unwrap() / orientation,
-            num::cast::<f32, f64>(2.0f32).unwrap(),
+            cast::<f32, f64>(0.5f32) / orientation,
+            cast::<f32, f64>(2.0f32),
         );
         let sum_x1: f64 = cast::<I, f64>(point1.x) + cast::<I, f64>(point2.x);
         let sum_x2: f64 = cast::<I, f64>(point2.x) + cast::<I, f64>(point3.x);
@@ -825,7 +825,7 @@ impl LazyCircleFormationFunctor {
                 * (dif_x2 * dif_x2 + dif_y2 * dif_y2)
                 * (dif_x3 * dif_x3 + dif_y3 * dif_y3))
                 .sqrt(),
-            num::cast::<f32, f64>(5.0f32).unwrap(),
+            cast::<f32, f64>(5.0f32),
         );
 
         c_event.cell_set_3_raw(

@@ -7,7 +7,7 @@
 
 //! Some basic geometry data structures together with From trait implementations.
 
-use crate::{diagram::Vertex, InputType, OutputType};
+use crate::{cast, diagram::Vertex, InputType, OutputType};
 use std::cmp;
 use std::fmt;
 
@@ -22,16 +22,13 @@ impl<T: InputType> Point<T> {
     /// Got "conflicting implementations of trait `std::convert::From..."
     /// So i picked the name as_f64 for this conversion
     pub fn as_f64(&self) -> [f64; 2] {
-        [
-            num::cast::<T, f64>(self.x).unwrap(),
-            num::cast::<T, f64>(self.y).unwrap(),
-        ]
+        [cast::<T, f64>(self.x), cast::<T, f64>(self.y)]
     }
 
     #[cfg(feature = "ce_corruption_check")]
     pub(crate) fn distance_to(&self, circle: &crate::circle_event::CircleEvent) -> f64 {
-        let x = num::cast::<T, f64>(self.x).unwrap() - circle.x().0;
-        let y = num::cast::<T, f64>(self.y).unwrap() - circle.y().0;
+        let x = cast::<T, f64>(self.x) - circle.x().0;
+        let y = cast::<T, f64>(self.y) - circle.y().0;
         (x * x + y * y).sqrt()
     }
 }

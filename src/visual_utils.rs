@@ -231,18 +231,12 @@ impl<F: OutputType> Aabb2<F> {
 
     #[inline]
     pub fn update_i64(&mut self, x: i64, y: i64) {
-        self.update_vertex(
-            num::cast::<i64, F>(x).unwrap(),
-            num::cast::<i64, F>(y).unwrap(),
-        )
+        self.update_vertex(cast::<i64, F>(x), cast::<i64, F>(y))
     }
 
     #[inline]
     pub fn update_f64(&mut self, x: f64, y: f64) {
-        self.update_vertex(
-            num::cast::<f64, F>(x).unwrap(),
-            num::cast::<f64, F>(y).unwrap(),
-        )
+        self.update_vertex(cast::<f64, F>(x), cast::<f64, F>(y))
     }
 
     #[inline(always)]
