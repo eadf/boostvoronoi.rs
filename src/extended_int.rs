@@ -11,7 +11,7 @@
 
 //! Utilities for big integers. Supports next set of arithmetic operations: +, -, *.
 
-use crate::extended_exp_fpt as EX;
+use crate::{cast, extended_exp_fpt as EX, InputType};
 #[allow(unused_imports)]
 use crate::{t, tln};
 use num::{One, ToPrimitive, Zero};
@@ -32,42 +32,17 @@ pub struct ExtendedInt {
     count_: i32,
 }
 
-impl From<i32> for ExtendedInt {
-    #[inline]
-    /// ```
-    /// # use boostvoronoi::extended_int::ExtendedInt;
-    ///
-    /// let aa = 42_f64;
-    /// let a = ExtendedInt::from(aa as i32);
-    /// approx::assert_ulps_eq!(a.d(), aa);
-    /// ```
-    fn from(that: i32) -> Self {
-        let mut rv = Self::zero();
-        match that.cmp(&0) {
-            cmp::Ordering::Greater => {
-                rv.chunks_.push(Wrapping(that as u32));
-                rv.count_ = 1;
-            }
-            cmp::Ordering::Less => {
-                rv.chunks_.push(Wrapping((-that) as u32));
-                rv.count_ = -1;
-            }
-            _ => (),
-        }
-        rv
-    }
-}
-
-impl From<i64> for ExtendedInt {
+impl<I: InputType> From<I> for ExtendedInt {
     #[inline]
     ///```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     ///
-    /// let aa = 41232131332_f64;
-    /// let a = ExtendedInt::from(aa as i64);
+    /// let aa = 41231332_f64;
+    /// let a = ExtendedInt::from(aa as i32);
     /// approx::assert_ulps_eq!(a.d(), aa);
     /// ```
-    fn from(that: i64) -> Self {
+    fn from(that: I) -> Self {
+        let that = cast::<I, i64>(that);
         let mut rv = Self::zero();
         match that.cmp(&0) {
             cmp::Ordering::Greater => {

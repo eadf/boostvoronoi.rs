@@ -28,7 +28,6 @@
 )]
 #![cfg_attr(feature = "map_first_last", feature(map_first_last))]
 
-use extended_int as EI;
 use num::{Float, NumCast, PrimInt, Signed, Zero};
 use std::fmt;
 use std::hash::Hash;
@@ -118,13 +117,6 @@ pub trait OutputType:
 
 impl OutputType for f32 {}
 impl OutputType for f64 {}
-
-#[inline(always)]
-/// Convert from the input integer type to an extended int
-/// todo: replace this with a from() that also casts the type
-pub(crate) fn cast_i_to_xi<I: InputType>(input: I) -> EI::ExtendedInt {
-    EI::ExtendedInt::from(num::cast::<I, i64>(input).unwrap())
-}
 
 #[inline(always)]
 /// Convert from one numeric type to another.
