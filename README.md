@@ -72,6 +72,7 @@ fn main() -> Result<(), BvError> {
 Edges will become curves when line segments are used as input, see the example code for discretization and interpolation. 
 
 ## Rust toolchain
+The crate is only tested on 1.56 and above.
 The code uses ```#![feature(map_first_last)]``` if run on +nightly, this is only emulated on +stable.
 So +nightly should be somewhat faster.
 

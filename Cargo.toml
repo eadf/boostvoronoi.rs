@@ -2,7 +2,7 @@
 name = "boostvoronoi"
 version = "0.9.3"
 authors = ["eadf <lacklustr@protonmail.com>"]
-edition = "2018"
+edition = "2021"
 description = "Boost voronoi ported to 100% rust"
 readme = "README.md"
 repository = "https://github.com/eadf/boostvoronoi.rs"
