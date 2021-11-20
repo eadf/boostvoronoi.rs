@@ -90,14 +90,16 @@ impl<I: InputType, F: OutputType> fmt::Debug for SiteEvent<I, F> {
 impl<I: InputType, F: OutputType> PartialOrd for SiteEvent<I, F> {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(VP::EventComparisonPredicate::event_comparison_predicate_ii::<I, F>(self, other))
+        Some(VP::EventComparisonPredicate::event_comparison_ii::<I, F>(
+            self, other,
+        ))
     }
 }
 
 impl<I: InputType, F: OutputType> Ord for SiteEvent<I, F> {
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
-        VP::EventComparisonPredicate::event_comparison_predicate_ii::<I, F>(self, other)
+        VP::EventComparisonPredicate::event_comparison_ii::<I, F>(self, other)
     }
 }
 

@@ -19,8 +19,8 @@ pub struct Point<T: InputType> {
 }
 
 impl<T: InputType> Point<T> {
-    /// Got "conflicting implementations of trait `std::convert::From..."
-    /// So i picked the name as_f64 for this conversion
+    /// Got "conflicting implementations of trait `std::convert::From...`"
+    /// So i picked the name `as_f64` for this conversion
     pub fn as_f64(&self) -> [f64; 2] {
         [cast::<T, f64>(self.x), cast::<T, f64>(self.y)]
     }
@@ -34,7 +34,8 @@ impl<T: InputType> Point<T> {
 }
 
 impl<T: InputType> From<Point<T>> for [f64; 2] {
-    /// Converts to [f64;2] from boostvoronoi::geometry::Point
+    #[inline]
+    /// Converts to `[f64;2]` from `boostvoronoi::geometry::Point<T>`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// let c1 = [1,2];
@@ -44,7 +45,7 @@ impl<T: InputType> From<Point<T>> for [f64; 2] {
     /// assert_eq!(c1[0] as f64, c2[0]);
     /// assert_eq!(c1[1] as f64, c2[1]);
     /// ```
-    fn from(coordinate: Point<T>) -> [f64; 2] {
+    fn from(coordinate: Point<T>) -> Self {
         coordinate.as_f64()
     }
 }
@@ -56,7 +57,8 @@ impl<T: InputType> fmt::Debug for Point<T> {
 }
 
 impl<T: InputType> From<[T; 2]> for Point<T> {
-    /// Converts to boostvoronoi::geometry::Point from \[T;2\]
+    #[inline]
+    /// Converts to `boostvoronoi::geometry::Poin` from `[T;2]`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// let c = [1,2];
@@ -64,8 +66,8 @@ impl<T: InputType> From<[T; 2]> for Point<T> {
     /// assert_eq!(p.x,c[0]);
     /// assert_eq!(p.y,c[1]);
     /// ```
-    fn from(coordinate: [T; 2]) -> Point<T> {
-        Point {
+    fn from(coordinate: [T; 2]) -> Self {
+        Self {
             x: coordinate[0],
             y: coordinate[1],
         }
@@ -73,7 +75,8 @@ impl<T: InputType> From<[T; 2]> for Point<T> {
 }
 
 impl<T: InputType> From<&[T; 2]> for Point<T> {
-    /// Converts to boostvoronoi::geometry::Point from &\[T;2\]
+    #[inline]
+    /// Converts to `boostvoronoi::geometry::Point` from `&\[T;2\]`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// let c = [1,2];
@@ -81,8 +84,8 @@ impl<T: InputType> From<&[T; 2]> for Point<T> {
     /// assert_eq!(p.x,c[0]);
     /// assert_eq!(p.y,c[1]);
     /// ```
-    fn from(coordinate: &[T; 2]) -> Point<T> {
-        Point {
+    fn from(coordinate: &[T; 2]) -> Self {
+        Self {
             x: coordinate[0],
             y: coordinate[1],
         }
@@ -91,7 +94,8 @@ impl<T: InputType> From<&[T; 2]> for Point<T> {
 
 #[cfg(feature = "geo")]
 impl<T: InputType> From<geo::Coordinate<T>> for Point<T> {
-    /// Converts to boostvoronoi::geometry::Point from geo::Coordinate
+    #[inline]
+    /// Converts to `boostvoronoi::geometry::Point` from `geo::Coordinate`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// let c1 = geo::Coordinate{x:1,y:2};
@@ -99,8 +103,8 @@ impl<T: InputType> From<geo::Coordinate<T>> for Point<T> {
     /// assert_eq!(p.x,c1.x);
     /// assert_eq!(p.y,c1.y);
     /// ```
-    fn from(coordinate: geo::Coordinate<T>) -> Point<T> {
-        Point {
+    fn from(coordinate: geo::Coordinate<T>) -> Self {
+        Self {
             x: coordinate.x,
             y: coordinate.y,
         }
@@ -109,7 +113,8 @@ impl<T: InputType> From<geo::Coordinate<T>> for Point<T> {
 
 #[cfg(feature = "geo")]
 impl<T: InputType + geo::CoordNum> From<Point<T>> for geo::Coordinate<T> {
-    /// Converts to geo::Coordinate from boostvoronoi::geometry::Point
+    #[inline]
+    /// Converts to `geo::Coordinate` from `boostvoronoi::geometry::Point`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// let p = Point{x:1,y:2};
@@ -117,8 +122,8 @@ impl<T: InputType + geo::CoordNum> From<Point<T>> for geo::Coordinate<T> {
     /// assert_eq!(p.x,c.x);
     /// assert_eq!(p.y,c.y);
     /// ```
-    fn from(coordinate: Point<T>) -> geo::Coordinate<T> {
-        geo::Coordinate {
+    fn from(coordinate: Point<T>) -> Self {
+        Self {
             x: coordinate.x,
             y: coordinate.y,
         }
@@ -127,7 +132,8 @@ impl<T: InputType + geo::CoordNum> From<Point<T>> for geo::Coordinate<T> {
 
 #[cfg(feature = "geo")]
 impl<T: InputType + geo::CoordNum> From<&Point<T>> for geo::Coordinate<T> {
-    /// Converts to geo::Coordinate from &boostvoronoi::geometry::Point
+    #[inline]
+    /// Converts to `geo::Coordinate` from `&boostvoronoi::geometry::Point`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// let p = Point{x:1,y:2};
@@ -135,8 +141,8 @@ impl<T: InputType + geo::CoordNum> From<&Point<T>> for geo::Coordinate<T> {
     /// assert_eq!(p.x,c.x);
     /// assert_eq!(p.y,c.y);
     /// ```
-    fn from(coordinate: &Point<T>) -> geo::Coordinate<T> {
-        geo::Coordinate {
+    fn from(coordinate: &Point<T>) -> Self {
+        Self {
             x: coordinate.x,
             y: coordinate.y,
         }
@@ -145,7 +151,8 @@ impl<T: InputType + geo::CoordNum> From<&Point<T>> for geo::Coordinate<T> {
 
 #[cfg(feature = "geo")]
 impl<F: OutputType + geo::CoordFloat> From<&Vertex<F>> for geo::Coordinate<F> {
-    /// Converts to geo::Coordinate from &boostvoronoi::diagram::Vertex
+    #[inline]
+    /// Converts to `geo::Coordinate` from `&boostvoronoi::diagram::Vertex`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// # use boostvoronoi::diagram::Vertex;
@@ -156,8 +163,8 @@ impl<F: OutputType + geo::CoordFloat> From<&Vertex<F>> for geo::Coordinate<F> {
     /// assert_eq!(v.x(),c.x);
     /// assert_eq!(v.y(),c.y);
     /// ```
-    fn from(vertex: &Vertex<F>) -> geo::Coordinate<F> {
-        geo::Coordinate {
+    fn from(vertex: &Vertex<F>) -> Self {
+        Self {
             x: vertex.x(),
             y: vertex.y(),
         }
@@ -166,7 +173,8 @@ impl<F: OutputType + geo::CoordFloat> From<&Vertex<F>> for geo::Coordinate<F> {
 
 #[cfg(feature = "geo")]
 impl<T: InputType + geo::CoordNum> From<Line<T>> for geo::Line<T> {
-    /// Converts to geo::Line from boostvoronoi::geometry::Line
+    #[inline]
+    /// Converts to `geo::Line` from `boostvoronoi::geometry::Line`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// let bl = Line::from([0,1,2,3]);
@@ -176,8 +184,8 @@ impl<T: InputType + geo::CoordNum> From<Line<T>> for geo::Line<T> {
     /// assert_eq!(bl.end.x,gl.end.x);
     /// assert_eq!(bl.end.y,gl.end.y);
     /// ```
-    fn from(line: Line<T>) -> geo::Line<T> {
-        geo::Line {
+    fn from(line: Line<T>) -> Self {
+        Self {
             start: geo::Coordinate::from(line.start),
             end: geo::Coordinate::from(line.end),
         }
@@ -186,7 +194,8 @@ impl<T: InputType + geo::CoordNum> From<Line<T>> for geo::Line<T> {
 
 #[cfg(feature = "geo")]
 impl<T: InputType + geo::CoordNum> From<geo::Line<T>> for Line<T> {
-    /// Converts to Line from geo::Line
+    #[inline]
+    /// Converts to `boostvoronoi::geometry::Line` from `geo::Line`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// let gl = geo::Line::from([(0,1),(2,3)]);
@@ -196,8 +205,8 @@ impl<T: InputType + geo::CoordNum> From<geo::Line<T>> for Line<T> {
     /// assert_eq!(bl.end.x,gl.end.x);
     /// assert_eq!(bl.end.y,gl.end.y);
     /// ```
-    fn from(line: geo::Line<T>) -> Line<T> {
-        Line {
+    fn from(line: geo::Line<T>) -> Self {
+        Self {
             start: Point::from(line.start),
             end: Point::from(line.end),
         }
@@ -206,7 +215,8 @@ impl<T: InputType + geo::CoordNum> From<geo::Line<T>> for Line<T> {
 
 #[cfg(feature = "cgmath")]
 impl<T: InputType + cgmath::BaseNum> From<cgmath::Point2<T>> for Point<T> {
-    /// Converts to boostvoronoi::geometry::Point from cgmath::Point2
+    #[inline]
+    /// Converts to `boostvoronoi::geometry::Point` from `cgmath::Point2`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// let c1 = cgmath::Point2{x:1,y:2};
@@ -214,8 +224,8 @@ impl<T: InputType + cgmath::BaseNum> From<cgmath::Point2<T>> for Point<T> {
     /// assert_eq!(p.x,c1.x);
     /// assert_eq!(p.y,c1.y);
     /// ```
-    fn from(coordinate: cgmath::Point2<T>) -> Point<T> {
-        Point {
+    fn from(coordinate: cgmath::Point2<T>) -> Self {
+        Self {
             x: coordinate.x,
             y: coordinate.y,
         }
@@ -224,7 +234,8 @@ impl<T: InputType + cgmath::BaseNum> From<cgmath::Point2<T>> for Point<T> {
 
 #[cfg(feature = "cgmath")]
 impl<T: InputType + cgmath::BaseNum> From<Point<T>> for cgmath::Point2<T> {
-    /// Converts to geo::Coordinate from boostvoronoi::geometry::Point
+    #[inline]
+    /// Converts to `geo::Coordinate` from `boostvoronoi::geometry::Point`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// let p = Point{x:1,y:2};
@@ -232,8 +243,8 @@ impl<T: InputType + cgmath::BaseNum> From<Point<T>> for cgmath::Point2<T> {
     /// assert_eq!(p.x,c.x);
     /// assert_eq!(p.y,c.y);
     /// ```
-    fn from(coordinate: Point<T>) -> cgmath::Point2<T> {
-        cgmath::Point2 {
+    fn from(coordinate: Point<T>) -> Self {
+        Self {
             x: coordinate.x,
             y: coordinate.y,
         }
@@ -242,7 +253,8 @@ impl<T: InputType + cgmath::BaseNum> From<Point<T>> for cgmath::Point2<T> {
 
 #[cfg(feature = "cgmath")]
 impl<F: OutputType + cgmath::BaseNum> From<&Vertex<F>> for cgmath::Point2<F> {
-    /// Converts to cgmath::Point2 from &boostvoronoi::diagram::Vertex
+    #[inline]
+    /// Converts to `cgmath::Point2` from `&boostvoronoi::diagram::Vertex`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// # use boostvoronoi::diagram::Vertex;
@@ -253,8 +265,8 @@ impl<F: OutputType + cgmath::BaseNum> From<&Vertex<F>> for cgmath::Point2<F> {
     /// assert_eq!(v.x(),p.x);
     /// assert_eq!(v.y(),p.y);
     /// ```
-    fn from(vertex: &Vertex<F>) -> cgmath::Point2<F> {
-        cgmath::Point2 {
+    fn from(vertex: &Vertex<F>) -> Self {
+        Self {
             x: vertex.x(),
             y: vertex.y(),
         }
@@ -269,8 +281,10 @@ pub struct Line<T: InputType> {
 }
 
 impl<T: InputType, IT: Copy + Into<Point<T>>> From<[IT; 2]> for Line<T> {
-    fn from(coordinate: [IT; 2]) -> Line<T> {
-        Line::<T> {
+    #[inline]
+    /// Converts to `boostvoronoi::geometry::Line<T>` from `[Into<Point<T>>;2]`
+    fn from(coordinate: [IT; 2]) -> Self {
+        Self {
             start: coordinate[0].into(),
             end: coordinate[1].into(),
         }
@@ -278,13 +292,15 @@ impl<T: InputType, IT: Copy + Into<Point<T>>> From<[IT; 2]> for Line<T> {
 }
 
 impl<T: InputType> Line<T> {
-    pub fn new(start: Point<T>, end: Point<T>) -> Line<T> {
-        Line::<T> { start, end }
+    #[inline]
+    pub fn new(start: Point<T>, end: Point<T>) -> Self {
+        Self { start, end }
     }
 }
 
 impl<T: InputType> From<[T; 4]> for Line<T> {
-    /// Converts to Line from \[T;4\]
+    #[inline]
+    /// Converts to `boostvoronoi::geometry::Line` from `[T;4]`
     /// ```
     /// # use boostvoronoi::geometry::Line;
     /// let a = [0,1,2,3];
@@ -294,8 +310,8 @@ impl<T: InputType> From<[T; 4]> for Line<T> {
     /// assert_eq!(bl.end.x,a[2]);
     /// assert_eq!(bl.end.y,a[3]);
     /// ```
-    fn from(line: [T; 4]) -> Line<T> {
-        Line {
+    fn from(line: [T; 4]) -> Self {
+        Self {
             start: Point {
                 x: line[0],
                 y: line[1],
@@ -309,7 +325,8 @@ impl<T: InputType> From<[T; 4]> for Line<T> {
 }
 
 impl<T: InputType> From<Line<T>> for [T; 4] {
-    /// Converts to \[T;4\] from boostvoronoi::geometry::Line
+    #[inline]
+    /// Converts to `[T;4]` from `boostvoronoi::geometry::Line`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// let l = Line::from([0,1,2,3]);
@@ -319,13 +336,14 @@ impl<T: InputType> From<Line<T>> for [T; 4] {
     /// assert_eq!(l.end.x,a[2]);
     /// assert_eq!(l.end.y,a[3]);
     /// ```
-    fn from(line: Line<T>) -> [T; 4] {
+    fn from(line: Line<T>) -> Self {
         [line.start.x, line.start.y, line.end.x, line.end.y]
     }
 }
 
 impl<T: InputType> From<&Line<T>> for [T; 4] {
-    /// Converts to \[T;4\] from &boostvoronoi::geometry::Line
+    #[inline]
+    /// Converts to `[T;4]` from `&boostvoronoi::geometry::Line`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// let l = Line::from([0,1,2,3]);
@@ -335,13 +353,14 @@ impl<T: InputType> From<&Line<T>> for [T; 4] {
     /// assert_eq!(l.end.x,a[2]);
     /// assert_eq!(l.end.y,a[3]);
     /// ```
-    fn from(line: &Line<T>) -> [T; 4] {
+    fn from(line: &Line<T>) -> Self {
         [line.start.x, line.start.y, line.end.x, line.end.y]
     }
 }
 
 impl<T: InputType> From<&[T; 4]> for Line<T> {
-    /// Converts to Line from &\[T;4\]
+    #[inline]
+    /// Converts to `boostvoronoi::geometry::Line` from `&[T;4]`
     /// ```
     /// # use boostvoronoi::geometry::Line;
     /// let a = [0,1,2,3];
@@ -351,8 +370,8 @@ impl<T: InputType> From<&[T; 4]> for Line<T> {
     /// assert_eq!(bl.end.x,a[2]);
     /// assert_eq!(bl.end.y,a[3]);
     /// ```
-    fn from(line: &[T; 4]) -> Line<T> {
-        Line {
+    fn from(line: &[T; 4]) -> Self {
+        Self {
             start: Point {
                 x: line[0],
                 y: line[1],
@@ -366,7 +385,8 @@ impl<T: InputType> From<&[T; 4]> for Line<T> {
 }
 
 impl<F: OutputType> From<&Vertex<F>> for [F; 2] {
-    /// Converts to \[T;2\] from &boostvoronoi::diagram::Vertex
+    #[inline]
+    /// Converts to `[T;2]` from `&boostvoronoi::diagram::Vertex`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// # use boostvoronoi::diagram::Vertex;
@@ -377,9 +397,39 @@ impl<F: OutputType> From<&Vertex<F>> for [F; 2] {
     /// assert_eq!(v.x(),a[0]);
     /// assert_eq!(v.y(),a[1]);
     /// ```
-    fn from(vertex: &Vertex<F>) -> [F; 2] {
+    fn from(vertex: &Vertex<F>) -> Self {
         [vertex.x(), vertex.y()]
     }
+}
+
+#[cfg(feature = "mint")]
+impl<T: InputType> From<Line<T>> for [mint::Point2<T>; 2] {
+    #[inline]
+    /// Converts to `[mint::Point2<T>;2]` from `boostvoronoi::geometry::Line`
+    /// ```
+    /// # use boostvoronoi::geometry::Line;
+    /// let bl = Line::<i32>::from([0,1,2,3]);
+    /// let ml:[mint::Point2::<i32>;2] = bl.into();
+    /// assert_eq!(bl.start.x,ml[0].x);
+    /// assert_eq!(bl.start.y,ml[0].y);
+    /// assert_eq!(bl.end.x,ml[1].x);
+    /// assert_eq!(bl.end.y,ml[1].y);
+    ///
+    /// let ml = [mint::Point2::<i32>::from([1,2]),mint::Point2::from([3,4])];
+    /// let bl = Line::<i32>::from(ml);
+    /// assert_eq!(bl.start.x,ml[0].x);
+    /// assert_eq!(bl.start.y,ml[0].y);
+    /// assert_eq!(bl.end.x,ml[1].x);
+    /// assert_eq!(bl.end.y,ml[1].y);
+    /// ```
+    fn from(line: Line<T>) -> Self {
+        [mint::Point2::from(line.start), mint::Point2::from(line.end)]
+    }
+}
+
+#[cfg(feature = "mint")]
+impl<I: InputType> mint::IntoMint for Line<I> {
+    type MintType = [mint::Point2<I>; 2];
 }
 
 #[cfg(feature = "mint")]
@@ -389,7 +439,8 @@ impl<I: InputType> mint::IntoMint for Point<I> {
 
 #[cfg(feature = "mint")]
 impl<I: InputType> From<Point<I>> for mint::Point2<I> {
-    /// Converts to mint::Point2 from boostvoronoi::geometry::Point
+    #[inline]
+    /// Converts to `mint::Point2` from `boostvoronoi::geometry::Point`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// let p:Point<i32> = Point{x:1, y:2};
@@ -398,14 +449,15 @@ impl<I: InputType> From<Point<I>> for mint::Point2<I> {
     /// assert_eq!(p.x,m.x);
     /// assert_eq!(p.y,m.y);
     /// ```
-    fn from(p: Point<I>) -> mint::Point2<I> {
-        mint::Point2::from([p.x, p.y])
+    fn from(p: Point<I>) -> Self {
+        Self::from([p.x, p.y])
     }
 }
 
 #[cfg(feature = "mint")]
 impl<I: InputType> From<mint::Point2<I>> for Point<I> {
-    /// Converts to boostvoronoi::geometry::Point from mint::Point2
+    #[inline]
+    /// Converts to `boostvoronoi::geometry::Point` from `mint::Point2`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// let m = mint::Point2{x:1,y:2};
@@ -413,8 +465,8 @@ impl<I: InputType> From<mint::Point2<I>> for Point<I> {
     /// assert_eq!(p.x,m.x);
     /// assert_eq!(p.y,m.y);
     /// ```
-    fn from(m: mint::Point2<I>) -> Point<I> {
-        Point { x: m.x, y: m.y }
+    fn from(m: mint::Point2<I>) -> Self {
+        Self { x: m.x, y: m.y }
     }
 }
 
@@ -425,7 +477,8 @@ impl<F: OutputType> mint::IntoMint for &Vertex<F> {
 
 #[cfg(feature = "mint")]
 impl<F: OutputType> From<&Vertex<F>> for mint::Point2<F> {
-    /// Converts to mint::Point2 from &boostvoronoi::diagram::Vertex
+    #[inline]
+    /// Converts to `mint::Point2` from `&boostvoronoi::diagram::Vertex`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// # use boostvoronoi::diagram::Vertex;
@@ -436,10 +489,105 @@ impl<F: OutputType> From<&Vertex<F>> for mint::Point2<F> {
     /// assert_eq!(v.x(),p.x);
     /// assert_eq!(v.y(),p.y);
     /// ```
-    fn from(vertex: &Vertex<F>) -> mint::Point2<F> {
-        mint::Point2 {
+    fn from(vertex: &Vertex<F>) -> Self {
+        Self {
             x: vertex.x(),
             y: vertex.y(),
         }
+    }
+}
+
+#[cfg(feature = "glam")]
+impl From<&Vertex<f64>> for glam::DVec2 {
+    #[inline]
+    /// Converts to `mint::Point2` from `&boostvoronoi::diagram::Vertex`
+    /// ```
+    /// # use boostvoronoi::geometry::*;
+    /// # use boostvoronoi::diagram::Vertex;
+    /// # use boostvoronoi::diagram::VertexIndex;
+    ///
+    /// let v = Vertex::<f64>::new_3(VertexIndex(0),1.0,2.0,false).get();
+    /// let p = glam::DVec2::from(&v);
+    /// assert_eq!(v.x(),p.x);
+    /// assert_eq!(v.y(),p.y);
+    /// ```
+    fn from(vertex: &Vertex<f64>) -> Self {
+        Self::new(vertex.x(), vertex.y())
+    }
+}
+
+#[cfg(feature = "glam")]
+impl From<&Vertex<f32>> for glam::Vec2 {
+    #[inline]
+    /// Converts to `glam::Vec2` from `&boostvoronoi::diagram::Vertex`
+    /// ```
+    /// # use boostvoronoi::geometry::*;
+    /// # use boostvoronoi::diagram::Vertex;
+    /// # use boostvoronoi::diagram::VertexIndex;
+    ///
+    /// let v = Vertex::<f32>::new_3(VertexIndex(0),1.0,2.0,false).get();
+    /// let p = glam::Vec2::from(&v);
+    /// assert_eq!(v.x(),p.x);
+    /// assert_eq!(v.y(),p.y);
+    /// ```
+    fn from(vertex: &Vertex<f32>) -> Self {
+        Self::new(vertex.x(), vertex.y())
+    }
+}
+
+#[cfg(feature = "glam")]
+impl From<glam::IVec2> for Point<i32> {
+    #[inline]
+    /// Converts to `boostvoronoi::geometry::Point<i32>` from `glam::IVec2`
+    /// ```
+    /// # use boostvoronoi::geometry::*;
+    /// let m = glam::IVec2::new(1,2);
+    /// let p:Point<i32> = Point::from(m);
+    /// assert_eq!(p.x,m.x);
+    /// assert_eq!(p.y,m.y);
+    /// ```
+    fn from(p: glam::IVec2) -> Self {
+        Self { x: p.x, y: p.y }
+    }
+}
+
+#[cfg(feature = "glam")]
+impl From<Point<i32>> for glam::IVec2 {
+    #[inline]
+    /// Converts to `glam::IVec2` from `boostvoronoi::geometry::Point<i32>`
+    /// ```
+    /// # use boostvoronoi::geometry::*;
+    /// let p = Point::<i32>{x:1,y:2};
+    /// let c = glam::IVec2::from(p);
+    /// assert_eq!(p.x,c.x);
+    /// assert_eq!(p.y,c.y);
+    /// ```
+    fn from(p: Point<i32>) -> Self {
+        Self::new(p.x, p.y)
+    }
+}
+
+#[cfg(feature = "glam")]
+impl From<Line<i32>> for [glam::IVec2; 2] {
+    #[inline]
+    /// Converts to `[glam::IVec2;2]` from `boostvoronoi::geometry::Line<i32>`
+    /// ```
+    /// # use boostvoronoi::geometry::Line;
+    /// let bl = Line::<i32>::from([0,1,2,3]);
+    /// let ml:[glam::IVec2;2] = bl.into();
+    /// assert_eq!(bl.start.x,ml[0].x);
+    /// assert_eq!(bl.start.y,ml[0].y);
+    /// assert_eq!(bl.end.x,ml[1].x);
+    /// assert_eq!(bl.end.y,ml[1].y);
+    ///
+    /// let ml = [glam::IVec2::new(1,2),glam::IVec2::new(3,4)];
+    /// let bl = Line::from(ml);
+    /// assert_eq!(bl.start.x,ml[0].x);
+    /// assert_eq!(bl.start.y,ml[0].y);
+    /// assert_eq!(bl.end.x,ml[1].x);
+    /// assert_eq!(bl.end.y,ml[1].y);
+    /// ```
+    fn from(line: Line<i32>) -> Self {
+        [glam::IVec2::from(line.start), glam::IVec2::from(line.end)]
     }
 }

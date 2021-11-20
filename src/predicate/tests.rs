@@ -33,7 +33,7 @@ where
 {
     let test_node = new_key::<I, F>(x1, y1, si1, x2, y2, si2);
 
-    let is_less = VP::NodeComparisonPredicate::node_comparison_predicate::<I, F>(a_key, &test_node);
+    let is_less = VP::NodeComparisonPredicate::node_comparison::<I, F>(a_key, &test_node);
     dbg!(&a_key, &test_node, is_less, expect);
     expect == is_less
 }

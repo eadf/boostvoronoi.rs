@@ -146,7 +146,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
 
             self.site_events_.push(s1);
             self.site_events_.push(s2);
-            let s3 = if VP::PointComparisonPredicate::<I>::point_comparison_predicate(&p1, &p2) {
+            let s3 = if VP::PointComparisonPredicate::<I>::point_comparison(&p1, &p2) {
                 let mut s3 = VSE::SiteEvent::<I, F>::new_3(p1, p2, self.index_);
                 s3.or_source_category(&Cb::INITIAL_SEGMENT);
                 s3
@@ -200,7 +200,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
                 self.process_site_event(&mut site_event_iterator_, &mut output)?;
             } else if site_event_iterator_ == self.site_events_.len() {
                 self.process_circle_event(&mut output)?;
-            } else if VP::EventComparisonPredicate::event_comparison_predicate_bif::<I, F>(
+            } else if VP::EventComparisonPredicate::event_comparison_bif::<I, F>(
                 &self.site_events_[site_event_iterator_],
                 // we checked with !is_empty(), unwrap is safe
                 &self.circle_events_.peek().unwrap().0.get(),
@@ -223,7 +223,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
     pub(crate) fn init_sites_queue(&mut self) -> VSE::SiteEventIndexType {
         // Sort site events.
         self.site_events_
-            .sort_by(VP::EventComparisonPredicate::event_comparison_predicate_ii::<I, F>);
+            .sort_by(VP::EventComparisonPredicate::event_comparison_ii::<I, F>);
 
         // Remove duplicates.
         self.site_events_.dedup();
@@ -930,9 +930,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
         // Check if the three input sites create a circle event.
         let c_event = Rc::new(VC::CircleEventCell::new(bisector_node));
 
-        if VP::CircleFormationFunctor::circle_formation_predicate::<I, F>(
-            &site1, &site2, &site3, &c_event,
-        ) {
+        if VP::CircleFormationFunctor::circle_formation::<I, F>(&site1, &site2, &site3, &c_event) {
             // Add the new circle event to the circle events queue.
             // Update bisector's circle event iterator to point to the
             // new circle event in the circle event queue.

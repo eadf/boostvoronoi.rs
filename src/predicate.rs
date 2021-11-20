@@ -194,7 +194,7 @@ pub struct PointComparisonPredicate<I: InputType> {
 impl<I: InputType> PointComparisonPredicate<I> {
     /// returns true if lhs.x < rhs.x, if lhs.x==rhs.x it returns lhs.y < rhs.y
     #[inline(always)]
-    pub(crate) fn point_comparison_predicate(lhs: &Point<I>, rhs: &Point<I>) -> bool {
+    pub(crate) fn point_comparison(lhs: &Point<I>, rhs: &Point<I>) -> bool {
         if lhs.x == rhs.x {
             lhs.y < rhs.y
         } else {
@@ -208,7 +208,7 @@ pub struct EventComparisonPredicate {}
 
 impl EventComparisonPredicate {
     /// boolean predicate between two sites (bool int int)
-    pub(crate) fn event_comparison_predicate_bii<I: InputType, F: OutputType>(
+    pub(crate) fn event_comparison_bii<I: InputType, F: OutputType>(
         lhs: &VSE::SiteEvent<I, F>,
         rhs: &VSE::SiteEvent<I, F>,
     ) -> bool {
@@ -242,7 +242,7 @@ impl EventComparisonPredicate {
     }
 
     /// cmp::Ordering predicate between two sites (int int)
-    pub(crate) fn event_comparison_predicate_ii<I: InputType, F: OutputType>(
+    pub(crate) fn event_comparison_ii<I: InputType, F: OutputType>(
         lhs: &VSE::SiteEvent<I, F>,
         rhs: &VSE::SiteEvent<I, F>,
     ) -> cmp::Ordering {
@@ -255,7 +255,7 @@ impl EventComparisonPredicate {
                 cmp::Ordering::Less
             };
         }
-        if Self::event_comparison_predicate_bii(lhs, rhs) {
+        if Self::event_comparison_bii(lhs, rhs) {
             cmp::Ordering::Less
         } else {
             cmp::Ordering::Greater
@@ -264,7 +264,7 @@ impl EventComparisonPredicate {
 
     /// boolean predicate between site and circle (Bool Integer Float)
     #[allow(clippy::let_and_return)]
-    pub(crate) fn event_comparison_predicate_bif<I: InputType, F: OutputType>(
+    pub(crate) fn event_comparison_bif<I: InputType, F: OutputType>(
         lhs: &VSE::SiteEvent<I, F>,
         rhs: &VC::CircleEvent,
     ) -> bool {
@@ -368,8 +368,8 @@ impl DistancePredicate {
             }
         }
 
-        let dist1 = Self::find_distance_to_point_arc(left_site, new_point);
-        let dist2 = Self::find_distance_to_point_arc(right_site, new_point);
+        let dist1 = Self::distance_to_point_arc(left_site, new_point);
+        let dist2 = Self::distance_to_point_arc(right_site, new_point);
 
         // The undefined ulp range is equal to 3EPS + 3EPS <= 6ULP.
         dist1 < dist2
@@ -386,8 +386,8 @@ impl DistancePredicate {
             return fast_res == KPredicateResult::LESS;
         }
 
-        let dist1 = Self::find_distance_to_point_arc(left_site, new_point);
-        let dist2 = Self::find_distance_to_segment_arc(right_site, new_point);
+        let dist1 = Self::distance_to_point_arc(left_site, new_point);
+        let dist2 = Self::distance_to_segment_arc(right_site, new_point);
 
         // The undefined ulp range is equal to 3EPS + 7EPS <= 10ULP.
         reverse_order ^ (dist1 < dist2)
@@ -407,15 +407,15 @@ impl DistancePredicate {
             ) == Orientation::Left;
         }
 
-        let dist1 = Self::find_distance_to_segment_arc(left_site, new_point);
-        let dist2 = Self::find_distance_to_segment_arc(right_site, new_point);
+        let dist1 = Self::distance_to_segment_arc(left_site, new_point);
+        let dist2 = Self::distance_to_segment_arc(right_site, new_point);
 
         // The undefined ulp range is equal to 7EPS + 7EPS <= 14ULP.
         dist1 < dist2
     }
 
     #[inline(always)]
-    fn find_distance_to_point_arc<I: InputType, F: OutputType>(
+    fn distance_to_point_arc<I: InputType, F: OutputType>(
         site: &VSE::SiteEvent<I, F>,
         point: &Point<I>,
     ) -> f64 {
@@ -425,7 +425,7 @@ impl DistancePredicate {
         (dx * dx + dy * dy) / (dx * 2_f64)
     }
 
-    fn find_distance_to_segment_arc<I: InputType, F: OutputType>(
+    fn distance_to_segment_arc<I: InputType, F: OutputType>(
         site: &VSE::SiteEvent<I, F>,
         point: &Point<I>,
     ) -> f64 {
@@ -463,8 +463,7 @@ impl DistancePredicate {
         let site_point: &Point<I> = left_site.point0();
         let segment_start: &Point<I> = right_site.point0();
         let segment_end: &Point<I> = right_site.point1();
-        let eval: Orientation =
-            OrientationTest::eval_p::<I, F>(segment_start, segment_end, new_point);
+        let eval = OrientationTest::eval_p::<I, F>(segment_start, segment_end, new_point);
         if eval != Orientation::Right {
             return if !right_site.is_inverse() {
                 KPredicateResult::LESS
@@ -538,7 +537,7 @@ impl NodeComparisonPredicate {
     /// Comparison is only called during the new site events processing.
     /// That's why one of the nodes will always lie on the sweepline and may
     /// be represented as a straight horizontal line.
-    pub fn node_comparison_predicate<I: InputType, F: OutputType>(
+    pub fn node_comparison<I: InputType, F: OutputType>(
         node1: &VB::BeachLineNodeKey<I, F>,
         node2: &VB::BeachLineNodeKey<I, F>,
     ) -> bool {
@@ -631,7 +630,7 @@ impl NodeComparisonPredicate {
     #[inline(always)]
     /// returns the point with lowest x, or point with lowest y if x are equal
     fn comparison_point_<I: InputType, F: OutputType>(site: &VSE::SiteEvent<I, F>) -> &Point<I> {
-        if PointComparisonPredicate::point_comparison_predicate(site.point0(), site.point1()) {
+        if PointComparisonPredicate::point_comparison(site.point0(), site.point1()) {
             site.point0()
         } else {
             site.point1()
@@ -675,7 +674,7 @@ impl CircleExistencePredicate {
 
     #[cfg(all(feature = "geo", feature = "ce_corruption_check"))]
     #[inline(always)]
-    pub(crate) fn validate_circle_formation_predicate<I: InputType, F: OutputType>(
+    pub(crate) fn validate_circle_formation<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
@@ -1651,7 +1650,7 @@ impl CircleFormationFunctor {
     #[cfg(feature = "console_debug")]
     #[allow(dead_code)]
     #[inline(always)]
-    pub(crate) fn circle_formation_predicate_fake<I: InputType, F: OutputType>(
+    pub(crate) fn circle_formation_fake<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
@@ -1671,13 +1670,13 @@ impl CircleFormationFunctor {
             site3.is_segment()
         );
 
-        Self::circle_formation_predicate(site1, site2, site3, circle)
+        Self::circle_formation(site1, site2, site3, circle)
     }
 
     /// Create a circle event from the given three sites.
     /// Returns true if the circle event exists, else false.
     /// If exists circle event is saved into the c_event variable.
-    pub(crate) fn circle_formation_predicate<I: InputType, F: OutputType>(
+    pub(crate) fn circle_formation<I: InputType, F: OutputType>(
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
@@ -1782,9 +1781,7 @@ impl CircleFormationFunctor {
             return false;
         }
         #[cfg(all(feature = "geo", feature = "ce_corruption_check"))]
-        CircleExistencePredicate::validate_circle_formation_predicate::<I, F>(
-            site1, site2, site3, circle,
-        );
+        CircleExistencePredicate::validate_circle_formation::<I, F>(site1, site2, site3, circle);
         true
     }
 }
@@ -2320,12 +2317,12 @@ impl ExactCircleFormationFunctor {
         ];
 
         let c = [
-            &ExtendedInt::from(site1.x0()) * &ExtendedInt::from(site1.y1())
-                - &ExtendedInt::from(site1.y0()) * &ExtendedInt::from(site1.x1()),
-            &ExtendedInt::from(site2.x0()) * &ExtendedInt::from(site2.y1())
-                - &ExtendedInt::from(site2.y0()) * &ExtendedInt::from(site2.x1()),
-            &ExtendedInt::from(site3.x0()) * &ExtendedInt::from(site3.y1())
-                - &ExtendedInt::from(site3.y0()) * &ExtendedInt::from(site3.x1()),
+            ExtendedInt::from(site1.x0()) * ExtendedInt::from(site1.y1())
+                - ExtendedInt::from(site1.y0()) * ExtendedInt::from(site1.x1()),
+            ExtendedInt::from(site2.x0()) * ExtendedInt::from(site2.y1())
+                - ExtendedInt::from(site2.y0()) * ExtendedInt::from(site2.x1()),
+            ExtendedInt::from(site3.x0()) * ExtendedInt::from(site3.y1())
+                - ExtendedInt::from(site3.y0()) * ExtendedInt::from(site3.x1()),
         ];
 
         for (i, aa) in a.iter().enumerate().take(3) {

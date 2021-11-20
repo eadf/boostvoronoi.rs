@@ -252,7 +252,7 @@ impl<I: InputType, F: OutputType> BeachLine<I, F> {
     pub(crate) fn debug_cmp_all(&self, key: BeachLineNodeKey<I, F>) {
         for (i, (v, _)) in self.beach_line_.borrow().iter().rev().enumerate() {
             t!("#{}:", i);
-            let _rv = VP::NodeComparisonPredicate::node_comparison_predicate::<I, F>(v, &key);
+            let _rv = VP::NodeComparisonPredicate::node_comparison::<I, F>(v, &key);
         }
     }
 
@@ -430,9 +430,9 @@ impl<I: InputType, F: OutputType> PartialOrd for BeachLineNodeKey<I, F> {
 impl<I: InputType, F: OutputType> Ord for BeachLineNodeKey<I, F> {
     // todo: move the content of node_comparison_predicate to here
     fn cmp(&self, other: &Self) -> Ordering {
-        if VP::NodeComparisonPredicate::node_comparison_predicate::<I, F>(self, other) {
+        if VP::NodeComparisonPredicate::node_comparison::<I, F>(self, other) {
             Ordering::Less
-        } else if VP::NodeComparisonPredicate::node_comparison_predicate::<I, F>(other, self) {
+        } else if VP::NodeComparisonPredicate::node_comparison::<I, F>(other, self) {
             Ordering::Greater
         } else {
             Ordering::Equal

@@ -34,6 +34,8 @@ mint = {version="0.5.8", optional=true}
 geo = {version="0.18", optional=true}
 # using "cgmath" feature will enable From traits
 cgmath = {version="0.18", optional=true}
+# using "glam" feature will enable From traits
+glam = {version="0.20", optional=true}
 
 # These features are only for debug purposes, should normally not be used
 [features]
