@@ -11,6 +11,16 @@
 
 use std::cmp::Ordering;
 
+#[inline(always)]
+/// Debug utility function, formats an id string
+pub(crate) fn format_id(value: Option<usize>) -> String {
+    if let Some(value) = value {
+        value.to_string()
+    } else {
+        String::from("-")
+    }
+}
+
 #[inline]
 /// If two floating-point numbers in the same format are ordered (x < y),
 /// then they are ordered the same way when their bits are reinterpreted as

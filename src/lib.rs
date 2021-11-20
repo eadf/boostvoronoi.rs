@@ -49,32 +49,23 @@ mod site_event;
 pub mod sync_diagram;
 pub mod visual_utils;
 
-/// Debug utility function, formats an id string
-pub(crate) fn format_id(value: Option<usize>) -> String {
-    if let Some(value) = value {
-        value.to_string()
-    } else {
-        String::from("-")
-    }
-}
-
 /// A feature gated print(), will only be active when the feature "console_debug" is selected.
-#[macro_export]
 macro_rules! t {
     ($($arg:tt)*) => ({
      #[cfg(feature = "console_debug")]
      print!($($arg)*)
     });
 }
+pub(crate) use t;
 
 /// A feature gated println(), will only be active when the feature "console_debug" is selected.
-#[macro_export]
 macro_rules! tln {
     ($($arg:tt)*) => ({
      #[cfg(feature = "console_debug")]
      println!($($arg)*)
     });
 }
+pub(crate) use tln;
 
 #[derive(thiserror::Error, Debug)]
 pub enum BvError {
@@ -145,7 +136,7 @@ pub(crate) type VobU32 = vob::Vob<u32>;
 pub(crate) trait GrowingVob {
     /// Will create a new Vob and fill it with `false`
     fn fill(initial_size: usize) -> Self;
-    /// Conditionally grow to fit required size, set ´bit´ to ´state´ value
+    /// Conditionally grow to fit required size, set `bit` to `state` value
     fn set_grow(&mut self, bit: usize, state: bool);
     /// get() with default value `false`
     fn get_f(&self, bit: usize) -> bool;

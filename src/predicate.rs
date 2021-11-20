@@ -57,7 +57,7 @@ impl Debug for SiteIndex {
 /// be converted to the 32-bit signed integer without precision loss.
 /// Todo! give this a lookover
 #[derive(Default)]
-pub struct Predicates {}
+pub(crate) struct Predicates {}
 
 impl Predicates {
     #[inline(always)]
@@ -142,7 +142,7 @@ enum Orientation {
 }
 
 #[derive(Default)]
-pub struct OrientationTest {}
+pub(crate) struct OrientationTest {}
 
 impl OrientationTest {
     /// Value is a determinant of two vectors (e.g. x1 * y2 - x2 * y1).
@@ -186,7 +186,7 @@ impl OrientationTest {
 }
 
 #[derive(Default)]
-pub struct PointComparisonPredicate<I: InputType> {
+pub(crate) struct PointComparisonPredicate<I: InputType> {
     #[doc(hidden)]
     pdi_: PhantomData<fn(I) -> I>,
 }
@@ -204,7 +204,7 @@ impl<I: InputType> PointComparisonPredicate<I> {
 }
 
 #[derive(Default)]
-pub struct EventComparisonPredicate {}
+pub(crate) struct EventComparisonPredicate {}
 
 impl EventComparisonPredicate {
     /// boolean predicate between two sites (bool int int)
@@ -292,7 +292,7 @@ enum KPredicateResult {
     MORE,      // = 1
 }
 
-pub struct DistancePredicate {}
+pub(crate) struct DistancePredicate {}
 
 impl DistancePredicate {
     #[cfg(feature = "console_debug")]
@@ -528,7 +528,7 @@ impl DistancePredicate {
     }
 }
 
-pub struct NodeComparisonPredicate {}
+pub(crate) struct NodeComparisonPredicate {}
 
 impl NodeComparisonPredicate {
     /// Compares nodes in the balanced binary search tree. Nodes are
@@ -537,7 +537,7 @@ impl NodeComparisonPredicate {
     /// Comparison is only called during the new site events processing.
     /// That's why one of the nodes will always lie on the sweepline and may
     /// be represented as a straight horizontal line.
-    pub fn node_comparison<I: InputType, F: OutputType>(
+    pub(crate) fn node_comparison<I: InputType, F: OutputType>(
         node1: &VB::BeachLineNodeKey<I, F>,
         node2: &VB::BeachLineNodeKey<I, F>,
     ) -> bool {
@@ -659,7 +659,7 @@ impl NodeComparisonPredicate {
     }
 }
 
-pub struct CircleExistencePredicate {}
+pub(crate) struct CircleExistencePredicate {}
 
 impl CircleExistencePredicate {
     #[inline(always)]

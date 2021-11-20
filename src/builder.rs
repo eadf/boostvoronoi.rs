@@ -109,10 +109,11 @@ impl<I: InputType, F: OutputType> Default for Builder<I, F> {
 impl<I: InputType, F: OutputType> Builder<I, F> {
     /// Inserts vertices.
     /// This should be done before inserting segments.
-    pub fn with_vertices<'a, T>(&mut self, vertices: T) -> Result<(), BvError>
+    /// This method accepts iterators of anything that implements `Into<boostvoronoi::geometry::Point>`
+    pub fn with_vertices<T, IT>(&mut self, vertices: T) -> Result<(), BvError>
     where
-        I: 'a,
-        T: Iterator<Item = &'a Point<I>>,
+        T: Iterator<Item = IT>,
+        IT: Copy + Into<Point<I>>,
     {
         if self.segments_added_ {
             return Err(BvError::VerticesGoesFirst(
@@ -120,7 +121,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
             ));
         }
         for v in vertices {
-            let mut s = VSE::SiteEvent::<I, F>::new_3(*v, *v, self.index_);
+            let mut s = VSE::SiteEvent::<I, F>::new(VSE::Site::Point(v.into()), self.index_);
             s.or_source_category(&VD::ColorBits::SINGLE_POINT__BIT);
             self.site_events_.push(s);
             self.index_ += 1;
@@ -130,28 +131,32 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
 
     /// Inserts segments.
     /// This should be done after inserting vertices.
-    pub fn with_segments<'a, T>(&mut self, segments: T) -> Result<(), BvError>
+    /// This method accepts iterators of anything that implements `Into<boostvoronoi::geometry::Line>`
+    pub fn with_segments<T, IT>(&mut self, segments: T) -> Result<(), BvError>
     where
-        I: 'a,
-        T: Iterator<Item = &'a Line<I>>,
+        T: Iterator<Item = IT>,
+        IT: Copy + Into<Line<I>>,
     {
         type Cb = VD::ColorBits;
         for s in segments {
-            let p1 = s.start;
-            let p2 = s.end;
-            let mut s1 = VSE::SiteEvent::<I, F>::new_3(p1, p1, self.index_);
+            let line: Line<I> = s.into();
+
+            let mut s1 = VSE::SiteEvent::<I, F>::new(VSE::Site::Point(line.start), self.index_);
             s1.or_source_category(&Cb::SEGMENT_START_POINT__BIT);
-            let mut s2 = VSE::SiteEvent::new_3(p2, p2, self.index_);
+
+            let mut s2 = VSE::SiteEvent::<I, F>::new(VSE::Site::Point(line.end), self.index_);
             s2.or_source_category(&Cb::SEGMENT_END_POINT__BIT);
 
             self.site_events_.push(s1);
             self.site_events_.push(s2);
-            let s3 = if VP::PointComparisonPredicate::<I>::point_comparison(&p1, &p2) {
-                let mut s3 = VSE::SiteEvent::<I, F>::new_3(p1, p2, self.index_);
+            let site = VSE::Site::from(line);
+            let s3 = if VP::PointComparisonPredicate::<I>::point_comparison(&line.start, &line.end)
+            {
+                let mut s3 = VSE::SiteEvent::<I, F>::new(site, self.index_);
                 s3.or_source_category(&Cb::INITIAL_SEGMENT);
                 s3
             } else {
-                let mut s3 = VSE::SiteEvent::<I, F>::new_3(p2, p1, self.index_);
+                let mut s3 = VSE::SiteEvent::<I, F>::new(site.reverse(), self.index_);
                 s3.or_source_category(&Cb::REVERSE_SEGMENT);
                 s3
             };

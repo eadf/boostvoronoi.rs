@@ -733,7 +733,10 @@ impl RobustSqrtExpr {
 
     /// Evaluates expression (re = 4 EPS):
     /// A\[0\] * sqrt(B\[0\]).
-    pub fn eval1(a: &[EI::ExtendedInt], b: &[EI::ExtendedInt]) -> EX::ExtendedExponentFpt<f64> {
+    pub(crate) fn eval1(
+        a: &[EI::ExtendedInt],
+        b: &[EI::ExtendedInt],
+    ) -> EX::ExtendedExponentFpt<f64> {
         let a = Self::i_to_f(&a[0]);
         let b = Self::i_to_f(&b[0]);
         //tln!("eval1:");
@@ -744,7 +747,10 @@ impl RobustSqrtExpr {
 
     // Evaluates expression (re = 7 EPS):
     // A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]).
-    pub fn eval2(a: &[EI::ExtendedInt], b: &[EI::ExtendedInt]) -> EX::ExtendedExponentFpt<f64> {
+    pub(crate) fn eval2(
+        a: &[EI::ExtendedInt],
+        b: &[EI::ExtendedInt],
+    ) -> EX::ExtendedExponentFpt<f64> {
         let ra = Self::eval1(a, b);
         let rb = Self::eval1(&a[1..], &b[1..]);
 
@@ -765,7 +771,10 @@ impl RobustSqrtExpr {
 
     /// Evaluates expression (re = 16 EPS):
     /// A\[0\] * sqrt(B\[0\]) + A\[1\] * sqrt(B\[1\]) + A\[2\] * sqrt(B\[2\]).
-    pub fn eval3(a: &[EI::ExtendedInt], b: &[EI::ExtendedInt]) -> EX::ExtendedExponentFpt<f64> {
+    pub(crate) fn eval3(
+        a: &[EI::ExtendedInt],
+        b: &[EI::ExtendedInt],
+    ) -> EX::ExtendedExponentFpt<f64> {
         let ra = Self::eval2(a, b);
         let rb = Self::eval1(&a[2..], &b[2..]);
 
@@ -792,7 +801,10 @@ impl RobustSqrtExpr {
     /// Evaluates expression (re = 25 EPS):
     /// A\[0\] * sqrt(B\[0\]) + A\[1\] * sqrt(B\[1\]) +
     /// A\[2\] * sqrt(B\[2\]) + A\[3\] * sqrt(B\[3\]).
-    pub fn eval4(a: &[EI::ExtendedInt], b: &[EI::ExtendedInt]) -> EX::ExtendedExponentFpt<f64> {
+    pub(crate) fn eval4(
+        a: &[EI::ExtendedInt],
+        b: &[EI::ExtendedInt],
+    ) -> EX::ExtendedExponentFpt<f64> {
         let ra = Self::eval2(a, b);
         let rb = Self::eval2(&a[2..], &b[2..]);
 
@@ -829,7 +841,7 @@ impl RobustSqrtExpr {
     ///           A\[2] + A\[3\] * sqrt(B\[0\] * B\[1\]).
     /// B\[3\] = B\[0\] * B\[1\].
     #[allow(non_snake_case)]
-    pub fn sqrt_expr_evaluator_pss3(
+    pub(crate) fn sqrt_expr_evaluator_pss3(
         A: &[EI::ExtendedInt],
         B: &[EI::ExtendedInt],
     ) -> EX::ExtendedExponentFpt<f64> {
@@ -860,7 +872,7 @@ impl RobustSqrtExpr {
     /// Evaluates A\[3\] + A\[0\] * sqrt(B\[0\]) + A\[1\] * sqrt(B\[1\]) +
     ///           A\[2\] * sqrt(B\[3\] * (sqrt(B\[0\] * B\[1\]) + B\[2\])).
     #[allow(non_snake_case)]
-    pub fn sqrt_expr_evaluator_pss4(
+    pub(crate) fn sqrt_expr_evaluator_pss4(
         A: &[EI::ExtendedInt],
         B: &[EI::ExtendedInt],
     ) -> EX::ExtendedExponentFpt<f64> {

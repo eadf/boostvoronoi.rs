@@ -45,10 +45,9 @@ fn beachline_0() {
 fn beachline_1() {
     type I = i32;
     type F = f32;
-    let coord = |x, y| Point { x, y };
 
     // Co-linear sites
-    let _v = vec![coord(10, 10), coord(1, 1), coord(1, 6)];
+    let _v = vec![Point::new(10, 10), Point::new(1, 1), Point::new(1, 6)];
 
     let mut vb = Builder::<I, F>::default();
     vb.with_vertices(_v.iter()).unwrap();
@@ -62,36 +61,38 @@ fn beachline_2() -> Result<(), BvError> {
     type I = i32;
     type F = f32;
 
+    let _v = vec![
+        Point::new(10, 18),
+        Point::new(12, 3),
+        Point::new(4, 21),
+        Point::new(8, 62),
+    ];
+    let mut output: VD::Diagram<F> = VD::Diagram::<F>::default();
+
+    let mut b = Builder::<I, F>::default();
+    b.with_vertices(_v.iter()).unwrap();
+    let mut site_event_iterator_: VSE::SiteEventIndexType = b.init_sites_queue();
+    println!("site_event_iterator_:{:?}", site_event_iterator_);
+    b.init_beach_line(&mut site_event_iterator_, &mut output)?;
     {
-        let coord = |x, y| Point { x, y };
-
-        let _v = vec![coord(10, 18), coord(12, 3), coord(4, 21), coord(8, 62)];
-        let mut output: VD::Diagram<F> = VD::Diagram::<F>::default();
-
-        let mut b = Builder::<I, F>::default();
-        b.with_vertices(_v.iter()).unwrap();
-        let mut site_event_iterator_: VSE::SiteEventIndexType = b.init_sites_queue();
-        println!("site_event_iterator_:{:?}", site_event_iterator_);
-        b.init_beach_line(&mut site_event_iterator_, &mut output)?;
-        {
-            println!("all: size:{}", b.beach_line_.beach_line_.borrow().len());
-            assert_eq!(b.beach_line_.beach_line_.borrow().len(), 2);
-            for n in b.beach_line_.beach_line_.borrow().iter() {
-                println!("{:?}", n);
-            }
-            let site_event = &b.site_events_[2];
-            dbg!(&site_event);
-            let new_key = VB::BeachLineNodeKey::<I, F>::new_1(*site_event);
-            dbg!(&new_key);
-            let lb = b.beach_line_.lower_bound(new_key)?;
-            dbg!(&lb); // lb should be : right_it:L(4,21#0) R(8,62#1)
-            assert!(lb.is_ok()?);
-
-            println!("experiment all done");
-            println!();
+        println!("all: size:{}", b.beach_line_.beach_line_.borrow().len());
+        assert_eq!(b.beach_line_.beach_line_.borrow().len(), 2);
+        for n in b.beach_line_.beach_line_.borrow().iter() {
+            println!("{:?}", n);
         }
-        println!("site_event_iterator_:{:?}", site_event_iterator_);
+        let site_event = &b.site_events_[2];
+        dbg!(&site_event);
+        let new_key = VB::BeachLineNodeKey::<I, F>::new_1(*site_event);
+        dbg!(&new_key);
+        let lb = b.beach_line_.lower_bound(new_key)?;
+        dbg!(&lb); // lb should be : right_it:L(4,21#0) R(8,62#1)
+        assert!(lb.is_ok()?);
+
+        println!("experiment all done");
+        println!();
     }
+    println!("site_event_iterator_:{:?}", site_event_iterator_);
+
     Ok(())
 }
 
@@ -138,36 +139,43 @@ fn beachline_4() {
     type I = i32;
     type F = f32;
 
-    let coord = |x, y| Point { x, y };
-
-    let mut a_site = VSE::SiteEvent::<I, F>::new_3(coord(10, 10), coord(50, 50), 1);
+    let mut a_site = VSE::SiteEvent::<I, F>::new(
+        VSE::Site::Segment(Point::new(10, 10), Point::new(50, 50)),
+        1,
+    );
     assert!(!a_site.is_inverse());
     let _ = a_site.inverse();
     assert!(a_site.is_inverse());
 
     //new_key_(50,50)#2, ((50,50)#2
     let mykey = {
-        let mut site1 = VSE::SiteEvent::<I, F>::new_2(coord(50, 50), 2);
+        let mut site1 = VSE::SiteEvent::<I, F>::new(VSE::Site::Point(Point::new(50, 50)), 2);
         site1.set_sorted_index(2);
         VB::BeachLineNodeKey::<I, F>::new_1(site1)
     };
 
     // (10,10)#0, ((10,10)-(50,50)#1
     let node1 = {
-        let mut site1 = VSE::SiteEvent::<I, F>::new_2(coord(10, 10), 0);
+        let mut site1 = VSE::SiteEvent::<I, F>::new(VSE::Site::Point(Point::new(10, 10)), 0);
         site1.set_sorted_index(0);
-        let mut site2 = VSE::SiteEvent::<I, F>::new_3(coord(10, 10), coord(50, 50), 1);
+        let mut site2 = VSE::SiteEvent::<I, F>::new(
+            VSE::Site::Segment(Point::new(10, 10), Point::new(50, 50)),
+            1,
+        );
         site2.set_sorted_index(1);
         VB::BeachLineNodeKey::<I, F>::new_2(site1, site2)
     };
 
     //(50,50)¿(10,10)#1, ((10,10)#0
     let node2 = {
-        let mut site1 = VSE::SiteEvent::<I, F>::new_3(coord(10, 10), coord(50, 50), 1);
+        let mut site1 = VSE::SiteEvent::<I, F>::new(
+            VSE::Site::Segment(Point::new(10, 10), Point::new(50, 50)),
+            1,
+        );
         let _ = site1.inverse();
         site1.set_sorted_index(1);
         dbg!(site1);
-        let mut site2 = VSE::SiteEvent::<I, F>::new_2(coord(10, 10), 0);
+        let mut site2 = VSE::SiteEvent::<I, F>::new(VSE::Site::Point(Point::new(10, 10)), 0);
         site2.set_sorted_index(0);
 
         //dbg!(site1, site2);
@@ -204,14 +212,18 @@ fn beachline_5() {
     type I = i32;
     type F = f64;
 
-    let coord = |x, y| Point::<I> { x, y };
-
     let node1 = {
-        let mut site1 = VSE::SiteEvent::<I, F>::new_3(coord(367, 107), coord(529, 242), 4);
+        let mut site1 = VSE::SiteEvent::<I, F>::new(
+            VSE::Site::Segment(Point::new(367, 107), Point::new(529, 242)),
+            4,
+        );
         site1.set_sorted_index(6);
         site1.set_flags(9);
 
-        let mut site2 = VSE::SiteEvent::<I, F>::new_3(coord(367, 107), coord(529, 242), 4);
+        let mut site2 = VSE::SiteEvent::<I, F>::new(
+            VSE::Site::Segment(Point::new(367, 107), Point::new(529, 242)),
+            4,
+        );
         let _ = site2.inverse();
         site2.set_sorted_index(6);
         site2.set_flags(41);
@@ -222,11 +234,17 @@ fn beachline_5() {
     println!();
 
     let node2 = {
-        let mut site1 = VSE::SiteEvent::<I, F>::new_3(coord(367, 107), coord(529, 242), 4);
+        let mut site1 = VSE::SiteEvent::<I, F>::new(
+            VSE::Site::Segment(Point::new(367, 107), Point::new(529, 242)),
+            4,
+        );
         let _ = site1.inverse();
         site1.set_sorted_index(6);
         site1.set_flags(41);
-        let mut site2 = VSE::SiteEvent::<I, F>::new_3(coord(400, 200), coord(400, 200), 2);
+        let mut site2 = VSE::SiteEvent::<I, F>::new(
+            VSE::Site::Segment(Point::new(400, 200), Point::new(400, 200)),
+            2,
+        );
         site2.set_sorted_index(7);
         site2.set_flags(2);
         VB::BeachLineNodeKey::<I, F>::new_2(site1, site2)

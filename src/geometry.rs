@@ -19,6 +19,11 @@ pub struct Point<T: InputType> {
 }
 
 impl<T: InputType> Point<T> {
+    /// Create a new `Point`
+    pub fn new(x: T, y: T) -> Self {
+        Self { x, y }
+    }
+
     /// Got "conflicting implementations of trait `std::convert::From...`"
     /// So i picked the name `as_f64` for this conversion
     pub fn as_f64(&self) -> [f64; 2] {
@@ -56,9 +61,47 @@ impl<T: InputType> fmt::Debug for Point<T> {
     }
 }
 
+impl<T: InputType> From<&Point<T>> for Point<T> {
+    #[inline]
+    /// A copy conversion from `&boostvoronoi::geometry::Point` to `boostvoronoi::geometry::Point`
+    /// This makes it possible to accept an `Iter<Into<Point>>` and `Iter<&Point>` in the same method.
+    /// ```
+    /// # use boostvoronoi::geometry::*;
+    /// let c = [1,2];
+    /// let p1:Point<i32> = Point::from(c);
+    /// let p2:Point<i32> = Point::from(&p1);
+    ///
+    /// assert_eq!(p2.x,c[0]);
+    /// assert_eq!(p2.y,c[1]);
+    /// ```
+    fn from(point: &Self) -> Self {
+        *point
+    }
+}
+
+impl<T: InputType> From<&Line<T>> for Line<T> {
+    #[inline]
+    /// A copy conversion from `&boostvoronoi::geometry::Line` to `boostvoronoi::geometry::Line`
+    /// This makes it possible to accept an `Iter<Into<Line>>` and `Iter<&Line>` in the same method.
+    /// ```
+    /// # use boostvoronoi::geometry::*;
+    /// let c = [1,2,3,4];
+    /// let p1:Line<i32> = Line::from(c);
+    /// let p2:Line<i32> = Line::from(&p1);
+    ///
+    /// assert_eq!(p2.start.x,c[0]);
+    /// assert_eq!(p2.start.y,c[1]);
+    /// assert_eq!(p2.end.x,c[2]);
+    /// assert_eq!(p2.end.y,c[3]);
+    /// ```
+    fn from(point: &Self) -> Self {
+        *point
+    }
+}
+
 impl<T: InputType> From<[T; 2]> for Point<T> {
     #[inline]
-    /// Converts to `boostvoronoi::geometry::Poin` from `[T;2]`
+    /// Converts to `boostvoronoi::geometry::Point` from `[T;2]`
     /// ```
     /// # use boostvoronoi::geometry::*;
     /// let c = [1,2];
@@ -293,6 +336,7 @@ impl<T: InputType, IT: Copy + Into<Point<T>>> From<[IT; 2]> for Line<T> {
 
 impl<T: InputType> Line<T> {
     #[inline]
+    /// Create a new Line
     pub fn new(start: Point<T>, end: Point<T>) -> Self {
         Self { start, end }
     }

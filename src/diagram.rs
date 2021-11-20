@@ -135,7 +135,7 @@ impl fmt::Debug for Cell {
             "(id:{:?} ii:{} ie:{} col:{})",
             self.id_.0,
             self.source_index_,
-            super::format_id(self.incident_edge_.map(|x| x.0)),
+            CT::format_id(self.incident_edge_.map(|x| x.0)),
             self.color_
         )
     }
@@ -386,7 +386,7 @@ impl<F: OutputType> fmt::Debug for Vertex<F> {
             self.id_.0,
             self.x_,
             self.y_,
-            super::format_id(self.incident_edge_.map(|x| x.0)),
+            CT::format_id(self.incident_edge_.map(|x| x.0)),
             self.color_
         )
     }
@@ -500,11 +500,11 @@ impl fmt::Debug for Edge {
             f,
             "id:{} cell:{} v0:{} t:{} n:{} p:{} c:{}",
             self.id_.0,
-            super::format_id(self.cell_.map(|c| c.0)),
-            super::format_id(self.vertex_.map(|v| v.0)),
-            super::format_id(self.twin_.map(|e| e.0)),
-            super::format_id(self.next_ccw_.map(|e| e.0)),
-            super::format_id(self.prev_ccw_.map(|e| e.0)),
+            CT::format_id(self.cell_.map(|c| c.0)),
+            CT::format_id(self.vertex_.map(|v| v.0)),
+            CT::format_id(self.twin_.map(|e| e.0)),
+            CT::format_id(self.next_ccw_.map(|e| e.0)),
+            CT::format_id(self.prev_ccw_.map(|e| e.0)),
             self.color_
         )
     }

@@ -11,7 +11,7 @@
 
 //! Utilities for big integers. Supports next set of arithmetic operations: +, -, *.
 
-use crate::{cast, extended_exp_fpt as EX, InputType};
+use crate::{cast, InputType};
 #[allow(unused_imports)]
 use crate::{t, tln};
 use num::{One, ToPrimitive, Zero};
@@ -143,20 +143,6 @@ impl ExtendedInt {
     pub fn d(&self) -> f64 {
         let p = self.p();
         libm::ldexp(p.0, p.1)
-    }
-
-    /// converts to EX::ExtendedExponentFpt::<f64>
-    /// ```
-    /// # use boostvoronoi::extended_int::ExtendedInt;
-    ///
-    /// let aa = 41232131332_f64;
-    /// let mut a = ExtendedInt::from(aa as i64);
-    /// let e = a.e();
-    /// approx::assert_ulps_eq!(e.d(), aa);
-    /// ```
-    pub fn e(&self) -> EX::ExtendedExponentFpt<f64> {
-        let p = self.p();
-        EX::ExtendedExponentFpt::<f64>::new(p.0, p.1)
     }
 
     #[inline(always)]

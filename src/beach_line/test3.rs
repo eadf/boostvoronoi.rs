@@ -47,10 +47,13 @@ where
             "si:{},x:{},y:{},ii:{},f:{}",
             &caps["si"], &caps["x"], &caps["y"], ii, &caps["f"]
         );
-        let mut site = VSE::SiteEvent::<I, F>::new_2(
-            coord(
-                (&caps)["x"].parse::<I>().unwrap(),
-                (&caps)["y"].parse::<I>().unwrap(),
+        let mut site = VSE::SiteEvent::<I, F>::new(
+            VSE::Site::Point(
+                [
+                    (&caps)["x"].parse::<I>().unwrap(),
+                    (&caps)["y"].parse::<I>().unwrap(),
+                ]
+                .into(),
             ),
             ii,
         );
@@ -63,14 +66,18 @@ where
             "si:{},x1:{},y1:{},x2:{},y2:{},ii:{},f:{}",
             &caps["si"], &caps["x1"], &caps["y1"], &caps["x2"], &caps["y2"], ii, &caps["f"]
         );
-        let mut site = VSE::SiteEvent::<I, F>::new_3(
-            coord(
-                (&caps)["x1"].parse::<I>().unwrap(),
-                (&caps)["y1"].parse::<I>().unwrap(),
-            ),
-            coord(
-                (&caps)["x2"].parse::<I>().unwrap(),
-                (&caps)["y2"].parse::<I>().unwrap(),
+        let mut site = VSE::SiteEvent::<I, F>::new(
+            VSE::Site::Segment(
+                [
+                    (&caps)["x1"].parse::<I>().unwrap(),
+                    (&caps)["y1"].parse::<I>().unwrap(),
+                ]
+                .into(),
+                [
+                    (&caps)["x2"].parse::<I>().unwrap(),
+                    (&caps)["y2"].parse::<I>().unwrap(),
+                ]
+                .into(),
             ),
             ii,
         );
@@ -83,14 +90,18 @@ where
             "si:{},x1:{},y1:{},x2:{},y2:{},ii:{},f:{}",
             &caps["si"], &caps["x1"], &caps["y1"], &caps["x2"], &caps["y2"], ii, &caps["f"]
         );*/
-        let mut site = VSE::SiteEvent::<I, F>::new_3(
-            coord(
-                (&caps)["x1"].parse::<I>().unwrap(),
-                (&caps)["y1"].parse::<I>().unwrap(),
-            ),
-            coord(
-                (&caps)["x2"].parse::<I>().unwrap(),
-                (&caps)["y2"].parse::<I>().unwrap(),
+        let mut site = VSE::SiteEvent::<I, F>::new(
+            VSE::Site::Segment(
+                [
+                    (&caps)["x1"].parse::<I>().unwrap(),
+                    (&caps)["y1"].parse::<I>().unwrap(),
+                ]
+                .into(),
+                [
+                    (&caps)["x2"].parse::<I>().unwrap(),
+                    (&caps)["y2"].parse::<I>().unwrap(),
+                ]
+                .into(),
             ),
             ii,
         );

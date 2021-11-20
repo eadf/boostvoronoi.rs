@@ -9,9 +9,9 @@ where
     I: InputType,
     F: OutputType,
 {
-    let mut site1 = VSE::SiteEvent::<I, F>::new_2(Point { x: x1, y: y1 }, si1);
+    let mut site1 = VSE::SiteEvent::<I, F>::new(VSE::Site::Point(Point { x: x1, y: y1 }), si1);
     site1.set_sorted_index(si1);
-    let mut site2 = VSE::SiteEvent::<I, F>::new_2(Point { x: x2, y: y2 }, si2);
+    let mut site2 = VSE::SiteEvent::<I, F>::new(VSE::Site::Point(Point { x: x2, y: y2 }), si2);
     site2.set_sorted_index(si2);
     VB::BeachLineNodeKey::<I, F>::new_2(site1, site2)
 }

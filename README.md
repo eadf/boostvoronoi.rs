@@ -15,7 +15,7 @@ This implementation of [Fortune's algorithm](https://en.wikipedia.org/wiki/Fortu
 Code still in development, there are still bugs. However, all the remaining bugs I've noticed are also present in C++ boost voronoi.
 
 Gui example:
-```fish
+```sh
 cargo run --example fltk_gui
 ```
 * Mouse click to place new points. 
@@ -27,7 +27,6 @@ cargo run --example fltk_gui
 API example:
 ```rust
 use boostvoronoi::builder::Builder;
-use boostvoronoi::geometry::*;
 use boostvoronoi::BvError;
 
 type I = i32; // this is the integer input type
@@ -35,13 +34,15 @@ type F = f64; // this is the float output type (circle event coordinates)
 
 fn main() -> Result<(), BvError> {
     // Only unique Points will be used. Points should not intersect lines
-    let p = vec![Point::from([9_i32, 10])];
+    let p = vec![[9_i32, 10]];
     // Lines may only intersect at the endpoints.
-    let s = vec![Line::from([10_i32, 11, 12, 33])];
+    let s = vec![[10_i32, 11, 12, 33]];
     let mut vb = Builder::<I, F>::default();
     // you will have to keep track of the input geometry. it will be referenced as
     // input geometry indices in the output.
+    // `with_vertices()` accepts iterators of anything that implements `Into<boostvoronoi::geometry::Point>`
     vb.with_vertices(p.iter())?;
+    // `with_segments()` accepts iterators of anything that implements `Into<boostvoronoi::geometry::Line>`
     vb.with_segments(s.iter())?;
     // this will generate the list of cells, edges and circle events (aka vertices)
     let result = vb.build()?;
@@ -68,7 +69,7 @@ fn main() -> Result<(), BvError> {
     Ok(())
 }
 ```
-Edges may become curves when line segments are used as input, see the example code for discretization and interpolation. 
+Edges will become curves when line segments are used as input, see the example code for discretization and interpolation. 
 
 ## Rust toolchain
 The code uses ```#![feature(map_first_last)]``` if run on +nightly, this is only emulated on +stable.

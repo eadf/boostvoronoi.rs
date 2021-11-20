@@ -16,7 +16,7 @@ use crate::diagram as VD;
 use crate::predicate as VP;
 use std::cmp::Ordering;
 
-use super::geometry::Point;
+use super::geometry::{Line, Point};
 use super::{InputType, OutputType};
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -24,6 +24,28 @@ use std::marker::PhantomData;
 use std::mem;
 
 pub type SiteEventIndexType = usize;
+
+#[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Hash, Debug)]
+pub(crate) enum Site<I: InputType> {
+    Point(Point<I>),
+    Segment(Point<I>, Point<I>),
+}
+
+impl<I: InputType> From<Line<I>> for Site<I> {
+    fn from(l: Line<I>) -> Self {
+        Site::Segment(l.start, l.end)
+    }
+}
+
+impl<I: InputType> Site<I> {
+    /// Reverse the order of a `Segment`, does nothing for a `Point`.
+    pub(crate) fn reverse(self) -> Self {
+        match self {
+            Site::Segment(a, b) => Site::Segment(b, a),
+            _ => self,
+        }
+    }
+}
 
 /// Site event type.
 /// Occurs when the sweepline sweeps over one of the initial sites:
@@ -40,19 +62,12 @@ pub type SiteEventIndexType = usize;
 /// In beach line data structure segment sites of the first
 /// type precede sites of the second type for the same segment.
 /// Members:
-///   point0_ - point site or segment's start-point
-///   point1_ - segment's endpoint if site is a segment
-///   sorted_index_ - the last bit encodes information if the site is inverse;
-///     the other VS::Bits encode site event index among the sorted site events
-///   initial_index_ - site index among the initial input set
-/// Note: for all sites is_inverse_ flag is equal to false by default.
-
-#[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Hash, Debug)]
-enum Site<I: InputType> {
-    Point(Point<I>),
-    Segment(Point<I>, Point<I>),
-}
-
+///   `point0_` - point site or segment's start-point
+///   `point1_` - segment's endpoint if site is a segment
+///   `sorted_index_` - the last bit encodes information if the site is inverse;
+///                     the other VS::Bits encode site event index among the sorted site events
+///   `initial_index_` - site index among the initial input set
+/// Note: for all sites `is_inverse_` flag is set to `false` by default.
 #[derive(Copy, Clone)]
 pub struct SiteEvent<I: InputType, F: OutputType> {
     site_: Site<I>,
@@ -123,35 +138,23 @@ impl<I: InputType, F: OutputType> Hash for SiteEvent<I, F> {
 }
 
 impl<I: InputType, F: OutputType> SiteEvent<I, F> {
-    #[cfg(test)]
-    /// only used by unit test code
-    pub(crate) fn new_2(point: Point<I>, initial_index: SiteEventIndexType) -> SiteEvent<I, F> {
-        Self {
-            site_: Site::Point(point),
-            sorted_index_: 0,
-            initial_index_: initial_index,
-            flags_: VD::ColorBits::SINGLE_POINT__BIT.0,
-            #[doc(hidden)]
-            pd_: PhantomData,
-        }
-    }
-
-    pub(crate) fn new_3(
-        a: Point<I>,
-        b: Point<I>,
-        initial_index: SiteEventIndexType,
-    ) -> SiteEvent<I, F> {
-        let site = if a != b {
-            Site::Segment(a, b)
-        } else {
-            Site::Point(a)
-        };
-        Self {
-            site_: site,
-            sorted_index_: 0,
-            initial_index_: initial_index,
-            flags_: 0,
-            pd_: PhantomData,
+    /// Creates a new SiteEvent from a `Site`.
+    pub(crate) fn new(site: Site<I>, initial_index: SiteEventIndexType) -> Self {
+        match site {
+            Site::Point(_) => Self {
+                site_: site,
+                sorted_index_: 0,
+                initial_index_: initial_index,
+                flags_: VD::ColorBits::SINGLE_POINT__BIT.0,
+                pd_: PhantomData,
+            },
+            Site::Segment(_, _) => Self {
+                site_: site,
+                sorted_index_: 0,
+                initial_index_: initial_index,
+                flags_: 0,
+                pd_: PhantomData,
+            },
         }
     }
 
