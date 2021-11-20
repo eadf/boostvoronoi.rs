@@ -132,7 +132,7 @@ where
 #[test]
 /// This test is massive, 9+ megs of node_comparison_predicate() -> disabled by default, but it works
 fn beachline_multiple_2() -> io::Result<()> {
-    let file = File::open(Path::new("src/beach_line/node_comparisons.txt"))?;
+    let file = File::open(Path::new("src/beach_line/node_comparisons.txt")).unwrap();
     let reader = BufReader::new(file);
 
     for line in reader.lines() {

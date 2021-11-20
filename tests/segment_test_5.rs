@@ -2,17 +2,11 @@ use boostvoronoi::builder::{to_segments, Builder};
 use boostvoronoi::diagram as VD;
 use boostvoronoi::BvError;
 
+mod common;
+use common::almost_equal;
+
 type I = i64;
 type F = f64;
-
-#[allow(dead_code)]
-fn almost_equal(x1: F, x2: F, y1: F, y2: F) -> bool {
-    let delta = 0.00001;
-    assert!(F::abs(x1 - x2) < delta, "{} != {}", x1, x2);
-    assert!(F::abs(y1 - y2) < delta, "{} != {}", y1, y2);
-
-    (F::abs(x1 - x2) < delta) && (F::abs(y1 - y2) < delta)
-}
 
 //#[ignore]
 #[test]

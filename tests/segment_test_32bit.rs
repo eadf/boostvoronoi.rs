@@ -4,15 +4,6 @@ use boostvoronoi::BvError;
 type I = i32;
 type F = f32;
 
-#[allow(dead_code)]
-fn almost_equal(x1: F, x2: F, y1: F, y2: F) -> bool {
-    let delta = 0.00001;
-    assert!(F::abs(x1 - x2) < delta, "{} != {}", x1, x2);
-    assert!(F::abs(y1 - y2) < delta, "{} != {}", y1, y2);
-
-    (F::abs(x1 - x2) < delta) && (F::abs(y1 - y2) < delta)
-}
-
 //#[ignore]
 #[test]
 // this test crashed once, but seem to be work now???

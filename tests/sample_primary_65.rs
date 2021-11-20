@@ -4,14 +4,8 @@ use boostvoronoi::file_reader as FR;
 use boostvoronoi::BvError;
 use std::io::{BufReader, Cursor};
 
-#[allow(dead_code)]
-fn almost_equal(x1: F, x2: F, y1: F, y2: F) -> bool {
-    let delta = 0.000001;
-    assert!(F::abs(x1 - x2) < delta, "{} != {}", x1, x2);
-    assert!(F::abs(y1 - y2) < delta, "{} != {}", y1, y2);
-
-    (F::abs(x1 - x2) < delta) && (F::abs(y1 - y2) < delta)
-}
+mod common;
+use common::almost_equal;
 
 type I = i32;
 type F = f64;
@@ -114,7 +108,10 @@ fn sample_primary_065() -> Result<(), BvError> {
         let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
-        vb.build()?
+        let output = vb.build()?;
+        #[cfg(feature = "geo")]
+        common::diagram_sanity_check(&output, &points, &segments, 0.0001)?;
+        output
     };
     assert_eq!(output.cells().len(), 261);
     let cell = output.cells()[0].get();
