@@ -23,11 +23,12 @@ pub struct ExtendedExponentFpt<F: OutputType> {
     val_: F,
     exp_: i32,
 }
+
 const MAX_SIGNIFICANT_EXP_DIF_F64: i32 = 54;
 
 impl From<&EI::ExtendedInt> for ExtendedExponentFpt<f64> {
     #[inline]
-    /// converts to ExtendedExponentFpt::<f64> from &ExtendedInt
+    /// Converts to ExtendedExponentFpt::<f64> from &ExtendedInt
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     /// # use boostvoronoi::extended_exp_fpt::ExtendedExponentFpt;
@@ -45,7 +46,7 @@ impl From<&EI::ExtendedInt> for ExtendedExponentFpt<f64> {
 
 impl From<EI::ExtendedInt> for ExtendedExponentFpt<f64> {
     #[inline]
-    /// converts to ExtendedExponentFpt::<f64> from ExtendedInt
+    /// Converts to `ExtendedExponentFpt::<f64>` from `ExtendedInt`
     /// ```
     /// # use boostvoronoi::extended_int::ExtendedInt;
     /// # use boostvoronoi::extended_exp_fpt::ExtendedExponentFpt;
@@ -61,31 +62,31 @@ impl From<EI::ExtendedInt> for ExtendedExponentFpt<f64> {
     }
 }
 
-impl From<&ExtendedExponentFpt<f64>> for f64 {
+impl From<ExtendedExponentFpt<f64>> for f64 {
     #[inline]
-    /// converts from ExtendedExponentFpt<f64> to f64
+    /// Converts from `ExtendedExponentFpt<f64>` to `f64`
     /// ```
     /// # use boostvoronoi::extended_exp_fpt::ExtendedExponentFpt;
     ///
     /// let f1 = 345345345453_f64;
     /// let e = ExtendedExponentFpt::from(f1);
-    /// let f2 = f64::from(&e);
+    /// let f2 = f64::from(e);
     /// approx::assert_ulps_eq!(f1, f2);
     /// ```
-    fn from(that: &ExtendedExponentFpt<f64>) -> f64 {
+    fn from(that: ExtendedExponentFpt<f64>) -> f64 {
         that.d()
     }
 }
 
 impl From<f64> for ExtendedExponentFpt<f64> {
     #[inline]
-    /// converts from f64 to ExtendedExponentFpt<f64>
+    /// Converts from `f64` to `ExtendedExponentFpt<f64>`
     /// ```
     /// # use boostvoronoi::extended_exp_fpt::ExtendedExponentFpt;
     ///
     /// let f1 = 345345345453_f64;
     /// let e = ExtendedExponentFpt::from(f1);
-    /// let f2 = f64::from(&e);
+    /// let f2 = f64::from(e);
     /// approx::assert_ulps_eq!(f1, f2);
     /// ```
     fn from(that: f64) -> ExtendedExponentFpt<f64> {
@@ -96,6 +97,7 @@ impl From<f64> for ExtendedExponentFpt<f64> {
 
 #[allow(dead_code)]
 impl ExtendedExponentFpt<f64> {
+    #[inline]
     /// Constructor with value and exponent as arguments.
     /// The value of this number is 'val_' * 2^ 'exp_'
     /// ```
@@ -104,7 +106,6 @@ impl ExtendedExponentFpt<f64> {
     /// let a = ExtendedExponentFpt::<f64>::new(1.0, 12);
     /// approx::assert_ulps_eq!(a.d(), 4096.0);
     /// ```
-    #[inline]
     pub fn new(val: f64, exp: i32) -> Self {
         let fr = libm::frexp(val);
         Self {

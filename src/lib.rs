@@ -28,9 +28,8 @@
 )]
 #![cfg_attr(feature = "map_first_last", feature(map_first_last))]
 
-use core::fmt::Debug;
 use extended_int as EI;
-use num::{Float, Integer, NumCast, PrimInt, Signed, Zero};
+use num::{Float, NumCast, PrimInt, Signed, Zero};
 use std::fmt;
 use std::hash::Hash;
 mod beach_line;
@@ -106,17 +105,14 @@ pub enum BvError {
 }
 
 /// This is the integer input type of the algorithm. i32 or i64.
-pub trait InputType:
-    fmt::Display + Hash + Integer + PrimInt + Debug + Default + Unpin + Signed
-{
-}
+pub trait InputType: Hash + PrimInt + Default + Unpin + Signed + fmt::Debug + fmt::Display {}
 
 impl InputType for i64 {}
 impl InputType for i32 {}
 
 /// This is the floating point output type of the algorithm. f32 or f64.
 pub trait OutputType:
-    Float + Debug + Zero + Unpin + fmt::Display + std::ops::MulAssign + Default
+    Float + Zero + Unpin + Default + std::ops::MulAssign + fmt::Debug + fmt::Display
 {
 }
 
@@ -125,6 +121,7 @@ impl OutputType for f64 {}
 
 #[inline(always)]
 /// Convert from the input integer type to an extended int
+/// todo: replace this with a from() that also casts the type
 pub(crate) fn cast_i_to_xi<I: InputType>(input: I) -> EI::ExtendedInt {
     EI::ExtendedInt::from(num::cast::<I, i64>(input).unwrap())
 }
@@ -141,7 +138,7 @@ pub fn cast<T: NumCast, U: NumCast>(n: T) -> U {
 /// Try to convert from one numeric type to another
 /// # Errors
 /// Will return an BvError::NumberConversion if the conversion fails
-pub fn try_cast<T: NumCast + Debug + Copy, U: NumCast>(n: T) -> Result<U, BvError> {
+pub fn try_cast<T: NumCast + fmt::Debug + Copy, U: NumCast>(n: T) -> Result<U, BvError> {
     NumCast::from(n).ok_or_else(|| {
         BvError::NumberConversion(format!(
             "Could not convert {:?} to {}",
@@ -162,7 +159,7 @@ pub(crate) trait GrowingVob {
     fn get_f(&self, bit: usize) -> bool;
 }
 
-impl<T: PrimInt + Debug> GrowingVob for vob::Vob<T> {
+impl<T: PrimInt + fmt::Debug> GrowingVob for vob::Vob<T> {
     #[inline]
     fn fill(initial_size: usize) -> Self {
         let mut v = Self::new_with_storage_type(0);

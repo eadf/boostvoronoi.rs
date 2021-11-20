@@ -1813,7 +1813,7 @@ impl<F: OutputType> Diagram<F> {
 }
 
 impl<F: OutputType> From<Diagram<F>> for SD::SyncDiagram<F> {
-    /// Converts a `Diagram` into a `SyncDiagram`
+    /// Converts a `Diagram` into a `SyncDiagram` by dropping the `std::cell::Cell` and `Rc`
     fn from(other: Diagram<F>) -> SD::SyncDiagram<F> {
         SD::SyncDiagram::new(
             other.cells_.into_iter().map(|x| x.get()).collect(),
