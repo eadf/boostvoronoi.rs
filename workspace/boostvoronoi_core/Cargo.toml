@@ -1,5 +1,5 @@
 [package]
-name = "boostvoronoi"
+name = "boostvoronoi_core"
 version = "0.9.3"
 authors = ["eadf <lacklustr@protonmail.com>"]
 edition = "2021"
@@ -15,49 +15,35 @@ exclude = [
     "examples/input_data/*"
 ]
 
-[workspace]
-members = ["workspace/boostvoronoi_core"]
-
 [dependencies]
-boostvoronoi_core = { path = "workspace/boostvoronoi_core"}
+num = "0.4"
+ordered-float = "2.8"
+ahash = "0.7"
+num-traits = "0.2"
+vob="3.0"
+thiserror = "1.0"
+bitflags = "1.3"
+libm = "0.2"
+smallvec = "1.7"
+itertools = "0.10"
+cpp_map = "0.1"
+approx = "0.5"
+# using "mint" feature will enable From traits
+mint = {version="0.5.8", optional=true}
+# using "geo" feature will enable From traits
+geo = {version="0.18", optional=true}
+# using "cgmath" feature will enable From traits
+cgmath = {version="0.18", optional=true}
+# using "glam" feature will enable From traits
+glam = {version="0.20", optional=true}
 
 # These features are only for debug purposes, should normally not be used
 [features]
 console_debug = []
 ce_corruption_check = []
 
-[[example]]
-name = "fltk_gui"
-path = "example/fltk_gui.rs"
-
-# this example is for development test purposes only
-[[example]]
-name = "main"
-path = "example/main.rs"
-
-# this is the README.md example
-[[example]]
-name = "readme"
-path = "example/readme.rs"
-
 [build-dependencies]
 version_check = "0.9"
-
-[dev-dependencies]
-geo = "0.18"
-fltk = "1.2"
-criterion = "0.3"
-approx = "0.5"
-regex = "1.5"
-rand = "0.8"
-lazy_static = "1.4"
-
-[[bench]]
-name = "bench"
-harness = false
-
-[profile.release]
-lto = true
 
 [badges]
 maintenance = { status = "actively-developed" }
