@@ -55,7 +55,7 @@ impl Debug for SiteIndex {
 
 /// Predicate utilities. Operates with the coordinate types that could
 /// be converted to the 32-bit signed integer without precision loss.
-/// Todo! give this a lookover
+// Todo! give this a lookover
 #[derive(Default)]
 pub(crate) struct Predicates {}
 
@@ -76,7 +76,7 @@ impl Predicates {
     /// Compute robust cross_product: a1 * b2 - b1 * a2.
     /// It was mathematically proven that the result is correct
     /// with epsilon relative error equal to 1EPS.
-    /// TODO: this is supposed to use u32 if I==i32
+    // TODO: this is supposed to use u32 if I==i32
     #[inline(always)]
     pub(crate) fn robust_cross_product<I: InputType, F: OutputType>(
         a1: i64,

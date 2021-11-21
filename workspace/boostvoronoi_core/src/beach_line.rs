@@ -460,7 +460,7 @@ impl<I: InputType, F: OutputType> Hash for BeachLineNodeKey<I, F> {
 /// associated as a value with beach line bisector in the beach
 /// line. Contains pointer to the circle event in the circle event
 /// queue if the edge corresponds to the right bisector of the circle event.
-/// Todo! this should be rust:ified and made into an Enum
+// Todo! this should be rust:ified and made into an Enum
 #[derive(Copy, Clone, Debug)]
 pub struct BeachLineNodeData {
     circle_event_: Option<VC::CircleEventIndex>,

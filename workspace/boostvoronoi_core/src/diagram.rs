@@ -29,8 +29,6 @@ use std::rc::Rc;
 
 pub type SourceIndex = usize;
 
-///! See <https://www.boost.org/doc/libs/1_76_0/libs/polygon/doc/voronoi_diagram.htm>
-
 /// Typed container for cell indices
 #[derive(Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub struct CellIndex(pub usize);
@@ -64,7 +62,7 @@ impl fmt::Debug for VertexIndex {
 pub type ColorType = u32;
 
 /// Represents category of the input source that forms Voronoi cell.
-/// Todo: sort out all of these bits, seems like they overlap in functionality
+// Todo: sort out all of these bits, seems like they overlap in functionality
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub(crate) struct ColorBits(pub ColorType);
 
@@ -116,8 +114,7 @@ pub enum SourceCategory {
 ///   2) id of the incident edge
 ///   3) mutable color member
 /// Cell may contain point or segment site inside.
-///
-/// TODO! fix the name confusion "initial index" & "source index" referring to the same thing.
+// TODO: fix the name confusion "initial index" & "source index" referring to the same thing.
 #[derive(Copy, Clone)]
 pub struct Cell {
     // sorted_index of the site event
@@ -652,7 +649,9 @@ pub type CellType = Rc<cell::Cell<Cell>>;
 pub type EdgeType = Rc<cell::Cell<Edge>>;
 pub type VertexType<F> = Rc<cell::Cell<Vertex<F>>>;
 
-/// Voronoi output data structure.
+/// Voronoi output data structure based on data wrapped in `Rc<Cell<T>>`.
+/// See the `SyncDiagram` for a version of this structure without the `Rc<Cell>`.
+///
 /// CCW ordering is used on the faces perimeter and around the vertices.
 /// Mandatory reading: <https://www.boost.org/doc/libs/1_76_0/libs/polygon/doc/voronoi_diagram.htm>
 #[derive(Default, Debug)]
@@ -663,7 +662,7 @@ pub struct Diagram<F: OutputType> {
 }
 
 impl<F: OutputType> Diagram<F> {
-    pub fn new(input_size: usize) -> Self {
+    pub(crate) fn new(input_size: usize) -> Self {
         Self {
             cells_: Vec::<CellType>::with_capacity(input_size),
             vertices_: Vec::<VertexType<F>>::with_capacity(input_size),
@@ -736,7 +735,7 @@ impl<F: OutputType> Diagram<F> {
 
     /// Return the edge represented as an straight line
     /// if the edge does not exists or if it lacks v0 or v1; None will be returned.
-    /// TODO: this looks like an into() candidate
+    // TODO: this looks like an into() candidate
     pub(crate) fn edge_as_line_(&self, edge: Option<EdgeIndex>) -> Option<[F; 4]> {
         let v0 = self.vertex_get_(self.edge_get_vertex0_(edge));
         let v1 = self.vertex_get_(self.edge_get_vertex1_(edge));

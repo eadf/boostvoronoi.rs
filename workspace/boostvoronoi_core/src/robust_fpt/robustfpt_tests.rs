@@ -7,7 +7,7 @@ use num::{Float, Num, NumCast, Zero};
 
 #[test]
 /// Add and sub
-/// Todo: add tests of re
+// Todo: add tests of re
 fn sum_1() {
     for a_ in -10..10 {
         for b_ in (-10..10).rev() {

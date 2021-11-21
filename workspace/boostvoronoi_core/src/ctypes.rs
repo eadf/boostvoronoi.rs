@@ -26,7 +26,7 @@ pub(crate) fn format_id(value: Option<usize>) -> String {
 /// then they are ordered the same way when their bits are reinterpreted as
 /// sign-magnitude integers. Values are considered to be almost equal if
 /// their integer bits reinterpretations differ in not more than maxUlps units.
-/// todo: replace with some function from approx
+// todo: replace with some function from approx
 pub(crate) fn ulp_comparison(a: f64, b: f64, max_ulps: u64) -> Ordering {
     // Reinterpret double bits as 64-bit "signed" integer.
     let mut ll_a: u64 = a.to_bits();

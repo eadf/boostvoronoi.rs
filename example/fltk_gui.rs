@@ -498,7 +498,7 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
     pub fn default() -> Self {
         Self {
             screen_aabb: BV::Aabb2::<F>::new_from_i32::<I>(0, 0, FW, FH),
-            diagram: BV::Diagram::<F>::new(0),
+            diagram: BV::Diagram::<F>::default(),
             points_aabb: BV::Aabb2::<F>::default(),
             point_data_: Vec::<BV::Point<I>>::new(),
             segment_data_: Vec::<BV::Line<I>>::new(),

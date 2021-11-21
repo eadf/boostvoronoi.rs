@@ -38,8 +38,8 @@ mod tests;
 /// of input geometries.
 ///
 /// CONTRACT:
-/// 1) Input geometries should have integral (e.g. int32, int64) coordinate type.
-/// 2) Input geometries should not intersect except their endpoints.
+/// 1) Input geometries should be of signed integer type (e.g. i32, i64).
+/// 2) Input geometries should never intersect except at their endpoints.
 ///
 /// IMPLEMENTATION DETAILS:
 /// Each input point creates one input site. Each input segment creates three
