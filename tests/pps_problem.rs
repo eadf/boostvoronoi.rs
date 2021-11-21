@@ -1,7 +1,5 @@
-use boostvoronoi::builder as VB;
-use boostvoronoi::diagram as VD;
-use boostvoronoi::file_reader as FR;
-use boostvoronoi::BvError;
+use boostvoronoi as BV;
+use boostvoronoi::prelude::*;
 use std::io::{BufReader, Cursor};
 
 mod common;
@@ -12,16 +10,16 @@ type F = f64;
 
 #[test]
 fn pps_problem_1() -> Result<(), BvError> {
-    let output: VD::Diagram<F> = {
+    let output: Diagram<F> = {
         let input = r#"0
 3
 -5138 -5149 -5038 -5142
 -5042 -5069 -5165 -5162
 -5011 -5195 -5404 -5134
 "#;
-        let mut vb = VB::Builder::<I, F>::default();
+        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
+        let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.build()?
@@ -37,7 +35,7 @@ fn pps_problem_1() -> Result<(), BvError> {
     let cell = output.cells()[1].get();
     assert_eq!(cell.id().0, 1);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -50,7 +48,7 @@ fn pps_problem_1() -> Result<(), BvError> {
     let cell = output.cells()[3].get();
     assert_eq!(cell.id().0, 3);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -63,7 +61,7 @@ fn pps_problem_1() -> Result<(), BvError> {
     let cell = output.cells()[5].get();
     assert_eq!(cell.id().0, 5);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -128,16 +126,16 @@ fn pps_problem_1() -> Result<(), BvError> {
 
 #[test]
 fn pps_problem_2() -> Result<(), BvError> {
-    let output: VD::Diagram<F> = {
+    let output: BV::Diagram<F> = {
         let input = r#"0
 3
 -5205 -5210 -5095 -5152
 -5166 -5197 -5099 -5209
 -5029 -5002 -5500 -5319
 "#;
-        let mut vb = VB::Builder::<I, F>::default();
+        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
+        let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.build()?
@@ -153,7 +151,7 @@ fn pps_problem_2() -> Result<(), BvError> {
     let cell = output.cells()[1].get();
     assert_eq!(cell.id().0, 1);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -166,7 +164,7 @@ fn pps_problem_2() -> Result<(), BvError> {
     let cell = output.cells()[3].get();
     assert_eq!(cell.id().0, 3);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -179,7 +177,7 @@ fn pps_problem_2() -> Result<(), BvError> {
     let cell = output.cells()[5].get();
     assert_eq!(cell.id().0, 5);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -244,16 +242,16 @@ fn pps_problem_2() -> Result<(), BvError> {
 
 #[test]
 fn pps_problem_3() -> Result<(), BvError> {
-    let output: VD::Diagram<F> = {
+    let output: BV::Diagram<F> = {
         let input = r#"0
 3
 759 -242 631 128
 189 -303 843 693
 -911 -920 921 853
 "#;
-        let mut vb = VB::Builder::<I, F>::default();
+        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
+        let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.build()?
@@ -269,7 +267,7 @@ fn pps_problem_3() -> Result<(), BvError> {
     let cell = output.cells()[1].get();
     assert_eq!(cell.id().0, 1);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -282,7 +280,7 @@ fn pps_problem_3() -> Result<(), BvError> {
     let cell = output.cells()[3].get();
     assert_eq!(cell.id().0, 3);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -295,7 +293,7 @@ fn pps_problem_3() -> Result<(), BvError> {
     let cell = output.cells()[5].get();
     assert_eq!(cell.id().0, 5);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -360,16 +358,16 @@ fn pps_problem_3() -> Result<(), BvError> {
 
 #[test]
 fn pps_problem_4() -> Result<(), BvError> {
-    let output: VD::Diagram<F> = {
+    let output: BV::Diagram<F> = {
         let input = r#"0
 3
 580 -833 552 -566
 -671 955 604 -936
 535 -110 412 -549
 "#;
-        let mut vb = VB::Builder::<I, F>::default();
+        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
+        let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.build()?
@@ -385,7 +383,7 @@ fn pps_problem_4() -> Result<(), BvError> {
     let cell = output.cells()[1].get();
     assert_eq!(cell.id().0, 1);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -398,7 +396,7 @@ fn pps_problem_4() -> Result<(), BvError> {
     let cell = output.cells()[3].get();
     assert_eq!(cell.id().0, 3);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -417,7 +415,7 @@ fn pps_problem_4() -> Result<(), BvError> {
     let cell = output.cells()[6].get();
     assert_eq!(cell.id().0, 6);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -476,16 +474,16 @@ fn pps_problem_4() -> Result<(), BvError> {
 
 #[test]
 fn pps_problem_5() -> Result<(), BvError> {
-    let output: VD::Diagram<F> = {
+    let output: BV::Diagram<F> = {
         let input = r#"0
 3
 963 -74 -944 707
 694 281 853 211
 326 220 803 441
 "#;
-        let mut vb = VB::Builder::<I, F>::default();
+        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
+        let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.build()?
@@ -501,7 +499,7 @@ fn pps_problem_5() -> Result<(), BvError> {
     let cell = output.cells()[1].get();
     assert_eq!(cell.id().0, 1);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -514,7 +512,7 @@ fn pps_problem_5() -> Result<(), BvError> {
     let cell = output.cells()[3].get();
     assert_eq!(cell.id().0, 3);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -527,7 +525,7 @@ fn pps_problem_5() -> Result<(), BvError> {
     let cell = output.cells()[5].get();
     assert_eq!(cell.id().0, 5);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -592,16 +590,16 @@ fn pps_problem_5() -> Result<(), BvError> {
 
 #[test]
 fn pps_problem_6() -> Result<(), BvError> {
-    let output: VD::Diagram<F> = {
+    let output: BV::Diagram<F> = {
         let input = r#"0
 3
 415 -54 955 703
 976 38 -916 -467
 909 424 962 401
 "#;
-        let mut vb = VB::Builder::<I, F>::default();
+        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
+        let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.build()?
@@ -617,7 +615,7 @@ fn pps_problem_6() -> Result<(), BvError> {
     let cell = output.cells()[1].get();
     assert_eq!(cell.id().0, 1);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -630,7 +628,7 @@ fn pps_problem_6() -> Result<(), BvError> {
     let cell = output.cells()[3].get();
     assert_eq!(cell.id().0, 3);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -643,7 +641,7 @@ fn pps_problem_6() -> Result<(), BvError> {
     let cell = output.cells()[5].get();
     assert_eq!(cell.id().0, 5);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -708,16 +706,16 @@ fn pps_problem_6() -> Result<(), BvError> {
 
 #[test]
 fn pps_problem_7() -> Result<(), BvError> {
-    let output: VD::Diagram<F> = {
+    let output: BV::Diagram<F> = {
         let input = r#"0
 3
 365 113 741 366
 768 -67 601 187
 -814 662 817 -285
 "#;
-        let mut vb = VB::Builder::<I, F>::default();
+        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
+        let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         vb.build()?
@@ -732,7 +730,7 @@ fn pps_problem_7() -> Result<(), BvError> {
     let cell = output.cells()[1].get();
     assert_eq!(cell.id().0, 1);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -745,7 +743,7 @@ fn pps_problem_7() -> Result<(), BvError> {
     let cell = output.cells()[3].get();
     assert_eq!(cell.id().0, 3);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -758,7 +756,7 @@ fn pps_problem_7() -> Result<(), BvError> {
     let cell = output.cells()[5].get();
     assert_eq!(cell.id().0, 5);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);

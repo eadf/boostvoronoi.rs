@@ -20,7 +20,6 @@ use crate::site_event as VSE;
 #[cfg(feature = "console_debug")]
 use crate::t;
 use crate::{
-    cast,
     geometry::{Line, Point},
     tln, BvError, InputType, OutputType,
 };
@@ -54,8 +53,8 @@ mod tests;
 /// correspond to the neighboring sites that form a bisector and values map to
 /// the corresponding Voronoi edges in the output data structure.
 /// ```
-/// # use boostvoronoi::geometry::{Point,Line};
-/// # use boostvoronoi::builder::Builder;
+/// # use boostvoronoi_core::geometry::{Point,Line};
+/// # use boostvoronoi_core::builder::Builder;
 ///
 /// type I = i32; // this is the integer input type
 /// type F = f64; // this is the float output type (circle event coordinates)
@@ -66,8 +65,10 @@ mod tests;
 /// let s = vec![Line::new(Point{x:10_i32, y:11}, Point{x:12, y:13})];
 /// let mut vb = Builder::<I, F>::default();
 ///
-/// // you will have to keep track of the input geometry. it will be referenced as
+/// // You will have to keep track of the input geometry. it will be referenced as
 /// // input geometry indices in the output.
+/// // `with_vertices()` and `with_segments()` accepts iterators of anything that implements
+/// // `Into()` for `Point` and `Line`
 /// vb.with_vertices(p.iter()).unwrap();
 /// vb.with_segments(s.iter()).unwrap();
 ///
@@ -973,58 +974,4 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
         }
         tln!("#site_events={}", self.site_events_.len());
     }
-}
-
-/// Helper function: converts a slice of \[\[integer,integer\]\] into input data for the Builder.
-/// You should use the From traits instead, this function performs a (potentially) redundant type conversion.
-pub fn to_points<I1: InputType, I2: InputType>(points: &[[I1; 2]]) -> Vec<Point<I2>> {
-    points
-        .iter()
-        .map(|x| [cast::<I1, I2>(x[0]), cast::<I1, I2>(x[1])].into())
-        .collect()
-}
-
-/// helper function: converts and casts a slice of \[\[integer,integer,integer,integer\]\] into
-/// input data for the Builder.
-/// You should use the From traits instead, this function performs a (potentially) redundant type conversion.
-pub fn to_segments<I1: InputType, I2: InputType>(segments: &[[I1; 4]]) -> Vec<Line<I2>> {
-    segments
-        .iter()
-        .map(|x| {
-            [
-                cast::<I1, I2>(x[0]),
-                cast::<I1, I2>(x[1]),
-                cast::<I1, I2>(x[2]),
-                cast::<I1, I2>(x[3]),
-            ]
-            .into()
-        })
-        .collect()
-}
-
-/// helper function: converts and casts a slice of \[\[integer,integer,integer,integer\]\] into
-/// input data for the Builder.
-/// You should use the From traits instead, this function performs a (potentially) redundant type conversion.
-pub fn to_segments_offset<I1: InputType, I2: InputType>(
-    points: &[[I1; 4]],
-    scale_x: f64,
-    scale_y: f64,
-    dx: i64,
-    dy: i64,
-) -> Vec<Line<I2>> {
-    let fx = |x: I1| cast::<f64, I2>(cast::<I1, f64>(x) * scale_x) + cast::<i64, I2>(dx);
-    let fy = |y: I1| cast::<f64, I2>(cast::<I1, f64>(y) * scale_y) + cast::<i64, I2>(dy);
-    points
-        .iter()
-        .map(|x| Line {
-            start: Point {
-                x: fx(x[0]),
-                y: fy(x[1]),
-            },
-            end: Point {
-                x: fx(x[2]),
-                y: fy(x[3]),
-            },
-        })
-        .collect()
 }

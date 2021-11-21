@@ -35,7 +35,7 @@ pub struct ExtendedInt {
 impl<I: InputType> From<I> for ExtendedInt {
     #[inline]
     ///```
-    /// # use boostvoronoi::extended_int::ExtendedInt;
+    /// # use boostvoronoi_core::extended_int::ExtendedInt;
     ///
     /// let aa = 41231332_f64;
     /// let a = ExtendedInt::from(aa as i32);
@@ -351,7 +351,7 @@ impl ops::Add for ExtendedInt {
     type Output = Self;
     /// Adds `self` to `that` returning a new object containing the result
     /// ```
-    /// # use boostvoronoi::extended_int::ExtendedInt;
+    /// # use boostvoronoi_core::extended_int::ExtendedInt;
     ///
     /// let aa = 472_f64;
     /// let bb = 147_f64;
@@ -371,7 +371,7 @@ impl<'a, 'b> ops::Add<&'b ExtendedInt> for &'a ExtendedInt {
     type Output = ExtendedInt;
     /// Adds `self` to `that` returning a new object containing the result
     /// ```
-    /// # use boostvoronoi::extended_int::ExtendedInt;
+    /// # use boostvoronoi_core::extended_int::ExtendedInt;
     ///
     /// let aa = 472_f64;
     /// let bb = 147_f64;
@@ -391,7 +391,7 @@ impl<'b> ops::Add<&'b ExtendedInt> for ExtendedInt {
     type Output = ExtendedInt;
     /// Adds `self` to `that` returning a new object containing the result
     /// ```
-    /// # use boostvoronoi::extended_int::ExtendedInt;
+    /// # use boostvoronoi_core::extended_int::ExtendedInt;
     ///
     /// let aa = 472_f64;
     /// let bb = 147_f64;
@@ -411,7 +411,7 @@ impl ops::Sub for ExtendedInt {
     type Output = Self;
     /// Subtracts `that` from `self` returning a new object containing the result
     /// ```
-    /// # use boostvoronoi::extended_int::ExtendedInt;
+    /// # use boostvoronoi_core::extended_int::ExtendedInt;
     ///
     /// let aa = 4727377593577731_f64;
     /// let bb = 759935777381_f64;
@@ -431,7 +431,7 @@ impl<'a, 'b> ops::Sub<&'b ExtendedInt> for &'a ExtendedInt {
     type Output = ExtendedInt;
     /// Subtracts `that` from `self` returning a new object containing the result
     /// ```
-    /// # use boostvoronoi::extended_int::ExtendedInt;
+    /// # use boostvoronoi_core::extended_int::ExtendedInt;
     ///
     /// let aa = 4727377593577731_f64;
     /// let bb = 759935777381_f64;
@@ -451,7 +451,7 @@ impl<'b> ops::Sub<&'b ExtendedInt> for ExtendedInt {
     type Output = ExtendedInt;
     /// Subtracts `that` from `self` returning a new object containing the result
     /// ```
-    /// # use boostvoronoi::extended_int::ExtendedInt;
+    /// # use boostvoronoi_core::extended_int::ExtendedInt;
     ///
     /// let aa = 4727377593577731_f64;
     /// let bb = 759935777381_f64;
@@ -471,7 +471,7 @@ impl ops::Mul for ExtendedInt {
     type Output = Self;
     /// Multiplies `self` with `that` returning a new object containing the result
     /// ```
-    /// # use boostvoronoi::extended_int::ExtendedInt;
+    /// # use boostvoronoi_core::extended_int::ExtendedInt;
     ///
     /// let aa = 4727377593577731_f64;
     /// let bb = 759935777381_f64;
@@ -491,7 +491,7 @@ impl<'a, 'b> ops::Mul<&'b ExtendedInt> for &'a ExtendedInt {
     type Output = ExtendedInt;
     /// Multiplies `self` with `that` returning a new object containing the result
     /// ```
-    /// # use boostvoronoi::extended_int::ExtendedInt;
+    /// # use boostvoronoi_core::extended_int::ExtendedInt;
     ///
     /// let aa = 4727377593577731_f64;
     /// let bb = 759935777381_f64;
@@ -511,7 +511,7 @@ impl<'b> ops::Mul<&'b ExtendedInt> for ExtendedInt {
     type Output = ExtendedInt;
     /// Multiplies `self` with `that` returning a new object containing the result
     /// ```
-    /// # use boostvoronoi::extended_int::ExtendedInt;
+    /// # use boostvoronoi_core::extended_int::ExtendedInt;
     ///
     /// let aa = 4727377593577731_f64;
     /// let bb = 759935777381_f64;
@@ -531,7 +531,7 @@ impl<'b> ops::Mul<i32> for ExtendedInt {
     type Output = ExtendedInt;
     /// Multiplies `self` with `that` returning a new object containing the result
     /// ```
-    /// # use boostvoronoi::extended_int::ExtendedInt;
+    /// # use boostvoronoi_core::extended_int::ExtendedInt;
     ///
     /// let aa = 4727377593577731_f64;
     /// let bb = 759935_f64;
@@ -552,7 +552,7 @@ impl ops::Neg for ExtendedInt {
     type Output = Self;
     /// Negates the value of `self`
     /// ```
-    /// # use boostvoronoi::extended_int::ExtendedInt;
+    /// # use boostvoronoi_core::extended_int::ExtendedInt;
     ///
     /// let aa = 4727377593577731_f64;
     /// let a = -ExtendedInt::from(aa as i64);

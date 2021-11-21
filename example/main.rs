@@ -1,6 +1,4 @@
-use boostvoronoi::builder as VB;
-use boostvoronoi::file_reader as FR;
-use boostvoronoi::BvError;
+use boostvoronoi::{prelude::*, read_boost_input_buffer};
 use std::io::{BufReader, Cursor};
 
 type I = i64;
@@ -18,9 +16,9 @@ fn main() -> Result<(), BvError> {
 9100000 0 10000000 10000000
 10000000 10000000 0 10000000
 "#;
-        let vb = VB::Builder::<I, F>::default();
+        let vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
+        let (points, segments) = read_boost_input_buffer::<I, _>(br)?;
 
         println!("-------\n{}", points.len());
         for p in points.iter() {
@@ -42,7 +40,7 @@ fn main() -> Result<(), BvError> {
         }
         println!("}};");
         println!("-------");
-        let mut vb = VB::Builder::<I, F>::default();
+        let mut vb = Builder::<I, F>::default();
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         //panic!();

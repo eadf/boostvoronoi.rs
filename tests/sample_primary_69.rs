@@ -1,8 +1,5 @@
-use boostvoronoi::builder as VB;
-use boostvoronoi::diagram as VD;
-use boostvoronoi::file_reader as FR;
-use boostvoronoi::sync_diagram as VS;
-use boostvoronoi::BvError;
+use boostvoronoi as BV;
+use boostvoronoi::prelude::*;
 use std::io::{BufReader, Cursor};
 
 mod common;
@@ -14,7 +11,7 @@ type F = f64;
 //#[ignore]
 #[test]
 fn sample_primary_069() -> Result<(), BvError> {
-    let output: VS::SyncDiagram<F> = {
+    let output: BV::SyncDiagram<F> = {
         let input = r#"0
 81
 -50026 -49688 -49978 -49701
@@ -99,9 +96,9 @@ fn sample_primary_069() -> Result<(), BvError> {
 -49025 -49437 -48988 -49427
 -49008 -49119 -48968 -49214
 "#;
-        let mut vb = VB::Builder::<I, F>::default();
+        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
+        let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         let output = vb.build()?;
@@ -119,7 +116,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[1];
     assert_eq!(cell.id().0, 1);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -132,7 +129,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[3];
     assert_eq!(cell.id().0, 3);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -151,7 +148,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[6];
     assert_eq!(cell.id().0, 6);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -164,7 +161,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[8];
     assert_eq!(cell.id().0, 8);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -183,7 +180,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[11];
     assert_eq!(cell.id().0, 11);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -202,7 +199,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[14];
     assert_eq!(cell.id().0, 14);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -215,7 +212,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[16];
     assert_eq!(cell.id().0, 16);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -228,7 +225,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[18];
     assert_eq!(cell.id().0, 18);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -241,7 +238,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[20];
     assert_eq!(cell.id().0, 20);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -260,7 +257,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[23];
     assert_eq!(cell.id().0, 23);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -273,7 +270,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[25];
     assert_eq!(cell.id().0, 25);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -286,7 +283,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[27];
     assert_eq!(cell.id().0, 27);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -299,7 +296,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[29];
     assert_eq!(cell.id().0, 29);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -324,7 +321,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[33];
     assert_eq!(cell.id().0, 33);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -337,7 +334,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[35];
     assert_eq!(cell.id().0, 35);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -386,7 +383,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[43];
     assert_eq!(cell.id().0, 43);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -411,7 +408,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[47];
     assert_eq!(cell.id().0, 47);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -430,7 +427,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[50];
     assert_eq!(cell.id().0, 50);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -455,7 +452,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[54];
     assert_eq!(cell.id().0, 54);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -468,7 +465,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[56];
     assert_eq!(cell.id().0, 56);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -481,7 +478,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[58];
     assert_eq!(cell.id().0, 58);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -494,7 +491,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[60];
     assert_eq!(cell.id().0, 60);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -507,7 +504,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[62];
     assert_eq!(cell.id().0, 62);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -544,7 +541,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[68];
     assert_eq!(cell.id().0, 68);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -557,7 +554,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[70];
     assert_eq!(cell.id().0, 70);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -576,7 +573,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[73];
     assert_eq!(cell.id().0, 73);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -589,7 +586,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[75];
     assert_eq!(cell.id().0, 75);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -602,7 +599,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[77];
     assert_eq!(cell.id().0, 77);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -615,7 +612,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[79];
     assert_eq!(cell.id().0, 79);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -634,7 +631,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[82];
     assert_eq!(cell.id().0, 82);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -677,7 +674,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[89];
     assert_eq!(cell.id().0, 89);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -702,7 +699,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[93];
     assert_eq!(cell.id().0, 93);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -715,7 +712,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[95];
     assert_eq!(cell.id().0, 95);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -734,14 +731,14 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[98];
     assert_eq!(cell.id().0, 98);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
     let cell = output.cells()[99];
     assert_eq!(cell.id().0, 99);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -754,7 +751,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[101];
     assert_eq!(cell.id().0, 101);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -767,7 +764,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[103];
     assert_eq!(cell.id().0, 103);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -780,7 +777,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[105];
     assert_eq!(cell.id().0, 105);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -799,7 +796,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[108];
     assert_eq!(cell.id().0, 108);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -818,7 +815,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[111];
     assert_eq!(cell.id().0, 111);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -837,7 +834,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[114];
     assert_eq!(cell.id().0, 114);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -862,7 +859,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[118];
     assert_eq!(cell.id().0, 118);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -875,7 +872,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[120];
     assert_eq!(cell.id().0, 120);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -906,7 +903,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[125];
     assert_eq!(cell.id().0, 125);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -937,7 +934,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[130];
     assert_eq!(cell.id().0, 130);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -956,14 +953,14 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[133];
     assert_eq!(cell.id().0, 133);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
     let cell = output.cells()[134];
     assert_eq!(cell.id().0, 134);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -994,7 +991,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[139];
     assert_eq!(cell.id().0, 139);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1031,7 +1028,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[145];
     assert_eq!(cell.id().0, 145);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1044,7 +1041,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[147];
     assert_eq!(cell.id().0, 147);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1057,7 +1054,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[149];
     assert_eq!(cell.id().0, 149);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1070,7 +1067,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[151];
     assert_eq!(cell.id().0, 151);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1089,7 +1086,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[154];
     assert_eq!(cell.id().0, 154);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1102,7 +1099,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[156];
     assert_eq!(cell.id().0, 156);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1115,7 +1112,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[158];
     assert_eq!(cell.id().0, 158);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1146,7 +1143,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[163];
     assert_eq!(cell.id().0, 163);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1159,7 +1156,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[165];
     assert_eq!(cell.id().0, 165);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1172,7 +1169,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[167];
     assert_eq!(cell.id().0, 167);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1197,7 +1194,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[171];
     assert_eq!(cell.id().0, 171);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1210,7 +1207,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[173];
     assert_eq!(cell.id().0, 173);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1223,7 +1220,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[175];
     assert_eq!(cell.id().0, 175);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1242,7 +1239,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[178];
     assert_eq!(cell.id().0, 178);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1255,7 +1252,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[180];
     assert_eq!(cell.id().0, 180);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1292,7 +1289,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[186];
     assert_eq!(cell.id().0, 186);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1311,7 +1308,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[189];
     assert_eq!(cell.id().0, 189);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1324,7 +1321,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[191];
     assert_eq!(cell.id().0, 191);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1337,7 +1334,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[193];
     assert_eq!(cell.id().0, 193);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1362,7 +1359,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[197];
     assert_eq!(cell.id().0, 197);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1393,7 +1390,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[202];
     assert_eq!(cell.id().0, 202);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1418,7 +1415,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[206];
     assert_eq!(cell.id().0, 206);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1431,7 +1428,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[208];
     assert_eq!(cell.id().0, 208);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1456,7 +1453,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[212];
     assert_eq!(cell.id().0, 212);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1481,7 +1478,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[216];
     assert_eq!(cell.id().0, 216);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1494,7 +1491,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[218];
     assert_eq!(cell.id().0, 218);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1507,7 +1504,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[220];
     assert_eq!(cell.id().0, 220);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1526,7 +1523,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[223];
     assert_eq!(cell.id().0, 223);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1545,7 +1542,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[226];
     assert_eq!(cell.id().0, 226);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1558,7 +1555,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[228];
     assert_eq!(cell.id().0, 228);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1589,7 +1586,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[233];
     assert_eq!(cell.id().0, 233);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1608,7 +1605,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[236];
     assert_eq!(cell.id().0, 236);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);
@@ -1621,7 +1618,7 @@ fn sample_primary_069() -> Result<(), BvError> {
     let cell = output.cells()[238];
     assert_eq!(cell.id().0, 238);
     let (_source_index, _cat) = cell.source_index_2();
-    assert_eq!(_cat, VD::SourceCategory::Segment);
+    assert_eq!(_cat, BV::SourceCategory::Segment);
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
     assert_eq!(cell.contains_segment(), true);

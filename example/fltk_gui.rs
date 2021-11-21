@@ -1,12 +1,9 @@
-use boostvoronoi::builder as VB;
-use boostvoronoi::diagram as VD;
-use boostvoronoi::diagram::EdgeIndex;
-use boostvoronoi::file_reader;
-use boostvoronoi::visual_utils as VU;
-use boostvoronoi::BvError;
-use boostvoronoi::{cast, geometry, try_cast, InputType, OutputType};
+use boostvoronoi as BV;
+use BV::prelude::*;
+
 use fltk::{app, button, dialog, draw, enums, frame, group, menu, prelude::*, window};
 use geo::prelude::Intersects;
+use geo_cr as geo;
 use ordered_float::OrderedFloat;
 use std::cell::{RefCell, RefMut};
 use std::rc::Rc;
@@ -26,7 +23,7 @@ const COORD_X_OFFSET: i32 = 5;
 const COORD_Y_OFFSET: i32 = 5;
 
 bitflags! {
-    pub struct ColorFlag: VD::ColorType {
+    pub struct ColorFlag: ColorType {
         const EXTERNAL     = 0b00000001;
         const PRIMARY      = 0b00000010;
         const CURVE        = 0b00000100;
@@ -86,7 +83,7 @@ struct SharedData {
     draw_flag: DrawFilterFlag,
     last_message: Option<GuiMessage>,
     visualizer: VoronoiVisualizer<IType, FType>,
-    last_click: Option<geometry::Point<IType>>,
+    last_click: Option<BV::Point<IType>>,
 }
 
 /// The Offscreen is slightly offset from the window.
@@ -376,9 +373,9 @@ fn main() -> Result<(), BvError> {
                     println!("{:?}", point.err().unwrap());
                     return false;
                 }
-                let point = geometry::Point::from(point.unwrap());
+                let point = BV::Point::from(point.unwrap());
                 if let Some(last_point) = shared_data_bm.last_click {
-                    let line = geometry::Line {
+                    let line = BV::Line {
                         start: last_point,
                         end: point,
                     };
@@ -411,7 +408,7 @@ fn main() -> Result<(), BvError> {
                             println!("{:?}", point.err().unwrap());
                             return false;
                         }
-                        let point = geometry::Point::from(point.unwrap());
+                        let point = BV::Point::from(point.unwrap());
                         shared_data_bm.visualizer.point_data_.push(point);
                     }
                     let _ = shared_data_bm.visualizer.build().unwrap();
@@ -488,31 +485,31 @@ fn main() -> Result<(), BvError> {
 
 /// struct to help deal with the voronoi diagram input and output
 pub struct VoronoiVisualizer<I: InputType, F: OutputType> {
-    screen_aabb: VU::Aabb2<F>,
-    diagram: VD::Diagram<F>,
-    points_aabb: VU::Aabb2<F>,
+    screen_aabb: BV::Aabb2<F>,
+    diagram: BV::Diagram<F>,
+    points_aabb: BV::Aabb2<F>,
 
-    point_data_: Vec<geometry::Point<I>>,
-    segment_data_: Vec<geometry::Line<I>>,
-    affine: VU::SimpleAffine<F>,
+    point_data_: Vec<BV::Point<I>>,
+    segment_data_: Vec<BV::Line<I>>,
+    affine: BV::SimpleAffine<F>,
 }
 
 impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
     pub fn default() -> Self {
         Self {
-            screen_aabb: VU::Aabb2::<F>::new_from_i32::<I>(0, 0, FW, FH),
-            diagram: VD::Diagram::<F>::new(0),
-            points_aabb: VU::Aabb2::<F>::default(),
-            point_data_: Vec::<geometry::Point<I>>::new(),
-            segment_data_: Vec::<geometry::Line<I>>::new(),
-            affine: VU::SimpleAffine::default(),
+            screen_aabb: BV::Aabb2::<F>::new_from_i32::<I>(0, 0, FW, FH),
+            diagram: BV::Diagram::<F>::new(0),
+            points_aabb: BV::Aabb2::<F>::default(),
+            point_data_: Vec::<BV::Point<I>>::new(),
+            segment_data_: Vec::<BV::Line<I>>::new(),
+            affine: BV::SimpleAffine::default(),
         }
     }
 
     /// recalculates the affine transformation, this should not be done every time
     /// the diagram is re-calculated or the screen will move around when adding new edges and points.
     pub fn re_calculate_affine(&mut self) -> Result<(), BvError> {
-        self.affine = VU::SimpleAffine::new::<I>(&self.points_aabb, &self.screen_aabb)?;
+        self.affine = BV::SimpleAffine::new::<I>(&self.points_aabb, &self.screen_aabb)?;
 
         // Flip the z axis because fltk uses quadrant 4 when drawing
         self.affine.scale[1] *= F::from(-1.0).unwrap();
@@ -550,7 +547,7 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
             }
             println!("}};");
         }
-        let mut vb = VB::Builder::<I, F>::default();
+        let mut vb = BV::Builder::<I, F>::default();
         vb.with_vertices(self.point_data_.iter())?;
         vb.with_segments(self.segment_data_.iter())?;
 
@@ -558,7 +555,7 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
         self.diagram = vb.build()?;
         println!("Result: found {} vertices", self.diagram.vertices().len());
         self.points_aabb = {
-            let mut aabb = VU::Aabb2::default();
+            let mut aabb = BV::Aabb2::default();
             for p in self.point_data_.iter() {
                 aabb.update_point(p);
             }
@@ -585,7 +582,7 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
     }
 
     // returns true if l intersects with any of the lines in self.segment_data_
-    fn self_intersecting_check(&self, l: &geometry::Line<I>) -> bool {
+    fn self_intersecting_check(&self, l: &BV::Line<I>) -> bool {
         let l_ = Self::line_i_to_f64(l);
         for s in self.segment_data_.iter() {
             // allow end point intersection
@@ -643,7 +640,7 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
     }
 
     /// Draw input points and endpoints of the input segments.
-    fn draw_input_points(&self, affine: &VU::SimpleAffine<F>) {
+    fn draw_input_points(&self, affine: &BV::SimpleAffine<F>) {
         let draw = |point: [F; 2]| {
             draw::draw_circle(cast::<F, f64>(point[0]), cast::<F, f64>(point[1]), 2.0);
         };
@@ -659,7 +656,7 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
     }
 
     /// Draw input segments.
-    fn draw_input_segments(&self, affine: &VU::SimpleAffine<F>) {
+    fn draw_input_segments(&self, affine: &BV::SimpleAffine<F>) {
         for i in self.segment_data_.iter() {
             let sp = affine.transform_p(&i.start);
             let ep = affine.transform_p(&i.end);
@@ -673,7 +670,7 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
     }
 
     /// Draw voronoi vertices aka circle events.
-    fn draw_vertices(&self, config: &SharedData, affine: &VU::SimpleAffine<F>) {
+    fn draw_vertices(&self, config: &SharedData, affine: &BV::SimpleAffine<F>) {
         let draw = |x: f64, y: f64| {
             draw::draw_circle(x, y, 1.0);
         };
@@ -702,7 +699,7 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
     }
 
     /// Draw voronoi edges.
-    fn draw_edges(&self, config: &SharedData, affine: &VU::SimpleAffine<F>) -> Result<(), BvError> {
+    fn draw_edges(&self, config: &SharedData, affine: &BV::SimpleAffine<F>) -> Result<(), BvError> {
         let draw_external = config.draw_flag.contains(DrawFilterFlag::EXTERNAL);
         let draw_primary = config.draw_flag.contains(DrawFilterFlag::PRIMARY);
         let draw_secondary = config.draw_flag.contains(DrawFilterFlag::SECONDARY);
@@ -824,8 +821,8 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
 
     fn clip_infinite_edge(
         &self,
-        affine: &VU::SimpleAffine<F>,
-        edge_id: VD::EdgeIndex,
+        affine: &BV::SimpleAffine<F>,
+        edge_id: BV::EdgeIndex,
         clipped_edge: &mut Vec<[F; 2]>,
     ) -> Result<(), BvError> {
         let edge = self.diagram.get_edge(edge_id)?;
@@ -914,8 +911,8 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
     /// sampled_edge should be 'screen' coordinates, i.e. affine transformed from voronoi output
     fn sample_curved_edge(
         &self,
-        affine: &VU::SimpleAffine<F>,
-        edge_id: VD::EdgeIndex,
+        affine: &BV::SimpleAffine<F>,
+        edge_id: BV::EdgeIndex,
         sampled_edge: &mut Vec<[F; 2]>,
     ) -> Result<(), BvError> {
         let max_dist = cast::<f64, F>(1E-3)
@@ -936,20 +933,20 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
         } else {
             self.retrieve_segment(cell_id)?
         };
-        VU::VoronoiVisualUtils::discretize::<I, F>(&point, segment, max_dist, affine, sampled_edge);
+        BV::VoronoiVisualUtils::discretize::<I, F>(&point, segment, max_dist, affine, sampled_edge);
         Ok(())
     }
 
     /// Retrieves a point from the voronoi input in the order it was presented to
     /// the voronoi builder
-    fn retrieve_point(&self, cell_id: VD::CellIndex) -> Result<geometry::Point<I>, BvError> {
+    fn retrieve_point(&self, cell_id: BV::CellIndex) -> Result<BV::Point<I>, BvError> {
         let (index, cat) = self.diagram.get_cell(cell_id)?.get().source_index_2();
         match cat {
-            VD::SourceCategory::SinglePoint => Ok(self.point_data_[index]),
-            VD::SourceCategory::SegmentStart => {
+            BV::SourceCategory::SinglePoint => Ok(self.point_data_[index]),
+            BV::SourceCategory::SegmentStart => {
                 Ok(self.segment_data_[index - self.point_data_.len()].start)
             }
-            VD::SourceCategory::Segment | VD::SourceCategory::SegmentEnd => {
+            BV::SourceCategory::Segment | BV::SourceCategory::SegmentEnd => {
                 Ok(self.segment_data_[index - self.point_data_.len()].end)
             }
         }
@@ -957,7 +954,7 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
 
     /// Retrieves a segment from the voronoi input in the order it was presented to
     /// the voronoi builder
-    fn retrieve_segment(&self, cell_id: VD::CellIndex) -> Result<&geometry::Line<I>, BvError> {
+    fn retrieve_segment(&self, cell_id: BV::CellIndex) -> Result<&BV::Line<I>, BvError> {
         let cell = self.diagram.get_cell(cell_id)?.get();
         let index = cell.source_index() - self.point_data_.len();
         Ok(&self.segment_data_[index])
@@ -978,381 +975,39 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
             [629, 342, 467, 207],
         ];
 
-        let _segments_rust_logo: [[i32; 4]; 350] = [
-            [402, 1580, 395, 1580],
-            [408, 1577, 402, 1580],
-            [476, 1573, 469, 1574],
-            [328, 1574, 322, 1572],
-            [335, 1571, 328, 1574],
-            [481, 1567, 476, 1573],
-            [322, 1572, 318, 1567],
-            [264, 1551, 257, 1553],
-            [548, 1550, 540, 1553],
-            [257, 1553, 250, 1549],
-            [552, 1544, 548, 1550],
-            [395, 1580, 370, 1543],
-            [429, 1543, 408, 1577],
-            [362, 1542, 335, 1571],
-            [469, 1574, 438, 1542],
-            [370, 1543, 362, 1542],
-            [438, 1542, 429, 1543],
-            [495, 1531, 481, 1567],
-            [318, 1567, 305, 1531],
-            [295, 1529, 264, 1551],
-            [540, 1553, 504, 1529],
-            [504, 1529, 495, 1531],
-            [305, 1531, 295, 1529],
-            [198, 1518, 191, 1518],
-            [613, 1515, 607, 1519],
-            [191, 1518, 185, 1513],
-            [393, 1513, 404, 1513],
-            [382, 1507, 393, 1513],
-            [616, 1508, 613, 1515],
-            [404, 1513, 415, 1506],
-            [558, 1506, 552, 1544],
-            [250, 1549, 241, 1506],
-            [241, 1506, 233, 1502],
-            [566, 1502, 558, 1506],
-            [233, 1502, 198, 1518],
-            [607, 1519, 566, 1502],
-            [377, 1497, 382, 1507],
-            [415, 1506, 420, 1496],
-            [614, 1469, 616, 1508],
-            [377, 1485, 377, 1497],
-            [420, 1496, 420, 1485],
-            [382, 1475, 377, 1485],
-            [420, 1485, 414, 1475],
-            [451, 1476, 471, 1472],
-            [318, 1469, 348, 1476],
-            [140, 1472, 133, 1471],
-            [667, 1470, 660, 1472],
-            [185, 1513, 185, 1469],
-            [392, 1469, 382, 1475],
-            [414, 1475, 403, 1469],
-            [403, 1469, 392, 1469],
-            [670, 1466, 667, 1470],
-            [133, 1471, 128, 1466],
-            [471, 1472, 510, 1459],
-            [185, 1469, 177, 1464],
-            [622, 1464, 614, 1469],
-            [289, 1458, 318, 1469],
-            [177, 1464, 140, 1472],
-            [660, 1472, 622, 1464],
-            [671, 1460, 670, 1466],
-            [262, 1445, 289, 1458],
-            [510, 1459, 545, 1440],
-            [348, 1476, 384, 1438],
-            [237, 1428, 262, 1445],
-            [405, 1435, 451, 1476],
-            [384, 1438, 395, 1433],
-            [395, 1433, 405, 1435],
-            [545, 1440, 577, 1417],
-            [128, 1466, 136, 1423],
-            [663, 1423, 671, 1460],
-            [213, 1409, 237, 1428],
-            [668, 1415, 663, 1423],
-            [136, 1423, 131, 1415],
-            [131, 1415, 92, 1417],
-            [707, 1417, 668, 1415],
-            [713, 1414, 707, 1417],
-            [92, 1417, 85, 1414],
-            [717, 1409, 713, 1414],
-            [85, 1414, 82, 1409],
-            [577, 1417, 606, 1390],
-            [717, 1402, 717, 1409],
-            [82, 1409, 82, 1402],
-            [192, 1389, 213, 1409],
-            [490, 1389, 192, 1389],
-            [501, 1387, 490, 1389],
-            [606, 1390, 630, 1358],
-            [701, 1367, 717, 1402],
-            [82, 1402, 98, 1367],
-            [529, 1378, 501, 1387],
-            [705, 1359, 701, 1367],
-            [98, 1367, 94, 1359],
-            [630, 1358, 641, 1341],
-            [94, 1359, 56, 1352],
-            [743, 1352, 705, 1359],
-            [56, 1352, 50, 1350],
-            [749, 1350, 743, 1352],
-            [50, 1350, 47, 1343],
-            [752, 1342, 749, 1350],
-            [47, 1343, 49, 1336],
-            [750, 1336, 752, 1342],
-            [584, 1329, 556, 1362],
-            [119, 1307, 132, 1309],
-            [666, 1308, 677, 1306],
-            [132, 1309, 142, 1305],
-            [728, 1305, 750, 1336],
-            [49, 1336, 71, 1305],
-            [654, 1304, 666, 1308],
-            [728, 1304, 728, 1305],
-            [172, 1304, 211, 1304],
-            [590, 1295, 584, 1329],
-            [211, 1304, 211, 1126],
-            [641, 1341, 622, 1296],
-            [173, 1301, 172, 1304],
-            [337, 1302, 337, 1250],
-            [337, 1302, 432, 1302],
-            [432, 1302, 435, 1302],
-            [111, 1299, 119, 1307],
-            [677, 1306, 686, 1298],
-            [71, 1305, 69, 1299],
-            [69, 1299, 69, 1298],
-            [150, 1295, 142, 1305],
-            [647, 1295, 654, 1304],
-            [69, 1298, 69, 1295],
-            [730, 1295, 728, 1304],
-            [435, 1302, 457, 1292],
-            [106, 1289, 111, 1299],
-            [686, 1298, 690, 1288],
-            [150, 1295, 152, 1284],
-            [646, 1283, 647, 1295],
-            [69, 1295, 33, 1282],
-            [767, 1282, 730, 1295],
-            [622, 1296, 613, 1278],
-            [108, 1277, 106, 1289],
-            [457, 1292, 465, 1275],
-            [690, 1288, 688, 1276],
-            [33, 1282, 27, 1277],
-            [772, 1276, 767, 1282],
-            [184, 1274, 173, 1301],
-            [152, 1284, 147, 1274],
-            [649, 1272, 646, 1283],
-            [773, 1271, 772, 1276],
-            [27, 1277, 26, 1270],
-            [582, 1263, 590, 1295],
-            [115, 1268, 108, 1277],
-            [613, 1278, 613, 1267],
-            [688, 1276, 681, 1267],
-            [147, 1274, 138, 1266],
-            [659, 1265, 649, 1272],
-            [770, 1265, 773, 1271],
-            [181, 1263, 184, 1274],
-            [126, 1264, 115, 1268],
-            [138, 1266, 126, 1264],
-            [681, 1267, 670, 1263],
-            [465, 1275, 458, 1260],
-            [670, 1263, 659, 1265],
-            [613, 1267, 618, 1258],
-            [174, 1256, 181, 1263],
-            [123, 1233, 174, 1256],
-            [458, 1260, 438, 1252],
-            [438, 1252, 428, 1250],
-            [428, 1250, 337, 1250],
-            [26, 1270, 58, 1238],
-            [742, 1238, 770, 1265],
-            [618, 1258, 675, 1231],
-            [742, 1231, 742, 1238],
-            [548, 1226, 582, 1263],
-            [675, 1231, 676, 1231],
-            [742, 1230, 742, 1231],
-            [58, 1238, 57, 1230],
-            [533, 1217, 548, 1226],
-            [121, 1213, 123, 1233],
-            [57, 1230, 23, 1209],
-            [742, 1230, 776, 1209],
-            [550, 1203, 533, 1217],
-            [780, 1204, 776, 1209],
-            [23, 1209, 20, 1203],
-            [558, 1195, 550, 1203],
-            [780, 1198, 780, 1204],
-            [20, 1203, 20, 1196],
-            [562, 1190, 558, 1195],
-            [776, 1192, 780, 1198],
-            [565, 1184, 562, 1190],
-            [676, 1231, 677, 1182],
-            [569, 1178, 565, 1184],
-            [123, 1177, 121, 1213],
-            [677, 1182, 647, 1182],
-            [647, 1182, 645, 1180],
-            [337, 1175, 411, 1175],
-            [337, 1124, 337, 1175],
-            [411, 1175, 417, 1174],
-            [742, 1171, 776, 1192],
-            [20, 1196, 57, 1171],
-            [574, 1162, 569, 1178],
-            [417, 1174, 434, 1166],
-            [645, 1180, 644, 1158],
-            [742, 1162, 742, 1171],
-            [57, 1171, 58, 1162],
-            [126, 1151, 123, 1177],
-            [434, 1166, 450, 1144],
-            [450, 1144, 453, 1137],
-            [644, 1158, 637, 1137],
-            [580, 1138, 574, 1162],
-            [58, 1162, 29, 1136],
-            [770, 1136, 742, 1162],
-            [132, 1126, 126, 1151],
-            [588, 1130, 580, 1138],
-            [773, 1129, 770, 1136],
-            [29, 1136, 26, 1129],
-            [637, 1137, 623, 1127],
-            [211, 1126, 132, 1126],
-            [605, 1125, 588, 1130],
-            [623, 1127, 605, 1125],
-            [406, 1124, 337, 1124],
-            [771, 1123, 773, 1129],
-            [26, 1129, 28, 1122],
-            [407, 1122, 406, 1124],
-            [766, 1119, 771, 1123],
-            [730, 1105, 766, 1119],
-            [28, 1122, 69, 1105],
-            [728, 1096, 730, 1105],
-            [69, 1105, 71, 1096],
-            [453, 1137, 464, 1085],
-            [464, 1085, 467, 1073],
-            [71, 1096, 49, 1065],
-            [752, 1060, 728, 1096],
-            [49, 1065, 47, 1059],
-            [47, 1059, 50, 1052],
-            [749, 1052, 752, 1060],
-            [467, 1073, 485, 1048],
-            [50, 1052, 56, 1048],
-            [743, 1048, 749, 1052],
-            [705, 1042, 743, 1048],
-            [56, 1048, 94, 1042],
-            [407, 1040, 407, 1122],
-            [485, 1048, 502, 1038],
-            [407, 1039, 407, 1040],
-            [502, 1038, 506, 1038],
-            [405, 1038, 407, 1039],
-            [621, 1038, 624, 1038],
-            [175, 1038, 405, 1038],
-            [506, 1038, 621, 1038],
-            [94, 1042, 98, 1034],
-            [701, 1034, 705, 1042],
-            [255, 1019, 200, 1010],
-            [548, 1019, 537, 1017],
-            [711, 1012, 701, 1034],
-            [265, 1015, 255, 1019],
-            [624, 1038, 600, 1010],
-            [537, 1017, 529, 1010],
-            [200, 1010, 175, 1038],
-            [600, 1010, 598, 1008],
-            [270, 1007, 265, 1015],
-            [598, 1008, 548, 1019],
-            [98, 1034, 82, 999],
-            [717, 999, 711, 1012],
-            [717, 991, 717, 999],
-            [82, 999, 82, 991],
-            [227, 991, 238, 990],
-            [558, 989, 571, 990],
-            [714, 987, 717, 991],
-            [82, 991, 86, 987],
-            [216, 985, 227, 991],
-            [571, 990, 581, 984],
-            [238, 990, 248, 983],
-            [86, 987, 92, 984],
-            [707, 984, 714, 987],
-            [92, 984, 131, 986],
-            [668, 986, 707, 984],
-            [549, 982, 558, 989],
-            [666, 983, 668, 986],
-            [131, 986, 136, 978],
-            [663, 978, 666, 983],
-            [210, 975, 216, 985],
-            [581, 984, 587, 974],
-            [248, 983, 253, 972],
-            [544, 972, 549, 982],
-            [209, 963, 210, 975],
-            [587, 974, 588, 962],
-            [281, 959, 270, 1007],
-            [253, 972, 252, 961],
-            [544, 960, 544, 972],
-            [214, 953, 209, 963],
-            [588, 962, 582, 952],
-            [252, 961, 247, 952],
-            [551, 951, 544, 960],
-            [283, 951, 281, 959],
-            [291, 947, 283, 951],
-            [529, 1010, 514, 950],
-            [224, 947, 214, 953],
-            [236, 946, 247, 952],
-            [582, 952, 572, 946],
-            [561, 945, 551, 951],
-            [236, 946, 224, 947],
-            [572, 946, 561, 945],
-            [136, 978, 128, 941],
-            [514, 950, 478, 936],
-            [329, 934, 291, 947],
-            [671, 935, 663, 978],
-            [128, 941, 129, 934],
-            [614, 932, 622, 937],
-            [177, 937, 185, 932],
-            [666, 930, 671, 935],
-            [129, 934, 134, 929],
-            [478, 936, 439, 928],
-            [622, 937, 659, 929],
-            [659, 929, 666, 930],
-            [134, 929, 177, 937],
-            [368, 927, 329, 934],
-            [439, 928, 419, 926],
-            [389, 925, 368, 927],
-            [419, 926, 389, 925],
-            [558, 895, 566, 899],
-            [233, 899, 241, 895],
-            [185, 932, 183, 893],
-            [614, 888, 614, 932],
-            [183, 893, 186, 887],
-            [198, 883, 233, 899],
-            [566, 899, 601, 883],
-            [609, 883, 614, 888],
-            [186, 887, 191, 882],
-            [191, 882, 198, 883],
-            [601, 883, 609, 883],
-            [495, 870, 504, 872],
-            [295, 872, 305, 870],
-            [241, 895, 248, 857],
-            [552, 857, 558, 895],
-            [362, 858, 370, 858],
-            [429, 858, 438, 858],
-            [549, 851, 552, 857],
-            [248, 857, 251, 851],
-            [504, 872, 535, 850],
-            [542, 848, 549, 851],
-            [251, 851, 259, 848],
-            [259, 848, 295, 872],
-            [535, 850, 542, 848],
-            [305, 870, 318, 834],
-            [481, 834, 495, 870],
-            [438, 858, 464, 830],
-            [334, 829, 362, 858],
-            [318, 834, 322, 829],
-            [476, 828, 481, 834],
-            [464, 830, 470, 827],
-            [322, 829, 327, 827],
-            [327, 827, 334, 829],
-            [470, 827, 476, 828],
-            [370, 858, 391, 824],
-            [404, 821, 429, 858],
-            [391, 824, 397, 820],
-            [397, 820, 404, 821],
-            [556, 1362, 529, 1378],
-        ];
+        let _segments_rust_logo: [[i32; 4]; 350] = include!("input_data/rust_logo.rs");
 
         // Preparing Input Geometries.
         let (mut new_points, mut new_segments) = match example {
             Example::Simple => {
                 rv = "Simple example".to_string();
                 (
-                    Vec::<geometry::Point<I>>::default(),
-                    VB::to_segments::<i32, I>(&_simple_segments),
+                    Vec::<BV::Point<I>>::default(),
+                    _simple_segments
+                        .iter()
+                        .map(|l| Line::from(l).cast::<I>())
+                        .collect::<Vec<_>>(),
                 )
             }
             Example::Complex => {
                 rv = "Rust logo".to_string();
                 (
-                    Vec::<geometry::Point<I>>::default(),
-                    VB::to_segments::<i32, I>(&_segments_rust_logo),
+                    Vec::<BV::Point<I>>::default(),
+                    _segments_rust_logo
+                        .iter()
+                        .map(|l| Line::from(l).cast::<I>())
+                        .collect::<Vec<_>>(),
                 )
             }
             Example::Clean => {
                 rv = "Clean".to_string();
-                let clean: [[i32; 4]; 0] = [];
+                let clean: [[I; 4]; 0] = [];
                 (
-                    Vec::<geometry::Point<I>>::default(),
-                    VB::to_segments::<i32, I>(&clean),
+                    Vec::<BV::Point<I>>::default(),
+                    clean
+                        .iter()
+                        .map(|l| Line::<I>::from(l).cast::<I>())
+                        .collect::<Vec<_>>(),
                 )
             }
             Example::File => {
@@ -1364,22 +1019,22 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
                 chooser.show();
                 if let Some(filename) = chooser.filenames().first() {
                     if let Ok(file_parse_result) =
-                        file_reader::read_boost_input_file::<I>(filename.as_path())
+                        BV::read_boost_input_file::<I>(filename.as_path())
                     {
                         rv = filename.to_str().unwrap().to_string();
                         file_parse_result
                     } else {
                         rv = "Failed to read file".to_string();
                         (
-                            Vec::<geometry::Point<I>>::default(),
-                            Vec::<geometry::Line<I>>::default(),
+                            Vec::<BV::Point<I>>::default(),
+                            Vec::<BV::Line<I>>::default(),
                         )
                     }
                 } else {
                     rv = "Failed to read file".to_string();
                     (
-                        Vec::<geometry::Point<I>>::default(),
-                        Vec::<geometry::Line<I>>::default(),
+                        Vec::<BV::Point<I>>::default(),
+                        Vec::<BV::Line<I>>::default(),
                     )
                 }
             }
@@ -1390,9 +1045,9 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
     }
 
     #[inline(always)]
-    /// converts from geometry::Line to geo::Line.
-    /// I wonder why my nice geo::Line::from(geometry::Line) does not work here, feature gated?.
-    fn line_i_to_f64(value: &geometry::Line<I>) -> geo::Line<f64> {
+    /// converts from BV::Line to geo::Line.
+    /// I wonder why my nice geo::Line::from(BV::Line) does not work here, feature gated?.
+    fn line_i_to_f64(value: &BV::Line<I>) -> geo::Line<f64> {
         let ps = geo::Coordinate {
             x: cast::<I, f64>(value.start.x),
             y: cast::<I, f64>(value.start.y),

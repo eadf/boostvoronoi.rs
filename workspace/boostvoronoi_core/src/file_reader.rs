@@ -17,10 +17,7 @@ use std::io::{BufRead, BufReader};
 use std::path::Path;
 
 #[derive(Debug)]
-enum InputData<T>
-where
-    T: super::InputType,
-{
+enum InputData<T: super::InputType> {
     Number(usize),
     Point(geometry::Point<T>),
     Line(geometry::Line<T>),
@@ -98,12 +95,9 @@ where
 /// \[X1\] \[Y1\] \[X2\] \[Y2\](repeats)
 /// This entire module is implemented in about 20 lines of code in C++ boost :/
 #[allow(clippy::type_complexity)]
-pub fn read_boost_input_file<I>(
+pub fn read_boost_input_file<I: super::InputType>(
     filename: &Path,
-) -> Result<(Vec<geometry::Point<I>>, Vec<geometry::Line<I>>), BvError>
-where
-    I: super::InputType,
-{
+) -> Result<(Vec<geometry::Point<I>>, Vec<geometry::Line<I>>), BvError> {
     if !filename.is_file() || !filename.exists() {
         return Err(BvError::ValueError(format!("{:?} not a file", filename)));
     }
@@ -119,13 +113,9 @@ where
 /// \[number of lines\]
 /// \[X1\] \[Y1\] \[X2\] \[Y2\](repeats)
 #[allow(clippy::type_complexity)]
-pub fn read_boost_input_buffer<I, F>(
+pub fn read_boost_input_buffer<I: super::InputType, F: std::io::Read>(
     reader: BufReader<F>,
-) -> Result<(Vec<geometry::Point<I>>, Vec<geometry::Line<I>>), BvError>
-where
-    I: super::InputType,
-    F: std::io::Read,
-{
+) -> Result<(Vec<geometry::Point<I>>, Vec<geometry::Line<I>>), BvError> {
     let mut points = Vec::<geometry::Point<I>>::default();
     let mut lines = Vec::<geometry::Line<I>>::default();
     let mut state = StateMachine::StartingPoints;

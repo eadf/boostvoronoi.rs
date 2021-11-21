@@ -1,24 +1,21 @@
-use boostvoronoi::builder as VB;
-use boostvoronoi::builder::{to_points, to_segments};
-use boostvoronoi::diagram as VD;
-use boostvoronoi::geometry::{Line, Point};
-use boostvoronoi::BvError;
+use boostvoronoi as BV;
+use boostvoronoi::prelude::*;
+
+mod common;
+use common::to_segments;
 
 type I = i32;
 type F = f64;
 
-fn retrieve_point<T>(
+fn retrieve_point<T: InputType>(
     point_data_: &Vec<Point<T>>,
     segment_data_: &Vec<Line<T>>,
-    source: (VD::SourceIndex, VD::SourceCategory),
-) -> Point<T>
-where
-    T: VD::InputType,
-{
+    source: (BV::SourceIndex, BV::SourceCategory),
+) -> Point<T> {
     match source.1 {
-        VD::SourceCategory::SinglePoint => point_data_[source.0],
-        VD::SourceCategory::SegmentStart => segment_data_[source.0 - point_data_.len()].start,
-        VD::SourceCategory::Segment | VD::SourceCategory::SegmentEnd => {
+        BV::SourceCategory::SinglePoint => point_data_[source.0],
+        BV::SourceCategory::SegmentStart => segment_data_[source.0 - point_data_.len()].start,
+        BV::SourceCategory::Segment | BV::SourceCategory::SegmentEnd => {
             segment_data_[source.0 - point_data_.len()].end
         }
     }
@@ -28,7 +25,7 @@ where
 #[test]
 fn segment_4_1() -> Result<(), BvError> {
     let _output = {
-        let segments: [[I; 4]; 9] = [
+        let segments = to_segments(&[
             [200, 200, 200, 400],
             [200, 400, 400, 400],
             [400, 400, 400, 200],
@@ -38,10 +35,9 @@ fn segment_4_1() -> Result<(), BvError> {
             [680, 608, 669, 291],
             [572, 96, 363, 51],
             [147, 103, 96, 170],
-        ];
-        let segments = VB::to_segments(&segments);
+        ]);
 
-        let mut vb = VB::Builder::<I, F>::default();
+        let mut vb = Builder::<I, F>::default();
         vb.with_segments(segments.iter())?;
         vb.build()?
     };
@@ -56,19 +52,16 @@ fn segment_4_1() -> Result<(), BvError> {
 //#[ignore]
 #[test]
 fn vertical_segment_1() -> Result<(), BvError> {
-    let points: [[I; 2]; 0] = [];
-    let segments: [[I; 4]; 3] = [
+    let v = Vec::<Point<I>>::default();
+    let s = to_segments::<I>(&[
         [200, 200, 200, 400],
         [94, 628, 512, 632],
         [147, 103, 96, 170],
-    ];
+    ]);
 
-    let _v = to_points::<I, I>(&points);
-    let _s = to_segments::<I, I>(&segments);
-
-    let mut vb = VB::Builder::<I, F>::default();
-    vb.with_vertices(_v.iter())?;
-    vb.with_segments(_s.iter())?;
+    let mut vb = Builder::<I, F>::default();
+    vb.with_vertices(v.iter())?;
+    vb.with_segments(s.iter())?;
     let output = vb.build()?;
 
     for v in output.vertices().iter() {
@@ -81,7 +74,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
     let cell = output.cells()[0].get();
     assert_eq!(cell.id().0, 0);
     let (source_index, cat) = cell.source_index_2();
-    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    let p = retrieve_point(&v, &s, (source_index, cat));
     assert_eq!(p, Point { x: 94, y: 628 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), true);
@@ -89,8 +82,8 @@ fn vertical_segment_1() -> Result<(), BvError> {
     let cell = output.cells()[1].get();
     assert_eq!(cell.id().0, 1);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourceCategory::Segment);
-    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    assert_eq!(cat, BV::SourceCategory::Segment);
+    let p = retrieve_point(&v, &s, (source_index, cat));
     assert_eq!(p, Point { x: 512, y: 632 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
@@ -98,7 +91,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
     let cell = output.cells()[2].get();
     assert_eq!(cell.id().0, 2);
     let (source_index, cat) = cell.source_index_2();
-    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    let p = retrieve_point(&v, &s, (source_index, cat));
     assert_eq!(p, Point { x: 96, y: 170 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), true);
@@ -106,8 +99,8 @@ fn vertical_segment_1() -> Result<(), BvError> {
     let cell = output.cells()[3].get();
     assert_eq!(cell.id().0, 3);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourceCategory::Segment);
-    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    assert_eq!(cat, BV::SourceCategory::Segment);
+    let p = retrieve_point(&v, &s, (source_index, cat));
     assert_eq!(p, Point { x: 96, y: 170 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
@@ -115,7 +108,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
     let cell = output.cells()[4].get();
     assert_eq!(cell.id().0, 4);
     let (source_index, cat) = cell.source_index_2();
-    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    let p = retrieve_point(&v, &s, (source_index, cat));
     assert_eq!(p, Point { x: 147, y: 103 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), true);
@@ -123,7 +116,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
     let cell = output.cells()[5].get();
     assert_eq!(cell.id().0, 5);
     let (source_index, cat) = cell.source_index_2();
-    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    let p = retrieve_point(&v, &s, (source_index, cat));
     assert_eq!(p, Point { x: 200, y: 200 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), true);
@@ -131,8 +124,8 @@ fn vertical_segment_1() -> Result<(), BvError> {
     let cell = output.cells()[6].get();
     assert_eq!(cell.id().0, 6);
     let (source_index, cat) = cell.source_index_2();
-    assert_eq!(cat, VD::SourceCategory::Segment);
-    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    assert_eq!(cat, BV::SourceCategory::Segment);
+    let p = retrieve_point(&v, &s, (source_index, cat));
     assert_eq!(p, Point { x: 200, y: 400 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), false);
@@ -140,7 +133,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
     let cell = output.cells()[7].get();
     assert_eq!(cell.id().0, 7);
     let (source_index, cat) = cell.source_index_2();
-    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    let p = retrieve_point(&v, &s, (source_index, cat));
     assert_eq!(p, Point { x: 200, y: 400 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), true);
@@ -148,7 +141,7 @@ fn vertical_segment_1() -> Result<(), BvError> {
     let cell = output.cells()[8].get();
     assert_eq!(cell.id().0, 8);
     let (source_index, cat) = cell.source_index_2();
-    let p = retrieve_point(&_v, &_s, (source_index, cat));
+    let p = retrieve_point(&v, &s, (source_index, cat));
     assert_eq!(p, Point { x: 512, y: 632 });
     assert_eq!(cell.is_degenerate(), false);
     assert_eq!(cell.contains_point(), true);
@@ -202,9 +195,8 @@ fn segment_4_2() -> Result<(), BvError> {
             [148480, -57522, 105345, 58720],
             [105345, 58720, -19546, 47259],
         ];
-        let segments = VB::to_segments(&segments);
 
-        let mut vb = VB::Builder::<I, F>::default();
+        let mut vb = Builder::<I, F>::default();
         vb.with_segments(segments.iter())?;
         vb.build()?
     };

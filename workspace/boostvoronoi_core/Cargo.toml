@@ -1,6 +1,6 @@
 [package]
 name = "boostvoronoi_core"
-version = "0.9.3"
+version = "0.10.0"
 authors = ["eadf <lacklustr@protonmail.com>"]
 edition = "2021"
 description = "Boost voronoi ported to 100% rust"
@@ -36,6 +36,10 @@ geo = {version="0.18", optional=true}
 cgmath = {version="0.18", optional=true}
 # using "glam" feature will enable From traits
 glam = {version="0.20", optional=true}
+
+[dev-dependencies]
+regex = "1.5"
+lazy_static = "1.4"
 
 # These features are only for debug purposes, should normally not be used
 [features]

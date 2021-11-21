@@ -1,6 +1,6 @@
-use boostvoronoi::builder as VB;
-use boostvoronoi::file_reader as FR;
-use boostvoronoi::BvError;
+use boostvoronoi as BV;
+use boostvoronoi::prelude::*;
+
 use std::io::{BufReader, Cursor};
 
 mod common;
@@ -208,9 +208,9 @@ fn sample_primary_066() -> Result<(), BvError> {
 -49009 -49823 -48919 -49827
 -49008 -49022 -48959 -49051
 "#;
-        let mut vb = VB::Builder::<I, F>::default();
+        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
-        let (points, segments) = FR::read_boost_input_buffer::<I, _>(br)?;
+        let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
         vb.with_vertices(points.iter())?;
         vb.with_segments(segments.iter())?;
         let output = vb.build()?;

@@ -93,7 +93,7 @@ impl Default for RobustFpt {
     #[inline(always)]
     /// Creates a new RobustFpt with value 0.0
     /// ```
-    /// # use boostvoronoi::robust_fpt::*;
+    /// # use boostvoronoi_core::robust_fpt::*;
     /// let r = RobustFpt::default();
     /// assert_eq!(r.fpv(), 0.0);
     /// ```
@@ -106,7 +106,7 @@ impl From<f64> for RobustFpt {
     #[inline(always)]
     /// Creates a new RobustFpt from a `f64`
     /// ```
-    /// # use boostvoronoi::robust_fpt::*;
+    /// # use boostvoronoi_core::robust_fpt::*;
     /// let f = 1.0f64;
     /// let r = RobustFpt::from(f);
     /// assert_eq!(r.fpv(),f);
@@ -153,7 +153,7 @@ impl RobustFpt {
     /// Is positive method.
     /// IMPORTANT!!!!! in c++ boost voronoi implementation zero values can't be positive.
     /// ```
-    /// # use boostvoronoi::robust_fpt;
+    /// # use boostvoronoi_core::robust_fpt;
     /// println!("is_pos()");
     /// let aa:f64 = 0_f64;
     /// let a = robust_fpt::RobustFpt::from(aa);
@@ -175,7 +175,7 @@ impl RobustFpt {
     /// Is negative method.
     /// IMPORTANT!!!!! in c++ boost voronoi implementation zero values can't be negative.
     /// ```
-    /// # use boostvoronoi::robust_fpt;
+    /// # use boostvoronoi_core::robust_fpt;
     ///
     /// println!("is_neg()");
     /// let aa:f64 = 0_f64;
@@ -446,7 +446,7 @@ impl From<f64> for RobustDif {
     #[inline(always)]
     /// Creates a new RobustDif from a `f64`
     /// ```
-    /// # use boostvoronoi::robust_fpt::*;
+    /// # use boostvoronoi_core::robust_fpt::*;
     /// let f = 1.234f64;
     /// let r = RobustDif::from(f);
     /// assert_eq!(r.dif().fpv(),f);
@@ -470,7 +470,7 @@ impl From<(RobustFpt, RobustFpt)> for RobustDif {
     #[inline(always)]
     /// Creates a new RobustDif from a `(RobustFpt,RobustFpt)`
     /// ```
-    /// # use boostvoronoi::robust_fpt::*;
+    /// # use boostvoronoi_core::robust_fpt::*;
     /// let p = 1.234f64;
     /// let n = 2.234f64;
     /// let r = RobustDif::from((RobustFpt::from(p), RobustFpt::from(n)));
@@ -569,7 +569,7 @@ impl ops::Sub<RobustDif> for RobustDif {
 
 /// Converts to RobustDif from RobustFpt
 /// ```
-/// # use boostvoronoi::robust_fpt::*;
+/// # use boostvoronoi_core::robust_fpt::*;
 /// let s = RobustFpt::from(1.0);
 /// let d = RobustDif::from(s);
 /// assert_eq!(s.fpv(),d.dif().fpv());

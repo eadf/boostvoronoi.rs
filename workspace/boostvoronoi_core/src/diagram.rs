@@ -101,7 +101,7 @@ impl ColorBits {
     pub(crate) const TEMPORARY_CELL: Self = ColorBits(u32::MAX << ColorBits::GEOMETRY__SHIFT.0);
 }
 
-/// Represents the type of input geometry a cell was created from
+/// Represents the type of input geometry a `Cell` was created from
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum SourceCategory {
     SinglePoint,

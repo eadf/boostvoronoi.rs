@@ -1,4 +1,4 @@
-use boostvoronoi::builder as VB;
+use boostvoronoi::prelude::*;
 use boostvoronoi::BvError;
 
 mod common;
@@ -20,14 +20,10 @@ fn two_segments_9() -> Result<(), BvError> {
             [400, 200, 200, 200],
             [529, 242, 367, 107],
         ];
-        //let s = segments.iter().map(|x|x.into()).collect();
 
-        let _v = VB::to_points::<I, I>(&points);
-        let _s = VB::to_segments::<I, I>(&segments);
-
-        let mut vb = VB::Builder::<I, F>::default();
-        vb.with_vertices(_v.iter()).expect("two_segments_9");
-        vb.with_segments(_s.iter()).expect("two_segments_9");
+        let mut vb = Builder::<I, F>::default();
+        vb.with_vertices(points.iter()).expect("two_segments_9");
+        vb.with_segments(segments.iter()).expect("two_segments_9");
         vb.build().expect("two_segments_9")
     };
     let v = output.vertices()[0].get();

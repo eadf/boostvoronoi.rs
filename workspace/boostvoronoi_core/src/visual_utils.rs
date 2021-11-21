@@ -156,15 +156,10 @@ impl VoronoiVisualUtils {
         let vec_dot = segment_vec_x * point_vec_x + segment_vec_y * point_vec_y;
         vec_dot / sqr_segment_length
     }
-
-    #[inline(always)]
-    pub fn cast_io<I: InputType, F: OutputType>(value: I) -> F {
-        cast::<I, F>(value)
-    }
 }
 
-/// A simple 2d AABB
-/// If min_max is none no data has not been assigned.
+/// A simple 2d axis aligned bounding box.
+/// If `min_max` is `None` no data has been assigned.
 #[derive(PartialEq, Eq, Clone, fmt::Debug)]
 pub struct Aabb2<F: OutputType> {
     min_max_: Option<([F; 2], [F; 2])>,
@@ -178,7 +173,7 @@ impl<F: OutputType> Default for Aabb2<F> {
 }
 
 impl<F: OutputType> Aabb2<F> {
-    /// Creates a new AABB with the limits defined by 'p1' & 'p2'
+    /// Creates a new AABB with the limits defined by `p1` & `p2`
     pub fn new<I: InputType>(p1: &Point<I>, p2: &Point<I>) -> Self {
         let mut rv = Self::default();
         rv.update_point(p1);
@@ -186,7 +181,7 @@ impl<F: OutputType> Aabb2<F> {
         rv
     }
 
-    /// Creates a new AABB with i32 coordinates
+    /// Creates a new AABB with `i32` coordinates
     pub fn new_from_i32<I: InputType>(x1: i32, y1: i32, x2: i32, y2: i32) -> Self {
         let mut rv = Self::default();
         rv.update_coordinate::<I>(x1, y1);
@@ -282,11 +277,11 @@ impl<F: OutputType> Aabb2<F> {
         }
     }
 
-    /// returns Some(true) if the aabb contains the point (inclusive)
-    /// returns None if the aabb is uninitialized
+    /// returns `Some(true)` if the aabb contains the point (inclusive)
+    /// returns `None` if the aabb is uninitialized
     ///```
-    /// # use boostvoronoi::geometry::Point;
-    /// # use boostvoronoi::visual_utils::Aabb2;
+    /// # use boostvoronoi_core::geometry::Point;
+    /// # use boostvoronoi_core::visual_utils::Aabb2;
     /// let p0 = Point::from([0,0]);
     /// let p1 = Point::from([1,1]);
     ///
@@ -306,12 +301,12 @@ impl<F: OutputType> Aabb2<F> {
         }
     }
 
-    /// returns Some(true) if the aabb contains the line (inclusive)
-    /// returns None if the aabb is uninitialized
+    /// returns `Some(true)` if the aabb contains the line (inclusive)
+    /// returns `None` if the aabb is uninitialized
     /// ```
-    /// # use boostvoronoi::BvError;
-    /// # use boostvoronoi::geometry::{Line, Point};
-    /// # use boostvoronoi::visual_utils::Aabb2;
+    /// # use boostvoronoi_core::BvError;
+    /// # use boostvoronoi_core::geometry::{Line, Point};
+    /// # use boostvoronoi_core::visual_utils::Aabb2;
     /// let p0 = Point::from([0,0]);
     /// let p1 = Point::from([10,10]);
     ///
@@ -506,4 +501,30 @@ impl<F: OutputType> SimpleAffine<F> {
     pub fn zoom(&mut self, f: F) {
         self.scale = [self.scale[0] * f, self.scale[1] * f];
     }
+}
+
+/// Helper function: Affine transforms and casts a slice of `[[integer,integer,integer,integer]]` into
+/// input data for the Builder.
+pub fn to_segments_offset<I1: InputType, I2: InputType>(
+    points: &[[I1; 4]],
+    scale_x: f64,
+    scale_y: f64,
+    dx: i64,
+    dy: i64,
+) -> Vec<Line<I2>> {
+    let fx = |x: I1| cast::<f64, I2>(cast::<I1, f64>(x) * scale_x) + cast::<i64, I2>(dx);
+    let fy = |y: I1| cast::<f64, I2>(cast::<I1, f64>(y) * scale_y) + cast::<i64, I2>(dy);
+    points
+        .iter()
+        .map(|x| Line {
+            start: Point {
+                x: fx(x[0]),
+                y: fy(x[1]),
+            },
+            end: Point {
+                x: fx(x[2]),
+                y: fy(x[3]),
+            },
+        })
+        .collect()
 }

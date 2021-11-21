@@ -1,6 +1,5 @@
-use boostvoronoi;
-use boostvoronoi::builder::Builder;
-use boostvoronoi::file_reader as FR;
+use boostvoronoi as BV;
+use boostvoronoi::prelude::*;
 use std::io::{BufReader, Cursor};
 
 use criterion::{criterion_group, criterion_main, Criterion};
@@ -18,7 +17,7 @@ pub fn bench_segments(c: &mut Criterion) {
                     let mut vb = Builder::<I, F>::default();
                     let br = BufReader::new(Cursor::new(input));
                     let (points, segments) =
-                        FR::read_boost_input_buffer::<I, _>(br).expect("bench_segments");
+                        BV::read_boost_input_buffer::<I, _>(br).expect("bench_segments");
                     vb.with_vertices(points.iter()).expect("bench_segments");
                     vb.with_segments(segments.iter()).expect("bench_segments");
                     vb.build().expect("bench_segments")
@@ -41,7 +40,7 @@ pub fn bench_points(c: &mut Criterion) {
                     let mut vb = Builder::<I, F>::default();
                     let br = BufReader::new(Cursor::new(input));
                     let (points, segments) =
-                        FR::read_boost_input_buffer::<I, _>(br).expect("bench_points");
+                        BV::read_boost_input_buffer::<I, _>(br).expect("bench_points");
                     vb.with_vertices(points.iter()).expect("bench_points");
                     vb.with_segments(segments.iter()).expect("bench_points");
                     vb.build().expect("bench_points")

@@ -1,8 +1,8 @@
 #![allow(unused_imports)]
-use super::super::diagram::Diagram;
-use super::super::BvError;
-use super::Builder;
-use super::{Line, Point};
+use crate::builder::Builder;
+use crate::diagram::Diagram;
+use crate::geometry::{Line, Point};
+use crate::BvError;
 
 #[test]
 fn sort_1() {

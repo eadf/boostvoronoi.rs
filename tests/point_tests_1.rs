@@ -1,6 +1,4 @@
-use boostvoronoi::builder::Builder;
-use boostvoronoi::geometry::Point;
-use boostvoronoi::BvError;
+use boostvoronoi::prelude::*;
 
 type I = i32;
 type F = f32;

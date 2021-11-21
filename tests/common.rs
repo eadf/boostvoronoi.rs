@@ -1,7 +1,5 @@
-#[allow(unused_imports)]
-use boostvoronoi::diagram::Diagram;
-#[allow(unused_imports)]
-use boostvoronoi::{cast, BvError, InputType, OutputType};
+use boostvoronoi as BV;
+use boostvoronoi::prelude::*;
 
 #[allow(dead_code)]
 pub fn almost_equal<F: OutputType>(x1: F, x2: F, y1: F, y2: F) -> bool {
@@ -16,13 +14,14 @@ pub fn almost_equal<F: OutputType>(x1: F, x2: F, y1: F, y2: F) -> bool {
 #[allow(dead_code)]
 /// A brute force-check to see if all the vertices really are at the midpoint
 /// between (at least) two segments or points. O(v*(p+s))
-pub fn diagram_sanity_check<I: InputType + geo::CoordNum, F: OutputType + geo::GeoFloat>(
+pub fn diagram_sanity_check<I: InputType + geo_cr::CoordNum, F: OutputType + geo_cr::GeoFloat>(
     diagram: &Diagram<F>,
-    points: &[boostvoronoi::geometry::Point<I>],
-    segments: &[boostvoronoi::geometry::Line<I>],
+    points: &[BV::Point<I>],
+    segments: &[BV::Line<I>],
     delta: F,
 ) -> Result<(), BvError> {
     use geo::algorithm::euclidean_distance::*;
+    use geo_cr as geo;
 
     // check that delta has a sane value
     assert!(delta.is_sign_positive() && delta <= cast::<f64, F>(0.0001));
@@ -94,4 +93,29 @@ pub fn diagram_sanity_check<I: InputType + geo::CoordNum, F: OutputType + geo::G
         heap.clear();
     }
     Ok(())
+}
+
+#[allow(dead_code)]
+pub fn retrieve_point<T: InputType>(
+    point_data_: &Vec<Point<T>>,
+    segment_data_: &Vec<Line<T>>,
+    source: (BV::SourceIndex, BV::SourceCategory),
+) -> Point<T> {
+    match source.1 {
+        BV::SourceCategory::SinglePoint => point_data_[source.0],
+        BV::SourceCategory::SegmentStart => segment_data_[source.0 - point_data_.len()].start,
+        BV::SourceCategory::Segment | BV::SourceCategory::SegmentEnd => {
+            segment_data_[source.0 - point_data_.len()].end
+        }
+    }
+}
+
+#[allow(dead_code)]
+pub fn to_points<I: InputType>(points: &[[I; 2]]) -> Vec<Point<I>> {
+    points.iter().map(|p| p.into()).collect()
+}
+
+#[allow(dead_code)]
+pub fn to_segments<I: InputType>(segments: &[[I; 4]]) -> Vec<Line<I>> {
+    segments.iter().map(|l| l.into()).collect()
 }
