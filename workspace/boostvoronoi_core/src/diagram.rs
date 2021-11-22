@@ -22,6 +22,8 @@ pub use crate::{cast, InputType, OutputType};
 #[allow(unused_imports)]
 use crate::{t, tln};
 use num::NumCast;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 use std::cell;
 use std::cmp::Ordering;
 use std::fmt;
@@ -30,6 +32,7 @@ use std::rc::Rc;
 pub type SourceIndex = usize;
 
 /// Typed container for cell indices
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub struct CellIndex(pub usize);
 
@@ -40,6 +43,7 @@ impl fmt::Debug for CellIndex {
 }
 
 /// Typed container for edge indices
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub struct EdgeIndex(pub usize);
 
@@ -50,6 +54,7 @@ impl fmt::Debug for EdgeIndex {
 }
 
 /// Typed container for vertex indices
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub struct VertexIndex(pub usize);
 
@@ -63,6 +68,7 @@ pub type ColorType = u32;
 
 /// Represents category of the input source that forms Voronoi cell.
 // Todo: sort out all of these bits, seems like they overlap in functionality
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub(crate) struct ColorBits(pub ColorType);
 
@@ -100,6 +106,7 @@ impl ColorBits {
 }
 
 /// Represents the type of input geometry a `Cell` was created from
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum SourceCategory {
     SinglePoint,
@@ -108,13 +115,15 @@ pub enum SourceCategory {
     Segment,
 }
 
-/// Represents Voronoi cell.
+/// Represents a Voronoi cell.
+///
 /// Data members:
 ///   1) index of the source within the initial input set
 ///   2) id of the incident edge
 ///   3) mutable color member
 /// Cell may contain point or segment site inside.
 // TODO: fix the name confusion "initial index" & "source index" referring to the same thing.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone)]
 pub struct Cell {
     // sorted_index of the site event
@@ -362,10 +371,12 @@ impl<'s, F: OutputType> Iterator for EdgeRotPrevIterator<'s, F> {
 }
 
 /// Represents Voronoi vertex aka. Circle event.
+///
 /// Data members:
 ///   1) vertex coordinates
 ///   2) id of the incident edge
 ///   3) mutable color member
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone)]
 pub struct Vertex<F: OutputType> {
     pub(crate) id_: VertexIndex,
@@ -472,6 +483,7 @@ impl<F: OutputType> Vertex<F> {
 }
 
 /// Half-edge data structure. Represents a Voronoi edge.
+///
 /// Data members:
 ///   1) id of the corresponding cell
 ///   2) id of to the vertex that is the starting
@@ -480,6 +492,7 @@ impl<F: OutputType> Vertex<F> {
 ///   4) id of of the CCW next edge
 ///   5) id of to the CCW prev edge
 ///   6) mutable color member
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone)]
 pub struct Edge {
     id_: EdgeIndex,
@@ -650,7 +663,8 @@ pub type EdgeType = Rc<cell::Cell<Edge>>;
 pub type VertexType<F> = Rc<cell::Cell<Vertex<F>>>;
 
 /// Voronoi output data structure based on data wrapped in `Rc<Cell<T>>`.
-/// See the `SyncDiagram` for a version of this structure without the `Rc<Cell>`.
+///
+/// See `SyncDiagram` for a version of this structure without the `Rc<Cell>`.
 ///
 /// CCW ordering is used on the faces perimeter and around the vertices.
 /// Mandatory reading: <https://www.boost.org/doc/libs/1_76_0/libs/polygon/doc/voronoi_diagram.htm>

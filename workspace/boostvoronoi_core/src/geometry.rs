@@ -8,10 +8,13 @@
 //! Some basic geometry data structures together with From trait implementations.
 
 use crate::{cast, diagram::Vertex, InputType, OutputType};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 use std::cmp;
 use std::fmt;
 
 /// A really simple 2d coordinate container type - integer only
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone, cmp::PartialEq, cmp::PartialOrd, cmp::Eq, Hash)]
 pub struct Point<T: InputType> {
     pub x: T,
@@ -325,6 +328,7 @@ impl<F: OutputType + cgmath::BaseNum> From<&Vertex<F>> for cgmath::Point2<F> {
 }
 
 /// A really simple 2d line type - integer only
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone, cmp::PartialEq, cmp::Eq, Hash, Debug)]
 pub struct Line<T: InputType> {
     pub start: Point<T>,

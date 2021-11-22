@@ -13,9 +13,12 @@
 use crate::diagram as VD;
 use crate::BvError;
 pub use crate::{InputType, OutputType};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// Sync version of the boostvoronoi::diagram::VoronoiDiagram struct.
 /// This is useful when traversing the diagram in a multi threaded environment.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Default, Debug)]
 pub struct SyncDiagram<F: OutputType> {
     cells_: Vec<VD::Cell>,         // indexed by CellIndex

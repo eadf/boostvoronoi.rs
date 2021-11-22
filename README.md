@@ -79,10 +79,14 @@ So +nightly should be somewhat faster.
 
 ## Todo
 - [ ] Try to fix the known problems in C++ Boost voronoi and port over.  
-- [ ] Add many more test cases for voronoi_robust_ftp.rs.
+- [ ] Add many more test cases for `voronoi_robust_ftp.rs`.
 - [ ] Benchmark and optimize.
 - [ ] Replace C++ style boolean ordering functors.
 - [ ] Replace builtin ulp with some rust crate (approx?).
-- [ ] Take care of the "todo:" tags.
+- [ ] Take care of the `todo:` tags.
+- [x] Builder pattern
+- [x] Hide implementation details with a workspace (w/o disabling doc-tests)
+- [x] Add `serde` to `SyncDiagram`
+- [ ] Specific type conversion tests (`cgmath`,`glam`,`mint` & `geo`)
 
 All credit goes to the original author ([Andrii Sydorchuk](https://github.com/asydorchuk)) and the [boost contributors](https://github.com/boostorg/polygon), except the porting mistakes. They are all mine.
