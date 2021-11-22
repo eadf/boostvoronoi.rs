@@ -31,7 +31,6 @@ use std::rc::Rc;
 #[cfg(test)]
 mod tests;
 
-/// GENERAL INFO:
 /// The sweepline algorithm implementation to compute Voronoi diagram of
 /// points and non-intersecting segments (excluding endpoints).
 /// Complexity - O(N*logN), memory usage - O(N), where N is the total number

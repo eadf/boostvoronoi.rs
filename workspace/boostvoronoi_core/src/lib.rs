@@ -67,6 +67,7 @@ macro_rules! tln {
 }
 pub(crate) use tln;
 
+/// The Error type of the library
 #[derive(thiserror::Error, Debug)]
 pub enum BvError {
     #[error("error: Some error from cpp_map")]
@@ -166,3 +167,15 @@ impl<T: PrimInt + fmt::Debug> GrowingVob for vob::Vob<T> {
         self.get(bit).unwrap_or(false)
     }
 }
+
+#[cfg(feature = "cgmath")]
+pub use cgmath;
+
+#[cfg(feature = "mint")]
+pub use mint;
+
+#[cfg(feature = "geo")]
+pub use geo;
+
+#[cfg(feature = "glam")]
+pub use glam;

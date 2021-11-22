@@ -31,7 +31,7 @@ use std::rc::Rc;
 
 pub type SourceIndex = usize;
 
-/// Typed container for cell indices
+/// Typed container for voronoi `Cell` indices
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub struct CellIndex(pub usize);
@@ -42,7 +42,7 @@ impl fmt::Debug for CellIndex {
     }
 }
 
-/// Typed container for edge indices
+/// Typed container for voronoi `Edge` indices
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub struct EdgeIndex(pub usize);
@@ -53,7 +53,7 @@ impl fmt::Debug for EdgeIndex {
     }
 }
 
-/// Typed container for vertex indices
+/// Typed container for voronoi `Vertex` indices
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub struct VertexIndex(pub usize);
@@ -105,13 +105,17 @@ impl ColorBits {
     pub(crate) const TEMPORARY_CELL: Self = ColorBits(u32::MAX << ColorBits::GEOMETRY__SHIFT.0);
 }
 
-/// Represents the type of input geometry a `Cell` was created from
+/// Represents the type of input geometry a voronoi `Cell` was created from
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum SourceCategory {
+    /// The source was a single point
     SinglePoint,
+    /// The source was a start point of a segment
     SegmentStart,
+    /// The source was a end point of a segment
     SegmentEnd,
+    /// The source was a segment
     Segment,
 }
 
@@ -122,7 +126,7 @@ pub enum SourceCategory {
 ///   2) id of the incident edge
 ///   3) mutable color member
 /// Cell may contain point or segment site inside.
-// TODO: fix the name confusion "initial index" & "source index" referring to the same thing.
+// TODO: fix the name confusing "initial index" & "source index" referring to the same thing.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone)]
 pub struct Cell {

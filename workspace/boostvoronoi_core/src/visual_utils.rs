@@ -159,6 +159,7 @@ impl VoronoiVisualUtils {
 }
 
 /// A simple 2d axis aligned bounding box.
+///
 /// If `min_max` is `None` no data has been assigned.
 #[derive(PartialEq, Eq, Clone, fmt::Debug)]
 pub struct Aabb2<F: OutputType> {

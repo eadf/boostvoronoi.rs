@@ -87,6 +87,6 @@ So +nightly should be somewhat faster.
 - [x] Builder pattern
 - [x] Hide implementation details with a workspace (w/o disabling doc-tests)
 - [x] Add `serde` to `SyncDiagram`
-- [ ] Specific type conversion tests (`cgmath`,`glam`,`mint` & `geo`)
+- [x] Specific type conversion tests (`cgmath`,`glam`,`mint` & `geo`)
 
 All credit goes to the original author ([Andrii Sydorchuk](https://github.com/asydorchuk)) and the [boost contributors](https://github.com/boostorg/polygon), except the porting mistakes. They are all mine.
