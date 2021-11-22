@@ -101,12 +101,12 @@ fn sample_primary_065() -> Result<(), BvError> {
 -49044 -49020 -49028 -49012
 -49010 -49234 -48949 -49210
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        let output = vb.build()?;
+        let output = Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?;
         #[cfg(feature = "geo")]
         common::diagram_sanity_check(&output, &points, &segments, 0.0001)?;
         output

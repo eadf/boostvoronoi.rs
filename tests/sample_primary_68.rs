@@ -102,12 +102,13 @@ fn sample_primary_068() -> Result<(), BvError> {
 -49048 -49413 -49004 -49497
 -49021 -49751 -49015 -49668
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?.into()
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
+            .into()
     };
     assert_eq!(output.cells().len(), 261);
     let cell = output.cells()[0];

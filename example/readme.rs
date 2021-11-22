@@ -8,19 +8,17 @@ fn main() -> Result<(), BvError> {
     let p = vec![[9_i32, 10]];
     // Lines may only intersect at the endpoints.
     let s = vec![[10_i32, 11, 12, 33]];
-    let diagram = {
-        let mut vb = Builder::<I, F>::default();
+    let diagram = Builder::<I, F>::default()
         // You will have to keep track of the input geometry. it will be referenced as
         // input geometry indices in the output.
         // `with_vertices()` accepts iterators of anything that implements
         // `Into<boostvoronoi::Point>`
-        vb.with_vertices(p.iter())?;
+        .with_vertices(p.iter())?
         // `with_segments()` accepts iterators of anything that implements
         // `Into<boostvoronoi::Line>`
-        vb.with_segments(s.iter())?;
+        .with_segments(s.iter())?
         // this will generate the list of cells, edges and circle events (aka vertices)
-        vb.build()?
-    };
+        .build()?;
     println!(
         "Result: cells:{}, edges:{}, vertices:{}",
         diagram.cells().len(),

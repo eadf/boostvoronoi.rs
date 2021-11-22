@@ -49,10 +49,10 @@ fn beachline_1() {
     // Co-linear sites
     let _v = vec![Point::new(10, 10), Point::new(1, 1), Point::new(1, 6)];
 
-    let mut vb = Builder::<I, F>::default();
-    vb.with_vertices(_v.iter()).unwrap();
-    let _output = vb.build();
-    //assert!(false);
+    let _output = Builder::<I, F>::default()
+        .with_vertices(_v.iter())
+        .unwrap()
+        .build();
 }
 
 //#[ignore]
@@ -69,8 +69,7 @@ fn beachline_2() -> Result<(), BvError> {
     ];
     let mut output: VD::Diagram<F> = VD::Diagram::<F>::default();
 
-    let mut b = Builder::<I, F>::default();
-    b.with_vertices(_v.iter()).unwrap();
+    let mut b = Builder::<I, F>::default().with_vertices(_v.iter()).unwrap();
     let mut site_event_iterator_: VSE::SiteEventIndexType = b.init_sites_queue();
     println!("site_event_iterator_:{:?}", site_event_iterator_);
     b.init_beach_line(&mut site_event_iterator_, &mut output)?;
@@ -106,8 +105,7 @@ fn beachline_3() -> Result<(), BvError> {
         let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 50 })];
         let mut output: VD::Diagram<F> = VD::Diagram::<F>::default();
 
-        let mut b = Builder::<I, F>::default();
-        b.with_segments(_s.iter()).unwrap();
+        let mut b = Builder::<I, F>::default().with_segments(_s.iter()).unwrap();
         let mut site_event_iterator_: VSE::SiteEventIndexType = b.init_sites_queue();
         println!("site_event_iterator_:{:?}", site_event_iterator_);
         b.init_beach_line(&mut site_event_iterator_, &mut output)?;

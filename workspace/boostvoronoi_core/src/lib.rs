@@ -95,14 +95,17 @@ pub enum BvError {
 }
 
 /// This is the integer input type of the algorithm. i32 or i64.
-pub trait InputType: Hash + PrimInt + Default + Unpin + Signed + fmt::Debug + fmt::Display {}
+pub trait InputType:
+    PrimInt + Sync + Hash + Default + Unpin + Signed + fmt::Debug + fmt::Display
+{
+}
 
 impl InputType for i64 {}
 impl InputType for i32 {}
 
 /// This is the floating point output type of the algorithm. f32 or f64.
 pub trait OutputType:
-    Float + Zero + Unpin + Default + std::ops::MulAssign + fmt::Debug + fmt::Display
+    Float + Sync + Zero + Unpin + Default + std::ops::MulAssign + fmt::Debug + fmt::Display
 {
 }
 

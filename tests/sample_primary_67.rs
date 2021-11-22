@@ -205,12 +205,12 @@ fn sample_primary_067() -> Result<(), BvError> {
 -49008 -49795 -48973 -49798
 -49003 -49428 -48993 -49376
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
 
     // A full test would take 7200+ loc

@@ -13,9 +13,9 @@ fn sort_1() {
 
         let _v = vec![coord(10, 11), coord(0, 100), coord(10, 11), coord(0, 100)];
 
-        let mut vb = Builder::<I, F>::default();
+        let vb = Builder::<I, F>::default();
         assert!(vb.site_events_.is_empty());
-        vb.with_vertices(_v.iter()).expect("sort_1");
+        let mut vb = vb.with_vertices(_v.iter()).expect("sort_1");
         assert_eq!(vb.site_events_.len(), 4);
         {
             // emulating construct()

@@ -63,17 +63,15 @@ mod tests;
 /// let p = vec![Point{x:9_i32, y:10}];
 /// // Lines may only intersect at the endpoints.
 /// let s = vec![Line::new(Point{x:10_i32, y:11}, Point{x:12, y:13})];
-/// let mut vb = Builder::<I, F>::default();
-///
-/// // You will have to keep track of the input geometry. it will be referenced as
-/// // input geometry indices in the output.
-/// // `with_vertices()` and `with_segments()` accepts iterators of anything that implements
-/// // `Into()` for `Point` and `Line`
-/// vb.with_vertices(p.iter()).unwrap();
-/// vb.with_segments(s.iter()).unwrap();
-///
-/// // this will generate a the list of cells, edges and circle events (aka vertices)
-/// let result = vb.build().unwrap();
+/// let result = Builder::<I, F>::default()
+///     // You will have to keep track of the input geometry. it will be referenced as
+///     // input geometry indices in the output.
+///     // `with_vertices()` and `with_segments()` accepts iterators of anything that implements
+///     // `Into()` for `Point` and `Line`
+///     .with_vertices(p.iter()).unwrap()
+///     .with_segments(s.iter()).unwrap()
+///     // this will generate a the list of cells, edges and circle events (aka vertices)
+///     .build().unwrap();
 /// ```
 pub struct Builder<I: InputType, F: OutputType> {
     pub(crate) site_events_: Vec<VSE::SiteEvent<I, F>>,
@@ -111,7 +109,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
     /// Inserts vertices.
     /// This should be done before inserting segments.
     /// This method accepts iterators of anything that implements `Into<boostvoronoi::geometry::Point>`
-    pub fn with_vertices<T, IT>(&mut self, vertices: T) -> Result<(), BvError>
+    pub fn with_vertices<T, IT>(mut self, vertices: T) -> Result<Self, BvError>
     where
         T: Iterator<Item = IT>,
         IT: Copy + Into<Point<I>>,
@@ -127,13 +125,13 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
             self.site_events_.push(s);
             self.index_ += 1;
         }
-        Ok(())
+        Ok(self)
     }
 
     /// Inserts segments.
     /// This should be done after inserting vertices.
     /// This method accepts iterators of anything that implements `Into<boostvoronoi::geometry::Line>`
-    pub fn with_segments<T, IT>(&mut self, segments: T) -> Result<(), BvError>
+    pub fn with_segments<T, IT>(mut self, segments: T) -> Result<Self, BvError>
     where
         T: Iterator<Item = IT>,
         IT: Copy + Into<Line<I>>,
@@ -165,11 +163,11 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
             self.index_ += 1;
         }
         self.segments_added_ = true;
-        Ok(())
+        Ok(self)
     }
 
     /// Run sweep-line algorithm and fill output data structure.
-    pub fn build(&mut self) -> Result<VD::Diagram<F>, BvError> {
+    pub fn build(mut self) -> Result<VD::Diagram<F>, BvError> {
         let mut output: VD::Diagram<F> = VD::Diagram::<F>::new(self.site_events_.len());
 
         let mut site_event_iterator_: VSE::SiteEventIndexType = self.init_sites_queue();

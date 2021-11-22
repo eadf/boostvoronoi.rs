@@ -18,9 +18,9 @@ fn segment_5_1() -> Result<(), BvError> {
             [-196800, 113093, -251891, 127298],
         ];
 
-        let mut vb = Builder::<I, F>::default();
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_segments(segments.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 8);
     let cell = output.cells()[0].get();
@@ -131,9 +131,9 @@ fn segment_5_2() -> Result<(), BvError> {
             [313497, 62603, 304929, 68078],
         ];
 
-        let mut vb = Builder::<I, F>::default();
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_segments(segments.iter())?
+            .build()?
     };
     Ok(())
 }
@@ -157,9 +157,9 @@ fn segment_5_3() -> Result<(), BvError> {
             [148480, 38812, 61580, -50720],
         ];
 
-        let mut vb = Builder::<I, F>::default();
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_segments(segments.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 24);
     let cell = output.cells()[0].get();
@@ -438,9 +438,9 @@ fn segment_5_4() -> Result<(), BvError> {
             [31058881, -35000000, 25058881, -35000001],
         ];
 
-        let mut vb = Builder::<I, F>::default();
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_segments(segments.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 5);
     let cell = output.cells()[0].get();

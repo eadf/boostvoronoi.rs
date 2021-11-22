@@ -37,9 +37,9 @@ fn segment_4_1() -> Result<(), BvError> {
             [147, 103, 96, 170],
         ]);
 
-        let mut vb = Builder::<I, F>::default();
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_segments(segments.iter())?
+            .build()?
     };
     for v in _output.vertices().iter() {
         let v = v.get();
@@ -59,10 +59,10 @@ fn vertical_segment_1() -> Result<(), BvError> {
         [147, 103, 96, 170],
     ]);
 
-    let mut vb = Builder::<I, F>::default();
-    vb.with_vertices(v.iter())?;
-    vb.with_segments(s.iter())?;
-    let output = vb.build()?;
+    let output = Builder::<I, F>::default()
+        .with_vertices(v.iter())?
+        .with_segments(s.iter())?
+        .build()?;
 
     for v in output.vertices().iter() {
         let v = v.get();
@@ -196,9 +196,9 @@ fn segment_4_2() -> Result<(), BvError> {
             [105345, 58720, -19546, 47259],
         ];
 
-        let mut vb = Builder::<I, F>::default();
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_segments(segments.iter())?
+            .build()?
     };
     for v in _output.vertices().iter() {
         let v = v.get();

@@ -17,12 +17,13 @@ fn sample_primary_070() -> Result<(), BvError> {
 -49431 -49703 -49427 -49798
 -49427 -49798 -49423 -49892
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?.into()
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
+            .into()
     };
     assert_eq!(output.cells().len(), 6);
     let cell = output.cells()[0];
@@ -177,12 +178,13 @@ fn sample_primary_071() -> Result<(), BvError> {
 -49022 -49065 -48973 -49118
 -49018 -49876 -48988 -49875
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?.into()
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
+            .into()
     };
     assert_eq!(output.cells().len(), 270);
     let cell = output.cells()[0];
@@ -3487,12 +3489,13 @@ fn sample_primary_072() -> Result<(), BvError> {
 1403829871 275 1403829741 275
 1403829741 275 1403829744 73
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?.into()
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
+            .into()
     };
     assert_eq!(output.cells().len(), 7);
     let cell = output.cells()[0];

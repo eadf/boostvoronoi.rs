@@ -38,9 +38,9 @@ fn single_segment_1() -> Result<(), BvError> {
             Point { x: 10, y: 10 },
             Point { x: 50, y: 50 },
         )];
-        let mut vb = Builder::<I, F>::default();
-        vb.with_segments(_s.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_segments(_s.iter())?
+            .build()?
     };
     // results verified against c++ boost
     assert_eq!(output.cells().len(), 3);
@@ -85,9 +85,9 @@ fn single_segment_1() -> Result<(), BvError> {
 fn single_segment_2() -> Result<(), BvError> {
     let output = {
         let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 50 })];
-        let mut vb = Builder::<I, F>::default();
-        vb.with_segments(_s.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_segments(_s.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 3);
     let cell = output.cells()[0].get();
@@ -128,9 +128,9 @@ fn single_segment_2() -> Result<(), BvError> {
 fn single_segment_3() -> Result<(), BvError> {
     let output = {
         let _s = vec![Line::new(Point { x: 10, y: 10 }, Point { x: 50, y: 10 })];
-        let mut vb = Builder::<I, F>::default();
-        vb.with_segments(_s.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_segments(_s.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 3);
     let cell = output.cells()[0].get();
@@ -171,9 +171,9 @@ fn single_segment_3() -> Result<(), BvError> {
 fn single_segment_4() -> Result<(), BvError> {
     let output = {
         let _s = vec![Line::new(Point { x: 50, y: 10 }, Point { x: 10, y: 10 })];
-        let mut vb = Builder::<I, F>::default();
-        vb.with_segments(_s.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_segments(_s.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 3);
     let cell = output.cells()[0].get();
@@ -219,9 +219,9 @@ fn two_segments_1() -> Result<(), BvError> {
             Line::new(Point { x: 1, y: 2 }, Point { x: 3, y: 4 }),
             Line::new(Point { x: 2, y: 2 }, Point { x: 5, y: 4 }),
         ];
-        let mut vb = Builder::<I, F>::default();
-        vb.with_segments(_s.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_segments(_s.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 6);
     let cell = output.cells()[0].get();
@@ -388,10 +388,10 @@ fn two_segments_2() -> Result<(), BvError> {
             Line::new(Point { x: 1, y: 2 }, Point { x: 3, y: 4 }),
             Line::new(Point { x: 2, y: 2 }, Point { x: 5, y: 4 }),
         ];
-        let mut vb = Builder::<I, F>::default();
-        vb.with_vertices(_v.iter())?;
-        vb.with_segments(_s.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(_v.iter())?
+            .with_segments(_s.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 7);
     let cell = output.cells()[0].get();
@@ -797,10 +797,10 @@ fn two_segments_3() -> Result<(), BvError> {
             Line::new(Point { x: 1, y: 2 }, Point { x: 3, y: 4 }),
             Line::new(Point { x: 2, y: 2 }, Point { x: 5, y: 4 }),
         ];
-        let mut vb = Builder::<I, F>::default();
-        vb.with_vertices(_v.iter())?;
-        vb.with_segments(_s.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(_v.iter())?
+            .with_segments(_s.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 8);
     let cell = output.cells()[0].get();
@@ -889,10 +889,10 @@ fn two_segments_5() -> Result<(), BvError> {
         let v: [[I; 2]; 4] = [[582, 779], [683, 1329], [741, 1155], [1239, 1102]];
         let s: [[I; 4]; 2] = [[1394, 1470, 982, 1594], [1047, 1427, 1155, 1228]];
 
-        let mut vb = Builder::<I, F>::default();
-        vb.with_vertices(v.iter())?;
-        vb.with_segments(s.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(v.iter())?
+            .with_segments(s.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 10);
     let cell = output.cells()[0].get();
@@ -1004,10 +1004,10 @@ fn two_segments_6() -> Result<(), BvError> {
         let v: [[I; 2]; 0] = [];
         let s: [[I; 4]; 2] = [[442, 215, 438, 355], [129, 559, 141, 60]];
 
-        let mut vb = Builder::<I, F>::default();
-        vb.with_vertices(v.iter())?;
-        vb.with_segments(s.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(v.iter())?
+            .with_segments(s.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 6);
     let cell = output.cells()[0].get();
@@ -1356,10 +1356,10 @@ fn two_segments_7() -> Result<(), BvError> {
         let v: [[I; 2]; 0] = [];
         let s: [[I; 4]; 2] = [[498, 224, 475, 335], [250, 507, 60, 77]];
 
-        let mut vb = Builder::<I, F>::default();
-        vb.with_vertices(v.iter())?;
-        vb.with_segments(s.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(v.iter())?
+            .with_segments(s.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 6);
     let cell = output.cells()[0].get();
@@ -1714,10 +1714,14 @@ fn two_segments_8() -> Result<(), BvError> {
             [200 + c, c, c, c],
         ]);
 
-        let mut vb = Builder::<I, F>::default();
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        (vb.build()?, points, segments)
+        (
+            Builder::<I, F>::default()
+                .with_vertices(points.iter())?
+                .with_segments(segments.iter())?
+                .build()?,
+            points,
+            segments,
+        )
     };
 
     assert_eq!(output.cells().len(), 8);

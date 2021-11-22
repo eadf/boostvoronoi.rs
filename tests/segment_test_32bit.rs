@@ -18,10 +18,10 @@ fn segment_32bit_1() -> Result<(), BvError> {
             [204, 40, 136, 294],
         ];
 
-        let mut vb = Builder::<I, F>::default();
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
     Ok(())
 }

@@ -17,10 +17,10 @@ fn single_segment_point_1() -> Result<(), BvError> {
     let output = {
         let _p = vec![Point { x: 9, y: 10 }];
         let _s = vec![Line::new(Point { x: 10, y: 11 }, Point { x: 12, y: 13 })];
-        let mut vb = Builder::<I, F>::default();
-        vb.with_vertices(_p.iter())?;
-        vb.with_segments(_s.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(_p.iter())?
+            .with_segments(_s.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 4);
     let cell = output.cells()[0].get();
@@ -78,10 +78,10 @@ fn single_segment_point_2() -> Result<(), BvError> {
     let output = {
         let _p = vec![point_new(12, 14)];
         let _s = vec![Line::new(point_new(10, 11), point_new(12, 13))];
-        let mut vb = Builder::<I, F>::default();
-        vb.with_vertices(_p.iter())?;
-        vb.with_segments(_s.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(_p.iter())?
+            .with_segments(_s.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 4);
     let cell = output.cells()[0].get();
@@ -276,10 +276,10 @@ fn single_segment_point_3() -> Result<(), BvError> {
     let output = {
         let _p = vec![point_new(12, 14), point_new(4, 5)];
         let _s = vec![Line::new(point_new(10, 11), point_new(12, 13))];
-        let mut vb = Builder::<I, F>::default();
-        vb.with_vertices(_p.iter())?;
-        vb.with_segments(_s.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(_p.iter())?
+            .with_segments(_s.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 5);
     let cell = output.cells()[0].get();
@@ -394,10 +394,13 @@ fn single_segment_point_4() -> Result<(), BvError> {
     let output = {
         let _p = vec![point_new(10, 14), point_new(8, 7), point_new(11, 11)];
         let _s = vec![Line::new(point_new(10, 11), point_new(12, 13))];
-        let mut vb = Builder::<I, F>::default();
-        vb.with_vertices(_p.iter()).expect("single_segment_point_3");
-        vb.with_segments(_s.iter()).expect("single_segment_point_3");
-        vb.build().expect("single_segment_point_3")
+        Builder::<I, F>::default()
+            .with_vertices(_p.iter())
+            .expect("single_segment_point_3")
+            .with_segments(_s.iter())
+            .expect("single_segment_point_3")
+            .build()
+            .expect("single_segment_point_3")
     };
     assert_eq!(output.cells().len(), 6);
     let cell = output.cells()[0].get();
@@ -579,10 +582,10 @@ fn single_segment_point_5() -> Result<(), BvError> {
     let output = {
         let _p = vec![point_new(10, 14), point_new(8, 7), point_new(11, 11)];
         let _s = vec![Line::new(point_new(12, 13), point_new(10, 11))];
-        let mut vb = Builder::<I, F>::default();
-        vb.with_vertices(_p.iter())?;
-        vb.with_segments(_s.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(_p.iter())?
+            .with_segments(_s.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 6);
     let cell = output.cells()[0].get();

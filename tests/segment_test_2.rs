@@ -21,10 +21,13 @@ fn two_segments_9() -> Result<(), BvError> {
             [529, 242, 367, 107],
         ];
 
-        let mut vb = Builder::<I, F>::default();
-        vb.with_vertices(points.iter()).expect("two_segments_9");
-        vb.with_segments(segments.iter()).expect("two_segments_9");
-        vb.build().expect("two_segments_9")
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())
+            .expect("two_segments_9")
+            .with_segments(segments.iter())
+            .expect("two_segments_9")
+            .build()
+            .expect("two_segments_9")
     };
     let v = output.vertices()[0].get();
     assert!(almost_equal(v.x(), 200.0000000, v.y(), 200.0000000));

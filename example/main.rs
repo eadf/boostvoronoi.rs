@@ -40,11 +40,10 @@ fn main() -> Result<(), BvError> {
         }
         println!("}};");
         println!("-------");
-        let mut vb = Builder::<I, F>::default();
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        //panic!();
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
     if false {
         println!();

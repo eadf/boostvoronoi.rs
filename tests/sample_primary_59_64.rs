@@ -25,12 +25,12 @@ fn sample_primary_059() -> Result<(), BvError> {
 -214748364 0 -214748364 -644245092
 -214748364 -644245092 0 -644245092
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 20);
     let cell = output.cells()[0].get();
@@ -325,12 +325,12 @@ fn sample_primary_060() -> Result<(), BvError> {
 -1 0 -1 -3
 -1 -3 0 -3
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 20);
     let cell = output.cells()[0].get();
@@ -547,12 +547,12 @@ fn sample_primary_061() -> Result<(), BvError> {
 -429496728 644245092 214748364 644245092
 214748364 644245092 429496728 644245092
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 17);
     let cell = output.cells()[0].get();
@@ -870,12 +870,12 @@ fn sample_primary_062() -> Result<(), BvError> {
 0 429496728 214748364 644245092
 -429496728 644245092 214748364 644245092
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 8);
     let cell = output.cells()[0].get();
@@ -998,12 +998,12 @@ fn sample_primary_063() -> Result<(), BvError> {
 -5 0 -1 -1
 -4 0 -6 3
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 6);
     let cell = output.cells()[0].get();
@@ -1076,12 +1076,12 @@ fn sample_primary_064() -> Result<(), BvError> {
 -37 4 -39 36
 12 -30 44 8
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 9);
     let cell = output.cells()[0].get();

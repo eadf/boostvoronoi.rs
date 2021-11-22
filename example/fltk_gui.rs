@@ -547,12 +547,11 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
             }
             println!("}};");
         }
-        let mut vb = BV::Builder::<I, F>::default();
-        vb.with_vertices(self.point_data_.iter())?;
-        vb.with_segments(self.segment_data_.iter())?;
-
-        // Construct voronoi diagram.
-        self.diagram = vb.build()?;
+        self.diagram = BV::Builder::<I, F>::default()
+            .with_vertices(self.point_data_.iter())?
+            .with_segments(self.segment_data_.iter())?
+            // Construct voronoi diagram.
+            .build()?;
         println!("Result: found {} vertices", self.diagram.vertices().len());
         self.points_aabb = {
             let mut aabb = BV::Aabb2::default();

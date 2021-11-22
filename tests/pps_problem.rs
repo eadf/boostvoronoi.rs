@@ -17,12 +17,12 @@ fn pps_problem_1() -> Result<(), BvError> {
 -5042 -5069 -5165 -5162
 -5011 -5195 -5404 -5134
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
 
     assert_eq!(output.cells().len(), 9);
@@ -133,12 +133,12 @@ fn pps_problem_2() -> Result<(), BvError> {
 -5166 -5197 -5099 -5209
 -5029 -5002 -5500 -5319
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
 
     assert_eq!(output.cells().len(), 9);
@@ -249,12 +249,12 @@ fn pps_problem_3() -> Result<(), BvError> {
 189 -303 843 693
 -911 -920 921 853
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
 
     assert_eq!(output.cells().len(), 9);
@@ -365,12 +365,12 @@ fn pps_problem_4() -> Result<(), BvError> {
 -671 955 604 -936
 535 -110 412 -549
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
 
     assert_eq!(output.cells().len(), 9);
@@ -481,12 +481,12 @@ fn pps_problem_5() -> Result<(), BvError> {
 694 281 853 211
 326 220 803 441
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
 
     assert_eq!(output.cells().len(), 9);
@@ -597,12 +597,12 @@ fn pps_problem_6() -> Result<(), BvError> {
 976 38 -916 -467
 909 424 962 401
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
 
     assert_eq!(output.cells().len(), 9);
@@ -713,12 +713,12 @@ fn pps_problem_7() -> Result<(), BvError> {
 768 -67 601 187
 -814 662 817 -285
 "#;
-        let mut vb = Builder::<I, F>::default();
         let br = BufReader::new(Cursor::new(input));
         let (points, segments) = BV::read_boost_input_buffer::<I, _>(br)?;
-        vb.with_vertices(points.iter())?;
-        vb.with_segments(segments.iter())?;
-        vb.build()?
+        Builder::<I, F>::default()
+            .with_vertices(points.iter())?
+            .with_segments(segments.iter())?
+            .build()?
     };
     assert_eq!(output.cells().len(), 9);
     let cell = output.cells()[0].get();
