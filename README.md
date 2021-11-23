@@ -3,7 +3,6 @@
 [![crates.io](https://img.shields.io/crates/v/boostvoronoi.svg)](https://crates.io/crates/boostvoronoi)
 [![Documentation](https://docs.rs/boostvoronoi/badge.svg)](https://docs.rs/boostvoronoi)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)
-[![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Clippy/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Clippy/badge.svg)
 [![dependency status](https://deps.rs/crate/boostvoronoi/0.9.3/status.svg)](https://deps.rs/crate/boostvoronoi/0.9.3)
 ![license](https://img.shields.io/crates/l/boostvoronoi)
 
@@ -86,7 +85,7 @@ So +nightly should be somewhat faster.
 - [ ] Take care of the `todo:` tags.
 - [x] Builder pattern
 - [x] Hide implementation details with a workspace (w/o disabling doc-tests)
-- [x] Add `serde` to `SyncDiagram`
+- [x] Add `serde` to `SyncDiagram` and other diagram types. 
 - [x] Specific type conversion tests (`cgmath`,`glam`,`mint` & `geo`)
 
 All credit goes to the original author ([Andrii Sydorchuk](https://github.com/asydorchuk)) and the [boost contributors](https://github.com/boostorg/polygon), except the porting mistakes. They are all mine.
