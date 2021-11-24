@@ -48,9 +48,6 @@ path = "example/main.rs"
 name = "readme"
 path = "example/readme.rs"
 
-[build-dependencies]
-version_check = "0.9"
-
 [dev-dependencies]
 fltk = "1.2"
 criterion = "0.3"
