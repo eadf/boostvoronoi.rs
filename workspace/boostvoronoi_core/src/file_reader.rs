@@ -17,7 +17,7 @@ use std::io::{BufRead, BufReader};
 use std::path::Path;
 
 #[derive(Debug)]
-enum InputData<T: super::InputType> {
+enum InputData<T: crate::InputType> {
     Number(usize),
     Point(geometry::Point<T>),
     Line(geometry::Line<T>),
@@ -31,10 +31,7 @@ enum StateMachine {
     ExpectLines,
 }
 
-fn line_to_data<I>(line: &str) -> Option<InputData<I>>
-where
-    I: super::InputType,
-{
+fn line_to_data<I: crate::InputType>(line: &str) -> Option<InputData<I>> {
     let line = line.split(' ').collect::<Vec<&str>>();
     //tln!("line split: {:?}", line);
     match line.len() {
@@ -88,17 +85,18 @@ where
     None
 }
 
-/// Reads an example file in the file format used by C++ boost voronoi
-/// \[number of points\]
-/// \[X\] \[Y\] (repeats)
-/// \[number of lines\]
-/// \[X1\] \[Y1\] \[X2\] \[Y2\](repeats)
-/// This entire module is implemented in about 20 lines of code in C++ boost :/
+/// Reads an example file in the file format used by C++ boost voronoi:
+///
+/// `[number of points]`<br>
+/// `[X] [Y] (repeats)`<br>
+/// `[number of lines]`<br>
+/// `[X1] [Y1] [X2] [Y2](repeats)`
+// This entire module is implemented in about 20 lines of code in C++ boost :/
 #[allow(clippy::type_complexity)]
-pub fn read_boost_input_file<I: super::InputType>(
+pub fn read_boost_input_file<I: crate::InputType>(
     filename: &Path,
 ) -> Result<(Vec<geometry::Point<I>>, Vec<geometry::Line<I>>), BvError> {
-    if !filename.is_file() || !filename.exists() {
+    if !filename.is_file() {
         return Err(BvError::ValueError(format!("{:?} not a file", filename)));
     }
     // Open the file in read-only mode
@@ -107,13 +105,14 @@ pub fn read_boost_input_file<I: super::InputType>(
     read_boost_input_buffer::<I, _>(reader)
 }
 
-/// Reads an example from a buffer using the format used by C++ boost voronoi
-/// \[number of points\]
-/// \[X\] \[Y\] (repeats)
-/// \[number of lines\]
-/// \[X1\] \[Y1\] \[X2\] \[Y2\](repeats)
+/// Reads an example from a buffer using the format used by C++ boost voronoi:
+///
+/// `[number of points]`<br>
+/// `[X] [Y] (repeats)`<br>
+/// `[number of lines]`<br>
+/// `[X1] [Y1] [X2] [Y2](repeats)`
 #[allow(clippy::type_complexity)]
-pub fn read_boost_input_buffer<I: super::InputType, F: std::io::Read>(
+pub fn read_boost_input_buffer<I: crate::InputType, F: std::io::Read>(
     reader: BufReader<F>,
 ) -> Result<(Vec<geometry::Point<I>>, Vec<geometry::Line<I>>), BvError> {
     let mut points = Vec::<geometry::Point<I>>::default();

@@ -16,8 +16,10 @@ pub use crate::{InputType, OutputType};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Sync version of the boostvoronoi::diagram::VoronoiDiagram struct.
+/// Sync version of the boostvoronoi::Diagram struct.
 /// This is useful when traversing the diagram in a multi threaded environment.
+///
+/// It also comes in an optional `serde` flavor.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Default, Debug)]
 pub struct SyncDiagram<F: OutputType> {
@@ -182,7 +184,6 @@ impl<F: OutputType> SyncDiagram<F> {
 }
 
 /// Iterator over edges pointing away from the vertex indicated by the initial edge.
-/// edge.vertex()
 pub struct EdgeRotNextIterator<'s, F: OutputType> {
     diagram_: &'s SyncDiagram<F>,
     starting_edge_: VD::EdgeIndex,
@@ -206,7 +207,7 @@ impl<'s, F: OutputType> Iterator for EdgeRotNextIterator<'s, F> {
         let new_next_edge = self.diagram_.edge_rot_next_no_err(self.next_edge_);
         self.next_edge_ = if let Some(nne) = new_next_edge {
             if nne.0 == self.starting_edge_.0 {
-                // Break the loop when we see starting edge again
+                // Break the loop when we see the starting edge again
                 None
             } else {
                 new_next_edge
