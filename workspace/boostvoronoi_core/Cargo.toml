@@ -3,11 +3,9 @@ name = "boostvoronoi_core"
 version = "0.10.0"
 authors = ["eadf <lacklustr@protonmail.com>"]
 edition = "2021"
-description = "Boost voronoi ported to 100% rust"
-readme = "README.md"
+description = "Boost voronoi private workspace"
 repository = "https://github.com/eadf/boostvoronoi.rs"
 license = "BSL-1.0"
-keywords = ["voronoi", "sweepline", "geometry"]
 exclude = [
     "img/*",
     "idea/*",

@@ -19,7 +19,7 @@ exclude = [
 members = ["workspace/boostvoronoi_core"]
 
 [dependencies]
-boostvoronoi_core = { path = "workspace/boostvoronoi_core", default-features = false}
+boostvoronoi_core = { path = "workspace/boostvoronoi_core", version="0.10.0", default-features = false}
 
 # These features are only for debug purposes, should normally not be used
 [features]

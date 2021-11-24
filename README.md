@@ -3,7 +3,7 @@
 [![crates.io](https://img.shields.io/crates/v/boostvoronoi.svg)](https://crates.io/crates/boostvoronoi)
 [![Documentation](https://docs.rs/boostvoronoi/badge.svg)](https://docs.rs/boostvoronoi)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)
-[![dependency status](https://deps.rs/crate/boostvoronoi/0.9.3/status.svg)](https://deps.rs/crate/boostvoronoi/0.9.3)
+[![dependency status](https://deps.rs/crate/boostvoronoi/0.10.0/status.svg)](https://deps.rs/crate/boostvoronoi/0.10.0)
 ![license](https://img.shields.io/crates/l/boostvoronoi)
 
 # Segmented Voronoi for Rust
@@ -32,9 +32,9 @@ type F = f64; // this is the float output type (circle event coordinates)
 
 fn main() -> Result<(), BvError> {
     // Only unique Points will be used. Points should not intersect lines
-    let p = vec![[9_i32, 10]];
+    let p = vec!([9_i32, 10]);
     // Lines may only intersect at the endpoints.
-    let s = vec![[10_i32, 11, 12, 33]];
+    let s = vec!([10_i32, 11, 12, 33]);
     let diagram = Builder::<I, F>::default()
         // You will have to keep track of the input geometry. it will be referenced as
         // input geometry indices in the output.
