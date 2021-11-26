@@ -29,7 +29,7 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 
 // TODO: how to make these generic?
-const ULPS: u64 = 64;
+//const ULPS: u64 = 64;
 const ULPSX2: u64 = 64; // Todo: This is what c++ boost uses. Find a fix for this
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -61,14 +61,16 @@ pub(crate) struct Predicates {}
 
 impl Predicates {
     #[inline(always)]
-    pub(crate) fn is_vertical_1<I: InputType, F: OutputType>(site: &VSE::SiteEvent<I, F>) -> bool {
-        Self::is_vertical_2::<I, F>(site.point0(), site.point1())
+    pub(crate) fn is_vertical_site<I: InputType, F: OutputType>(
+        site: &VSE::SiteEvent<I, F>,
+    ) -> bool {
+        Self::is_vertical_points::<I, F>(site.point0(), site.point1())
     }
 
     #[inline(always)]
-    pub(crate) fn is_vertical_2<I: InputType, F: OutputType>(
-        point1: &Point<I>,
-        point2: &Point<I>,
+    pub(crate) fn is_vertical_points<I: InputType, F: OutputType>(
+        point1: Point<I>,
+        point2: Point<I>,
     ) -> bool {
         point1.x == point2.x
     }
@@ -85,16 +87,6 @@ impl Predicates {
         b2: i64,
     ) -> f64 {
         robust_cross_product_f::<i64, f64>(a1, b1, a2, b2)
-    }
-
-    #[inline(always)]
-    pub(crate) fn ulps() -> u64 {
-        // todo figure out how to cache this
-        if std::mem::size_of::<f64>() > 4 {
-            ULPSX2
-        } else {
-            ULPS
-        }
     }
 }
 
@@ -160,9 +152,9 @@ impl OrientationTest {
 
     #[inline(always)]
     fn eval_p<I: InputType, F: OutputType>(
-        point1: &Point<I>,
-        point2: &Point<I>,
-        point3: &Point<I>,
+        point1: Point<I>,
+        point2: Point<I>,
+        point3: Point<I>,
     ) -> Orientation {
         let dx1: i64 = cast::<I, i64>(point1.x) - cast::<I, i64>(point2.x);
         let dx2: i64 = cast::<I, i64>(point2.x) - cast::<I, i64>(point3.x);
@@ -194,7 +186,7 @@ pub(crate) struct PointComparisonPredicate<I: InputType> {
 impl<I: InputType> PointComparisonPredicate<I> {
     /// returns true if lhs.x < rhs.x, if lhs.x==rhs.x it returns lhs.y < rhs.y
     #[inline(always)]
-    pub(crate) fn point_comparison(lhs: &Point<I>, rhs: &Point<I>) -> bool {
+    pub(crate) fn point_comparison(lhs: Point<I>, rhs: Point<I>) -> bool {
         if lhs.x == rhs.x {
             lhs.y < rhs.y
         } else {
@@ -219,25 +211,25 @@ impl EventComparisonPredicate {
             if !rhs.is_segment() {
                 return lhs.y0() < rhs.y0();
             }
-            if Predicates::is_vertical_2::<I, F>(rhs.point0(), rhs.point1()) {
+            if Predicates::is_vertical_points::<I, F>(rhs.point0(), rhs.point1()) {
                 return lhs.y0() <= rhs.y0();
             }
             true
         } else {
-            if Predicates::is_vertical_2::<I, F>(rhs.point0(), rhs.point1()) {
-                if Predicates::is_vertical_2::<I, F>(lhs.point0(), lhs.point1()) {
+            if Predicates::is_vertical_points::<I, F>(rhs.point0(), rhs.point1()) {
+                if Predicates::is_vertical_points::<I, F>(lhs.point0(), lhs.point1()) {
                     return lhs.y0() < rhs.y0();
                 }
                 return false;
             }
-            if Predicates::is_vertical_2::<I, F>(lhs.point0(), lhs.point1()) {
+            if Predicates::is_vertical_points::<I, F>(lhs.point0(), lhs.point1()) {
                 return true;
             }
             if lhs.y0() != rhs.y0() {
                 return lhs.y0() < rhs.y0();
             }
-            return OrientationTest::eval_p::<I, F>(lhs.point1(), lhs.point0(), rhs.point1())
-                == Orientation::Left;
+            OrientationTest::eval_p::<I, F>(lhs.point1(), lhs.point0(), rhs.point1())
+                == Orientation::Left
         }
     }
 
@@ -270,8 +262,7 @@ impl EventComparisonPredicate {
     ) -> bool {
         let lhs = cast::<I, f64>(lhs.x0());
         let rhs = rhs.lower_x().into_inner();
-        let ulps = Predicates::ulps();
-        let rv = ulp_comparison(lhs, rhs, ulps) == cmp::Ordering::Less;
+        let rv = ulp_comparison(lhs, rhs, ULPSX2) == cmp::Ordering::Less;
         tln!(
             "event_comparison_predicate_bif lhs:{:.12} rhs:{:.12} -> {}",
             lhs,
@@ -304,7 +295,7 @@ impl DistancePredicate {
     pub(crate) fn distance_predicate_fake<I: InputType, F: OutputType>(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
-        new_point: &Point<I>,
+        new_point: Point<I>,
     ) -> bool {
         let rv = Self::distance_predicate(left_site, right_site, new_point);
         tln!(
@@ -321,7 +312,7 @@ impl DistancePredicate {
     pub(crate) fn distance_predicate<I: InputType, F: OutputType>(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
-        new_point: &Point<I>,
+        new_point: Point<I>,
     ) -> bool {
         if !left_site.is_segment() {
             if !right_site.is_segment() {
@@ -343,7 +334,7 @@ impl DistancePredicate {
     fn pp<I: InputType, F: OutputType>(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
-        new_point: &Point<I>,
+        new_point: Point<I>,
     ) -> bool {
         let left_point = left_site.point0();
         let right_point = right_site.point0();
@@ -378,7 +369,7 @@ impl DistancePredicate {
     fn ps<I: InputType, F: OutputType>(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
-        new_point: &Point<I>,
+        new_point: Point<I>,
         reverse_order: bool,
     ) -> bool {
         let fast_res = Self::fast_ps(left_site, right_site, new_point, reverse_order);
@@ -396,7 +387,7 @@ impl DistancePredicate {
     fn ss<I: InputType, F: OutputType>(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
-        new_point: &Point<I>,
+        new_point: Point<I>,
     ) -> bool {
         // Handle temporary segment sites.
         if left_site.sorted_index() == right_site.sorted_index() {
@@ -417,7 +408,7 @@ impl DistancePredicate {
     #[inline(always)]
     fn distance_to_point_arc<I: InputType, F: OutputType>(
         site: &VSE::SiteEvent<I, F>,
-        point: &Point<I>,
+        point: Point<I>,
     ) -> f64 {
         let dx = cast::<I, f64>(site.x()) - cast::<I, f64>(point.x);
         let dy = cast::<I, f64>(site.y()) - cast::<I, f64>(point.y);
@@ -427,9 +418,9 @@ impl DistancePredicate {
 
     fn distance_to_segment_arc<I: InputType, F: OutputType>(
         site: &VSE::SiteEvent<I, F>,
-        point: &Point<I>,
+        point: Point<I>,
     ) -> f64 {
-        if Predicates::is_vertical_1::<I, F>(site) {
+        if Predicates::is_vertical_site::<I, F>(site) {
             (cast::<I, f64>(site.x()) - cast::<I, f64>(point.x)) * 0.5_f64
         } else {
             let segment0 = site.point0();
@@ -457,12 +448,12 @@ impl DistancePredicate {
     fn fast_ps<I: InputType, F: OutputType>(
         left_site: &VSE::SiteEvent<I, F>,
         right_site: &VSE::SiteEvent<I, F>,
-        new_point: &Point<I>,
+        new_point: Point<I>,
         reverse_order: bool,
     ) -> KPredicateResult {
-        let site_point: &Point<I> = left_site.point0();
-        let segment_start: &Point<I> = right_site.point0();
-        let segment_end: &Point<I> = right_site.point1();
+        let site_point: Point<I> = left_site.point0();
+        let segment_start: Point<I> = right_site.point0();
+        let segment_end: Point<I> = right_site.point1();
         let eval = OrientationTest::eval_p::<I, F>(segment_start, segment_end, new_point);
         if eval != Orientation::Right {
             return if !right_site.is_inverse() {
@@ -477,7 +468,7 @@ impl DistancePredicate {
         let a = cast::<I, f64>(segment_end.x) - cast::<I, f64>(segment_start.x);
         let b = cast::<I, f64>(segment_end.y) - cast::<I, f64>(segment_start.y);
 
-        if Predicates::is_vertical_1(right_site) {
+        if Predicates::is_vertical_site(right_site) {
             if new_point.y < site_point.y && !reverse_order {
                 return KPredicateResult::MORE;
             } else if new_point.y > site_point.y && reverse_order {
@@ -629,7 +620,7 @@ impl NodeComparisonPredicate {
 
     #[inline(always)]
     /// returns the point with lowest x, or point with lowest y if x are equal
-    fn comparison_point_<I: InputType, F: OutputType>(site: &VSE::SiteEvent<I, F>) -> &Point<I> {
+    fn comparison_point_<I: InputType, F: OutputType>(site: &VSE::SiteEvent<I, F>) -> Point<I> {
         if PointComparisonPredicate::point_comparison(site.point0(), site.point1()) {
             site.point0()
         } else {
@@ -649,7 +640,7 @@ impl NodeComparisonPredicate {
         if node.left_site().sorted_index() > node.right_site().sorted_index() {
             if !is_new_node
                 && node.left_site().is_segment()
-                && Predicates::is_vertical_1::<I, F>(node.left_site())
+                && Predicates::is_vertical_site::<I, F>(node.left_site())
             {
                 return (node.left_site().y0(), 1);
             }
@@ -786,9 +777,9 @@ pub struct LazyCircleFormationFunctor {}
 impl LazyCircleFormationFunctor {
     /// Lazy evaluation of point, point, point circle events
     fn ppp<I: InputType, F: OutputType>(
-        point1: &Point<I>,
-        point2: &Point<I>,
-        point3: &Point<I>,
+        point1: Point<I>,
+        point2: Point<I>,
+        point3: Point<I>,
         c_event: &VC::CircleEventType,
     ) {
         let dif_x1 = cast::<I, f64>(point1.x) - cast::<I, f64>(point2.x);
@@ -836,7 +827,7 @@ impl LazyCircleFormationFunctor {
             c_y.dif().fpv() * inv_orientation.fpv(),
             lower_x.dif().fpv() * inv_orientation.fpv(),
         );
-        let ulps = Predicates::ulps() as f64;
+        let ulps = ULPSX2 as f64;
         let recompute_c_x = c_x.dif().ulp() > ulps;
         let recompute_c_y = c_y.dif().ulp() > ulps;
         let recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -988,7 +979,7 @@ impl LazyCircleFormationFunctor {
 
         tln!("  c_x:{:?}, c_y:{:?}, l_x:{:?}", c_x, c_y, lower_x);
 
-        let ulps = Predicates::ulps() as f64;
+        let ulps = ULPSX2 as f64;
         let recompute_c_x = c_x.dif().ulp() > ulps;
         let recompute_c_y = c_y.dif().ulp() > ulps;
         let recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1272,7 +1263,7 @@ impl LazyCircleFormationFunctor {
             } else {
                 lower_x += RF::RobustFpt::from(0.5) * c / a.sqrt();
             }
-            let ulps = Predicates::ulps() as f64;
+            let ulps = ULPSX2 as f64;
             recompute_c_x = c_x.dif().ulp() > ulps;
             recompute_c_y = c_y.dif().ulp() > ulps;
             recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1452,7 +1443,7 @@ impl LazyCircleFormationFunctor {
                 lower_x.dif().ulp()
             );*/
 
-            let ulps = Predicates::ulps() as f64;
+            let ulps = ULPSX2 as f64;
             recompute_c_x = c_x.dif().ulp() > ulps;
             recompute_c_y = c_y.dif().ulp() > ulps;
             recompute_lower_x = lower_x.dif().ulp() > ulps;
@@ -1590,7 +1581,7 @@ impl LazyCircleFormationFunctor {
         let c_y_dif = c_y.dif() / denom_dif;
         let lower_x_dif = lower_x.dif() / denom_dif;
 
-        let ulps = Predicates::ulps() as f64;
+        let ulps = ULPSX2 as f64;
         let recompute_c_x = c_x_dif.ulp() > ulps;
         let recompute_c_y = c_y_dif.ulp() > ulps;
         let recompute_lower_x = lower_x_dif.ulp() > ulps;
@@ -1636,7 +1627,7 @@ impl CircleFormationFunctor {
         c: &VC::CircleEventType,
         s: &VSE::SiteEvent<I, F>,
     ) -> bool {
-        if !s.is_segment() || !Predicates::is_vertical_1::<I, F>(s) {
+        if !s.is_segment() || !Predicates::is_vertical_site::<I, F>(s) {
             return false;
         }
         let y0 = cast::<I, f64>(if s.is_inverse() { s.y1() } else { s.y0() });
@@ -1792,9 +1783,9 @@ pub struct ExactCircleFormationFunctor {}
 impl ExactCircleFormationFunctor {
     /// Recompute parameters of the point, point, point circle event using high-precision library.
     fn ppp<I: InputType, F: OutputType>(
-        point1: &Point<I>,
-        point2: &Point<I>,
-        point3: &Point<I>,
+        point1: Point<I>,
+        point2: Point<I>,
+        point3: Point<I>,
         circle: &VC::CircleEventType,
         recompute_c_x: bool,
         recompute_c_y: bool,

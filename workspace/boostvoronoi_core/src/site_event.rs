@@ -257,16 +257,16 @@ impl<I: InputType, F: OutputType> SiteEvent<I, F> {
     }
 
     #[inline(always)]
-    pub(crate) fn point0(&self) -> &Point<I> {
-        match &self.site_ {
+    pub(crate) fn point0(&self) -> Point<I> {
+        match self.site_ {
             Site::Point(p) => p,
             Site::Segment(p, _) => p,
         }
     }
 
     #[inline(always)]
-    pub(crate) fn point1(&self) -> &Point<I> {
-        match &self.site_ {
+    pub(crate) fn point1(&self) -> Point<I> {
+        match self.site_ {
             Site::Point(p) => {
                 // todo: This should not happen (but it happens in some tests)
                 // debug_assert!(false, "Site was not a segment");

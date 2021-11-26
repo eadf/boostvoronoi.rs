@@ -148,8 +148,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
             self.site_events_.push(s1);
             self.site_events_.push(s2);
             let site = VSE::Site::from(line);
-            let s3 = if VP::PointComparisonPredicate::<I>::point_comparison(&line.start, &line.end)
-            {
+            let s3 = if VP::PointComparisonPredicate::<I>::point_comparison(line.start, line.end) {
                 let mut s3 = VSE::SiteEvent::<I, F>::new(site, self.index_);
                 s3.or_source_category(&Cb::INITIAL_SEGMENT);
                 s3
@@ -262,11 +261,13 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
             let mut skip = 0;
 
             while *site_event_iterator_ < self.site_events_.len()
-                && VP::Predicates::is_vertical_2::<I, F>(
+                && VP::Predicates::is_vertical_points::<I, F>(
                     self.site_events_[*site_event_iterator_].point0(),
                     self.site_events_[0].point0(),
                 )
-                && VP::Predicates::is_vertical_1::<I, F>(&self.site_events_[*site_event_iterator_])
+                && VP::Predicates::is_vertical_site::<I, F>(
+                    &self.site_events_[*site_event_iterator_],
+                )
             {
                 *site_event_iterator_ += 1;
                 skip += 1;
@@ -897,7 +898,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
             }
             // Update the data structure that holds temporary bisectors.
             self.end_points_
-                .push(VEP::EndPointPair::new(*site_event.point1(), index));
+                .push(VEP::EndPointPair::new(site_event.point1(), index));
         }
         let new_node_data = VB::BeachLineNodeData::new_1(edges.0);
 

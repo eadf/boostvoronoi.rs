@@ -33,8 +33,8 @@ impl<I: InputType> EndPointPair<I> {
     }
 
     /// Returns a reference to the site point
-    pub(crate) fn site(&self) -> &Point<I> {
-        &self.site_
+    pub(crate) fn site(&self) -> Point<I> {
+        self.site_
     }
 
     /// Returns a reference to the beachline index
@@ -51,7 +51,7 @@ impl<I: InputType> PartialOrd for EndPointPair<I> {
 
 impl<I: InputType> Ord for EndPointPair<I> {
     fn cmp(&self, other: &Self) -> Ordering {
-        if VP::PointComparisonPredicate::<I>::point_comparison(&self.site_, &other.site_) {
+        if VP::PointComparisonPredicate::<I>::point_comparison(self.site_, other.site_) {
             Ordering::Greater
         } else if self.site_ == other.site_ {
             Ordering::Equal

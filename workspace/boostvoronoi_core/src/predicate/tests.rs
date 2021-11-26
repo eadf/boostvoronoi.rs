@@ -17,7 +17,7 @@ where
 }
 
 #[allow(clippy::too_many_arguments)]
-fn node_test<I, F>(
+fn node_test<I: InputType, F: OutputType>(
     a_key: &VB::BeachLineNodeKey<I, F>,
     x1: I,
     y1: I,
@@ -26,11 +26,7 @@ fn node_test<I, F>(
     y2: I,
     si2: usize,
     expect: bool,
-) -> bool
-where
-    I: InputType,
-    F: OutputType,
-{
+) -> bool {
     let test_node = new_key::<I, F>(x1, y1, si1, x2, y2, si2);
 
     let is_less = VP::NodeComparisonPredicate::node_comparison::<I, F>(a_key, &test_node);
@@ -157,7 +153,7 @@ fn distance_predicate_pp() {
         pp(
             &new_site(1, 2, 1, 2, 1, 0, 1),
             &new_site(2, 2, 2, 2, 2, 2, 1),
-            &new_point(3, 1)
+            new_point(3, 1)
         ),
         true
     ); //distance_predicate
@@ -165,7 +161,7 @@ fn distance_predicate_pp() {
         pp(
             &new_site(1, 2, 1, 2, 1, 0, 1),
             &new_site(3, 1, 3, 1, 3, 4, 2),
-            &new_point(5, 4)
+            new_point(5, 4)
         ),
         true
     ); //distance_predicate
@@ -173,7 +169,7 @@ fn distance_predicate_pp() {
         pp(
             &new_site(1, 2, 1, 2, 1, 0, 1),
             &new_site(3, 1, 3, 1, 3, 4, 2),
-            &new_point(5, 6)
+            new_point(5, 6)
         ),
         true
     ); //distance_predicate
@@ -192,7 +188,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(1, 2, 1, 2, 1, 0, 1),
             &new_site(1, 2, 3, 4, 1, 1, 8),
-            &new_point(2, 2),
+            new_point(2, 2),
             false
         ),
         true
@@ -201,7 +197,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(1, 2, 1, 2, 1, 0, 1),
             &new_site(3, 4, 1, 2, 1, 1, 40),
-            &new_point(3, 4),
+            new_point(3, 4),
             true
         ),
         false
@@ -210,7 +206,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(1, 2, 1, 2, 1, 0, 1),
             &new_site(3, 4, 1, 2, 1, 1, 40),
-            &new_point(5, 4),
+            new_point(5, 4),
             true
         ),
         false
@@ -219,7 +215,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(1, 2, 1, 2, 1, 0, 1),
             &new_site(3, 4, 1, 2, 1, 1, 40),
-            &new_point(5, 6),
+            new_point(5, 6),
             true
         ),
         false
@@ -228,7 +224,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(2, 2, 2, 2, 2, 2, 1),
             &new_site(2, 2, 5, 4, 2, 3, 8),
-            &new_point(3, 1),
+            new_point(3, 1),
             false
         ),
         false
@@ -237,7 +233,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(3, 1, 3, 1, 3, 4, 2),
             &new_site(3, 1, 5, 6, 3, 6, 9),
-            &new_point(4, 3),
+            new_point(4, 3),
             false
         ),
         true
@@ -246,7 +242,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(3, 1, 3, 1, 3, 4, 2),
             &new_site(3, 1, 5, 6, 3, 6, 9),
-            &new_point(5, 4),
+            new_point(5, 4),
             false
         ),
         true
@@ -255,7 +251,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(3, 1, 3, 1, 3, 4, 2),
             &new_site(3, 1, 5, 6, 3, 6, 9),
-            &new_point(5, 6),
+            new_point(5, 6),
             false
         ),
         true
@@ -264,7 +260,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(3, 4, 3, 4, 1, 5, 2),
             &new_site(3, 4, 1, 2, 1, 1, 40),
-            &new_point(5, 4),
+            new_point(5, 4),
             false
         ),
         false
@@ -273,7 +269,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(3, 4, 3, 4, 1, 5, 2),
             &new_site(3, 4, 1, 2, 1, 1, 40),
-            &new_point(5, 6),
+            new_point(5, 6),
             false
         ),
         false
@@ -282,7 +278,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(3, 4, 3, 4, 1, 5, 2),
             &new_site(5, 4, 2, 2, 2, 3, 40),
-            &new_point(5, 4),
+            new_point(5, 4),
             true
         ),
         false
@@ -291,7 +287,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(3, 4, 3, 4, 1, 5, 2),
             &new_site(5, 4, 2, 2, 2, 3, 40),
-            &new_point(5, 6),
+            new_point(5, 6),
             true
         ),
         true
@@ -300,7 +296,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(4, 3, 4, 3, 0, 7, 0),
             &new_site(3, 1, 5, 6, 3, 6, 9),
-            &new_point(5, 4),
+            new_point(5, 4),
             false
         ),
         true
@@ -309,7 +305,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(4, 3, 4, 3, 0, 7, 0),
             &new_site(3, 1, 5, 6, 3, 6, 9),
-            &new_point(5, 4),
+            new_point(5, 4),
             true
         ),
         true
@@ -318,7 +314,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(4, 3, 4, 3, 0, 7, 0),
             &new_site(3, 1, 5, 6, 3, 6, 9),
-            &new_point(5, 6),
+            new_point(5, 6),
             false
         ),
         true
@@ -327,7 +323,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(4, 3, 4, 3, 0, 7, 0),
             &new_site(3, 1, 5, 6, 3, 6, 9),
-            &new_point(5, 6),
+            new_point(5, 6),
             true
         ),
         true
@@ -336,7 +332,7 @@ fn distance_predicate_ps_32() {
         ps(
             &new_site(200, 400, 200, 400, 0, 2, 2),
             &new_site(400, 400, 200, 400, 1, 4, 40),
-            &new_point(400, 400),
+            new_point(400, 400),
             true
         ),
         false
@@ -349,14 +345,14 @@ fn distance_predicate_ps_64() {
     type F = f64;
     let ps = super::DistancePredicate::ps::<I, F>;
     let new_site = VSE::SiteEvent::<I, F>::new_7;
-    let new_point = |x, y| Point::<I> { x, y };
+    let new_point = Point::<I>::new;
 
     // test data copy & pasted from c++ debug session
     assert_eq!(
         ps(
             &new_site(1, 2, 1, 2, 1, 0, 1),
             &new_site(1, 2, 3, 4, 1, 1, 8),
-            &new_point(2, 2),
+            new_point(2, 2),
             false
         ),
         true
@@ -365,7 +361,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(1, 2, 1, 2, 1, 0, 1),
             &new_site(3, 4, 1, 2, 1, 1, 40),
-            &new_point(3, 4),
+            new_point(3, 4),
             true
         ),
         false
@@ -374,7 +370,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(1, 2, 1, 2, 1, 0, 1),
             &new_site(3, 4, 1, 2, 1, 1, 40),
-            &new_point(5, 4),
+            new_point(5, 4),
             true
         ),
         false
@@ -383,7 +379,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(1, 2, 1, 2, 1, 0, 1),
             &new_site(3, 4, 1, 2, 1, 1, 40),
-            &new_point(5, 6),
+            new_point(5, 6),
             true
         ),
         false
@@ -392,7 +388,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(2, 2, 2, 2, 2, 2, 1),
             &new_site(2, 2, 5, 4, 2, 3, 8),
-            &new_point(3, 1),
+            new_point(3, 1),
             false
         ),
         false
@@ -401,7 +397,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(3, 1, 3, 1, 3, 4, 2),
             &new_site(3, 1, 5, 6, 3, 6, 9),
-            &new_point(4, 3),
+            new_point(4, 3),
             false
         ),
         true
@@ -410,7 +406,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(3, 1, 3, 1, 3, 4, 2),
             &new_site(3, 1, 5, 6, 3, 6, 9),
-            &new_point(5, 4),
+            new_point(5, 4),
             false
         ),
         true
@@ -419,7 +415,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(3, 1, 3, 1, 3, 4, 2),
             &new_site(3, 1, 5, 6, 3, 6, 9),
-            &new_point(5, 6),
+            new_point(5, 6),
             false
         ),
         true
@@ -428,7 +424,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(3, 4, 3, 4, 1, 5, 2),
             &new_site(3, 4, 1, 2, 1, 1, 40),
-            &new_point(5, 4),
+            new_point(5, 4),
             false
         ),
         false
@@ -437,7 +433,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(3, 4, 3, 4, 1, 5, 2),
             &new_site(3, 4, 1, 2, 1, 1, 40),
-            &new_point(5, 6),
+            new_point(5, 6),
             false
         ),
         false
@@ -446,7 +442,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(3, 4, 3, 4, 1, 5, 2),
             &new_site(5, 4, 2, 2, 2, 3, 40),
-            &new_point(5, 4),
+            new_point(5, 4),
             true
         ),
         false
@@ -455,7 +451,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(3, 4, 3, 4, 1, 5, 2),
             &new_site(5, 4, 2, 2, 2, 3, 40),
-            &new_point(5, 6),
+            new_point(5, 6),
             true
         ),
         true
@@ -464,7 +460,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(4, 3, 4, 3, 0, 7, 0),
             &new_site(3, 1, 5, 6, 3, 6, 9),
-            &new_point(5, 4),
+            new_point(5, 4),
             false
         ),
         true
@@ -473,7 +469,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(4, 3, 4, 3, 0, 7, 0),
             &new_site(3, 1, 5, 6, 3, 6, 9),
-            &new_point(5, 4),
+            new_point(5, 4),
             true
         ),
         true
@@ -482,7 +478,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(4, 3, 4, 3, 0, 7, 0),
             &new_site(3, 1, 5, 6, 3, 6, 9),
-            &new_point(5, 6),
+            new_point(5, 6),
             false
         ),
         true
@@ -491,7 +487,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(4, 3, 4, 3, 0, 7, 0),
             &new_site(3, 1, 5, 6, 3, 6, 9),
-            &new_point(5, 6),
+            new_point(5, 6),
             true
         ),
         true
@@ -500,7 +496,7 @@ fn distance_predicate_ps_64() {
         ps(
             &new_site(200, 400, 200, 400, 0, 2, 2),
             &new_site(400, 400, 200, 400, 1, 4, 40),
-            &new_point(400, 400),
+            new_point(400, 400),
             true
         ),
         false
@@ -520,7 +516,7 @@ fn distance_predicate_ss_32() {
         ss(
             &new_site(1, 2, 3, 4, 1, 1, 8),
             &new_site(3, 4, 1, 2, 1, 1, 40),
-            &new_point(2, 2)
+            new_point(2, 2)
         ),
         false
     ); //distance_predicate
@@ -528,7 +524,7 @@ fn distance_predicate_ss_32() {
         ss(
             &new_site(2, 2, 5, 4, 2, 3, 8),
             &new_site(5, 4, 2, 2, 2, 3, 40),
-            &new_point(4, 3)
+            new_point(4, 3)
         ),
         false
     ); //distance_predicate
@@ -536,7 +532,7 @@ fn distance_predicate_ss_32() {
         ss(
             &new_site(3, 1, 5, 6, 3, 6, 9),
             &new_site(5, 6, 3, 1, 3, 6, 41),
-            &new_point(4, 3)
+            new_point(4, 3)
         ),
         false
     ); //distance_predicate
@@ -544,7 +540,7 @@ fn distance_predicate_ss_32() {
         ss(
             &new_site(3, 1, 5, 6, 3, 6, 9),
             &new_site(5, 6, 3, 1, 3, 6, 41),
-            &new_point(5, 4)
+            new_point(5, 4)
         ),
         false
     ); //distance_predicate
@@ -552,7 +548,7 @@ fn distance_predicate_ss_32() {
         ss(
             &new_site(5, 4, 2, 2, 2, 3, 40),
             &new_site(1, 2, 3, 4, 1, 1, 8),
-            &new_point(3, 1)
+            new_point(3, 1)
         ),
         false
     ); //distance_predicate
@@ -560,7 +556,7 @@ fn distance_predicate_ss_32() {
         ss(
             &new_site(5, 4, 2, 2, 2, 3, 40),
             &new_site(1, 2, 3, 4, 1, 1, 8),
-            &new_point(3, 4)
+            new_point(3, 4)
         ),
         true
     ); //distance_predicate
@@ -568,7 +564,7 @@ fn distance_predicate_ss_32() {
         ss(
             &new_site(5, 6, 3, 1, 3, 6, 41),
             &new_site(2, 2, 5, 4, 2, 3, 8),
-            &new_point(5, 4)
+            new_point(5, 4)
         ),
         false
     ); //distance_predicate
@@ -576,7 +572,7 @@ fn distance_predicate_ss_32() {
         ss(
             &new_site(5, 6, 3, 1, 3, 6, 41),
             &new_site(2, 2, 5, 4, 2, 3, 8),
-            &new_point(5, 6)
+            new_point(5, 6)
         ),
         true
     ); //distance_predicate
@@ -584,11 +580,12 @@ fn distance_predicate_ss_32() {
         ss(
             &new_site(367, 107, 529, 242, 4, 6, 9),
             &new_site(529, 242, 367, 107, 4, 6, 41),
-            &new_point(400, 200)
+            new_point(400, 200)
         ),
         true
     ); //distance_predicate
 }
+
 #[test]
 fn distance_predicate_ss_64() {
     type I = i32;
@@ -602,7 +599,7 @@ fn distance_predicate_ss_64() {
         ss(
             &new_site(1, 2, 3, 4, 1, 1, 8),
             &new_site(3, 4, 1, 2, 1, 1, 40),
-            &new_point(2, 2)
+            new_point(2, 2)
         ),
         false
     ); //distance_predicate
@@ -610,7 +607,7 @@ fn distance_predicate_ss_64() {
         ss(
             &new_site(2, 2, 5, 4, 2, 3, 8),
             &new_site(5, 4, 2, 2, 2, 3, 40),
-            &new_point(4, 3)
+            new_point(4, 3)
         ),
         false
     ); //distance_predicate
@@ -618,7 +615,7 @@ fn distance_predicate_ss_64() {
         ss(
             &new_site(3, 1, 5, 6, 3, 6, 9),
             &new_site(5, 6, 3, 1, 3, 6, 41),
-            &new_point(4, 3)
+            new_point(4, 3)
         ),
         false
     ); //distance_predicate
@@ -626,7 +623,7 @@ fn distance_predicate_ss_64() {
         ss(
             &new_site(3, 1, 5, 6, 3, 6, 9),
             &new_site(5, 6, 3, 1, 3, 6, 41),
-            &new_point(5, 4)
+            new_point(5, 4)
         ),
         false
     ); //distance_predicate
@@ -634,7 +631,7 @@ fn distance_predicate_ss_64() {
         ss(
             &new_site(5, 4, 2, 2, 2, 3, 40),
             &new_site(1, 2, 3, 4, 1, 1, 8),
-            &new_point(3, 1)
+            new_point(3, 1)
         ),
         false
     ); //distance_predicate
@@ -642,7 +639,7 @@ fn distance_predicate_ss_64() {
         ss(
             &new_site(5, 4, 2, 2, 2, 3, 40),
             &new_site(1, 2, 3, 4, 1, 1, 8),
-            &new_point(3, 4)
+            new_point(3, 4)
         ),
         true
     ); //distance_predicate
@@ -650,7 +647,7 @@ fn distance_predicate_ss_64() {
         ss(
             &new_site(5, 6, 3, 1, 3, 6, 41),
             &new_site(2, 2, 5, 4, 2, 3, 8),
-            &new_point(5, 4)
+            new_point(5, 4)
         ),
         false
     ); //distance_predicate
@@ -658,7 +655,7 @@ fn distance_predicate_ss_64() {
         ss(
             &new_site(5, 6, 3, 1, 3, 6, 41),
             &new_site(2, 2, 5, 4, 2, 3, 8),
-            &new_point(5, 6)
+            new_point(5, 6)
         ),
         true
     ); //distance_predicate
@@ -666,7 +663,7 @@ fn distance_predicate_ss_64() {
         ss(
             &new_site(367, 107, 529, 242, 4, 6, 9),
             &new_site(529, 242, 367, 107, 4, 6, 41),
-            &new_point(400, 200)
+            new_point(400, 200)
         ),
         true
     ); //distance_predicate
