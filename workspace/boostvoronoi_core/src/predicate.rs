@@ -655,12 +655,11 @@ pub(crate) struct CircleExistencePredicate {}
 impl CircleExistencePredicate {
     #[inline(always)]
     pub(crate) fn ppp<I: InputType, F: OutputType>(
-        site1: &VSE::SiteEvent<I, F>,
-        site2: &VSE::SiteEvent<I, F>,
-        site3: &VSE::SiteEvent<I, F>,
+        point1: Point<I>,
+        point2: Point<I>,
+        point3: Point<I>,
     ) -> bool {
-        OrientationTest::eval_p::<I, F>(site1.point0(), site2.point0(), site3.point0())
-            == Orientation::Right
+        OrientationTest::eval_p::<I, F>(point1, point2, point3) == Orientation::Right
     }
 
     #[cfg(all(feature = "geo", feature = "ce_corruption_check"))]
@@ -709,22 +708,20 @@ impl CircleExistencePredicate {
 
     #[inline(always)]
     fn pps<I: InputType, F: OutputType>(
-        site1: &VSE::SiteEvent<I, F>,
-        site2: &VSE::SiteEvent<I, F>,
+        point1: Point<I>,
+        point2: Point<I>,
         site3: &VSE::SiteEvent<I, F>,
         segment_index: SiteIndex,
     ) -> bool {
         #[allow(clippy::suspicious_operation_groupings)]
         if segment_index != SiteIndex::Two {
-            let orient1 =
-                OrientationTest::eval_p::<I, F>(site1.point0(), site2.point0(), site3.point0());
-            let orient2 =
-                OrientationTest::eval_p::<I, F>(site1.point0(), site2.point0(), site3.point1());
-            if segment_index == SiteIndex::One && site1.x0() >= site2.x0() {
+            let orient1 = OrientationTest::eval_p::<I, F>(point1, point2, site3.point0());
+            let orient2 = OrientationTest::eval_p::<I, F>(point1, point2, site3.point1());
+            if segment_index == SiteIndex::One && point1.x >= point2.x {
                 if orient1 != Orientation::Right {
                     return false;
                 }
-            } else if segment_index == SiteIndex::Three && site2.x0() >= site1.x0() {
+            } else if segment_index == SiteIndex::Three && point2.x >= point1.x {
                 if orient2 != Orientation::Right {
                     return false;
                 }
@@ -732,14 +729,14 @@ impl CircleExistencePredicate {
                 return false;
             }
         } else {
-            return (site3.point0() != site1.point0()) || (site3.point1() != site2.point0());
+            return (site3.point0() != point1) || (site3.point1() != point2);
         }
         true
     }
 
     #[inline(always)]
     fn pss<I: InputType, F: OutputType>(
-        site1: &VSE::SiteEvent<I, F>,
+        point1: Point<I>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
         point_index: SiteIndex,
@@ -752,7 +749,7 @@ impl CircleExistencePredicate {
                 return false;
             }
             if site2.is_inverse() == site3.is_inverse()
-                && OrientationTest::eval_p::<I, F>(site2.point0(), site1.point0(), site3.point1())
+                && OrientationTest::eval_p::<I, F>(site2.point0(), point1, site3.point1())
                     != Orientation::Right
             {
                 return false;
@@ -853,30 +850,30 @@ impl LazyCircleFormationFunctor {
 
     /// Lazy evaluation of point, point, segment circle events
     fn pps<I: InputType, F: OutputType>(
-        site1: &VSE::SiteEvent<I, F>,
-        site2: &VSE::SiteEvent<I, F>,
+        point1: Point<I>,
+        point2: Point<I>,
         site3: &VSE::SiteEvent<I, F>,
         segment_index: SiteIndex,
         c_event: &VC::CircleEventType,
     ) {
         #[cfg(feature = "ce_corruption_check")]
-        println!("\n->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?})", site1, site2, site3, segment_index);
-        tln!("->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?})", site1, site2, site3, segment_index);
+        println!("\n->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?})", point1, point2, site3, segment_index);
+        tln!("->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?})", point1, point2, site3, segment_index);
 
         // (line_a,line_b) it the perpendicular vector of site3-point0 -> site3-point1
         let line_a = cast::<I, f64>(site3.y1()) - cast::<I, f64>(site3.y0());
         let line_b = cast::<I, f64>(site3.x0()) - cast::<I, f64>(site3.x1());
         // (vec_x,vec_y) it the perpendicular vector of site1->site2
         // t*(vec_x,vec_y) + midpoint(site1->site2) is our circle event position
-        let vec_x = cast::<I, f64>(site2.y()) - cast::<I, f64>(site1.y());
-        let vec_y = cast::<I, f64>(site1.x()) - cast::<I, f64>(site2.x());
+        let vec_x = cast::<I, f64>(point2.y) - cast::<I, f64>(point1.y);
+        let vec_y = cast::<I, f64>(point1.x) - cast::<I, f64>(point2.x);
 
         let teta = RF::RobustFpt::new(
             Predicates::robust_cross_product::<I, F>(
                 cast::<I, i64>(site3.y1()) - cast::<I, i64>(site3.y0()),
                 cast::<I, i64>(site3.x0()) - cast::<I, i64>(site3.x1()),
-                cast::<I, i64>(site2.x()) - cast::<I, i64>(site1.x()),
-                cast::<I, i64>(site2.y()) - cast::<I, i64>(site1.y()),
+                cast::<I, i64>(point2.x) - cast::<I, i64>(point1.x),
+                cast::<I, i64>(point2.y) - cast::<I, i64>(point1.y),
             ),
             1_f64,
         );
@@ -884,8 +881,8 @@ impl LazyCircleFormationFunctor {
             Predicates::robust_cross_product::<I, F>(
                 cast::<I, i64>(site3.y0()) - cast::<I, i64>(site3.y1()),
                 cast::<I, i64>(site3.x0()) - cast::<I, i64>(site3.x1()),
-                cast::<I, i64>(site3.y1()) - cast::<I, i64>(site1.y()),
-                cast::<I, i64>(site3.x1()) - cast::<I, i64>(site1.x()),
+                cast::<I, i64>(site3.y1()) - cast::<I, i64>(point1.y),
+                cast::<I, i64>(site3.x1()) - cast::<I, i64>(point1.x),
             ),
             1_f64,
         );
@@ -893,15 +890,15 @@ impl LazyCircleFormationFunctor {
             Predicates::robust_cross_product::<I, F>(
                 cast::<I, i64>(site3.y0()) - cast::<I, i64>(site3.y1()),
                 cast::<I, i64>(site3.x0()) - cast::<I, i64>(site3.x1()),
-                cast::<I, i64>(site3.y1()) - cast::<I, i64>(site2.y()),
-                cast::<I, i64>(site3.x1()) - cast::<I, i64>(site2.x()),
+                cast::<I, i64>(site3.y1()) - cast::<I, i64>(point2.y),
+                cast::<I, i64>(site3.x1()) - cast::<I, i64>(point2.x),
             ),
             1_f64,
         );
         let denom = RF::RobustFpt::new(
             Predicates::robust_cross_product::<I, F>(
-                cast::<I, i64>(site1.y()) - cast::<I, i64>(site2.y()),
-                cast::<I, i64>(site1.x()) - cast::<I, i64>(site2.x()),
+                cast::<I, i64>(point1.y) - cast::<I, i64>(point2.y),
+                cast::<I, i64>(point1.x) - cast::<I, i64>(point2.x),
                 cast::<I, i64>(site3.y1()) - cast::<I, i64>(site3.y0()),
                 cast::<I, i64>(site3.x1()) - cast::<I, i64>(site3.x0()),
             ),
@@ -939,11 +936,11 @@ impl LazyCircleFormationFunctor {
         let mut c_x = RF::RobustDif::default();
         tln!("0: c_x:{:?}", c_x);
         let mut c_y = RF::RobustDif::default();
-        c_x += RF::RobustFpt::from(0.5 * (cast::<I, f64>(site1.x()) + cast::<I, f64>(site2.x())));
+        c_x += RF::RobustFpt::from(0.5 * (cast::<I, f64>(point1.x) + cast::<I, f64>(point2.x)));
         tln!("1: c_x:{:?}", c_x);
         c_x += t * RF::RobustFpt::from(vec_x);
         tln!("2: c_x:{:?}", c_x);
-        c_y += RF::RobustFpt::from(0.5 * (cast::<I, f64>(site1.y()) + cast::<I, f64>(site2.y())));
+        c_y += RF::RobustFpt::from(0.5 * (cast::<I, f64>(point1.y) + cast::<I, f64>(point2.y)));
         c_y += t * RF::RobustFpt::from(vec_y);
 
         let mut r = RF::RobustDif::default();
@@ -959,8 +956,8 @@ impl LazyCircleFormationFunctor {
 
         #[cfg(feature = "ce_corruption_check")]
         {
-            println!("let site1=[{},{}];", site1.x(), site1.y());
-            println!("let site2=[{},{}];", site2.x(), site2.y());
+            println!("let site1=[{},{}];", point1.x, point1.y);
+            println!("let site2=[{},{}];", point2.x, point2.y);
             println!(
                 "let site3=[{},{},{},{}];",
                 site3.point0().x,
@@ -999,8 +996,8 @@ impl LazyCircleFormationFunctor {
 
         if recompute_c_x || recompute_c_y || recompute_lower_x {
             ExactCircleFormationFunctor::pps::<I, F>(
-                site1,
-                site2,
+                point1,
+                point2,
                 site3,
                 segment_index,
                 c_event,
@@ -1011,22 +1008,22 @@ impl LazyCircleFormationFunctor {
         }
         #[allow(clippy::suspicious_operation_groupings)]
         // All sites needs to be unique, or ppp will return NaN
-        let unique_endpoints = !(site3.point0() == site1.point0()
-            || site3.point0() == site2.point0()
-            || site3.point1() == site1.point0()
-            || site3.point1() == site2.point0()
-            || site1.point0() == site2.point0());
+        let unique_endpoints = !(site3.point0() == point1
+            || site3.point0() == point2
+            || site3.point1() == point1
+            || site3.point1() == point2
+            || point1 == point2);
         tln!("pps unique_endpoints:{}", unique_endpoints);
         if unique_endpoints {
             #[cfg(feature = "ce_corruption_check")]
             {
                 println!(
                     "site1->c distance:{:-12}",
-                    site1.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
+                    point1.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
                 );
                 println!(
                     "site2->c distance:{:-12}",
-                    site2.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
+                    point2.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
                 );
                 println!(
                     "site3->c distance:{:-12}",
@@ -1081,23 +1078,23 @@ impl LazyCircleFormationFunctor {
                     SiteIndex::One => {
                         LazyCircleFormationFunctor::ppp::<I, F>(
                             site_3_point,
-                            site1.point0(),
-                            site2.point0(),
+                            point1,
+                            point2,
                             c_event,
                         );
                     }
                     SiteIndex::Two => {
                         LazyCircleFormationFunctor::ppp::<I, F>(
-                            site1.point0(),
+                            point1,
                             site_3_point,
-                            site2.point0(),
+                            point2,
                             c_event,
                         );
                     }
                     SiteIndex::Three => {
                         LazyCircleFormationFunctor::ppp::<I, F>(
-                            site1.point0(),
-                            site2.point0(),
+                            point1,
+                            point2,
                             site_3_point,
                             c_event,
                         );
@@ -1114,11 +1111,11 @@ impl LazyCircleFormationFunctor {
                     );
                     println!(
                         "site1->c distance:{:-12}",
-                        site1.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
+                        point1.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
                     );
                     println!(
                         "site2->c distance:{:-12}",
-                        site2.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
+                        point2.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
                     );
                     println!(
                         "site3->c distance:{:-12}",
@@ -1134,7 +1131,7 @@ impl LazyCircleFormationFunctor {
     /// Lazy evaluation of point, segment, segment circle events
     #[allow(unused_parens)]
     fn pss<I: InputType, F: OutputType>(
-        site1: &VSE::SiteEvent<I, F>,
+        point1: Point<I>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
         point_index: SiteIndex,
@@ -1146,7 +1143,7 @@ impl LazyCircleFormationFunctor {
         let segm_end2 = site3.point1();
         tln!(
             "->LazyCircleFormationFunctor::pss(site1:{:?}, site2:{:?}, site3:{:?}, point_index:{:?})",
-            site1,
+            point1,
             site2,
             site3,
             point_index
@@ -1158,12 +1155,12 @@ impl LazyCircleFormationFunctor {
         // It seems better to use the pristine int coordinate instead of spending cycles
         // re-calculating it again with lossy floats.
         #[allow(clippy::suspicious_operation_groupings)]
-        if (site1.point0() == site2.point0() || site1.point0() == site2.point1())
-            && (site1.point0() == site3.point0() || site1.point0() == site3.point1())
+        if (point1 == site2.point0() || point1 == site2.point1())
+            && (point1 == site3.point0() || point1 == site3.point1())
         {
             c_event.cell_set_is_site_point();
-            let x = cast::<I, f64>(site1.point0().x);
-            let y = cast::<I, f64>(site1.point0().y);
+            let x = cast::<I, f64>(point1.x);
+            let y = cast::<I, f64>(point1.y);
             c_event.cell_set_3_raw(x, y, x);
             tln!("<-LazyCircleFormationFunctor::pss shortcut");
             return;
@@ -1204,13 +1201,13 @@ impl LazyCircleFormationFunctor {
                 Predicates::robust_cross_product::<I, F>(
                     cast::<I, i64>(segm_end1.x) - cast::<I, i64>(segm_start1.x),
                     cast::<I, i64>(segm_end1.y) - cast::<I, i64>(segm_start1.y),
-                    cast::<I, i64>(site1.x()) - cast::<I, i64>(segm_start1.x),
-                    cast::<I, i64>(site1.y()) - cast::<I, i64>(segm_start1.y),
+                    cast::<I, i64>(point1.x) - cast::<I, i64>(segm_start1.x),
+                    cast::<I, i64>(point1.y) - cast::<I, i64>(segm_start1.y),
                 ) * Predicates::robust_cross_product::<I, F>(
                     cast::<I, i64>(segm_end1.y) - cast::<I, i64>(segm_start1.y),
                     cast::<I, i64>(segm_end1.x) - cast::<I, i64>(segm_start1.x),
-                    cast::<I, i64>(site1.y()) - cast::<I, i64>(segm_start2.y),
-                    cast::<I, i64>(site1.x()) - cast::<I, i64>(segm_start2.x),
+                    cast::<I, i64>(point1.y) - cast::<I, i64>(segm_start2.y),
+                    cast::<I, i64>(point1.x) - cast::<I, i64>(segm_start2.x),
                 ),
                 3.0,
             );
@@ -1228,12 +1225,12 @@ impl LazyCircleFormationFunctor {
             t -= RF::RobustFpt::from(a1)
                 * RF::RobustFpt::from(
                     (cast::<I, f64>(segm_start1.x) + cast::<I, f64>(segm_start2.x)) * 0.5
-                        - cast::<I, f64>(site1.x()),
+                        - cast::<I, f64>(point1.x),
                 );
             t -= RF::RobustFpt::from(b1)
                 * RF::RobustFpt::from(
                     (cast::<I, f64>(segm_start1.y) + cast::<I, f64>(segm_start2.y)) * 0.5
-                        - cast::<I, f64>(site1.y()),
+                        - cast::<I, f64>(point1.y),
                 );
             if point_index == SiteIndex::Two {
                 t += det.sqrt();
@@ -1312,8 +1309,8 @@ impl LazyCircleFormationFunctor {
                 Predicates::robust_cross_product::<I, F>(
                     cast::<I, i64>(segm_end1.y) - cast::<I, i64>(segm_start1.y),
                     cast::<I, i64>(segm_end1.x) - cast::<I, i64>(segm_start1.x),
-                    cast::<I, i64>(segm_end1.y) - cast::<I, i64>(site1.y()),
-                    cast::<I, i64>(segm_end1.x) - cast::<I, i64>(site1.x()),
+                    cast::<I, i64>(segm_end1.y) - cast::<I, i64>(point1.y),
+                    cast::<I, i64>(segm_end1.x) - cast::<I, i64>(point1.x),
                 ),
                 1_f64,
             );
@@ -1321,8 +1318,8 @@ impl LazyCircleFormationFunctor {
                 Predicates::robust_cross_product::<I, F>(
                     cast::<I, i64>(segm_end2.x) - cast::<I, i64>(segm_start2.x),
                     cast::<I, i64>(segm_end2.y) - cast::<I, i64>(segm_start2.y),
-                    cast::<I, i64>(segm_end2.x) - cast::<I, i64>(site1.x()),
-                    cast::<I, i64>(segm_end2.y) - cast::<I, i64>(site1.y()),
+                    cast::<I, i64>(segm_end2.x) - cast::<I, i64>(point1.x),
+                    cast::<I, i64>(segm_end2.y) - cast::<I, i64>(point1.y),
                 ),
                 1_f64,
             );
@@ -1373,8 +1370,8 @@ impl LazyCircleFormationFunctor {
                     Predicates::robust_cross_product::<I, F>(
                         cast::<I, i64>(segm_end2.x) - cast::<I, i64>(segm_start2.x),
                         cast::<I, i64>(segm_end2.y) - cast::<I, i64>(segm_start2.y),
-                        -cast::<I, i64>(site1.y()),
-                        cast::<I, i64>(site1.x()),
+                        -cast::<I, i64>(point1.y),
+                        cast::<I, i64>(point1.x),
                     ),
                     1_f64,
                 );
@@ -1384,8 +1381,8 @@ impl LazyCircleFormationFunctor {
                     Predicates::robust_cross_product::<I, F>(
                         cast::<I, i64>(segm_end1.x) - cast::<I, i64>(segm_start1.x),
                         cast::<I, i64>(segm_end1.y) - cast::<I, i64>(segm_start1.y),
-                        -cast::<I, i64>(site1.y()),
-                        cast::<I, i64>(site1.x()),
+                        -cast::<I, i64>(point1.y),
+                        cast::<I, i64>(point1.x),
                     ),
                     1_f64,
                 );
@@ -1459,7 +1456,7 @@ impl LazyCircleFormationFunctor {
 
         if recompute_c_x || recompute_c_y || recompute_lower_x {
             ExactCircleFormationFunctor::pss(
-                site1,
+                point1,
                 site2,
                 site3,
                 point_index,
@@ -1677,7 +1674,11 @@ impl CircleFormationFunctor {
             if !site2.is_segment() {
                 if !site3.is_segment() {
                     // (point, point, point) sites.
-                    if !CircleExistencePredicate::ppp::<I, F>(site1, site2, site3) {
+                    if !CircleExistencePredicate::ppp::<I, F>(
+                        site1.point0(),
+                        site2.point0(),
+                        site3.point0(),
+                    ) {
                         return false;
                     }
                     LazyCircleFormationFunctor::ppp::<I, F>(
@@ -1688,13 +1689,17 @@ impl CircleFormationFunctor {
                     );
                 } else {
                     // (point, point, segment) sites.
-                    if !CircleExistencePredicate::pps::<I, F>(site1, site2, site3, SiteIndex::Three)
-                    {
+                    if !CircleExistencePredicate::pps::<I, F>(
+                        site1.point0(),
+                        site2.point0(),
+                        site3,
+                        SiteIndex::Three,
+                    ) {
                         return false;
                     }
                     LazyCircleFormationFunctor::pps::<I, F>(
-                        site1,
-                        site2,
+                        site1.point0(),
+                        site2.point0(),
                         site3,
                         SiteIndex::Three,
                         circle,
@@ -1702,23 +1707,33 @@ impl CircleFormationFunctor {
                 }
             } else if !site3.is_segment() {
                 // (point, segment, point) sites.
-                if !CircleExistencePredicate::pps::<I, F>(site1, site3, site2, SiteIndex::Two) {
+                if !CircleExistencePredicate::pps::<I, F>(
+                    site1.point0(),
+                    site3.point0(),
+                    site2,
+                    SiteIndex::Two,
+                ) {
                     return false;
                 }
                 LazyCircleFormationFunctor::pps::<I, F>(
-                    site1,
-                    site3,
+                    site1.point0(),
+                    site3.point0(),
                     site2,
                     SiteIndex::Two,
                     circle,
                 );
             } else {
                 // (point, segment, segment) sites.
-                if !CircleExistencePredicate::pss::<I, F>(site1, site2, site3, SiteIndex::One) {
+                if !CircleExistencePredicate::pss::<I, F>(
+                    site1.point0(),
+                    site2,
+                    site3,
+                    SiteIndex::One,
+                ) {
                     return false;
                 }
                 LazyCircleFormationFunctor::pss::<I, F>(
-                    site1,
+                    site1.point0(),
                     site2,
                     site3,
                     SiteIndex::One,
@@ -1728,23 +1743,33 @@ impl CircleFormationFunctor {
         } else if !site2.is_segment() {
             if !site3.is_segment() {
                 // (segment, point, point) sites.
-                if !CircleExistencePredicate::pps::<I, F>(site2, site3, site1, SiteIndex::One) {
+                if !CircleExistencePredicate::pps::<I, F>(
+                    site2.point0(),
+                    site3.point0(),
+                    site1,
+                    SiteIndex::One,
+                ) {
                     return false;
                 }
                 LazyCircleFormationFunctor::pps::<I, F>(
-                    site2,
-                    site3,
+                    site2.point0(),
+                    site3.point0(),
                     site1,
                     SiteIndex::One,
                     circle,
                 );
             } else {
                 // (segment, point, segment) sites.
-                if !CircleExistencePredicate::pss::<I, F>(site2, site1, site3, SiteIndex::Two) {
+                if !CircleExistencePredicate::pss::<I, F>(
+                    site2.point0(),
+                    site1,
+                    site3,
+                    SiteIndex::Two,
+                ) {
                     return false;
                 }
                 LazyCircleFormationFunctor::pss::<I, F>(
-                    site2,
+                    site2.point0(),
                     site1,
                     site3,
                     SiteIndex::Two,
@@ -1753,10 +1778,21 @@ impl CircleFormationFunctor {
             }
         } else if !site3.is_segment() {
             // (segment, segment, point) sites.
-            if !CircleExistencePredicate::pss::<I, F>(site3, site1, site2, SiteIndex::Three) {
+            if !CircleExistencePredicate::pss::<I, F>(
+                site3.point0(),
+                site1,
+                site2,
+                SiteIndex::Three,
+            ) {
                 return false;
             }
-            LazyCircleFormationFunctor::pss::<I, F>(site3, site1, site2, SiteIndex::Three, circle);
+            LazyCircleFormationFunctor::pss::<I, F>(
+                site3.point0(),
+                site1,
+                site2,
+                SiteIndex::Three,
+                circle,
+            );
         } else {
             // (segment, segment, segment) sites.
             if !CircleExistencePredicate::sss::<I, F>(site1, site2, site3) {
@@ -1871,8 +1907,8 @@ impl ExactCircleFormationFunctor {
     /// Recompute parameters of the point, point, segment circle event using high-precision library.
     #[allow(clippy::too_many_arguments)]
     fn pps<I: InputType, F: OutputType>(
-        site1: &VSE::SiteEvent<I, F>,
-        site2: &VSE::SiteEvent<I, F>,
+        point1: Point<I>,
+        point2: Point<I>,
         site3: &VSE::SiteEvent<I, F>,
         segment_index: SiteIndex,
         c_event: &VC::CircleEventType,
@@ -1882,8 +1918,8 @@ impl ExactCircleFormationFunctor {
     ) {
         tln!(
             "->pps site1:{:?} site2:{:?} site3:{:?}",
-            site1,
-            site2,
+            point1,
+            point2,
             site3
         );
         t!(
@@ -1915,19 +1951,19 @@ impl ExactCircleFormationFunctor {
         let line_a = ExtendedInt::from(site3.y1()) - ExtendedInt::from(site3.y0());
         let line_b = ExtendedInt::from(site3.x0()) - ExtendedInt::from(site3.x1());
         let segm_len = &line_a * &line_a + &line_b * &line_b;
-        let vec_x = ExtendedInt::from(site2.y()) - ExtendedInt::from(site1.y());
-        let vec_y = ExtendedInt::from(site1.x()) - ExtendedInt::from(site2.x());
-        let sum_x = ExtendedInt::from(site1.x()) + ExtendedInt::from(site2.x());
-        let sum_y = ExtendedInt::from(site1.y()) + ExtendedInt::from(site2.y());
+        let vec_x = ExtendedInt::from(point2.y) - ExtendedInt::from(point1.y);
+        let vec_y = ExtendedInt::from(point1.x) - ExtendedInt::from(point2.x);
+        let sum_x = ExtendedInt::from(point1.x) + ExtendedInt::from(point2.x);
+        let sum_y = ExtendedInt::from(point1.y) + ExtendedInt::from(point2.y);
         let teta: ExtendedInt = &line_a * &vec_x + &line_b * &vec_y;
         let mut denom: ExtendedInt = &vec_x * &line_b - &vec_y * &line_a;
 
-        let mut dif0 = ExtendedInt::from(site3.y1()) - ExtendedInt::from(site1.y());
-        let mut dif1 = ExtendedInt::from(site1.x()) - ExtendedInt::from(site3.x1());
+        let mut dif0 = ExtendedInt::from(site3.y1()) - ExtendedInt::from(point1.y);
+        let mut dif1 = ExtendedInt::from(point1.x) - ExtendedInt::from(site3.x1());
         let a: ExtendedInt = &line_a * &dif1 - &line_b * &dif0;
 
-        dif0 = ExtendedInt::from(site3.y1()) - ExtendedInt::from(site2.y());
-        dif1 = ExtendedInt::from(site2.x()) - ExtendedInt::from(site3.x1());
+        dif0 = ExtendedInt::from(site3.y1()) - ExtendedInt::from(point2.y);
+        dif1 = ExtendedInt::from(point2.x) - ExtendedInt::from(site3.x1());
         let b = line_a * dif1 - line_b * dif0;
         let sum_ab = &a + &b;
         tln!("a:{:?} b:{:?} denom:{:?}", a, b, denom);
@@ -2035,7 +2071,7 @@ impl ExactCircleFormationFunctor {
     #[allow(non_snake_case)]
     #[allow(clippy::too_many_arguments)]
     fn pss<I: InputType, F: OutputType>(
-        site1: &VSE::SiteEvent<I, F>,
+        point1: Point<I>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
         point_index: SiteIndex,
@@ -2090,12 +2126,12 @@ impl ExactCircleFormationFunctor {
 
             c[0] = (ExtendedInt::from(segm_start2.x) - ExtendedInt::from(segm_start1.x)) * &b[0]
                 - (ExtendedInt::from(segm_start2.y) - ExtendedInt::from(segm_start1.y)) * &a[0];
-            let dx: ExtendedInt = (ExtendedInt::from(site1.y()) - ExtendedInt::from(segm_start1.y))
+            let dx: ExtendedInt = (ExtendedInt::from(point1.y) - ExtendedInt::from(segm_start1.y))
                 * &a[0]
-                - (ExtendedInt::from(site1.x()) - ExtendedInt::from(segm_start1.x)) * &b[0];
-            let dy: ExtendedInt = (ExtendedInt::from(site1.x()) - ExtendedInt::from(segm_start2.x))
+                - (ExtendedInt::from(point1.x) - ExtendedInt::from(segm_start1.x)) * &b[0];
+            let dy: ExtendedInt = (ExtendedInt::from(point1.x) - ExtendedInt::from(segm_start2.x))
                 * &b[0]
-                - (ExtendedInt::from(site1.y()) - ExtendedInt::from(segm_start2.y)) * &a[0];
+                - (ExtendedInt::from(point1.y) - ExtendedInt::from(segm_start2.y)) * &a[0];
             cB[0] = dx * dy;
             cB[1] = ExtendedInt::one();
 
@@ -2122,10 +2158,10 @@ impl ExactCircleFormationFunctor {
                     * &a[0]
                     * &a[0]
                     - (ExtendedInt::from(segm_start1.x) + ExtendedInt::from(segm_start2.x)
-                        - (ExtendedInt::from(site1.x()) * ExtendedInt::from(2_i32)))
+                        - (ExtendedInt::from(point1.x) * ExtendedInt::from(2_i32)))
                         * &a[0]
                         * &b[0]
-                    + (ExtendedInt::from(site1.y()) * ExtendedInt::from(2_i32)) * &b[0] * &b[0];
+                    + (ExtendedInt::from(point1.y) * ExtendedInt::from(2_i32)) * &b[0] * &b[0];
                 tln!("cA[1]={:?}", cA[1]);
                 let c_y = RF::RobustSqrtExpr::eval2(&cA, &cB);
                 tln!("c_y={:?}", c_y);
@@ -2143,10 +2179,10 @@ impl ExactCircleFormationFunctor {
                     * &b[0]
                     * &b[0]
                     - (ExtendedInt::from(segm_start1.y) + ExtendedInt::from(segm_start2.y)
-                        - ExtendedInt::from(site1.y()) * ExtendedInt::from(2_i32))
+                        - ExtendedInt::from(point1.y) * ExtendedInt::from(2_i32))
                         * &a[0]
                         * &b[0]
-                    + ExtendedInt::from(site1.x()) * &a[0] * &a[0] * ExtendedInt::from(2_i32);
+                    + ExtendedInt::from(point1.x) * &a[0] * &a[0] * ExtendedInt::from(2_i32);
                 tln!(" cA[0]={:.0}", cA[0].d());
                 tln!(" cA[1]={:.0}", cA[1].d());
 
@@ -2176,8 +2212,8 @@ impl ExactCircleFormationFunctor {
         c[1] = ExtendedInt::from(segm_end2.y) * &a[1] - ExtendedInt::from(segm_end2.x) * &b[1];
         let ix: ExtendedInt = &a[0] * &c[1] + &a[1] * &c[0];
         let iy: ExtendedInt = &b[0] * &c[1] + &b[1] * &c[0];
-        let dx: ExtendedInt = ix.clone() - ExtendedInt::from(site1.x()) * &orientation;
-        let dy: ExtendedInt = iy.clone() - ExtendedInt::from(site1.y()) * &orientation;
+        let dx: ExtendedInt = ix.clone() - ExtendedInt::from(point1.x) * &orientation;
+        let dy: ExtendedInt = iy.clone() - ExtendedInt::from(point1.y) * &orientation;
         tln!(" ix={:?}", ix);
         tln!(" iy={:?}", iy);
         tln!(" dx={:?}", dx);
