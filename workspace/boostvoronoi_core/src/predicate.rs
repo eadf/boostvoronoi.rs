@@ -856,7 +856,7 @@ impl LazyCircleFormationFunctor {
         site3: &VSE::SiteEvent<I, F>,
         segment_index: SiteIndex,
         c_event: &VC::CircleEventType,
-    ) {
+    ) -> bool {
         #[cfg(feature = "ce_corruption_check")]
         println!("\n->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?})", point1, point2, site3, segment_index);
         tln!("->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?})", point1, point2, site3, segment_index);
@@ -1007,14 +1007,15 @@ impl LazyCircleFormationFunctor {
                 recompute_lower_x,
             );
         }
-        #[allow(clippy::suspicious_operation_groupings)]
         // All sites needs to be unique, or ppp will return NaN
         let unique_endpoints = !(site3.point0() == point1
             || site3.point0() == point2
             || site3.point1() == point1
             || site3.point1() == point2
-            || point1 == point2);
+            || point1 == point2
+            || site3.point0() == site3.point1());
         tln!("pps unique_endpoints:{}", unique_endpoints);
+
         if unique_endpoints {
             #[cfg(feature = "ce_corruption_check")]
             {
@@ -1050,83 +1051,12 @@ impl LazyCircleFormationFunctor {
                 println!("v_a_c:{:?}, v3:{:?}", v_3_c, v_3);
                 println!("dot:{:?}", dot);
             }
-
-            if !(-0.0..=1.0).contains(&dot) {
-                // The (current) circle event is located outside the length of the segment
-                // - re-calculate with ppp
-                let site_3_point = if dot < -0.0 {
-                    site3.point0()
-                } else {
-                    site3.point1()
-                };
-
-                #[cfg(feature = "ce_corruption_check")]
-                {
-                    println!(
-                        "dot_n:{:?} was bad ---------------- calling ppp on point0",
-                        dot
-                    );
-                    println!(
-                        "point0 distance {}",
-                        site3.point0().distance_to(&c_event.0.get())
-                    );
-                    println!(
-                        "point1 distance {}",
-                        site3.point1().distance_to(&c_event.0.get())
-                    );
-                }
-                match segment_index {
-                    SiteIndex::One => {
-                        LazyCircleFormationFunctor::ppp::<I, F>(
-                            site_3_point,
-                            point1,
-                            point2,
-                            c_event,
-                        );
-                    }
-                    SiteIndex::Two => {
-                        LazyCircleFormationFunctor::ppp::<I, F>(
-                            point1,
-                            site_3_point,
-                            point2,
-                            c_event,
-                        );
-                    }
-                    SiteIndex::Three => {
-                        LazyCircleFormationFunctor::ppp::<I, F>(
-                            point1,
-                            point2,
-                            site_3_point,
-                            c_event,
-                        );
-                    }
-                };
-                #[cfg(feature = "ce_corruption_check")]
-                {
-                    println!("//c after ppp");
-                    println!(
-                        "let c2=[{:.12},{:.12}];//l_x={:12}",
-                        c_event.0.get().x().0,
-                        c_event.0.get().y().0,
-                        c_event.0.get().lower_x().0
-                    );
-                    println!(
-                        "site1->c distance:{:-12}",
-                        point1.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
-                    );
-                    println!(
-                        "site2->c distance:{:-12}",
-                        point2.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
-                    );
-                    println!(
-                        "site3->c distance:{:-12}",
-                        site3.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
-                    );
-                    assert!(c_event.0.get().x().is_finite());
-                    assert!(c_event.0.get().y().is_finite());
-                }
-            }
+            // allow the dot to be [0..1] + some ULP fuzz
+            return (-0.0..=1.0).contains(&dot)
+                || approx::ulps_eq!(0.0, dot)
+                || approx::ulps_eq!(1.0, dot);
         };
+        true
     }
 
     /// Lazy evaluation of point, segment, segment circle events
@@ -1675,13 +1605,15 @@ impl CircleFormationFunctor {
                         return None;
                     }
                     circle = Rc::new(VC::CircleEventCell::new(bisector_node));
-                    LazyCircleFormationFunctor::pps::<I, F>(
+                    if !LazyCircleFormationFunctor::pps::<I, F>(
                         site1.point0(),
                         site2.point0(),
                         site3,
                         SiteIndex::Three,
                         &circle,
-                    )
+                    ) {
+                        return None;
+                    }
                 }
             } else if !site3.is_segment() {
                 // (point, segment, point) sites.
@@ -1694,13 +1626,15 @@ impl CircleFormationFunctor {
                     return None;
                 }
                 circle = Rc::new(VC::CircleEventCell::new(bisector_node));
-                LazyCircleFormationFunctor::pps::<I, F>(
+                if !LazyCircleFormationFunctor::pps::<I, F>(
                     site1.point0(),
                     site3.point0(),
                     site2,
                     SiteIndex::Two,
                     &circle,
-                );
+                ) {
+                    return None;
+                };
             } else {
                 // (point, segment, segment) sites.
                 if !CircleExistencePredicate::pss::<I, F>(
@@ -1732,13 +1666,15 @@ impl CircleFormationFunctor {
                     return None;
                 }
                 circle = Rc::new(VC::CircleEventCell::new(bisector_node));
-                LazyCircleFormationFunctor::pps::<I, F>(
+                if !LazyCircleFormationFunctor::pps::<I, F>(
                     site2.point0(),
                     site3.point0(),
                     site1,
                     SiteIndex::One,
                     &circle,
-                );
+                ) {
+                    return None;
+                };
             } else {
                 // (segment, point, segment) sites.
                 if !CircleExistencePredicate::pss::<I, F>(
