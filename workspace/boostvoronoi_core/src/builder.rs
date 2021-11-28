@@ -118,8 +118,8 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
                 "Vertices should be added before segments".to_string(),
             ));
         }
-        for v in vertices {
-            let mut s = VSE::SiteEvent::<I, F>::new(VSE::Site::Point(v.into()), self.index_);
+        for v in vertices.map(|v| -> Point<I> { v.into() }) {
+            let mut s = VSE::SiteEvent::<I, F>::new(VSE::Site::Point(v), self.index_);
             s.or_source_category(&VD::ColorBits::SINGLE_POINT__BIT);
             self.site_events_.push(s);
             self.index_ += 1;
@@ -136,9 +136,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
         IT: Copy + Into<Line<I>>,
     {
         type Cb = VD::ColorBits;
-        for s in segments {
-            let line: Line<I> = s.into();
-
+        for line in segments.map(|s| -> Line<I> { s.into() }) {
             let mut s1 = VSE::SiteEvent::<I, F>::new(VSE::Site::Point(line.start), self.index_);
             s1.or_source_category(&Cb::SEGMENT_START_POINT__BIT);
 

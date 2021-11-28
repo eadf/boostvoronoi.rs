@@ -34,10 +34,18 @@ impl<T: InputType> Point<T> {
     }
 
     #[cfg(feature = "ce_corruption_check")]
+    #[allow(dead_code)]
     pub(crate) fn distance_to(&self, circle: &crate::circle_event::CircleEvent) -> f64 {
         let x = cast::<T, f64>(self.x) - circle.x().0;
         let y = cast::<T, f64>(self.y) - circle.y().0;
         (x * x + y * y).sqrt()
+    }
+
+    #[cfg(all(feature = "ce_corruption_check", feature = "geo"))]
+    #[inline(always)]
+    pub fn distance_to_point(&self, x: f64, y: f64) -> f64 {
+        use geo::algorithm::euclidean_distance::*;
+        geo::Coordinate { x, y }.euclidean_distance(&geo::Coordinate::from(self.as_f64()))
     }
 
     /// Cast a `Point<T>` to ´Point<T2>¨
