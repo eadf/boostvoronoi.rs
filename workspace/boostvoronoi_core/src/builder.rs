@@ -930,9 +930,12 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
         bisector_node: VB::BeachLineIndex,
     ) -> Result<(), BvError> {
         // Check if the three input sites create a circle event.
-        let c_event = Rc::new(VC::CircleEventCell::new(bisector_node));
-
-        if VP::CircleFormationFunctor::circle_formation::<I, F>(&site1, &site2, &site3, &c_event) {
+        if let Some(c_event) = VP::CircleFormationFunctor::circle_formation::<I, F>(
+            &site1,
+            &site2,
+            &site3,
+            bisector_node,
+        ) {
             // Add the new circle event to the circle events queue.
             // Update bisector's circle event iterator to point to the
             // new circle event in the circle event queue.

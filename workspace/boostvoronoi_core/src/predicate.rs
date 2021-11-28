@@ -27,6 +27,7 @@ use num_traits::One;
 use std::cmp;
 use std::fmt::Debug;
 use std::marker::PhantomData;
+use std::rc::Rc;
 
 // TODO: how to make these generic?
 //const ULPS: u64 = 64;
@@ -1635,32 +1636,6 @@ impl CircleFormationFunctor {
             || ulp_comparison(cc_y, y1, 64) == cmp::Ordering::Greater
     }
 
-    #[cfg(feature = "console_debug")]
-    #[allow(dead_code)]
-    #[inline(always)]
-    pub(crate) fn circle_formation_fake<I: InputType, F: OutputType>(
-        site1: &VSE::SiteEvent<I, F>,
-        site2: &VSE::SiteEvent<I, F>,
-        site3: &VSE::SiteEvent<I, F>,
-        circle: &VC::CircleEventType,
-    ) -> bool {
-        tln!(
-            "circle_formation_predicate(site1:{:?}, site2:{:?}, site3:{:?}, circle:{:?})",
-            site1,
-            site2,
-            site3,
-            circle
-        );
-        tln!(
-            "                           1:{}, 2:{}, 3:{}",
-            site1.is_segment(),
-            site2.is_segment(),
-            site3.is_segment()
-        );
-
-        Self::circle_formation(site1, site2, site3, circle)
-    }
-
     /// Create a circle event from the given three sites.
     /// Returns true if the circle event exists, else false.
     /// If exists circle event is saved into the c_event variable.
@@ -1668,8 +1643,9 @@ impl CircleFormationFunctor {
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        circle: &VC::CircleEventType,
-    ) -> bool {
+        bisector_node: VB::BeachLineIndex,
+    ) -> Option<VC::CircleEventType> {
+        let circle: VC::CircleEventType;
         if !site1.is_segment() {
             if !site2.is_segment() {
                 if !site3.is_segment() {
@@ -1679,13 +1655,14 @@ impl CircleFormationFunctor {
                         site2.point0(),
                         site3.point0(),
                     ) {
-                        return false;
+                        return None;
                     }
+                    circle = Rc::new(VC::CircleEventCell::new(bisector_node));
                     LazyCircleFormationFunctor::ppp::<I, F>(
                         site1.point0(),
                         site2.point0(),
                         site3.point0(),
-                        circle,
+                        &circle,
                     );
                 } else {
                     // (point, point, segment) sites.
@@ -1695,14 +1672,15 @@ impl CircleFormationFunctor {
                         site3,
                         SiteIndex::Three,
                     ) {
-                        return false;
+                        return None;
                     }
+                    circle = Rc::new(VC::CircleEventCell::new(bisector_node));
                     LazyCircleFormationFunctor::pps::<I, F>(
                         site1.point0(),
                         site2.point0(),
                         site3,
                         SiteIndex::Three,
-                        circle,
+                        &circle,
                     )
                 }
             } else if !site3.is_segment() {
@@ -1713,14 +1691,15 @@ impl CircleFormationFunctor {
                     site2,
                     SiteIndex::Two,
                 ) {
-                    return false;
+                    return None;
                 }
+                circle = Rc::new(VC::CircleEventCell::new(bisector_node));
                 LazyCircleFormationFunctor::pps::<I, F>(
                     site1.point0(),
                     site3.point0(),
                     site2,
                     SiteIndex::Two,
-                    circle,
+                    &circle,
                 );
             } else {
                 // (point, segment, segment) sites.
@@ -1730,14 +1709,15 @@ impl CircleFormationFunctor {
                     site3,
                     SiteIndex::One,
                 ) {
-                    return false;
+                    return None;
                 }
+                circle = Rc::new(VC::CircleEventCell::new(bisector_node));
                 LazyCircleFormationFunctor::pss::<I, F>(
                     site1.point0(),
                     site2,
                     site3,
                     SiteIndex::One,
-                    circle,
+                    &circle,
                 );
             }
         } else if !site2.is_segment() {
@@ -1749,14 +1729,15 @@ impl CircleFormationFunctor {
                     site1,
                     SiteIndex::One,
                 ) {
-                    return false;
+                    return None;
                 }
+                circle = Rc::new(VC::CircleEventCell::new(bisector_node));
                 LazyCircleFormationFunctor::pps::<I, F>(
                     site2.point0(),
                     site3.point0(),
                     site1,
                     SiteIndex::One,
-                    circle,
+                    &circle,
                 );
             } else {
                 // (segment, point, segment) sites.
@@ -1766,14 +1747,15 @@ impl CircleFormationFunctor {
                     site3,
                     SiteIndex::Two,
                 ) {
-                    return false;
+                    return None;
                 }
+                circle = Rc::new(VC::CircleEventCell::new(bisector_node));
                 LazyCircleFormationFunctor::pss::<I, F>(
                     site2.point0(),
                     site1,
                     site3,
                     SiteIndex::Two,
-                    circle,
+                    &circle,
                 );
             }
         } else if !site3.is_segment() {
@@ -1784,32 +1766,34 @@ impl CircleFormationFunctor {
                 site2,
                 SiteIndex::Three,
             ) {
-                return false;
+                return None;
             }
+            circle = Rc::new(VC::CircleEventCell::new(bisector_node));
             LazyCircleFormationFunctor::pss::<I, F>(
                 site3.point0(),
                 site1,
                 site2,
                 SiteIndex::Three,
-                circle,
+                &circle,
             );
         } else {
             // (segment, segment, segment) sites.
             if !CircleExistencePredicate::sss::<I, F>(site1, site2, site3) {
-                return false;
+                return None;
             }
-            LazyCircleFormationFunctor::sss::<I, F>(site1, site2, site3, circle);
+            circle = Rc::new(VC::CircleEventCell::new(bisector_node));
+            LazyCircleFormationFunctor::sss::<I, F>(site1, site2, site3, &circle);
         }
 
-        if Self::lies_outside_vertical_segment(circle, site1)
-            || Self::lies_outside_vertical_segment(circle, site2)
-            || Self::lies_outside_vertical_segment(circle, site3)
+        if Self::lies_outside_vertical_segment(&circle, site1)
+            || Self::lies_outside_vertical_segment(&circle, site2)
+            || Self::lies_outside_vertical_segment(&circle, site3)
         {
-            return false;
+            return None;
         }
         #[cfg(all(feature = "geo", feature = "ce_corruption_check"))]
-        CircleExistencePredicate::validate_circle_formation::<I, F>(site1, site2, site3, circle);
-        true
+        CircleExistencePredicate::validate_circle_formation::<I, F>(site1, site2, site3, &circle);
+        Some(circle)
     }
 }
 
