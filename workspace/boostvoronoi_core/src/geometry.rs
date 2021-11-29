@@ -36,8 +36,8 @@ impl<T: InputType> Point<T> {
     #[cfg(feature = "ce_corruption_check")]
     #[allow(dead_code)]
     pub(crate) fn distance_to(&self, circle: &crate::circle_event::CircleEvent) -> f64 {
-        let x = cast::<T, f64>(self.x) - circle.x().0;
-        let y = cast::<T, f64>(self.y) - circle.y().0;
+        let x = cast::<T, f64>(self.x) - circle.x();
+        let y = cast::<T, f64>(self.y) - circle.y();
         (x * x + y * y).sqrt()
     }
 

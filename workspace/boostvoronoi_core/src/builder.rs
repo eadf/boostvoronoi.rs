@@ -203,13 +203,12 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
             } else if VP::EventComparisonPredicate::event_comparison_bif::<I, F>(
                 &self.site_events_[site_event_iterator_],
                 // we checked with !is_empty(), unwrap is safe
-                &self.circle_events_.peek().unwrap().0.get(),
+                self.circle_events_.peek().unwrap(),
             ) {
                 self.process_site_event(&mut site_event_iterator_, &mut output)?;
             } else {
                 self.process_circle_event(&mut output)?;
             }
-
             self.circle_events_.pop_inactive_at_top()?;
         }
 
@@ -605,14 +604,13 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
         self.circle_events_.ce_corruption_check();
 
         // Get the topmost circle event.
-        let e = self.circle_events_.top()?.ok_or_else(|| {
+        let circle_event = self.circle_events_.top()?.ok_or_else(|| {
             BvError::InternalError(format!(
                 "No topmost circle event found. {}:{}",
                 file!(),
                 line!()
             ))
         })?;
-        let circle_event = e.0.get();
         tln!("processing:CE{:?}", circle_event);
 
         if !self
@@ -625,15 +623,15 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
                 line!()
             )));
         }
-        let mut it_first = self
-            .beach_line_
-            .get_pointer(e.beach_line_index().ok_or_else(|| {
-                BvError::InternalError(format!(
-                    "No beachline index found for circle event. {}:{}",
-                    file!(),
-                    line!()
-                ))
-            })?)?;
+        let mut it_first =
+            self.beach_line_
+                .get_pointer(circle_event.beach_line_index().ok_or_else(|| {
+                    BvError::InternalError(format!(
+                        "No beachline index found for circle event. {}:{}",
+                        file!(),
+                        line!()
+                    ))
+                })?)?;
         let mut it_last = it_first.clone();
         #[cfg(feature = "console_debug")]
         {
@@ -725,7 +723,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
                 .insert_new_edge_5_(site1, site3, circle_event, bisector1, bisector2)
                 .0;
             let data = if let Some(ref mut node) = it_first.get_v()?.get() {
-                let _ = node.set_edge_id(edge);
+                node.set_edge_id(edge);
                 //tln!("Updated node data: {:?} new edge:{}", node, edge.0);
                 *node
             } else {
@@ -941,24 +939,22 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
             // new circle event in the circle event queue.
             tln!("added circle event:{:?}", c_event);
 
-            let e = self.circle_events_.associate_and_push(c_event);
-            {
-                let b = self.beach_line_.get_node(&bisector_node)?;
-                if let Some(mut bd) = b.1.get() {
-                    let _ = bd.set_circle_event_id(Some(e.0.get().get_index().unwrap())); // make sure it is_some()
-                    b.1.set(Some(bd));
-                    #[cfg(feature = "console_debug")]
-                    {
-                        t!("with bisector_node: ");
-                        self.beach_line_
-                            .dbgpa_compat_node_(&b.0, &b.1, &self.circle_events_)?;
-                    }
-                } else {
-                    return Err(BvError::InternalError(format!(
-                        "activate_circle_event could not find node by key {}",
-                        bisector_node.0
-                    )));
+            let circle_event_id = self.circle_events_.associate_and_push(c_event);
+            let bn = self.beach_line_.get_node(&bisector_node)?;
+            if let Some(mut bd) = bn.1.get() {
+                bd.set_circle_event_id(Some(circle_event_id));
+                bn.1.set(Some(bd));
+                #[cfg(feature = "console_debug")]
+                {
+                    t!("with bisector_node: ");
+                    self.beach_line_
+                        .dbgpa_compat_node_(&bn.0, &bn.1, &self.circle_events_)?;
                 }
+            } else {
+                return Err(BvError::InternalError(format!(
+                    "activate_circle_event could not find node by key {}",
+                    bisector_node.0
+                )));
             }
         }
         Ok(())

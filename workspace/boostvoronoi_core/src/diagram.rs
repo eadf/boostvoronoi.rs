@@ -1082,11 +1082,14 @@ impl<F: OutputType> Diagram<F> {
     #[inline]
     pub(crate) fn edge_get_(&self, edge_id: Option<EdgeIndex>) -> Option<&EdgeType> {
         let rv = self.edges_.get(edge_id?.0);
-        if rv.is_none() {
-            dbg!(edge_id.unwrap().0);
-            // todo: remove this panic and raise error?
-            panic!();
-        }
+        debug_assert!({
+            if rv.is_none() {
+                dbg!(edge_id.unwrap().0);
+                // todo: remove this panic and raise error?
+                panic!();
+            };
+            true
+        });
         rv
     }
 
@@ -1511,7 +1514,7 @@ impl<F: OutputType> Diagram<F> {
         &mut self,
         site1: VSE::SiteEvent<I, F>,
         site3: VSE::SiteEvent<I, F>,
-        circle: VC::CircleEvent,
+        circle: &VC::CircleEvent,
         edge12_id: EdgeIndex,
         edge23_id: EdgeIndex,
     ) -> (EdgeIndex, EdgeIndex) {
@@ -1539,8 +1542,8 @@ impl<F: OutputType> Diagram<F> {
 
         // Add a new Voronoi vertex.
         let new_vertex_id = self.vertex_new_2_(
-            cast::<f64, F>(circle.raw_x()),
-            cast::<f64, F>(circle.raw_y()),
+            cast::<f64, F>(circle.x()),
+            cast::<f64, F>(circle.y()),
             circle.is_site_point(),
         );
 

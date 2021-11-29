@@ -16,11 +16,9 @@ use crate::extended_exp_fpt as EX;
 use crate::tln;
 use crate::{BvError, GrowingVob, VobU32};
 use ordered_float::OrderedFloat;
-use std::cell::Cell;
 use std::cmp::Ordering;
 use std::collections::BTreeSet;
 use std::fmt;
-use std::rc::Rc;
 
 /// Type-checked placeholder for usize
 /// Hopefully rust zero cost abstractions will flatten this out.
@@ -58,12 +56,12 @@ impl fmt::Debug for CircleEventIndex {
 ///   lower_x_ - leftmost x-coordinate;
 /// NOTE: lower_y coordinate is always equal to center_y.
 ///
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct CircleEvent {
     index_: Option<CircleEventIndex>, // the list index inside CircleEventQueue
-    center_x_: OrderedFloat<f64>,
-    center_y_: OrderedFloat<f64>,
-    lower_x_: OrderedFloat<f64>,
+    center_x_: f64,
+    center_y_: f64,
+    lower_x_: f64,
     beach_line_index_: Option<VB::BeachLineIndex>, //beach_line_iterator in C++
     is_site_point_: bool,
 }
@@ -75,19 +73,6 @@ impl fmt::Debug for CircleEvent {
             "(x:{:.12},y:{:.12},lx:{:.12})",
             self.center_x_, self.center_y_, self.lower_x_,
         )
-    }
-}
-
-impl Default for CircleEvent {
-    fn default() -> Self {
-        Self {
-            index_: None, // do i really have to put this in an option?
-            center_x_: OrderedFloat(0_f64),
-            center_y_: OrderedFloat(0_f64),
-            lower_x_: OrderedFloat(0_f64),
-            beach_line_index_: None,
-            is_site_point_: false,
-        }
     }
 }
 
@@ -113,16 +98,21 @@ impl PartialOrd for CircleEvent {
 }
 
 impl Ord for CircleEvent {
+    #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
-        if self.lower_x() != other.lower_x() {
-            if self.lower_x() < other.lower_x() {
+        let self_lower_x_ = OrderedFloat(self.lower_x_);
+        let other_lower_x_ = OrderedFloat(other.lower_x_);
+        let self_center_y_ = OrderedFloat(self.center_y_);
+        let other_center_y_ = OrderedFloat(other.center_y_);
+        if self_lower_x_ != other_lower_x_ {
+            if self_lower_x_ < other_lower_x_ {
                 Ordering::Less
             } else {
                 Ordering::Greater
             }
-        } else if self.y() < other.y() {
+        } else if self_center_y_ < other_center_y_ {
             Ordering::Less
-        } else if self.y() == other.y() {
+        } else if self_center_y_ == other_center_y_ {
             //tln!("cmp self.lx():{:.12}, other.lx:{:.12} si:{:?}", self.lower_x(), other.lower_x(), self._index);
             //tln!("cmp self.y():{:.12}, other.y:{:.12} oi:{:?}", self.y(), other.y(), self._index);
             //tln!("cmp self.idx:{:?}, other.idx:{:?}", self.index_, other.index_);
@@ -144,212 +134,87 @@ impl Ord for CircleEvent {
     }
 }
 
-/// Wrapper that makes it possible to implement Ord on a std::cell::Cell<CircleEvent>
-#[derive(Clone)]
-pub struct CircleEventCell(pub Cell<CircleEvent>);
-
-impl fmt::Debug for CircleEventCell {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "CE{:?}", self.0.get())
-    }
-}
-
-impl CircleEventCell {
-    pub(crate) fn new(bech_line_index: VB::BeachLineIndex) -> Self {
-        Self(Cell::new(CircleEvent::new(bech_line_index)))
-    }
-
-    #[inline]
-    /// sets the coordinates inside the Cell.
-    pub(crate) fn cell_set_3_ext(
-        &self,
-        x: EX::ExtendedExponentFpt<f64>,
-        y: EX::ExtendedExponentFpt<f64>,
-        lower_x: EX::ExtendedExponentFpt<f64>,
-    ) {
-        let mut selfc = self.0.get();
-        selfc.set_3_raw(x.d(), y.d(), lower_x.d());
-        self.0.set(selfc);
-    }
-
-    #[inline]
-    /// sets the coordinates inside the Cell.
-    pub(crate) fn cell_set_3_raw(&self, x: f64, y: f64, lower_x: f64) {
-        let mut selfc = self.0.get();
-        selfc.set_3_raw(x, y, lower_x);
-        self.0.set(selfc);
-    }
-
-    #[inline]
-    /// sets the x coordinates inside the Cell.
-    pub(crate) fn cell_set_x_xf(&self, x: EX::ExtendedExponentFpt<f64>) {
-        let mut selfc = self.0.get();
-        let _ = selfc.set_x_raw(x.d());
-        self.0.set(selfc);
-    }
-
-    #[inline]
-    /// sets the y coordinate inside the Cell.
-    pub(crate) fn cell_set_y_xf(&self, y: EX::ExtendedExponentFpt<f64>) {
-        let mut selfc = self.0.get();
-        let _ = selfc.set_raw_y(y.d());
-        self.0.set(selfc);
-    }
-
-    #[inline]
-    /// sets the y coordinate inside the Cell.
-    pub(crate) fn cell_set_lower_x_xf(&self, x: EX::ExtendedExponentFpt<f64>) {
-        let mut selfc: CircleEvent = self.0.get();
-        let _ = selfc.set_raw_lower_x(x.d());
-        self.0.set(selfc);
-    }
-
-    #[inline]
-    /// sets the site_point flag
-    pub(crate) fn cell_set_is_site_point(&self) {
-        let mut selfc = self.0.get();
-        selfc.is_site_point_ = true;
-        self.0.set(selfc)
-    }
-
-    #[inline]
-    /// Returns the beach line index
-    pub(crate) fn beach_line_index(&self) -> Option<VB::BeachLineIndex> {
-        self.0.get().beach_line_index_
-    }
-}
-
-impl PartialOrd for CircleEventCell {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for CircleEventCell {
-    fn cmp(&self, other: &Self) -> Ordering {
-        let cell_self = self.0.get();
-        let cell_other = other.0.get();
-        cell_self.cmp(&cell_other)
-    }
-}
-
-impl PartialEq for CircleEventCell {
-    fn eq(&self, other: &Self) -> bool {
-        let c_self = self.0.get();
-        let c_other = other.0.get();
-
-        c_self.center_x_ == c_other.center_x_
-            && c_self.center_y_ == c_other.center_y_
-            && c_self.lower_x_ == c_other.lower_x_
-    }
-}
-
-impl Eq for CircleEventCell {}
-
 impl CircleEvent {
     pub(crate) fn new(bech_line_index: VB::BeachLineIndex) -> CircleEvent {
         Self {
-            center_x_: OrderedFloat(0_f64),
-            center_y_: OrderedFloat(0_f64),
-            lower_x_: OrderedFloat(0_f64),
+            center_x_: 0_f64,
+            center_y_: 0_f64,
+            lower_x_: 0_f64,
             beach_line_index_: Some(bech_line_index),
             index_: None,
             is_site_point_: false,
         }
     }
 
+    #[inline]
+    pub(crate) fn set_3_ext(
+        &mut self,
+        x: EX::ExtendedExponentFpt<f64>,
+        y: EX::ExtendedExponentFpt<f64>,
+        lower_x: EX::ExtendedExponentFpt<f64>,
+    ) {
+        self.set_3(x.d(), y.d(), lower_x.d());
+    }
+
     pub(crate) fn get_index(&self) -> Option<CircleEventIndex> {
         self.index_
     }
 
-    pub(crate) fn set_index(&mut self, index: CircleEventIndex) -> &mut Self {
+    pub(crate) fn set_index(&mut self, index: CircleEventIndex) {
         self.index_ = Some(index);
-        self
     }
 
     #[allow(dead_code)]
-    pub(crate) fn x(&self) -> OrderedFloat<f64> {
+    pub(crate) fn x(&self) -> f64 {
         self.center_x_
     }
 
     pub(crate) fn x_as_xf(&self) -> EX::ExtendedExponentFpt<f64> {
-        EX::ExtendedExponentFpt::<f64>::from(self.center_x_.into_inner())
+        EX::ExtendedExponentFpt::<f64>::from(self.center_x_)
     }
 
-    pub(crate) fn raw_x(&self) -> f64 {
-        self.center_x_.into_inner()
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn set_x(&mut self, x: OrderedFloat<f64>) -> &mut Self {
+    pub(crate) fn set_x(&mut self, x: f64) -> &mut Self {
         self.center_x_ = x;
         self
     }
 
-    pub(crate) fn set_x_raw(&mut self, x: f64) -> &mut Self {
-        self.center_x_ = OrderedFloat(x);
-        self
-    }
-
-    pub(crate) fn y(&self) -> OrderedFloat<f64> {
+    pub(crate) fn y(&self) -> f64 {
         self.center_y_
     }
 
     /// convert self.y() to ExtendedExponentFpt
     #[allow(dead_code)]
     pub(crate) fn y_as_ext(&self) -> EX::ExtendedExponentFpt<f64> {
-        EX::ExtendedExponentFpt::<f64>::from(self.center_y_.into_inner())
+        EX::ExtendedExponentFpt::<f64>::from(self.center_y_)
     }
 
-    pub(crate) fn raw_y(&self) -> f64 {
-        self.center_y_.into_inner()
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn set_y(&mut self, y: OrderedFloat<f64>) -> &mut Self {
+    pub(crate) fn set_y(&mut self, y: f64) -> &mut Self {
         self.center_y_ = y;
         self
     }
 
-    pub(crate) fn set_raw_y(&mut self, y: f64) -> &mut Self {
-        self.center_y_ = OrderedFloat(y);
-        self
-    }
-
     #[inline(always)]
-    pub(crate) fn lower_x(&self) -> OrderedFloat<f64> {
+    pub(crate) fn lower_x(&self) -> f64 {
         self.lower_x_
     }
 
-    #[allow(dead_code)]
-    pub(crate) fn set_lower_x(&mut self, x: OrderedFloat<f64>) -> &mut Self {
+    #[inline(always)]
+    pub(crate) fn set_lower_x(&mut self, x: f64) -> &mut Self {
         self.lower_x_ = x;
         self
     }
 
     #[allow(dead_code)]
     #[inline(always)]
-    pub(crate) fn raw_lower_x(&self) -> f64 {
-        self.lower_x_.into_inner()
-    }
-
-    #[inline(always)]
-    pub(crate) fn set_raw_lower_x(&mut self, x: f64) -> &mut Self {
-        self.lower_x_ = OrderedFloat(x);
-        self
-    }
-
-    #[allow(dead_code)]
-    #[inline(always)]
-    pub(crate) fn lower_y(&self) -> OrderedFloat<f64> {
+    pub(crate) fn lower_y(&self) -> f64 {
         self.center_y_
     }
 
     #[inline(always)]
-    pub(crate) fn set_3_raw(&mut self, x: f64, y: f64, lower_x: f64) {
-        let _ = self.set_x_raw(x);
-        let _ = self.set_raw_y(y);
-        let _ = self.set_raw_lower_x(lower_x);
+    pub(crate) fn set_3(&mut self, x: f64, y: f64, lower_x: f64) {
+        let _ = self.set_x(x);
+        let _ = self.set_y(y);
+        let _ = self.set_lower_x(lower_x);
     }
 
     #[inline(always)]
@@ -357,14 +222,41 @@ impl CircleEvent {
         self.is_site_point_
     }
 
+    #[inline(always)]
+    pub(crate) fn set_is_site_point(&mut self) {
+        self.is_site_point_ = true
+    }
+
     #[cfg(any(feature = "ce_corruption_check", feature = "console_debug"))]
     #[allow(dead_code)]
     pub fn dbg(&self) {
-        println!("[{},{}]", self.x().0, self.y().0);
+        println!("[{},{}]", self.x(), self.y());
+    }
+
+    #[inline]
+    /// sets the x coordinates inside the Cell.
+    pub(crate) fn set_x_xf(&mut self, x: EX::ExtendedExponentFpt<f64>) {
+        let _ = self.set_x(x.d());
+    }
+
+    #[inline]
+    /// sets the y coordinate inside the Cell.
+    pub(crate) fn set_y_xf(&mut self, y: EX::ExtendedExponentFpt<f64>) {
+        let _ = self.set_y(y.d());
+    }
+
+    #[inline]
+    /// sets the y coordinate inside the Cell.
+    pub(crate) fn set_lower_x_xf(&mut self, x: EX::ExtendedExponentFpt<f64>) {
+        let _ = self.set_lower_x(x.d());
+    }
+
+    #[inline]
+    /// Returns the beach line index
+    pub(crate) fn beach_line_index(&self) -> Option<VB::BeachLineIndex> {
+        self.beach_line_index_
     }
 }
-
-pub type CircleEventType = Rc<CircleEventCell>;
 
 /// Event queue data structure, holds circle events.
 /// During algorithm run, some of the circle events disappear (become
@@ -372,12 +264,15 @@ pub type CircleEventType = Rc<CircleEventCell>;
 /// iterators (there is no direct ability to modify its elements).
 /// Instead list is used to store all the circle events and priority queue
 /// of the iterators to the list elements is used to keep the correct circle
-/// events ordering. (todo: this comment text is from c++, convert to rust)
+/// events ordering.
+// todo: this comment text is from c++, convert to rust
 pub(crate) struct CircleEventQueue {
-    // circle events sorted by order
-    c_: BTreeSet<CircleEventType>,
-    // circle events sorted by id
-    c_list_: ahash::AHashMap<usize, CircleEventType>,
+    /// circle events sorted by order
+    /// Note that the `CircleEvent`s must be identical clones of the ones in `ce_by_id_`
+    ce_by_order_: BTreeSet<CircleEvent>,
+    /// circle events sorted by id
+    /// Note that the `CircleEvent`s must be identical clones of the ones in `ce_by_order_`
+    ce_by_id_: ahash::AHashMap<usize, CircleEvent>,
     c_list_next_free_index_: CircleEventIndex,
     inactive_circle_ids_: VobU32, // Circle events turned inactive
 }
@@ -385,8 +280,8 @@ pub(crate) struct CircleEventQueue {
 impl Default for CircleEventQueue {
     fn default() -> CircleEventQueue {
         Self {
-            c_: BTreeSet::new(),
-            c_list_: ahash::AHashMap::new(),
+            ce_by_order_: BTreeSet::new(),
+            ce_by_id_: ahash::AHashMap::new(),
             c_list_next_free_index_: CircleEventIndex(0),
             inactive_circle_ids_: VobU32::fill(128),
         }
@@ -396,32 +291,32 @@ impl Default for CircleEventQueue {
 impl CircleEventQueue {
     #[inline]
     pub(crate) fn is_empty(&self) -> bool {
-        self.c_.is_empty()
+        self.ce_by_order_.is_empty()
     }
 
     /// the real first() for +nightly builds
     #[inline(always)]
     #[cfg(feature = "map_first_last")]
-    pub(crate) fn peek(&self) -> Option<&CircleEventType> {
-        self.c_.first()
+    pub(crate) fn peek(&self) -> Option<&CircleEvent> {
+        self.ce_by_order_.first()
     }
 
     /// simulated first() for +stable builds
     #[cfg(not(feature = "map_first_last"))]
-    #[inline]
-    pub(crate) fn peek(&self) -> Option<&CircleEventType> {
+    #[inline(always)]
+    pub(crate) fn peek(&self) -> Option<&CircleEvent> {
         // super inefficient implementation of 'first()' for +stable
-        self.c_.iter().next()
+        self.ce_by_order_.iter().next()
     }
 
     #[cfg(feature = "ce_corruption_check")]
     pub(crate) fn ce_corruption_check(&self) {
-        if self.c_.len() >= 2 {
-            let mut iter = self.c_.iter();
-            let first_ce = iter.next().unwrap().0.get();
-            let second_ce = iter.next().unwrap().0.get();
+        if self.ce_by_order_.len() >= 2 {
+            let mut iter = self.ce_by_order_.iter();
+            let first_ce = iter.next().unwrap();
+            let second_ce = iter.next().unwrap();
 
-            if first_ce.cmp(&second_ce) != Ordering::Less {
+            if first_ce.cmp(second_ce) != Ordering::Less {
                 println!("*************************************************");
                 println!("topmost CE could just as well been the second CE.");
                 println!("topmost CE :{:?}", first_ce);
@@ -433,19 +328,19 @@ impl CircleEventQueue {
     /// the real pop_firs() for +nightly builds
     #[inline(always)]
     #[cfg(feature = "map_first_last")]
-    fn pop_first(&mut self) -> Option<CircleEventType> {
-        self.c_.pop_first()
+    fn pop_first(&mut self) -> Option<CircleEvent> {
+        self.ce_by_order_.pop_first()
     }
 
     /// simulated pop_firs() for +stable builds
     #[cfg(not(feature = "map_first_last"))]
     #[inline(always)]
-    fn pop_first(&mut self) -> Option<CircleEventType> {
-        if let Some(item) = self.c_.iter().next().cloned() {
+    fn pop_first(&mut self) -> Option<CircleEvent> {
+        if let Some(item) = self.ce_by_order_.iter().next().cloned() {
             #[cfg(feature = "console_debug")]
-            assert!(self.c_.remove(&item));
+            debug_assert!(self.ce_by_order_.remove(&item));
             #[cfg(not(feature = "console_debug"))]
-            let _ = self.c_.remove(&item);
+            let _ = self.ce_by_order_.remove(&item);
             Some(item)
         } else {
             None
@@ -455,7 +350,7 @@ impl CircleEventQueue {
     pub(crate) fn pop_inactive_at_top(&mut self) -> Result<(), BvError> {
         while !self.is_empty() {
             if let Some(peek) = self.peek() {
-                if let Some(peek) = peek.0.get().get_index() {
+                if let Some(peek) = peek.get_index() {
                     //dbg!(peek);
                     if !self.is_active(peek) {
                         self.pop_and_destroy()?;
@@ -471,49 +366,53 @@ impl CircleEventQueue {
             }
             break;
         }
-        // todo: remove this when stable
-        if self.c_list_.len() != self.c_.len() {
-            return Err(BvError::InternalError(format!(
-                "The two circle event lists should always be of the same size. {}:{}",
-                file!(),
-                line!()
-            )));
-        }
+        debug_assert!({
+            // todo: remove this when stable
+            if self.ce_by_id_.len() != self.ce_by_order_.len() {
+                return Err(BvError::InternalError(format!(
+                    "The two circle event lists should always be of the same size. {}:{}",
+                    file!(),
+                    line!()
+                )));
+            };
+            true
+        });
         Ok(())
     }
 
-    ///
-    /// was named pop in C++, but it was never used to actually get the item, only to destroy it
-    ///
+    /// Was named pop in C++, but it was never used to actually get the item, only to destroy it
     pub(crate) fn pop_and_destroy(&mut self) -> Result<(), BvError> {
         if let Some(circle) = self.pop_first() {
-            if let Some(circle_id) = circle.0.get().index_ {
-                let _ = self.c_list_.remove(&circle_id.0);
+            if let Some(circle_id) = circle.index_ {
+                let _ = self.ce_by_id_.remove(&circle_id.0);
                 self.inactive_circle_ids_.set_grow(circle_id.0, true);
             } else {
                 return Err(BvError::InternalError(format!(
                     "circle event lists corruption, circle event id {:?} not found {}:{}",
-                    circle.0.get().index_,
+                    circle.index_,
                     file!(),
                     line!()
                 )));
             }
         }
-        // todo: remove this when stable
-        if self.c_list_.len() != self.c_.len() {
-            return Err(BvError::InternalError(format!(
-                "The two circle event lists should always be of the same size. {}:{}",
-                file!(),
-                line!()
-            )));
-        }
+        debug_assert!({
+            // todo: remove this when stable
+            if self.ce_by_id_.len() != self.ce_by_order_.len() {
+                return Err(BvError::InternalError(format!(
+                    "The two circle event lists should always be of the same size. {}:{}",
+                    file!(),
+                    line!()
+                )));
+            };
+            true
+        });
         Ok(())
     }
 
     #[allow(dead_code)]
     pub(crate) fn clear(&mut self) {
-        self.c_.clear();
-        self.c_list_.clear();
+        self.ce_by_order_.clear();
+        self.ce_by_id_.clear();
         self.inactive_circle_ids_ = {
             let mut cids = VobU32::fill(512);
             cids.resize(512, false);
@@ -525,20 +424,17 @@ impl CircleEventQueue {
     /// Update index
     /// Insert Rc ref into the list
     /// Insert Rc wrapped object in self.c_
-    /// return a Rc ref of the inserted element
-    pub(crate) fn associate_and_push(&mut self, cc: CircleEventType) -> Rc<CircleEventCell> {
-        {
-            let mut c = cc.0.get();
-            let _ = c.set_index(self.c_list_next_free_index_);
-            cc.0.set(c);
-        }
-
+    /// return the `CircleEventIndex` of the inserted element
+    pub(crate) fn associate_and_push(&mut self, mut cc: CircleEvent) -> CircleEventIndex {
+        let ce_id = self.c_list_next_free_index_;
+        // set the correct index on the circle event
+        cc.set_index(ce_id);
         let _ = self
-            .c_list_
+            .ce_by_id_
             .insert(self.c_list_next_free_index_.0, cc.clone());
         let _ = self.c_list_next_free_index_.increment();
-        let _ = self.c_.insert(cc.clone());
-        cc
+        let _ = self.ce_by_order_.insert(cc);
+        ce_id
     }
 
     #[inline(always)]
@@ -554,8 +450,8 @@ impl CircleEventQueue {
         #[cfg(feature = "console_debug")]
         if let Some(circle_event_id) = circle_event_id {
             if !self.inactive_circle_ids_.get_f(circle_event_id.0) {
-                if self.c_list_.contains_key(&circle_event_id.0) {
-                    tln!("deactivate {:?}", self.c_list_[&circle_event_id.0]);
+                if self.ce_by_id_.contains_key(&circle_event_id.0) {
+                    tln!("deactivate {:?}", self.ce_by_id_[&circle_event_id.0]);
                 } else {
                     tln!("circle {} not present", circle_event_id);
                 }
@@ -564,10 +460,10 @@ impl CircleEventQueue {
         }
     }
 
-    pub(crate) fn top(&self) -> Result<Option<&CircleEventType>, BvError> {
+    pub(crate) fn top(&self) -> Result<Option<&CircleEvent>, BvError> {
         let c = self.peek();
         if let Some(cc) = c {
-            let id = cc.0.get().index_.unwrap();
+            let id = cc.index_.unwrap();
             if !self.is_active(id) {
                 return Err(BvError::InternalError(format!(
                     "Tried to use an inactive circle event {}, {}:{}",
@@ -582,7 +478,7 @@ impl CircleEventQueue {
 
     #[cfg(feature = "console_debug")]
     pub(crate) fn dbg_ce(&self, cei: CircleEventIndex) {
-        if let Some(ce) = self.c_list_.get(&cei.0) {
+        if let Some(ce) = self.ce_by_id_.get(&cei.0) {
             print!("{:?}", ce);
         } else {
             print!("{}: not found", cei);
@@ -593,6 +489,6 @@ impl CircleEventQueue {
     /// Only used by test code.
     #[cfg(any(feature = "test", feature = "console_debug"))]
     pub(crate) fn len(&self) -> usize {
-        self.c_.len()
+        self.ce_by_order_.len()
     }
 }

@@ -15,7 +15,7 @@
 mod tests;
 
 use crate::beach_line as VB;
-use crate::circle_event as VC;
+use crate::circle_event::CircleEvent;
 use crate::ctypes::ulp_comparison;
 use crate::extended_exp_fpt as EX;
 use crate::extended_int::ExtendedInt;
@@ -27,7 +27,6 @@ use num_traits::One;
 use std::cmp;
 use std::fmt::Debug;
 use std::marker::PhantomData;
-use std::rc::Rc;
 
 // TODO: how to make these generic?
 //const ULPS: u64 = 64;
@@ -259,10 +258,10 @@ impl EventComparisonPredicate {
     #[allow(clippy::let_and_return)]
     pub(crate) fn event_comparison_bif<I: InputType, F: OutputType>(
         lhs: &VSE::SiteEvent<I, F>,
-        rhs: &VC::CircleEvent,
+        rhs: &CircleEvent,
     ) -> bool {
         let lhs = cast::<I, f64>(lhs.x0());
-        let rhs = rhs.lower_x().into_inner();
+        let rhs = rhs.lower_x();
         let rv = ulp_comparison(lhs, rhs, ULPSX2) == cmp::Ordering::Less;
         tln!(
             "event_comparison_predicate_bif lhs:{:.12} rhs:{:.12} -> {}",
@@ -669,13 +668,13 @@ impl CircleExistencePredicate {
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        c_event: &VC::CircleEventType,
+        c_event: &CircleEvent,
     ) {
         use approx::AbsDiffEq;
 
         let c = geo::Coordinate {
-            x: c_event.0.get().x().0 as f64,
-            y: c_event.0.get().y().0 as f64,
+            x: c_event.x() as f64,
+            y: c_event.y() as f64,
         };
         let d1 = site1.distance_to_point(c.x, c.y);
         let d2 = site2.distance_to_point(c.x, c.y);
@@ -704,13 +703,13 @@ impl CircleExistencePredicate {
         if equidistant {
             println!(
                 "\nvalidate CE x={} y:{} xl:{}",
-                c_event.0.get().x().0,
-                c_event.0.get().y().0,
-                c_event.0.get().lower_x().0
+                c_event.x(),
+                c_event.y(),
+                c_event.lower_x()
             );
 
             println!("circle_formation_predicate should return false but doesn't");
-            println!("c={:?} lx:{}", c, c_event.0.get().lower_x().0);
+            println!("c={:?} lx:{}", c, c_event.lower_x());
             println!("site1:{:?} distance={:.12}", site1, d1);
             println!("site2:{:?} distance={:.12}", site2, d2);
             println!("site3:{:?}, distance={:.12}", site3, d3);
@@ -789,8 +788,8 @@ impl LazyCircleFormationFunctor {
         point1: Point<I>,
         point2: Point<I>,
         point3: Point<I>,
-        c_event: &VC::CircleEventType,
-    ) {
+        mut c_event: CircleEvent,
+    ) -> Option<CircleEvent> {
         let dif_x1 = cast::<I, f64>(point1.x) - cast::<I, f64>(point2.x);
         let dif_x2 = cast::<I, f64>(point2.x) - cast::<I, f64>(point3.x);
         let dif_y1 = cast::<I, f64>(point1.y) - cast::<I, f64>(point2.y);
@@ -831,7 +830,7 @@ impl LazyCircleFormationFunctor {
             cast::<f32, f64>(5.0f32),
         );
 
-        c_event.cell_set_3_raw(
+        c_event.set_3(
             c_x.dif().fpv() * inv_orientation.fpv(),
             c_y.dif().fpv() * inv_orientation.fpv(),
             lower_x.dif().fpv() * inv_orientation.fpv(),
@@ -852,12 +851,13 @@ impl LazyCircleFormationFunctor {
                 point1,
                 point2,
                 point3,
-                c_event,
+                &mut c_event,
                 recompute_c_x,
                 recompute_c_y,
                 recompute_lower_x,
             );
         }
+        Some(c_event)
     }
 
     /// Lazy evaluation of point, point, segment circle events
@@ -866,8 +866,8 @@ impl LazyCircleFormationFunctor {
         point2: Point<I>,
         site3: &VSE::SiteEvent<I, F>,
         segment_index: SiteIndex,
-        c_event: &VC::CircleEventType,
-    ) -> bool {
+        mut c_event: CircleEvent,
+    ) -> Option<CircleEvent> {
         tln!("->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?})", point1, point2, site3, segment_index);
 
         // (line_a,line_b) it the perpendicular vector of site3-point0 -> site3-point1
@@ -964,7 +964,7 @@ impl LazyCircleFormationFunctor {
         }
         lower_x += r * inv_segm_len;
 
-        c_event.cell_set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
+        c_event.set_3(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
 
         tln!("  c_x:{:?}, c_y:{:?}, l_x:{:?}", c_x, c_y, lower_x);
 
@@ -992,7 +992,7 @@ impl LazyCircleFormationFunctor {
                 point2,
                 site3,
                 segment_index,
-                c_event,
+                &mut c_event,
                 recompute_c_x,
                 recompute_c_y,
                 recompute_lower_x,
@@ -1010,8 +1010,8 @@ impl LazyCircleFormationFunctor {
         if unique_endpoints {
             // site3.point0 -> c
             let v_3_c = (
-                c_event.0.get().x().0 - cast::<I, f64>(site3.point0().x),
-                c_event.0.get().y().0 - cast::<I, f64>(site3.point0().y),
+                c_event.x() - cast::<I, f64>(site3.point0().x),
+                c_event.y() - cast::<I, f64>(site3.point0().y),
             );
             // site3.point0 -> site3.point1
             let v_3 = (
@@ -1049,24 +1049,24 @@ impl LazyCircleFormationFunctor {
 
                 println!(
                     "site1->c distance:{:-12}",
-                    point1.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
+                    point1.distance_to_point(c_event.x(), c_event.y())
                 );
                 println!(
                     "site2->c distance:{:-12}",
-                    point2.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
+                    point2.distance_to_point(c_event.x(), c_event.y())
                 );
                 println!(
                     "site3->c distance:{:-12}",
-                    site3.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
+                    site3.distance_to_point(c_event.x(), c_event.y())
                 );
 
                 println!("v_a_c:{:?}, v3:{:?}", v_3_c, v_3);
                 println!("dot:{:?}", dot);
                 println!("ignoring this CE\n");
             }
-            return rv;
+            return rv.then(|| c_event);
         };
-        true
+        Some(c_event)
     }
 
     /// Lazy evaluation of point, segment, segment circle events
@@ -1076,8 +1076,8 @@ impl LazyCircleFormationFunctor {
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
         point_index: SiteIndex,
-        c_event: &VC::CircleEventType,
-    ) {
+        mut c_event: CircleEvent,
+    ) -> Option<CircleEvent> {
         let segm_start1 = site2.point1();
         let segm_end1 = site2.point0();
         let segm_start2 = site3.point0();
@@ -1099,12 +1099,12 @@ impl LazyCircleFormationFunctor {
         if (point1 == site2.point0() || point1 == site2.point1())
             && (point1 == site3.point0() || point1 == site3.point1())
         {
-            c_event.cell_set_is_site_point();
+            c_event.set_is_site_point();
             let x = cast::<I, f64>(point1.x);
             let y = cast::<I, f64>(point1.y);
-            c_event.cell_set_3_raw(x, y, x);
+            c_event.set_3(x, y, x);
             tln!("<-LazyCircleFormationFunctor::pss shortcut");
-            return;
+            return Some(c_event);
         }
 
         let a1 = cast::<I, f64>(segm_end1.x) - cast::<I, f64>(segm_start1.x);
@@ -1224,7 +1224,7 @@ impl LazyCircleFormationFunctor {
                 assert!(!c_y.dif().ulp().is_nan());
                 assert!(!lower_x.dif().ulp().is_nan());
             }
-            c_event.cell_set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
+            c_event.set_3(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
         } else {
             tln!("  LazyCircleFormationFunctor::pss !collinear");
             let sqr_sum1 = RF::RobustFpt::new((a1 * a1 + b1 * b1).sqrt(), 2_f64);
@@ -1373,13 +1373,6 @@ impl LazyCircleFormationFunctor {
                 c_y,
                 lower_x
             );
-            /*
-            println!(
-                "  LazyCircleFormationFunctor::pss c_x:{:?} c_y:{:?} l_x:{:?}",
-                c_x.dif().ulp(),
-                c_y.dif().ulp(),
-                lower_x.dif().ulp()
-            );*/
 
             let ulps = ULPSX2 as f64;
             recompute_c_x = c_x.dif().ulp() > ulps;
@@ -1392,7 +1385,7 @@ impl LazyCircleFormationFunctor {
                 assert!(!lower_x.dif().ulp().is_nan());
             }
             // Todo! Is this correct? it was let c_event = ...
-            c_event.cell_set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
+            c_event.set_3(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
         }
 
         if recompute_c_x || recompute_c_y || recompute_lower_x {
@@ -1401,12 +1394,13 @@ impl LazyCircleFormationFunctor {
                 site2,
                 site3,
                 point_index,
-                c_event,
+                &mut c_event,
                 recompute_c_x,
                 recompute_c_y,
                 recompute_lower_x,
             );
         }
+        Some(c_event)
     }
 
     /// Lazy evaluation of segment, segment, segment circle events
@@ -1414,8 +1408,8 @@ impl LazyCircleFormationFunctor {
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        c_event: &VC::CircleEventType,
-    ) {
+        mut c_event: CircleEvent,
+    ) -> Option<CircleEvent> {
         let a1 = RF::RobustFpt::from(cast::<I, f64>(site1.x1()) - cast::<I, f64>(site1.x0()));
         let b1 = RF::RobustFpt::from(cast::<I, f64>(site1.y1()) - cast::<I, f64>(site1.y0()));
         let c1 = RF::RobustFpt::new(
@@ -1535,14 +1529,14 @@ impl LazyCircleFormationFunctor {
             assert!(!c_y.dif().ulp().is_nan());
             assert!(!lower_x.dif().ulp().is_nan());
         }
-        c_event.cell_set_3_raw(c_x_dif.fpv(), c_y_dif.fpv(), lower_x_dif.fpv());
+        c_event.set_3(c_x_dif.fpv(), c_y_dif.fpv(), lower_x_dif.fpv());
 
         if recompute_c_x || recompute_c_y || recompute_lower_x {
             ExactCircleFormationFunctor::sss(
                 site1,
                 site2,
                 site3,
-                c_event,
+                &mut c_event,
                 recompute_c_x,
                 recompute_c_y,
                 recompute_lower_x,
@@ -1553,7 +1547,9 @@ impl LazyCircleFormationFunctor {
         tln!("  site1:{:?}", site1);
         tln!("  site2:{:?}", site2);
         tln!("  site3:{:?}", site3);
-        tln!("  c_event:CE{:?}", c_event.0.get());
+        tln!("  c_event:CE{:?}", c_event);
+
+        Some(c_event)
     }
 }
 
@@ -1562,7 +1558,7 @@ pub struct CircleFormationFunctor {}
 
 impl CircleFormationFunctor {
     pub(crate) fn lies_outside_vertical_segment<I: InputType, F: OutputType>(
-        c: &VC::CircleEventType,
+        c: &CircleEvent,
         s: &VSE::SiteEvent<I, F>,
     ) -> bool {
         if !s.is_segment() || !Predicates::is_vertical_site::<I, F>(s) {
@@ -1570,7 +1566,7 @@ impl CircleFormationFunctor {
         }
         let y0 = cast::<I, f64>(if s.is_inverse() { s.y1() } else { s.y0() });
         let y1 = cast::<I, f64>(if s.is_inverse() { s.y0() } else { s.y1() });
-        let cc_y = c.0.get().y().into_inner();
+        let cc_y = c.y();
 
         ulp_comparison(cc_y, y0, 64) == cmp::Ordering::Less
             || ulp_comparison(cc_y, y1, 64) == cmp::Ordering::Greater
@@ -1584,9 +1580,8 @@ impl CircleFormationFunctor {
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
         bisector_node: VB::BeachLineIndex,
-    ) -> Option<VC::CircleEventType> {
-        let circle: VC::CircleEventType;
-        if !site1.is_segment() {
+    ) -> Option<CircleEvent> {
+        let circle = if !site1.is_segment() {
             if !site2.is_segment() {
                 if !site3.is_segment() {
                     // (point, point, point) sites.
@@ -1597,13 +1592,12 @@ impl CircleFormationFunctor {
                     ) {
                         return None;
                     }
-                    circle = Rc::new(VC::CircleEventCell::new(bisector_node));
                     LazyCircleFormationFunctor::ppp::<I, F>(
                         site1.point0(),
                         site2.point0(),
                         site3.point0(),
-                        &circle,
-                    );
+                        CircleEvent::new(bisector_node),
+                    )
                 } else {
                     // (point, point, segment) sites.
                     if !CircleExistencePredicate::pps::<I, F>(
@@ -1614,16 +1608,13 @@ impl CircleFormationFunctor {
                     ) {
                         return None;
                     }
-                    circle = Rc::new(VC::CircleEventCell::new(bisector_node));
-                    if !LazyCircleFormationFunctor::pps::<I, F>(
+                    LazyCircleFormationFunctor::pps::<I, F>(
                         site1.point0(),
                         site2.point0(),
                         site3,
                         SiteIndex::Three,
-                        &circle,
-                    ) {
-                        return None;
-                    }
+                        CircleEvent::new(bisector_node),
+                    )
                 }
             } else if !site3.is_segment() {
                 // (point, segment, point) sites.
@@ -1635,16 +1626,13 @@ impl CircleFormationFunctor {
                 ) {
                     return None;
                 }
-                circle = Rc::new(VC::CircleEventCell::new(bisector_node));
-                if !LazyCircleFormationFunctor::pps::<I, F>(
+                LazyCircleFormationFunctor::pps::<I, F>(
                     site1.point0(),
                     site3.point0(),
                     site2,
                     SiteIndex::Two,
-                    &circle,
-                ) {
-                    return None;
-                };
+                    CircleEvent::new(bisector_node),
+                )
             } else {
                 // (point, segment, segment) sites.
                 if !CircleExistencePredicate::pss::<I, F>(
@@ -1655,14 +1643,13 @@ impl CircleFormationFunctor {
                 ) {
                     return None;
                 }
-                circle = Rc::new(VC::CircleEventCell::new(bisector_node));
                 LazyCircleFormationFunctor::pss::<I, F>(
                     site1.point0(),
                     site2,
                     site3,
                     SiteIndex::One,
-                    &circle,
-                );
+                    CircleEvent::new(bisector_node),
+                )
             }
         } else if !site2.is_segment() {
             if !site3.is_segment() {
@@ -1675,16 +1662,13 @@ impl CircleFormationFunctor {
                 ) {
                     return None;
                 }
-                circle = Rc::new(VC::CircleEventCell::new(bisector_node));
-                if !LazyCircleFormationFunctor::pps::<I, F>(
+                LazyCircleFormationFunctor::pps::<I, F>(
                     site2.point0(),
                     site3.point0(),
                     site1,
                     SiteIndex::One,
-                    &circle,
-                ) {
-                    return None;
-                };
+                    CircleEvent::new(bisector_node),
+                )
             } else {
                 // (segment, point, segment) sites.
                 if !CircleExistencePredicate::pss::<I, F>(
@@ -1695,14 +1679,13 @@ impl CircleFormationFunctor {
                 ) {
                     return None;
                 }
-                circle = Rc::new(VC::CircleEventCell::new(bisector_node));
                 LazyCircleFormationFunctor::pss::<I, F>(
                     site2.point0(),
                     site1,
                     site3,
                     SiteIndex::Two,
-                    &circle,
-                );
+                    CircleEvent::new(bisector_node),
+                )
             }
         } else if !site3.is_segment() {
             // (segment, segment, point) sites.
@@ -1714,32 +1697,41 @@ impl CircleFormationFunctor {
             ) {
                 return None;
             }
-            circle = Rc::new(VC::CircleEventCell::new(bisector_node));
             LazyCircleFormationFunctor::pss::<I, F>(
                 site3.point0(),
                 site1,
                 site2,
                 SiteIndex::Three,
-                &circle,
-            );
+                CircleEvent::new(bisector_node),
+            )
         } else {
             // (segment, segment, segment) sites.
             if !CircleExistencePredicate::sss::<I, F>(site1, site2, site3) {
                 return None;
             }
-            circle = Rc::new(VC::CircleEventCell::new(bisector_node));
-            LazyCircleFormationFunctor::sss::<I, F>(site1, site2, site3, &circle);
-        }
+            LazyCircleFormationFunctor::sss::<I, F>(
+                site1,
+                site2,
+                site3,
+                CircleEvent::new(bisector_node),
+            )
+        };
 
-        if Self::lies_outside_vertical_segment(&circle, site1)
-            || Self::lies_outside_vertical_segment(&circle, site2)
-            || Self::lies_outside_vertical_segment(&circle, site3)
-        {
-            return None;
+        if let Some(circle) = circle.as_ref() {
+            if Self::lies_outside_vertical_segment(circle, site1)
+                || Self::lies_outside_vertical_segment(circle, site2)
+                || Self::lies_outside_vertical_segment(circle, site3)
+            {
+                return None;
+            }
         }
         #[cfg(all(feature = "geo", feature = "ce_corruption_check"))]
-        CircleExistencePredicate::validate_circle_formation::<I, F>(site1, site2, site3, &circle);
-        Some(circle)
+        if let Some(circle) = circle.as_ref() {
+            CircleExistencePredicate::validate_circle_formation::<I, F>(
+                site1, site2, site3, circle,
+            );
+        }
+        circle
     }
 }
 
@@ -1752,7 +1744,7 @@ impl ExactCircleFormationFunctor {
         point1: Point<I>,
         point2: Point<I>,
         point3: Point<I>,
-        circle: &VC::CircleEventType,
+        circle: &mut CircleEvent,
         recompute_c_x: bool,
         recompute_c_y: bool,
         recompute_lower_x: bool,
@@ -1787,7 +1779,7 @@ impl ExactCircleFormationFunctor {
 
         if recompute_c_x || recompute_lower_x {
             let c_x: ExtendedInt = &numer1 * &dif_y[1] - &numer2 * &dif_y[0];
-            circle.cell_set_x_xf(EX::ExtendedExponentFpt::from(&c_x) * inv_denom);
+            circle.set_x_xf(EX::ExtendedExponentFpt::from(&c_x) * inv_denom);
 
             if recompute_lower_x {
                 // Evaluate radius of the circle.
@@ -1801,35 +1793,34 @@ impl ExactCircleFormationFunctor {
                 // To guarantee epsilon relative error.
 
                 // this value will be invalid after call to set_lower_x()
-                let tmp_circle_x = circle.0.get().x_as_xf();
+                let tmp_circle_x = circle.x_as_xf();
 
                 if !tmp_circle_x.is_neg() {
                     if !inv_denom.is_neg() {
-                        circle.cell_set_lower_x_xf(tmp_circle_x + r * inv_denom);
+                        circle.set_lower_x_xf(tmp_circle_x + r * inv_denom);
                     } else {
-                        circle.cell_set_lower_x_xf(tmp_circle_x - r * inv_denom);
+                        circle.set_lower_x_xf(tmp_circle_x - r * inv_denom);
                     }
                 } else {
                     let numer: ExtendedInt = &c_x * &c_x - &sqr_r;
                     let lower_x = EX::ExtendedExponentFpt::from(numer) * inv_denom
                         / (EX::ExtendedExponentFpt::from(c_x) + r);
-                    circle.cell_set_lower_x_xf(lower_x);
+                    circle.set_lower_x_xf(lower_x);
                 }
             }
         }
 
         if recompute_c_y {
             let c_y: ExtendedInt = &numer2 * &dif_x[0] - &numer1 * &dif_x[1];
-            circle.cell_set_y_xf(EX::ExtendedExponentFpt::from(c_y) * inv_denom);
+            circle.set_y_xf(EX::ExtendedExponentFpt::from(c_y) * inv_denom);
         }
         #[cfg(feature = "console_debug")]
         {
-            let c = circle.0.get();
             tln!(
                 "ppp(x:{:.12}, y:{:.12}, lx:{:.12})",
-                c.x(),
-                c.y(),
-                c.lower_x()
+                circle.x(),
+                circle.y(),
+                circle.lower_x()
             );
         }
     }
@@ -1841,7 +1832,7 @@ impl ExactCircleFormationFunctor {
         point2: Point<I>,
         site3: &VSE::SiteEvent<I, F>,
         segment_index: SiteIndex,
-        c_event: &VC::CircleEventType,
+        c_event: &mut CircleEvent,
         recompute_c_x: bool,
         recompute_c_y: bool,
         recompute_lower_x: bool,
@@ -1909,13 +1900,13 @@ impl ExactCircleFormationFunctor {
             let inv_denom =
                 EX::ExtendedExponentFpt::from(1f64) / EX::ExtendedExponentFpt::from(&denom);
             if recompute_c_x {
-                c_event.cell_set_x_xf(EX::ExtendedExponentFpt::from(&ca[0]) * inv_denom / 4_f64);
+                c_event.set_x_xf(EX::ExtendedExponentFpt::from(&ca[0]) * inv_denom / 4_f64);
             }
             if recompute_c_y {
-                c_event.cell_set_y_xf(EX::ExtendedExponentFpt::from(&ca[2]) * inv_denom / 4_f64);
+                c_event.set_y_xf(EX::ExtendedExponentFpt::from(&ca[2]) * inv_denom / 4_f64);
             }
             if recompute_lower_x {
-                c_event.cell_set_lower_x_xf(
+                c_event.set_lower_x_xf(
                     RF::RobustSqrtExpr::eval2(&ca, &cb) * inv_denom * 0.25f64
                         / (EX::ExtendedExponentFpt::from(&segm_len).sqrt()),
                 );
@@ -1938,7 +1929,7 @@ impl ExactCircleFormationFunctor {
             };
             cb[1] = det.clone();
             if recompute_c_x {
-                c_event.cell_set_x_xf(RF::RobustSqrtExpr::eval2(&ca, &cb) * inv_denom_sqr * 0.5f64);
+                c_event.set_x_xf(RF::RobustSqrtExpr::eval2(&ca, &cb) * inv_denom_sqr * 0.5f64);
             }
         }
 
@@ -1952,7 +1943,7 @@ impl ExactCircleFormationFunctor {
             };
             cb[3] = det.clone();
             if recompute_c_y {
-                c_event.cell_set_y_xf(
+                c_event.set_y_xf(
                     RF::RobustSqrtExpr::eval2(&ca[2..], &cb[2..]) * inv_denom_sqr * 0.5f64,
                 );
             }
@@ -1983,16 +1974,15 @@ impl ExactCircleFormationFunctor {
             let eval4 = RF::RobustSqrtExpr::eval4(&ca, &cb);
             tln!("eval4:{:.12}", eval4.d());
 
-            c_event.cell_set_lower_x_xf(eval4 * inv_denom_sqr * 0.5f64 / segm_len);
+            c_event.set_lower_x_xf(eval4 * inv_denom_sqr * 0.5f64 / segm_len);
         }
         #[cfg(feature = "console_debug")]
         {
-            let c = c_event.0.get();
             tln!(
                 "<-pps(x:{:.12}, y:{:.12}, lx:{:.12})",
-                c.x(),
-                c.y(),
-                c.lower_x()
+                c_event.x(),
+                c_event.y(),
+                c_event.lower_x()
             );
         }
     }
@@ -2005,7 +1995,7 @@ impl ExactCircleFormationFunctor {
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
         point_index: SiteIndex,
-        c_event: &VC::CircleEventType,
+        c_event: &mut CircleEvent,
         recompute_c_x: bool,
         recompute_c_y: bool,
         recompute_lower_x: bool,
@@ -2096,7 +2086,7 @@ impl ExactCircleFormationFunctor {
                 let c_y = RF::RobustSqrtExpr::eval2(&cA, &cB);
                 tln!("c_y={:?}", c_y);
                 tln!("denom={:?}", denom);
-                c_event.cell_set_y_xf(c_y / denom);
+                c_event.set_y_xf(c_y / denom);
             }
 
             if recompute_c_x || recompute_lower_x {
@@ -2122,7 +2112,7 @@ impl ExactCircleFormationFunctor {
                     tln!(" denom={:.0}", denom.d());
                     tln!(" c_x/denom={:.0}", (c_x / denom).d());
 
-                    c_event.cell_set_x_xf(c_x / denom);
+                    c_event.set_x_xf(c_x / denom);
                 }
 
                 if recompute_lower_x {
@@ -2133,7 +2123,7 @@ impl ExactCircleFormationFunctor {
                     };
                     cB[2] = &a[0] * &a[0] + &b[0] * &b[0];
                     let lower_x = RF::RobustSqrtExpr::eval3(&cA, &cB);
-                    c_event.cell_set_lower_x_xf(lower_x / denom);
+                    c_event.set_lower_x_xf(lower_x / denom);
                 }
             }
             return;
@@ -2153,7 +2143,7 @@ impl ExactCircleFormationFunctor {
             let denom = EX::ExtendedExponentFpt::from(&orientation);
             let c_x = EX::ExtendedExponentFpt::from(&ix) / denom;
             let c_y = EX::ExtendedExponentFpt::from(&iy) / denom;
-            c_event.cell_set_3_ext(c_x, c_y, c_x);
+            c_event.set_3_ext(c_x, c_y, c_x);
             return;
         }
 
@@ -2189,7 +2179,7 @@ impl ExactCircleFormationFunctor {
             cA[1] = (&dx * &dx + &dy * &dy) * &b[0] - (&dx * &a[0] + &dy * &b[0]) * &iy;
             cA[2] = iy * &sign;
             let cy = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
-            c_event.cell_set_y_xf(cy / denom);
+            c_event.set_y_xf(cy / denom);
         }
 
         if recompute_c_x || recompute_lower_x {
@@ -2199,7 +2189,7 @@ impl ExactCircleFormationFunctor {
 
             if recompute_c_x {
                 let cx = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA, &cB);
-                c_event.cell_set_x_xf(cx / denom);
+                c_event.set_x_xf(cx / denom);
             }
 
             if recompute_lower_x {
@@ -2209,17 +2199,16 @@ impl ExactCircleFormationFunctor {
                     orientation
                 } * (&dx * &dx + &dy * &dy);
                 let lower_x = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA, &cB);
-                c_event.cell_set_lower_x_xf(lower_x / denom);
+                c_event.set_lower_x_xf(lower_x / denom);
             }
         }
         #[cfg(feature = "console_debug")]
         {
-            let c = c_event.0.get();
             tln!(
                 "pss(x:{:.12}, y:{:.12}, lx:{:.12})",
-                c.x(),
-                c.y(),
-                c.lower_x()
+                c_event.x(),
+                c_event.y(),
+                c_event.lower_x()
             );
             tln!(
                 "recompute_c_x:{}, recompute_c_y:{}, recompute_lower_x:{}",
@@ -2238,7 +2227,7 @@ impl ExactCircleFormationFunctor {
         site1: &VSE::SiteEvent<I, F>,
         site2: &VSE::SiteEvent<I, F>,
         site3: &VSE::SiteEvent<I, F>,
-        c_event: &VC::CircleEventType,
+        c_event: &mut CircleEvent,
         recompute_c_x: bool,
         recompute_c_y: bool,
         recompute_lower_x: bool,
@@ -2299,7 +2288,7 @@ impl ExactCircleFormationFunctor {
                 *cA_i = &b[j] * &c[k] - &b[k] * &c[j];
             }
             let c_y = RF::RobustSqrtExpr::eval3(&cA, &cB);
-            c_event.cell_set_y_xf(c_y / denom);
+            c_event.set_y_xf(c_y / denom);
         }
 
         if recompute_c_x || recompute_lower_x {
@@ -2315,23 +2304,22 @@ impl ExactCircleFormationFunctor {
 
             if recompute_c_x {
                 let c_x = RF::RobustSqrtExpr::eval3(&cA, &cB);
-                c_event.cell_set_x_xf(c_x / denom);
+                c_event.set_x_xf(c_x / denom);
             }
 
             if recompute_lower_x {
                 cB[3] = ExtendedInt::one();
                 let lower_x = RF::RobustSqrtExpr::eval4(&cA, &cB);
-                c_event.cell_set_lower_x_xf(lower_x / denom);
+                c_event.set_lower_x_xf(lower_x / denom);
             }
         }
         #[cfg(feature = "console_debug")]
         {
-            let c = c_event.0.get();
             tln!(
                 "sss(x:{:.12}, y:{:.12}, lx:{:.12})",
-                c.x(),
-                c.y(),
-                c.lower_x()
+                c_event.x(),
+                c_event.y(),
+                c_event.lower_x()
             );
         }
     }

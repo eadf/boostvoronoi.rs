@@ -479,20 +479,15 @@ impl BeachLineNodeData {
         self.circle_event_
     }
 
-    pub(crate) fn set_circle_event_id(
-        &mut self,
-        circle_event: Option<VC::CircleEventIndex>,
-    ) -> &mut Self {
+    pub(crate) fn set_circle_event_id(&mut self, circle_event: Option<VC::CircleEventIndex>) {
         self.circle_event_ = circle_event;
-        self
     }
 
     pub(crate) fn edge_id(&self) -> VD::EdgeIndex {
         self.edge_
     }
 
-    pub(crate) fn set_edge_id(&mut self, new_edge: VD::EdgeIndex) -> &mut Self {
+    pub(crate) fn set_edge_id(&mut self, new_edge: VD::EdgeIndex) {
         self.edge_ = new_edge;
-        self
     }
 }
