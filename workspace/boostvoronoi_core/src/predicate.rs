@@ -671,39 +671,50 @@ impl CircleExistencePredicate {
         site3: &VSE::SiteEvent<I, F>,
         c_event: &VC::CircleEventType,
     ) {
-        // only do this if the circle event is outside the site event x range.
-        println!(
-            "\nvalidate CE x={} y:{} xl:{}",
-            c_event.0.get().x().0,
-            c_event.0.get().y().0,
-            c_event.0.get().lower_x().0
-        );
-        #[allow(clippy::match_like_matches_macro)]
-        if match (site1.is_point(), site2.is_point(), site3.is_point()) {
-            // only validate pps
-            (false, true, true) => true,
-            (true, false, true) => true,
-            (true, true, false) => true,
-            _ => false,
-        } {
-            use approx::AbsDiffEq;
+        use approx::AbsDiffEq;
 
-            let c = geo::Coordinate {
-                x: c_event.0.get().x().0 as f64,
-                y: c_event.0.get().y().0 as f64,
-            };
-            let d1 = site1.distance_to_point(c.x, c.y);
-            let d2 = site2.distance_to_point(c.x, c.y);
-            let d3 = site3.distance_to_point(c.x, c.y);
+        let c = geo::Coordinate {
+            x: c_event.0.get().x().0 as f64,
+            y: c_event.0.get().y().0 as f64,
+        };
+        let d1 = site1.distance_to_point(c.x, c.y);
+        let d2 = site2.distance_to_point(c.x, c.y);
+        let d3 = site3.distance_to_point(c.x, c.y);
 
-            if d1.abs_diff_ne(&d2, 0.001) || d1.abs_diff_ne(&d3, 0.001) {
-                println!("circle_formation_predicate should return false but doesn't");
-                println!("c={:?} lx:{}", c, c_event.0.get().lower_x().0);
-                println!("site1:{:?} distance={:.12}", site1, d1);
-                println!("site2:{:?} distance={:.12}", site2, d2);
-                println!("site3:{:?}, distance={:.12}", site3, d3);
-                println!("there were no three point vertex!");
+        let equidistant = if d1 <= d2 && d1 <= d3 {
+            if d2 <= d3 {
+                d1.abs_diff_ne(&d2, 0.00001)
+            } else {
+                d1.abs_diff_ne(&d3, 0.00001)
             }
+        } else if d2 <= d1 && d2 <= d3 {
+            if d1 <= d3 {
+                d2.abs_diff_ne(&d1, 0.00001)
+            } else {
+                d2.abs_diff_ne(&d3, 0.00001)
+            }
+        } else if d1 <= d2 {
+            d3.abs_diff_ne(&d1, 0.00001)
+        } else {
+            d3.abs_diff_ne(&d2, 0.00001)
+        };
+
+        // accept circle events that are in the middle of *two* sites,
+        // as long as they are the closest two
+        if equidistant {
+            println!(
+                "\nvalidate CE x={} y:{} xl:{}",
+                c_event.0.get().x().0,
+                c_event.0.get().y().0,
+                c_event.0.get().lower_x().0
+            );
+
+            println!("circle_formation_predicate should return false but doesn't");
+            println!("c={:?} lx:{}", c, c_event.0.get().lower_x().0);
+            println!("site1:{:?} distance={:.12}", site1, d1);
+            println!("site2:{:?} distance={:.12}", site2, d2);
+            println!("site3:{:?}, distance={:.12}", site3, d3);
+            println!("there were no two point vertex!");
         }
     }
 
@@ -857,8 +868,6 @@ impl LazyCircleFormationFunctor {
         segment_index: SiteIndex,
         c_event: &VC::CircleEventType,
     ) -> bool {
-        #[cfg(feature = "ce_corruption_check")]
-        println!("\n->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?})", point1, point2, site3, segment_index);
         tln!("->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?})", point1, point2, site3, segment_index);
 
         // (line_a,line_b) it the perpendicular vector of site3-point0 -> site3-point1
@@ -955,24 +964,6 @@ impl LazyCircleFormationFunctor {
         }
         lower_x += r * inv_segm_len;
 
-        #[cfg(feature = "ce_corruption_check")]
-        {
-            println!("let site1=[{},{}];", point1.x, point1.y);
-            println!("let site2=[{},{}];", point2.x, point2.y);
-            println!(
-                "let site3=[{},{},{},{}];",
-                site3.point0().x,
-                site3.point0().y,
-                site3.point1().x,
-                site3.point1().y
-            );
-            println!(
-                "let c1=[{:.12},{:.12}];//lx={:.12}",
-                c_x.dif().fpv(),
-                c_y.dif().fpv(),
-                lower_x.dif().fpv()
-            );
-        }
         c_event.cell_set_3_raw(c_x.dif().fpv(), c_y.dif().fpv(), lower_x.dif().fpv());
 
         tln!("  c_x:{:?}, c_y:{:?}, l_x:{:?}", c_x, c_y, lower_x);
@@ -1017,22 +1008,6 @@ impl LazyCircleFormationFunctor {
         tln!("pps unique_endpoints:{}", unique_endpoints);
 
         if unique_endpoints {
-            #[cfg(feature = "ce_corruption_check")]
-            {
-                println!(
-                    "site1->c distance:{:-12}",
-                    point1.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
-                );
-                println!(
-                    "site2->c distance:{:-12}",
-                    point2.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
-                );
-                println!(
-                    "site3->c distance:{:-12}",
-                    site3.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
-                );
-            }
-
             // site3.point0 -> c
             let v_3_c = (
                 c_event.0.get().x().0 - cast::<I, f64>(site3.point0().x),
@@ -1046,15 +1021,50 @@ impl LazyCircleFormationFunctor {
             #[allow(clippy::suspicious_operation_groupings)]
             let dot = (v_3_c.0 * v_3.0 + v_3_c.1 * v_3.1) / (v_3.0 * v_3.0 + v_3.1 * v_3.1);
             tln!("pps dot:{:.12}", dot);
-            #[cfg(feature = "ce_corruption_check")]
-            {
-                println!("v_a_c:{:?}, v3:{:?}", v_3_c, v_3);
-                println!("dot:{:?}", dot);
-            }
+
             // allow the dot to be [0..1] + some ULP fuzz
-            return (-0.0..=1.0).contains(&dot)
+            let rv = (-0.0..=1.0).contains(&dot)
                 || approx::ulps_eq!(0.0, dot)
                 || approx::ulps_eq!(1.0, dot);
+
+            #[cfg(feature = "ce_corruption_check")]
+            if !rv {
+                println!("\n->LazyCircleFormationFunctor::pps(site1:{:?}, site2:{:?}, site3:{:?}, segment_index:{:?})", point1, point2, site3, segment_index);
+
+                println!("let site1=[{},{}];", point1.x, point1.y);
+                println!("let site2=[{},{}];", point2.x, point2.y);
+                println!(
+                    "let site3=[{},{},{},{}];",
+                    site3.point0().x,
+                    site3.point0().y,
+                    site3.point1().x,
+                    site3.point1().y
+                );
+                println!(
+                    "let c1=[{:.12},{:.12}];//lx={:.12}",
+                    c_x.dif().fpv(),
+                    c_y.dif().fpv(),
+                    lower_x.dif().fpv()
+                );
+
+                println!(
+                    "site1->c distance:{:-12}",
+                    point1.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
+                );
+                println!(
+                    "site2->c distance:{:-12}",
+                    point2.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
+                );
+                println!(
+                    "site3->c distance:{:-12}",
+                    site3.distance_to_point(c_event.0.get().x().0, c_event.0.get().y().0)
+                );
+
+                println!("v_a_c:{:?}, v3:{:?}", v_3_c, v_3);
+                println!("dot:{:?}", dot);
+                println!("ignoring this CE\n");
+            }
+            return rv;
         };
         true
     }
