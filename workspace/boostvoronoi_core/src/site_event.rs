@@ -315,7 +315,7 @@ impl<I: InputType, F: OutputType> SiteEvent<I, F> {
         VD::ColorBits(self.flags_ & VD::ColorBits::RESERVED__MASK.0)
     }
 
-    pub(crate) fn or_source_category(&mut self, source_category: &VD::ColorBits) {
+    pub(crate) fn or_source_category(&mut self, source_category: VD::ColorBits) {
         self.flags_ |= source_category.0;
     }
 
