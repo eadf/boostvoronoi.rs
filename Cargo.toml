@@ -1,6 +1,6 @@
 [package]
 name = "boostvoronoi"
-version = "0.10.1"
+version = "0.10.2"
 authors = ["eadf <lacklustr@protonmail.com>"]
 edition = "2021"
 description = "Boost voronoi ported to 100% rust"
@@ -19,7 +19,7 @@ exclude = [
 members = ["workspace/boostvoronoi_core"]
 
 [dependencies]
-boostvoronoi_core = { path = "workspace/boostvoronoi_core", version="0.10.0", default-features = false}
+boostvoronoi_core = { path = "workspace/boostvoronoi_core", version="0.10.2", default-features = false}
 
 # These features are only for debug purposes, should normally not be used
 [features]

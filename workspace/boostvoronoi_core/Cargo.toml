@@ -1,6 +1,6 @@
 [package]
 name = "boostvoronoi_core"
-version = "0.10.1"
+version = "0.10.2"
 authors = ["eadf <lacklustr@protonmail.com>"]
 edition = "2021"
 description = "Boost voronoi private workspace"
