@@ -110,7 +110,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
     /// This method accepts iterators of anything that implements `Into<boostvoronoi::geometry::Point>`
     pub fn with_vertices<T, IT>(mut self, vertices: T) -> Result<Self, BvError>
     where
-        T: Iterator<Item = IT>,
+        T: IntoIterator<Item = IT>,
         IT: Copy + Into<Point<I>>,
     {
         if self.segments_added_ {
@@ -118,7 +118,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
                 "Vertices should be added before segments".to_string(),
             ));
         }
-        for v in vertices.map(|v| -> Point<I> { v.into() }) {
+        for v in vertices.into_iter().map(|v| -> Point<I> { v.into() }) {
             let mut s = VSE::SiteEvent::<I, F>::new(VSE::Site::Point(v), self.index_);
             s.or_source_category(VD::ColorBits::SINGLE_POINT__BIT);
             self.site_events_.push(s);
@@ -132,11 +132,11 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
     /// This method accepts iterators of anything that implements `Into<boostvoronoi::geometry::Line>`
     pub fn with_segments<T, IT>(mut self, segments: T) -> Result<Self, BvError>
     where
-        T: Iterator<Item = IT>,
+        T: IntoIterator<Item = IT>,
         IT: Copy + Into<Line<I>>,
     {
         type Cb = VD::ColorBits;
-        for line in segments.map(|s| -> Line<I> { s.into() }) {
+        for line in segments.into_iter().map(|s| -> Line<I> { s.into() }) {
             #[allow(clippy::branches_sharing_code)]
             let se = if line.start == line.end {
                 // take care of the case when a line is actually a point
