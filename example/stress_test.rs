@@ -15,12 +15,13 @@ const NUMBER_OF_THREADS: usize = 6;
 const REPORT_FREQUENCY: usize = 1000_000;
 const TESTS_PER_SEED: usize = 1000_000;
 const NUMBER_OF_SEGMENTS_PER_TEST:usize = 2;
+const SEED_START:u64 = 121;
 
+/// Messages sent from worker threads to manager
 enum SeedRequest {
     RequestNewSeed(usize),
     ErrorFrom(usize),
 }
-
 
 /// Check if all the vertices really are at the midpoint between (at least) two segments.
 ///
@@ -174,8 +175,10 @@ fn worker_thread_loop(
 }
 
 /// spawn off a number of threads and let those test for faulty voronoi builds.
+///
+/// run with 'cargo run --example stress_test --features geo --release"
 fn main()  {
-    let mut next_seed = 11_u64;
+    let mut next_seed = SEED_START;
     let printout_lock = Arc::new(Mutex::new(()));
 
     // used when requesting and sending new seeds
@@ -201,7 +204,7 @@ fn main()  {
     let duration = std::time::Instant::now();
     let mut detected_errors = 0;
     loop {
-        match request_rx.recv().ok() {
+        match request_rx.recv_timeout(std::time::Duration::from_millis(100)).ok() {
             Some(SeedRequest::RequestNewSeed(requesting_id)) => {
                 //println!("Got request from : {}", requesting_thread);
                 handles[requesting_id as usize].1.send(next_seed).unwrap();
@@ -220,7 +223,8 @@ fn main()  {
                         detected_errors,
                     );
                 }
-            }
+            },
+            None => continue,
             _ => {
                 detected_errors += 1;
                 if detected_errors >= 5 {
