@@ -998,13 +998,15 @@ impl LazyCircleFormationFunctor {
                 recompute_lower_x,
             );
         }
-        // All sites needs to be unique, or ppp will return NaN
-        let unique_endpoints = !(site3.point0() == point1
-            || site3.point0() == point2
-            || site3.point1() == point1
-            || site3.point1() == point2
-            || point1 == point2
-            || site3.point0() == site3.point1());
+        // All sites must be unique, or the dot calculation will be invalid
+        let unique_endpoints = !(
+            point1 == point2
+                || site3.point0() == point1
+                || site3.point0() == point2
+                || site3.point1() == point1
+                || site3.point1() == point2
+            //|| site3.point0() == site3.point1() this can never happen
+        );
         tln!("pps unique_endpoints:{}", unique_endpoints);
 
         if unique_endpoints {
@@ -1547,7 +1549,7 @@ impl LazyCircleFormationFunctor {
         tln!("  site1:{:?}", site1);
         tln!("  site2:{:?}", site2);
         tln!("  site3:{:?}", site3);
-        tln!("  c_event:CE{:?}", c_event);
+        tln!("  c_event:{:?}", c_event);
 
         Some(c_event)
     }

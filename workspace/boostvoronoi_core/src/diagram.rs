@@ -1527,7 +1527,7 @@ impl<F: OutputType> Diagram<F> {
             edge12_id,
             edge23_id
         );*/
-        tln!("new vertex@CE{:?}", circle);
+        tln!("new vertex@{:?}", circle);
 
         let is_linear = VSE::SiteEvent::<I, F>::is_linear_edge(&site1, &site3);
         let is_primary = VSE::SiteEvent::<I, F>::is_primary_edge(&site1, &site3);

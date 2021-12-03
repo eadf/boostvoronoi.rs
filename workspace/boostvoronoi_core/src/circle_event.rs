@@ -70,7 +70,7 @@ impl fmt::Debug for CircleEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "(x:{:.12},y:{:.12},lx:{:.12})",
+            "CE(x:{:.12},y:{:.12},lx:{:.12})",
             self.center_x_, self.center_y_, self.lower_x_,
         )
     }

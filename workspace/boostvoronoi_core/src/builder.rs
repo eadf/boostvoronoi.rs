@@ -621,7 +621,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
                 line!()
             ))
         })?;
-        tln!("processing:CE{:?}", circle_event);
+        tln!("processing:{:?}", circle_event);
 
         if !self
             .circle_events_

@@ -7,13 +7,10 @@ type F = f64;
 fn main() -> Result<(), BvError> {
     let output = {
         let input = r#"0
-6
-0 10000000 700000 1
-700000 1 700000 9000000
-700000 9000000 9100000 9000000
-9100000 9000000 9100000 0
-9100000 0 10000000 10000000
-10000000 10000000 0 10000000
+3
+310 407 365 177
+754 177 -893 79
+300 558 109 347
 "#;
         let (points, segments) =
             read_boost_input_buffer::<I, _>(BufReader::new(Cursor::new(input)))?;
@@ -26,7 +23,7 @@ fn main() -> Result<(), BvError> {
         for s in segments.iter() {
             println!("{} {} {} {}", s.start.x, s.start.y, s.end.x, s.end.y);
         }
-        if false {
+        if true {
             // this will generate some C++ code from the example data
             println!("-------");
             println!("int INPUT_PTS[{}][2] = {{", points.len());
