@@ -439,17 +439,21 @@ fn main() -> Result<(), BvError> {
             // only update coordinate when hovering over the graphics
             let mouse_position = offscreen_event_coords();
             if mouse_position.0 < FW {
-                let shared_data_b = shared_data_c.borrow();
-                let point = shared_data_b
-                    .visualizer
-                    .affine
-                    .reverse_transform::<IType>(mouse_position.0 as f64, mouse_position.1 as f64);
-                if let Ok(point) = point {
-                    x_label.set_label(&point[0].to_string());
-                    y_label.set_label(&point[1].to_string());
+                if let Ok(shared_data_b) = shared_data_c.try_borrow() {
+                    // todo: IDK why the borrow sometimes fails
+                    let point = shared_data_b.visualizer.affine.reverse_transform::<IType>(
+                        mouse_position.0 as f64,
+                        mouse_position.1 as f64,
+                    );
+                    if let Ok(point) = point {
+                        x_label.set_label(&point[0].to_string());
+                        y_label.set_label(&point[1].to_string());
+                    } else {
+                        x_label.set_label("?");
+                        y_label.set_label("?");
+                    }
                 } else {
-                    x_label.set_label("?");
-                    y_label.set_label("?");
+                    println!("shared_data_c.try_borrow() failed");
                 }
             }
             false
@@ -470,7 +474,7 @@ fn main() -> Result<(), BvError> {
                     }
                     let _ = shared_data_bm.visualizer.build()?;
                     let _ = shared_data_bm.visualizer.re_calculate_affine();
-                    app::redraw();
+                    //app::redraw();
                 }
                 GuiMessage::Filter(flag) => {
                     shared_data_bm.draw_flag ^= flag;

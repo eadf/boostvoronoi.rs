@@ -51,6 +51,7 @@ path = "example/readme.rs"
 [[example]]
 name = "stress_test"
 path = "example/stress_test.rs"
+required-features = ["geo"]
 
 [dev-dependencies]
 fltk = "1.2"

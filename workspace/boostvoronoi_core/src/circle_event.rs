@@ -26,9 +26,9 @@ use std::fmt;
 pub struct CircleEventIndex(pub usize);
 
 impl CircleEventIndex {
-    fn increment(&mut self) -> &Self {
+    #[inline]
+    fn increment(&mut self) {
         self.0 += 1;
-        self
     }
 }
 
@@ -92,13 +92,14 @@ impl PartialEq for CircleEvent {
 impl Eq for CircleEvent {}
 
 impl PartialOrd for CircleEvent {
+    #[inline(always)]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
 impl Ord for CircleEvent {
-    #[inline]
+    #[inline(always)]
     fn cmp(&self, other: &Self) -> Ordering {
         let self_lower_x_ = OrderedFloat(self.lower_x_);
         let other_lower_x_ = OrderedFloat(other.lower_x_);
@@ -113,22 +114,24 @@ impl Ord for CircleEvent {
         } else if self_center_y_ < other_center_y_ {
             Ordering::Less
         } else if self_center_y_ == other_center_y_ {
-            //tln!("cmp self.lx():{:.12}, other.lx:{:.12} si:{:?}", self.lower_x(), other.lower_x(), self._index);
-            //tln!("cmp self.y():{:.12}, other.y:{:.12} oi:{:?}", self.y(), other.y(), self._index);
-            //tln!("cmp self.idx:{:?}, other.idx:{:?}", self.index_, other.index_);
-            if let Some(self_index) = self.index_ {
-                if let Some(other_index) = other.index_ {
-                    self_index.0.cmp(&other_index.0)
-                } else {
-                    //todo: fix
-                    Ordering::Greater
-                }
+            // self_lower_x_ == other_lower_x_ and self_center_y_ == other_center_y_
+            // Sort by reverse order of circle event id (highest value==youngest first)
+            // This implementation differ from C++, because i can only keep one
+            // unique circle-event in the circle-event BTreeSet
+            if let (Some(self_index), Some(other_index)) = (self.index_, other.index_) {
+                /*tln!(
+                    "{}.cmp({}) {:?}",
+                    self_index.0,
+                    other_index.0,
+                    self_index.0.cmp(&other_index.0).reverse()
+                );*/
+                self_index.0.cmp(&other_index.0).reverse()
             } else {
-                //todo: fix
+                //todo: this should never happen, but still..
+                debug_assert!(false);
                 Ordering::Greater
             }
         } else {
-            //todo: fix
             Ordering::Greater
         }
     }
@@ -422,19 +425,16 @@ impl CircleEventQueue {
 
     /// Take ownership of the circle event,
     /// Update index
-    /// Insert Rc ref into the list
-    /// Insert Rc wrapped object in self.c_
     /// return the `CircleEventIndex` of the inserted element
     pub(crate) fn associate_and_push(&mut self, mut cc: CircleEvent) -> CircleEventIndex {
-        let ce_id = self.c_list_next_free_index_;
+        let circle_event_id = self.c_list_next_free_index_;
         // set the correct index on the circle event
-        cc.set_index(ce_id);
-        let _ = self
-            .ce_by_id_
-            .insert(self.c_list_next_free_index_.0, cc.clone());
-        let _ = self.c_list_next_free_index_.increment();
+        cc.set_index(circle_event_id);
+        let _ = self.ce_by_id_.insert(circle_event_id.0, cc.clone());
+
         let _ = self.ce_by_order_.insert(cc);
-        ce_id
+        self.c_list_next_free_index_.increment();
+        circle_event_id
     }
 
     #[inline(always)]

@@ -917,32 +917,32 @@ impl LazyCircleFormationFunctor {
         let inv_segm_len =
             RF::RobustFpt::new(1_f64 / (line_a * line_a + line_b * line_b).sqrt(), 3_f64);
         let mut t = RF::RobustDif::default();
-        tln!("0t:{:?}", t);
+        //tln!("0t:{:?}", t);
         if OrientationTest::eval_f::<I, F>(denom.fpv()) == Orientation::Collinear {
             t += teta / (RF::RobustFpt::from(8_f64) * a);
-            tln!("1t:{:?}", t);
+            //tln!("1t:{:?}", t);
             t -= a / (RF::RobustFpt::from(2_f64) * teta);
-            tln!("2t:{:?}", t);
+            //tln!("2t:{:?}", t);
         } else {
             let det = ((teta * teta + denom * denom) * a * b).sqrt();
             //tln!("det:{:?}", det);
             if segment_index == SiteIndex::Two {
-                tln!("3 det:{:?}", det);
-                tln!("3 denom:{:?}", denom);
-                tln!("3 det/denom:{:?}", det / (denom * denom));
+                //tln!("3 det:{:?}", det);
+                //tln!("3 denom:{:?}", denom);
+                //tln!("3 det/denom:{:?}", det / (denom * denom));
                 t -= det / (denom * denom);
-                tln!("3t:{:?}", t);
+                //tln!("3t:{:?}", t);
             } else {
                 t += det / (denom * denom);
-                tln!("4t:{:?}", t);
+                //tln!("4t:{:?}", t);
             }
-            tln!("5teta:{:?}", teta);
-            tln!("A:{:?}", a);
-            tln!("B:{:?}", b);
+            //tln!("5teta:{:?}", teta);
+            //tln!("A:{:?}", a);
+            //tln!("B:{:?}", b);
             t += teta * (a + b) / (RF::RobustFpt::from(2_f64) * denom * denom);
-            tln!("5t:{:?}", t);
+            //tln!("5t:{:?}", t);
         }
-        tln!("6t:{:?}", t);
+        //tln!("6t:{:?}", t);
         let mut c_x = RF::RobustDif::default();
         tln!("0: c_x:{:?}", c_x);
         let mut c_y = RF::RobustDif::default();
