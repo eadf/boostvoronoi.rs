@@ -101,38 +101,33 @@ impl PartialOrd for CircleEvent {
 impl Ord for CircleEvent {
     #[inline(always)]
     fn cmp(&self, other: &Self) -> Ordering {
-        let self_lower_x_ = OrderedFloat(self.lower_x_);
-        let other_lower_x_ = OrderedFloat(other.lower_x_);
-        let self_center_y_ = OrderedFloat(self.center_y_);
-        let other_center_y_ = OrderedFloat(other.center_y_);
-        if self_lower_x_ != other_lower_x_ {
-            if self_lower_x_ < other_lower_x_ {
-                Ordering::Less
-            } else {
-                Ordering::Greater
-            }
-        } else if self_center_y_ < other_center_y_ {
-            Ordering::Less
-        } else if self_center_y_ == other_center_y_ {
-            // self_lower_x_ == other_lower_x_ and self_center_y_ == other_center_y_
-            // Sort by reverse order of circle event id (highest value==youngest first)
-            // This implementation differ from C++, because i can only keep one
-            // unique circle-event in the circle-event BTreeSet
-            if let (Some(self_index), Some(other_index)) = (self.index_, other.index_) {
-                /*tln!(
-                    "{}.cmp({}) {:?}",
-                    self_index.0,
-                    other_index.0,
-                    self_index.0.cmp(&other_index.0).reverse()
-                );*/
-                self_index.0.cmp(&other_index.0).reverse()
-            } else {
-                //todo: this should never happen, but still..
-                debug_assert!(false);
-                Ordering::Greater
-            }
-        } else {
-            Ordering::Greater
+        match OrderedFloat(self.lower_x_).cmp(&OrderedFloat(other.lower_x_)) {
+            Ordering::Less => Ordering::Less,
+            Ordering::Greater => Ordering::Greater,
+            _ => match OrderedFloat(self.center_y_).cmp(&OrderedFloat(other.center_y_)) {
+                Ordering::Less => Ordering::Less,
+                Ordering::Greater => Ordering::Greater,
+                Ordering::Equal => {
+                    // self_lower_x_ == other_lower_x_ and self_center_y_ == other_center_y_
+                    // Sort by reverse order of circle event id (highest value==youngest first)
+                    // This implementation differ from C++, because i can only keep one
+                    // unique circle-event in the circle-event BTreeSet
+                    if let (Some(self_index), Some(other_index)) = (self.index_, other.index_) {
+                        #[cfg(feature = "console_debug")]
+                        println!(
+                            "ce_id: {}.cmp({}) {:?}",
+                            self_index.0,
+                            other_index.0,
+                            self_index.0.cmp(&other_index.0).reverse()
+                        );
+                        self_index.0.cmp(&other_index.0).reverse()
+                    } else {
+                        //todo: this should never happen, but still..
+                        debug_assert!(false);
+                        Ordering::Greater
+                    }
+                }
+            },
         }
     }
 }
