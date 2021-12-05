@@ -19,6 +19,7 @@ use ordered_float::OrderedFloat;
 use std::cmp::Ordering;
 use std::collections::BTreeSet;
 use std::fmt;
+use std::rc::Rc;
 
 /// Type-checked placeholder for usize
 /// Hopefully rust zero cost abstractions will flatten this out.
@@ -267,10 +268,10 @@ impl CircleEvent {
 pub(crate) struct CircleEventQueue {
     /// circle events sorted by order
     /// Note that the `CircleEvent`s must be identical clones of the ones in `ce_by_id_`
-    ce_by_order_: BTreeSet<CircleEvent>,
+    ce_by_order_: BTreeSet<Rc<CircleEvent>>,
     /// circle events sorted by id
     /// Note that the `CircleEvent`s must be identical clones of the ones in `ce_by_order_`
-    ce_by_id_: ahash::AHashMap<usize, CircleEvent>,
+    ce_by_id_: ahash::AHashMap<usize, Rc<CircleEvent>>,
     c_list_next_free_index_: CircleEventIndex,
     inactive_circle_ids_: VobU32, // Circle events turned inactive
 }
@@ -295,14 +296,14 @@ impl CircleEventQueue {
     /// the real first() for +nightly builds
     #[inline(always)]
     #[cfg(feature = "map_first_last")]
-    pub(crate) fn peek(&self) -> Option<&CircleEvent> {
+    pub(crate) fn peek(&self) -> Option<&Rc<CircleEvent>> {
         self.ce_by_order_.first()
     }
 
     /// simulated first() for +stable builds
     #[cfg(not(feature = "map_first_last"))]
     #[inline(always)]
-    pub(crate) fn peek(&self) -> Option<&CircleEvent> {
+    pub(crate) fn peek(&self) -> Option<&Rc<CircleEvent>> {
         // super inefficient implementation of 'first()' for +stable
         self.ce_by_order_.iter().next()
     }
@@ -326,14 +327,14 @@ impl CircleEventQueue {
     /// the real pop_firs() for +nightly builds
     #[inline(always)]
     #[cfg(feature = "map_first_last")]
-    fn pop_first(&mut self) -> Option<CircleEvent> {
+    fn pop_first(&mut self) -> Option<Rc<CircleEvent>> {
         self.ce_by_order_.pop_first()
     }
 
     /// simulated pop_firs() for +stable builds
     #[cfg(not(feature = "map_first_last"))]
     #[inline(always)]
-    fn pop_first(&mut self) -> Option<CircleEvent> {
+    fn pop_first(&mut self) -> Option<Rc<CircleEvent>> {
         if let Some(item) = self.ce_by_order_.iter().next().cloned() {
             #[cfg(feature = "console_debug")]
             debug_assert!(self.ce_by_order_.remove(&item));
@@ -421,13 +422,14 @@ impl CircleEventQueue {
     /// Take ownership of the circle event,
     /// Update index
     /// return the `CircleEventIndex` of the inserted element
-    pub(crate) fn associate_and_push(&mut self, mut cc: CircleEvent) -> CircleEventIndex {
+    pub(crate) fn associate_and_push(&mut self, mut ce: CircleEvent) -> CircleEventIndex {
         let circle_event_id = self.c_list_next_free_index_;
         // set the correct index on the circle event
-        cc.set_index(circle_event_id);
-        let _ = self.ce_by_id_.insert(circle_event_id.0, cc.clone());
+        ce.set_index(circle_event_id);
+        let rc_ce = Rc::new(ce);
+        let _ = self.ce_by_id_.insert(circle_event_id.0, Rc::clone(&rc_ce));
 
-        let _ = self.ce_by_order_.insert(cc);
+        let _ = self.ce_by_order_.insert(rc_ce);
         self.c_list_next_free_index_.increment();
         circle_event_id
     }
@@ -455,7 +457,7 @@ impl CircleEventQueue {
         }
     }
 
-    pub(crate) fn top(&self) -> Result<Option<&CircleEvent>, BvError> {
+    pub(crate) fn top(&self) -> Result<Option<&Rc<CircleEvent>>, BvError> {
         let c = self.peek();
         if let Some(cc) = c {
             let id = cc.index_.unwrap();

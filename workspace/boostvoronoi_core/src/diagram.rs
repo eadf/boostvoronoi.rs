@@ -736,7 +736,7 @@ impl<F: OutputType> Diagram<F> {
     /// Returns the edge associated with the edge id
     pub(crate) fn get_edge_(&self, edge_id: Option<EdgeIndex>) -> Option<EdgeType> {
         let edge_id = edge_id?;
-        self.edges_.get(edge_id.0).map(|x| Rc::clone(x))
+        self.edges_.get(edge_id.0).map(Rc::clone)
     }
 
     /// Returns the edge associated with the edge id
