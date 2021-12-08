@@ -1700,7 +1700,7 @@ node_comparison_predicate(L:#4(700000,1)-(700000,9000000),ii:1,f:8,R:#6(700000,9
         for cap in RE_PREDICATE.captures_iter(aline) {
             let node1 = parse_node::<i64, f64>(&cap["node1"]);
             let node2 = parse_node::<i64, f64>(&cap["node2"]);
-            let result = VP::NodeComparisonPredicate::node_comparison::<i64, f64>(&node1, &node2);
+            let result = VP::node_comparison_predicate::node_comparison::<i64, f64>(&node1, &node2);
             println!("Result:{}", &cap["result"]);
             let expected_result = (&cap)["result"].parse::<bool>().unwrap();
             println!("result:{}, expected_result:{}", result, expected_result);

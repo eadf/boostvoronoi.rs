@@ -51,7 +51,7 @@ impl<I: InputType> PartialOrd for EndPointPair<I> {
 
 impl<I: InputType> Ord for EndPointPair<I> {
     fn cmp(&self, other: &Self) -> Ordering {
-        if VP::PointComparisonPredicate::<I>::point_comparison(self.site_, other.site_) {
+        if VP::point_comparison::point_comparison(self.site_, other.site_) {
             Ordering::Greater
         } else if self.site_ == other.site_ {
             Ordering::Equal

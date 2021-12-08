@@ -19,11 +19,10 @@ mod tests1;
 
 use crate::circle_event as VC;
 use crate::diagram as VD;
-use crate::predicate as VP;
 use crate::site_event as VSE;
 
 #[allow(unused_imports)]
-use crate::predicate::NodeComparisonPredicate;
+use crate::predicate::node_comparison_predicate;
 use crate::BvError;
 #[allow(unused_imports)]
 use crate::{t, tln};
@@ -252,7 +251,7 @@ impl<I: InputType, F: OutputType> BeachLine<I, F> {
     pub(crate) fn debug_cmp_all(&self, key: BeachLineNodeKey<I, F>) {
         for (i, (v, _)) in self.beach_line_.borrow().iter().rev().enumerate() {
             t!("#{}:", i);
-            let _rv = VP::NodeComparisonPredicate::node_comparison::<I, F>(v, &key);
+            let _rv = VP::node_comparison::<I, F>(v, &key);
         }
     }
 
@@ -430,9 +429,9 @@ impl<I: InputType, F: OutputType> PartialOrd for BeachLineNodeKey<I, F> {
 impl<I: InputType, F: OutputType> Ord for BeachLineNodeKey<I, F> {
     // todo: move the content of node_comparison_predicate to here
     fn cmp(&self, other: &Self) -> Ordering {
-        if VP::NodeComparisonPredicate::node_comparison::<I, F>(self, other) {
+        if node_comparison_predicate::node_comparison::<I, F>(self, other) {
             Ordering::Less
-        } else if VP::NodeComparisonPredicate::node_comparison::<I, F>(other, self) {
+        } else if node_comparison_predicate::node_comparison::<I, F>(other, self) {
             Ordering::Greater
         } else {
             Ordering::Equal

@@ -105,7 +105,7 @@ impl<I: InputType, F: OutputType> fmt::Debug for SiteEvent<I, F> {
 impl<I: InputType, F: OutputType> PartialOrd for SiteEvent<I, F> {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(VP::EventComparisonPredicate::event_comparison_ii::<I, F>(
+        Some(VP::event_comparison_predicate::event_comparison_ii::<I, F>(
             self, other,
         ))
     }
@@ -114,7 +114,7 @@ impl<I: InputType, F: OutputType> PartialOrd for SiteEvent<I, F> {
 impl<I: InputType, F: OutputType> Ord for SiteEvent<I, F> {
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
-        VP::EventComparisonPredicate::event_comparison_ii::<I, F>(self, other)
+        VP::event_comparison_predicate::event_comparison_ii::<I, F>(self, other)
     }
 }
 
@@ -159,20 +159,21 @@ impl<I: InputType, F: OutputType> SiteEvent<I, F> {
     }
 
     #[cfg(test)]
+    #[allow(dead_code)]
     /// Only used by test code
     pub fn new_7(
+        x0: I,
+        y0: I,
         x1: I,
         y1: I,
-        x2: I,
-        y2: I,
         initial_index: SiteEventIndexType,
         sorted_index: SiteEventIndexType,
         flags: VD::ColorType,
     ) -> SiteEvent<I, F> {
-        let site = if x1 == x2 && y1 == y2 {
-            Site::Point(Point { x: x1, y: y1 })
+        let site = if x0 == x1 && y0 == y1 {
+            Site::Point(Point { x: x0, y: y0 })
         } else {
-            Site::Segment(Point { x: x1, y: y1 }, Point { x: x2, y: y2 })
+            Site::Segment(Point { x: x0, y: y0 }, Point { x: x1, y: y1 })
         };
         Self {
             site_: site,
@@ -205,6 +206,21 @@ impl<I: InputType, F: OutputType> SiteEvent<I, F> {
             }
         }
     }
+
+    /*#[allow(dead_code)]
+    pub fn build(&self) {
+        //let _ = crate::site_event::SiteEvent::<I,F>::new_7(self.x0(),self.y0(), self.x1(), self.y1(), self.initial_index_, self.sorted_index_, self.flags_);
+        print!(
+            "({},{},{},{},{},{},{:?})",
+            self.x0(),
+            self.y0(),
+            self.x1(),
+            self.y1(),
+            self.initial_index_,
+            self.sorted_index_,
+            self.flags_
+        );
+    }*/
 
     #[inline(always)]
     pub(crate) fn x(&self) -> I {
@@ -376,6 +392,11 @@ impl<I: InputType, F: OutputType> SiteEvent<I, F> {
                 geo::Coordinate::from(self.point1().as_f64()),
             ))
         }
+    }
+
+    #[inline(always)]
+    pub(crate) fn is_vertical(&self) -> bool {
+        self.point0().x == self.point1().x
     }
 }
 

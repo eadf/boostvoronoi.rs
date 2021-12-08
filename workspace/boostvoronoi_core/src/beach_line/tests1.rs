@@ -182,7 +182,7 @@ fn beachline_4() {
 
     dbg!(mykey, node1);
 
-    let is_less = VP::NodeComparisonPredicate::node_comparison::<I, F>(&node1, &mykey);
+    let is_less = VP::node_comparison_predicate::node_comparison::<I, F>(&node1, &mykey);
     dbg!(is_less);
     assert_eq!(is_less, true);
     let cmp = mykey.cmp(&node1);
@@ -193,7 +193,7 @@ fn beachline_4() {
     assert_eq!(cmp, Ordering::Less);
 
     println!();
-    let is_less = VP::NodeComparisonPredicate::node_comparison::<I, F>(&node2, &mykey);
+    let is_less = VP::node_comparison_predicate::node_comparison::<I, F>(&node2, &mykey);
     dbg!(mykey, node2, is_less);
     assert_eq!(is_less, false);
     let cmp = mykey.cmp(&node2);

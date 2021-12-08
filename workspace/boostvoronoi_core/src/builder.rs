@@ -155,7 +155,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
                 self.site_events_.push(s2);
                 let site = VSE::Site::from(line);
 
-                if VP::PointComparisonPredicate::<I>::point_comparison(line.start, line.end) {
+                if VP::point_comparison::point_comparison(line.start, line.end) {
                     let mut s3 = VSE::SiteEvent::<I, F>::new(site, self.index_);
                     s3.or_source_category(Cb::INITIAL_SEGMENT);
                     s3
@@ -210,7 +210,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
                 self.process_site_event(&mut site_event_iterator_, &mut output)?;
             } else if site_event_iterator_ == self.site_events_.len() {
                 self.process_circle_event(&mut output)?;
-            } else if VP::EventComparisonPredicate::event_comparison_bif::<I, F>(
+            } else if VP::event_comparison_predicate::event_comparison_bif::<I, F>(
                 &self.site_events_[site_event_iterator_],
                 // we checked with !is_empty(), unwrap is safe
                 self.circle_events_.peek().unwrap(),
@@ -232,7 +232,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
     pub(crate) fn init_sites_queue(&mut self) -> VSE::SiteEventIndexType {
         // Sort site events.
         self.site_events_
-            .sort_by(VP::EventComparisonPredicate::event_comparison_ii::<I, F>);
+            .sort_by(VP::event_comparison_predicate::event_comparison_ii::<I, F>);
 
         // Remove duplicates.
         self.site_events_.dedup();
@@ -268,13 +268,11 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
             let mut skip = 0;
 
             while *site_event_iterator_ < self.site_events_.len()
-                && VP::Predicates::is_vertical_points::<I, F>(
+                && VP::is_vertical::<I, F>(
                     self.site_events_[*site_event_iterator_].point0(),
                     self.site_events_[0].point0(),
                 )
-                && VP::Predicates::is_vertical_site::<I, F>(
-                    &self.site_events_[*site_event_iterator_],
-                )
+                && self.site_events_[*site_event_iterator_].is_vertical()
             {
                 *site_event_iterator_ += 1;
                 skip += 1;
@@ -938,7 +936,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
         bisector_node: VB::BeachLineIndex,
     ) -> Result<(), BvError> {
         // Check if the three input sites create a circle event.
-        if let Some(c_event) = VP::CircleFormationFunctor::circle_formation::<I, F>(
+        if let Some(c_event) = VP::circle_formation_predicate::circle_formation::<I, F>(
             &site1,
             &site2,
             &site3,
