@@ -1,0 +1,20 @@
+[package]
+name = "boostvoronoi_ext"
+version = "0.10.2"
+authors = ["eadf <lacklustr@protonmail.com>"]
+edition = "2021"
+description = "Boost voronoi private workspace"
+repository = "https://github.com/eadf/boostvoronoi.rs"
+license = "BSL-1.0"
+exclude = [
+    "img/*",
+    "idea/*",
+    ".github/*",
+]
+
+[dependencies]
+num-traits = "0.2"
+libm = "0.2"
+smallvec = "1.7"
+ordered-float = "2.8" # todo: remove
+approx = "0.5"

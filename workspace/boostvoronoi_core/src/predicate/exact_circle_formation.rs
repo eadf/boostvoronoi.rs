@@ -10,9 +10,9 @@
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 use crate::circle_event::CircleEvent;
-use crate::extended_exp_fpt as EX;
-use crate::extended_int::ExtendedInt;
-use crate::robust_fpt as RF;
+use boostvoronoi_ext::extended_exp_fpt as EX;
+use boostvoronoi_ext::extended_int::ExtendedInt;
+use crate::robust_sqrt_expr as RF;
 use crate::site_event as VSE;
 use crate::{geometry::Point, predicate::SiteIndex, t, tln, InputType, OutputType};
 use num::Zero;
@@ -185,7 +185,7 @@ pub(crate) fn pps<I: InputType, F: OutputType>(
         }
         if recompute_lower_x {
             c_event.set_lower_x_xf(
-                RF::RobustSqrtExpr::eval2(&ca, &cb) * inv_denom * 0.25f64
+                RF::eval2(&ca, &cb) * inv_denom * 0.25f64
                     / (EX::ExtendedExponentFpt::from(&segm_len).sqrt()),
             );
         }
@@ -207,7 +207,7 @@ pub(crate) fn pps<I: InputType, F: OutputType>(
         };
         cb[1] = det.clone();
         if recompute_c_x {
-            c_event.set_x_xf(RF::RobustSqrtExpr::eval2(&ca, &cb) * inv_denom_sqr * 0.5f64);
+            c_event.set_x_xf(RF::eval2(&ca, &cb) * inv_denom_sqr * 0.5f64);
         }
     }
 
@@ -222,7 +222,7 @@ pub(crate) fn pps<I: InputType, F: OutputType>(
         cb[3] = det.clone();
         if recompute_c_y {
             c_event
-                .set_y_xf(RF::RobustSqrtExpr::eval2(&ca[2..], &cb[2..]) * inv_denom_sqr * 0.5f64);
+                .set_y_xf(RF::eval2(&ca[2..], &cb[2..]) * inv_denom_sqr * 0.5f64);
         }
     }
 
@@ -248,7 +248,7 @@ pub(crate) fn pps<I: InputType, F: OutputType>(
         tln!(" cb[3]:{:?}", cb[3]);
         tln!(" segm_len:{:.12}", segm_len.d());
 
-        let eval4 = RF::RobustSqrtExpr::eval4(&ca, &cb);
+        let eval4 = RF::eval4(&ca, &cb);
         tln!("eval4:{:.12}", eval4.d());
 
         c_event.set_lower_x_xf(eval4 * inv_denom_sqr * 0.5f64 / segm_len);
@@ -360,7 +360,7 @@ pub(crate) fn pss<I: InputType, F: OutputType>(
                     * &b[0]
                 + (ExtendedInt::from(point1.y) * ExtendedInt::from(2_i32)) * &b[0] * &b[0];
             tln!("cA[1]={:?}", cA[1]);
-            let c_y = RF::RobustSqrtExpr::eval2(&cA, &cB);
+            let c_y = RF::eval2(&cA, &cB);
             tln!("c_y={:?}", c_y);
             tln!("denom={:?}", denom);
             c_event.set_y_xf(c_y / denom);
@@ -384,7 +384,7 @@ pub(crate) fn pss<I: InputType, F: OutputType>(
             tln!(" cA[1]={:.0}", cA[1].d());
 
             if recompute_c_x {
-                let c_x = RF::RobustSqrtExpr::eval2(&cA, &cB);
+                let c_x = RF::eval2(&cA, &cB);
                 tln!(" c_x={:.0}", c_x.d());
                 tln!(" denom={:.0}", denom.d());
                 tln!(" c_x/denom={:.0}", (c_x / denom).d());
@@ -399,7 +399,7 @@ pub(crate) fn pss<I: InputType, F: OutputType>(
                     c[0].clone()
                 };
                 cB[2] = &a[0] * &a[0] + &b[0] * &b[0];
-                let lower_x = RF::RobustSqrtExpr::eval3(&cA, &cB);
+                let lower_x = RF::eval3(&cA, &cB);
                 c_event.set_lower_x_xf(lower_x / denom);
             }
         }
@@ -447,14 +447,14 @@ pub(crate) fn pss<I: InputType, F: OutputType>(
     cB[1] = &a[1] * &a[1] + &b[1] * &b[1];
     cB[2] = &a[0] * &a[1] + &b[0] * &b[1];
     cB[3] = ExtendedInt::from(-2_i32) * (&a[0] * &dy - &b[0] * &dx) * (&a[1] * &dy - &b[1] * &dx);
-    let temp = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
+    let temp = RF::sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
     let denom = temp * EX::ExtendedExponentFpt::from(&orientation);
 
     if recompute_c_y {
         cA[0] = (&dx * &dx + &dy * &dy) * &b[1] - (&dx * &a[1] + &dy * &b[1]) * &iy;
         cA[1] = (&dx * &dx + &dy * &dy) * &b[0] - (&dx * &a[0] + &dy * &b[0]) * &iy;
         cA[2] = iy * &sign;
-        let cy = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
+        let cy = RF::sqrt_expr_evaluator_pss4(&cA[0..], &cB[0..]);
         c_event.set_y_xf(cy / denom);
     }
 
@@ -464,7 +464,7 @@ pub(crate) fn pss<I: InputType, F: OutputType>(
         cA[2] = ix * &sign;
 
         if recompute_c_x {
-            let cx = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA, &cB);
+            let cx = RF::sqrt_expr_evaluator_pss4(&cA, &cB);
             c_event.set_x_xf(cx / denom);
         }
 
@@ -474,7 +474,7 @@ pub(crate) fn pss<I: InputType, F: OutputType>(
             } else {
                 orientation
             } * (&dx * &dx + &dy * &dy);
-            let lower_x = RF::RobustSqrtExpr::sqrt_expr_evaluator_pss4(&cA, &cB);
+            let lower_x = RF::sqrt_expr_evaluator_pss4(&cA, &cB);
             c_event.set_lower_x_xf(lower_x / denom);
         }
     }
@@ -555,7 +555,7 @@ pub(crate) fn sss<I: InputType, F: OutputType>(
         let k = (i + 2) % 3;
         *cA_i = &a[j] * &b[k] - &a[k] * &b[j];
     }
-    let denom = RF::RobustSqrtExpr::eval3(&cA, &cB);
+    let denom = RF::eval3(&cA, &cB);
 
     if recompute_c_y {
         for (i, cA_i) in cA.iter_mut().enumerate().take(3) {
@@ -563,7 +563,7 @@ pub(crate) fn sss<I: InputType, F: OutputType>(
             let k = (i + 2) % 3;
             *cA_i = &b[j] * &c[k] - &b[k] * &c[j];
         }
-        let c_y = RF::RobustSqrtExpr::eval3(&cA, &cB);
+        let c_y = RF::eval3(&cA, &cB);
         c_event.set_y_xf(c_y / denom);
     }
 
@@ -579,13 +579,13 @@ pub(crate) fn sss<I: InputType, F: OutputType>(
         }
 
         if recompute_c_x {
-            let c_x = RF::RobustSqrtExpr::eval3(&cA, &cB);
+            let c_x = RF::eval3(&cA, &cB);
             c_event.set_x_xf(c_x / denom);
         }
 
         if recompute_lower_x {
             cB[3] = ExtendedInt::one();
-            let lower_x = RF::RobustSqrtExpr::eval4(&cA, &cB);
+            let lower_x = RF::eval4(&cA, &cB);
             c_event.set_lower_x_xf(lower_x / denom);
         }
     }

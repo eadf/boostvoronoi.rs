@@ -219,6 +219,87 @@ pub(crate) mod event_comparison_predicate {
         }
     }
 
+    #[inline]
+    #[allow(dead_code)]
+    /// cmp::Ordering predicate between two sites (int int)
+    pub(crate) fn event_comparison_ii_wip<I: InputType, F: OutputType>(
+        lhs: &SiteEvent<I, F>,
+        rhs: &SiteEvent<I, F>,
+    ) -> cmp::Ordering {
+        match lhs.x0().cmp(&rhs.x0()) {
+            cmp::Ordering::Greater => return cmp::Ordering::Greater,
+            cmp::Ordering::Less => return cmp::Ordering::Less,
+            cmp::Ordering::Equal => {
+                if lhs.is_point() {
+                    if rhs.is_point() {
+                        // lhs & rhs: Point
+                        match lhs.point0().y.cmp(&rhs.point0().y) {
+                            cmp::Ordering::Greater => {
+                                println!("ii_1");
+                                return cmp::Ordering::Greater;
+                            }
+                            cmp::Ordering::Less => {
+                                println!("ii_2");
+                                return cmp::Ordering::Less;
+                            }
+                            cmp::Ordering::Equal => (),
+                        }
+                    } else {
+                        // lhs:Point rhs: Segment
+                        println!("ii_2.1");
+                        return cmp::Ordering::Less;
+                    }
+                } else {
+                    // lhs = Segment
+                    if rhs.is_point() {
+                        // rhs: Point
+                        match lhs.y0().cmp(&rhs.y0()) {
+                            cmp::Ordering::Greater => {
+                                println!("ii_2.3");
+                                return cmp::Ordering::Greater;
+                            }
+                            cmp::Ordering::Less => {
+                                println!("ii_2.4");
+                                return cmp::Ordering::Less;
+                            }
+                            cmp::Ordering::Equal => {
+                                println!("ii_2.5");
+                                return cmp::Ordering::Greater;
+                            }
+                        }
+                    }
+                    if rhs.is_vertical() {
+                        if lhs.is_vertical() {
+                            println!("ii_3");
+                            return lhs.y0().cmp(&rhs.y0());
+                        }
+                        println!("ii_4");
+                        return cmp::Ordering::Greater;
+                    }
+                    if lhs.is_vertical() {
+                        println!("ii_5");
+                        return cmp::Ordering::Less;
+                    }
+                    if lhs.y0() != rhs.y0() {
+                        println!("ii_6");
+                        return lhs.y0().cmp(&rhs.y0());
+                    }
+                    if orientation_predicate::eval_p::<I, F>(
+                        lhs.point1(),
+                        lhs.point0(),
+                        rhs.point1(),
+                    ) == orientation_predicate::Orientation::Left
+                    {
+                        println!("ii_7");
+                        return cmp::Ordering::Less;
+                    }
+                }
+            }
+        }
+        println!("ii_8");
+        lhs.initial_index().cmp(&rhs.initial_index())
+    }
+
     /// boolean predicate between site and circle (Bool Integer Float)
     #[allow(clippy::let_and_return)]
     pub(crate) fn event_comparison_bif<I: InputType, F: OutputType>(

@@ -20,6 +20,8 @@ mod tests1;
 use crate::circle_event as VC;
 use crate::diagram as VD;
 use crate::site_event as VSE;
+#[cfg(feature = "console_debug")]
+use crate::predicate as VP;
 
 #[allow(unused_imports)]
 use crate::predicate::node_comparison_predicate;
@@ -251,7 +253,7 @@ impl<I: InputType, F: OutputType> BeachLine<I, F> {
     pub(crate) fn debug_cmp_all(&self, key: BeachLineNodeKey<I, F>) {
         for (i, (v, _)) in self.beach_line_.borrow().iter().rev().enumerate() {
             t!("#{}:", i);
-            let _rv = VP::node_comparison::<I, F>(v, &key);
+            let _rv = VP::node_comparison_predicate::node_comparison::<I, F>(v, &key);
         }
     }
 

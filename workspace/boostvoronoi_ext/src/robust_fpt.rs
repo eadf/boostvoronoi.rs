@@ -12,17 +12,11 @@
 //! Module containing robust floating points utilities.
 
 #[cfg(test)]
-mod extendedint_tests;
-#[cfg(test)]
 mod robustdif_tests;
 #[cfg(test)]
 mod robustfpt_tests;
 
-use crate::extended_exp_fpt as EX;
-use crate::extended_int as EI;
-#[allow(unused_imports)]
-use crate::{t, tln, OutputType};
-use num::Zero;
+use num_traits::Zero;
 use ordered_float::OrderedFloat;
 use std::fmt;
 use std::ops;
@@ -93,7 +87,7 @@ impl Default for RobustFpt {
     #[inline(always)]
     /// Creates a new RobustFpt with value 0.0
     /// ```
-    /// # use boostvoronoi_core::robust_fpt::*;
+    /// # use boostvoronoi_ext::robust_fpt::*;
     /// let r = RobustFpt::default();
     /// assert_eq!(r.fpv(), 0.0);
     /// ```
@@ -106,7 +100,7 @@ impl From<f64> for RobustFpt {
     #[inline(always)]
     /// Creates a new RobustFpt from a `f64`
     /// ```
-    /// # use boostvoronoi_core::robust_fpt::*;
+    /// # use boostvoronoi_ext::robust_fpt::*;
     /// let f = 1.0f64;
     /// let r = RobustFpt::from(f);
     /// assert_eq!(r.fpv(),f);
@@ -153,7 +147,7 @@ impl RobustFpt {
     /// Is positive method.
     /// IMPORTANT!!!!! in c++ boost voronoi implementation zero values can't be positive.
     /// ```
-    /// # use boostvoronoi_core::robust_fpt;
+    /// # use boostvoronoi_ext::robust_fpt;
     /// println!("is_pos()");
     /// let aa:f64 = 0_f64;
     /// let a = robust_fpt::RobustFpt::from(aa);
@@ -175,7 +169,7 @@ impl RobustFpt {
     /// Is negative method.
     /// IMPORTANT!!!!! in c++ boost voronoi implementation zero values can't be negative.
     /// ```
-    /// # use boostvoronoi_core::robust_fpt;
+    /// # use boostvoronoi_ext::robust_fpt;
     ///
     /// println!("is_neg()");
     /// let aa:f64 = 0_f64;
@@ -446,7 +440,7 @@ impl From<f64> for RobustDif {
     #[inline(always)]
     /// Creates a new RobustDif from a `f64`
     /// ```
-    /// # use boostvoronoi_core::robust_fpt::*;
+    /// # use boostvoronoi_ext::robust_fpt::*;
     /// let f = 1.234f64;
     /// let r = RobustDif::from(f);
     /// assert_eq!(r.dif().fpv(),f);
@@ -470,7 +464,7 @@ impl From<(RobustFpt, RobustFpt)> for RobustDif {
     #[inline(always)]
     /// Creates a new RobustDif from a `(RobustFpt,RobustFpt)`
     /// ```
-    /// # use boostvoronoi_core::robust_fpt::*;
+    /// # use boostvoronoi_ext::robust_fpt::*;
     /// let p = 1.234f64;
     /// let n = 2.234f64;
     /// let r = RobustDif::from((RobustFpt::from(p), RobustFpt::from(n)));
@@ -569,7 +563,7 @@ impl ops::Sub<RobustDif> for RobustDif {
 
 /// Converts to RobustDif from RobustFpt
 /// ```
-/// # use boostvoronoi_core::robust_fpt::*;
+/// # use boostvoronoi_ext::robust_fpt::*;
 /// let s = RobustFpt::from(1.0);
 /// let d = RobustDif::from(s);
 /// assert_eq!(s.fpv(),d.dif().fpv());
@@ -719,225 +713,3 @@ impl ops::DivAssign<RobustFpt> for RobustDif {
     }
 }
 
-/// Used to compute expressions that operate with sqrts with predefined
-/// relative error. Evaluates expressions of the next type:
-/// sum(i = 1 .. n)(A\[i\] * sqrt(B\[i\])), 1 <= n <= 4.
-#[derive(Default)]
-pub struct RobustSqrtExpr {}
-
-impl RobustSqrtExpr {
-    #[inline(always)]
-    fn i_to_f(that: &EI::ExtendedInt) -> EX::ExtendedExponentFpt<f64> {
-        EX::ExtendedExponentFpt::<f64>::from(that)
-    }
-
-    /// Evaluates expression (re = 4 EPS):
-    /// A\[0\] * sqrt(B\[0\]).
-    pub(crate) fn eval1(
-        a: &[EI::ExtendedInt],
-        b: &[EI::ExtendedInt],
-    ) -> EX::ExtendedExponentFpt<f64> {
-        let a = Self::i_to_f(&a[0]);
-        let b = Self::i_to_f(&b[0]);
-        //tln!("eval1:");
-        //tln!(" a:{:.0}", a.d());
-        //tln!(" b:{:.0}", b.d());
-        a * (b.sqrt())
-    }
-
-    // Evaluates expression (re = 7 EPS):
-    // A[0] * sqrt(B[0]) + A[1] * sqrt(B[1]).
-    pub(crate) fn eval2(
-        a: &[EI::ExtendedInt],
-        b: &[EI::ExtendedInt],
-    ) -> EX::ExtendedExponentFpt<f64> {
-        let ra = Self::eval1(a, b);
-        let rb = Self::eval1(&a[1..], &b[1..]);
-
-        if ra.is_zero()
-            || rb.is_zero()
-            || (!ra.is_neg() && !rb.is_neg())
-            || (!ra.is_pos() && !rb.is_pos())
-        {
-            return ra + rb;
-        }
-
-        let p = &a[0] * &a[0] * &b[0] - &a[1] * &a[1] * &b[1];
-        let numer = Self::i_to_f(&p);
-        let divisor = ra - rb;
-
-        numer / divisor
-    }
-
-    /// Evaluates expression (re = 16 EPS):
-    /// A\[0\] * sqrt(B\[0\]) + A\[1\] * sqrt(B\[1\]) + A\[2\] * sqrt(B\[2\]).
-    pub(crate) fn eval3(
-        a: &[EI::ExtendedInt],
-        b: &[EI::ExtendedInt],
-    ) -> EX::ExtendedExponentFpt<f64> {
-        let ra = Self::eval2(a, b);
-        let rb = Self::eval1(&a[2..], &b[2..]);
-
-        if ra.is_zero()
-            || rb.is_zero()
-            || (!ra.is_neg() && !rb.is_neg())
-            || (!ra.is_pos() && !rb.is_pos())
-        {
-            return ra + rb;
-        }
-        let mut ta = [EI::ExtendedInt::zero(), EI::ExtendedInt::zero()];
-        let mut tb = [EI::ExtendedInt::zero(), EI::ExtendedInt::zero()];
-
-        ta[0] = &a[0] * &a[0] * &b[0] + &a[1] * &a[1] * &b[1] - &a[2] * &a[2] * &b[2];
-        tb[0] = EI::ExtendedInt::from(1);
-        ta[1] = &a[0] * &a[1] * &EI::ExtendedInt::from(2_i32);
-        tb[1] = &b[0] * &b[1];
-
-        let nom = Self::eval2(&ta[..], &tb[..]);
-        let div = ra - rb;
-        nom / div
-    }
-
-    /// Evaluates expression (re = 25 EPS):
-    /// A\[0\] * sqrt(B\[0\]) + A\[1\] * sqrt(B\[1\]) +
-    /// A\[2\] * sqrt(B\[2\]) + A\[3\] * sqrt(B\[3\]).
-    pub(crate) fn eval4(
-        a: &[EI::ExtendedInt],
-        b: &[EI::ExtendedInt],
-    ) -> EX::ExtendedExponentFpt<f64> {
-        let ra = Self::eval2(a, b);
-        let rb = Self::eval2(&a[2..], &b[2..]);
-
-        if ra.is_zero()
-            || rb.is_zero()
-            || (!ra.is_neg() && !rb.is_neg())
-            || (!ra.is_pos() && !rb.is_pos())
-        {
-            return ra + rb;
-        }
-        let mut ta = [
-            EI::ExtendedInt::zero(),
-            EI::ExtendedInt::zero(),
-            EI::ExtendedInt::zero(),
-        ];
-        let mut tb = [
-            EI::ExtendedInt::zero(),
-            EI::ExtendedInt::zero(),
-            EI::ExtendedInt::zero(),
-        ];
-
-        ta[0] = &a[0] * &a[0] * &b[0] + &a[1] * &a[1] * &b[1]
-            - &a[2] * &a[2] * &b[2]
-            - &a[3] * &a[3] * &b[3];
-        tb[0] = EI::ExtendedInt::from(1_i32);
-        ta[1] = &a[0] * &a[1] * &EI::ExtendedInt::from(2_i32);
-        tb[1] = &b[0] * &b[1];
-        ta[2] = &a[2] * &a[3] * &EI::ExtendedInt::from(-2_i32);
-        tb[2] = &b[2] * &b[3];
-        Self::eval3(&ta, &tb) / (ra - rb)
-    }
-
-    /// Evaluates A\[0] * sqrt(B\[0\]) + A\[1\] * sqrt(B\[1\]) +
-    ///           A\[2] + A\[3\] * sqrt(B\[0\] * B\[1\]).
-    /// B\[3\] = B\[0\] * B\[1\].
-    #[allow(non_snake_case)]
-    pub(crate) fn sqrt_expr_evaluator_pss3(
-        A: &[EI::ExtendedInt],
-        B: &[EI::ExtendedInt],
-    ) -> EX::ExtendedExponentFpt<f64> {
-        let mut cA: [EI::ExtendedInt; 2] = [EI::ExtendedInt::zero(), EI::ExtendedInt::zero()];
-        let mut cB: [EI::ExtendedInt; 2] = [EI::ExtendedInt::zero(), EI::ExtendedInt::zero()];
-
-        let lh = Self::eval2(A, B);
-        let rh = Self::eval2(&A[2..], &B[2..]);
-
-        if lh.is_zero()
-            || rh.is_zero()
-            || (!lh.is_neg() && !rh.is_neg())
-            || (!lh.is_pos() && !rh.is_pos())
-        {
-            return lh + rh;
-        }
-        cA[0] = &A[0] * &A[0] * &B[0] + &A[1] * &A[1] * &B[1]
-            - &A[2] * &A[2]
-            - &A[3] * &A[3] * &B[0] * &B[1];
-        cB[0] = EI::ExtendedInt::from(1);
-        cA[1] = (&A[0] * &A[1] - &A[2] * &A[3]) * &EI::ExtendedInt::from(2_i32);
-        cB[1] = B[3].clone();
-        let numer = Self::eval2(&cA, &cB);
-        let divisor = lh - rh;
-        numer / divisor
-    }
-
-    /// Evaluates A\[3\] + A\[0\] * sqrt(B\[0\]) + A\[1\] * sqrt(B\[1\]) +
-    ///           A\[2\] * sqrt(B\[3\] * (sqrt(B\[0\] * B\[1\]) + B\[2\])).
-    #[allow(non_snake_case)]
-    pub(crate) fn sqrt_expr_evaluator_pss4(
-        A: &[EI::ExtendedInt],
-        B: &[EI::ExtendedInt],
-    ) -> EX::ExtendedExponentFpt<f64> {
-        let mut cA: [EI::ExtendedInt; 4] = [
-            EI::ExtendedInt::zero(),
-            EI::ExtendedInt::zero(),
-            EI::ExtendedInt::zero(),
-            EI::ExtendedInt::zero(),
-        ];
-        let mut cB: [EI::ExtendedInt; 4] = [
-            EI::ExtendedInt::zero(),
-            EI::ExtendedInt::zero(),
-            EI::ExtendedInt::zero(),
-            EI::ExtendedInt::zero(),
-        ];
-        if A[3].is_zero() {
-            let lh = Self::eval2(A, B);
-            cA[0] = EI::ExtendedInt::from(1);
-            cB[0] = &B[0] * &B[1];
-            cA[1] = B[2].clone();
-            cB[1] = EI::ExtendedInt::from(1);
-            let rh = Self::eval1(&A[2..], &B[3..]) * Self::eval2(&cA, &cB).sqrt();
-            if lh.is_zero()
-                || rh.is_zero()
-                || (!lh.is_neg() && !rh.is_neg())
-                || (!lh.is_pos() && !rh.is_pos())
-            {
-                return lh + rh;
-            }
-            cA[0] = &A[0] * &A[0] * &B[0] + &A[1] * &A[1] * &B[1] - &A[2] * &A[2] * &B[3] * &B[2];
-            cB[0] = EI::ExtendedInt::from(1_i32);
-            cA[1] = &A[0] * &A[1] * &EI::ExtendedInt::from(2_i32) - &A[2] * &A[2] * &B[3];
-            cB[1] = &B[0] * &B[1];
-            let numer = Self::eval2(&cA, &cB);
-
-            return numer / (lh - rh);
-        }
-        cA[0] = EI::ExtendedInt::from(1);
-        cB[0] = &B[0] * &B[1];
-        cA[1] = B[2].clone();
-        cB[1] = EI::ExtendedInt::from(1);
-        let rh = Self::eval1(&A[2..], &B[3..]) * (Self::eval2(&cA, &cB).sqrt());
-        cA[0] = A[0].clone();
-        cB[0] = B[0].clone();
-        cA[1] = A[1].clone();
-        cB[1] = B[1].clone();
-        cA[2] = A[3].clone();
-        cB[2] = EI::ExtendedInt::from(1);
-        let lh = Self::eval3(&cA, &cB);
-
-        if lh.is_zero()
-            || rh.is_zero()
-            || (!lh.is_neg() && !rh.is_neg())
-            || (!lh.is_pos() && !rh.is_pos())
-        {
-            return lh + rh;
-        }
-        cA[0] = &A[3] * &A[0] * &EI::ExtendedInt::from(2_i32);
-        cA[1] = &A[3] * &A[1] * &EI::ExtendedInt::from(2_i32);
-        cA[2] = &A[0] * &A[0] * &B[0] + &A[1] * &A[1] * &B[1] + &A[3] * &A[3]
-            - &A[2] * &A[2] * &B[2] * &B[3];
-        cA[3] = &A[0] * &A[1] * &EI::ExtendedInt::from(2_i32) - &A[2] * &A[2] * &B[3];
-        cB[3] = &B[0] * &B[1];
-        let numer = Self::sqrt_expr_evaluator_pss3(&cA, &cB);
-
-        numer / (lh - rh)
-    }
-}

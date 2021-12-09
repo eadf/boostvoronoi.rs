@@ -10,7 +10,8 @@
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 //! Utilities for extended float. Supports 63 bit mantissa with 32 bit exponent.
-use crate::{extended_int as EI, OutputType};
+use crate::extended_int as EI;
+use num_traits::Float as OutputType;
 use std::fmt;
 use std::ops;
 
@@ -30,8 +31,8 @@ impl From<&EI::ExtendedInt> for ExtendedExponentFpt<f64> {
     #[inline]
     /// Converts to ExtendedExponentFpt::<f64> from &ExtendedInt
     /// ```
-    /// # use boostvoronoi_core::extended_int::ExtendedInt;
-    /// # use boostvoronoi_core::extended_exp_fpt::ExtendedExponentFpt;
+    /// # use boostvoronoi_ext::extended_int::ExtendedInt;
+    /// # use boostvoronoi_ext::extended_exp_fpt::ExtendedExponentFpt;
     ///
     /// let aa = 41232131332_f64;
     /// let a = ExtendedInt::from(aa as i64);
@@ -48,8 +49,8 @@ impl From<EI::ExtendedInt> for ExtendedExponentFpt<f64> {
     #[inline]
     /// Converts to `ExtendedExponentFpt::<f64>` from `ExtendedInt`
     /// ```
-    /// # use boostvoronoi_core::extended_int::ExtendedInt;
-    /// # use boostvoronoi_core::extended_exp_fpt::ExtendedExponentFpt;
+    /// # use boostvoronoi_ext::extended_int::ExtendedInt;
+    /// # use boostvoronoi_ext::extended_exp_fpt::ExtendedExponentFpt;
     ///
     /// let aa = 41232131332_f64;
     /// let a = ExtendedInt::from(aa as i64);
@@ -66,7 +67,7 @@ impl From<ExtendedExponentFpt<f64>> for f64 {
     #[inline]
     /// Converts from `ExtendedExponentFpt<f64>` to `f64`
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt::ExtendedExponentFpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt::ExtendedExponentFpt;
     ///
     /// let f1 = 345345345453_f64;
     /// let e = ExtendedExponentFpt::from(f1);
@@ -82,7 +83,7 @@ impl From<f64> for ExtendedExponentFpt<f64> {
     #[inline]
     /// Converts from `f64` to `ExtendedExponentFpt<f64>`
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt::ExtendedExponentFpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt::ExtendedExponentFpt;
     ///
     /// let f1 = 345345345453_f64;
     /// let e = ExtendedExponentFpt::from(f1);
@@ -101,7 +102,7 @@ impl ExtendedExponentFpt<f64> {
     /// Constructor with value and exponent as arguments.
     /// The value of this number is 'val_' * 2^ 'exp_'
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt::ExtendedExponentFpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt::ExtendedExponentFpt;
     ///
     /// let a = ExtendedExponentFpt::<f64>::new(1.0, 12);
     /// approx::assert_ulps_eq!(a.d(), 4096.0);
@@ -117,7 +118,7 @@ impl ExtendedExponentFpt<f64> {
     /// Is positive method.
     /// IMPORTANT!!!!! in the c++ boost voronoi implementation zero values can't be positive.
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt::ExtendedExponentFpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt::ExtendedExponentFpt;
     ///
     /// let aa:f64 = 0_f64;
     /// let a = ExtendedExponentFpt::<f64>::from(aa);
@@ -139,7 +140,7 @@ impl ExtendedExponentFpt<f64> {
     /// Is negative method.
     /// IMPORTANT!!!!! in the c++ boost voronoi implementation zero values can't be negative.
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt;
     ///
     /// let aa:f64 = 0_f64;
     /// let a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(aa);
@@ -156,7 +157,7 @@ impl ExtendedExponentFpt<f64> {
 
     /// Is zero method.
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt;
     /// # use num_traits::identities::Zero;
     ///
     /// let aa:f64 = 0_f64;
@@ -182,7 +183,7 @@ impl ExtendedExponentFpt<f64> {
 
     /// Square root method.
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt;
     ///
     /// let aa:f64 = f64::MAX;
     /// let a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(aa);
@@ -204,7 +205,7 @@ impl ExtendedExponentFpt<f64> {
 
     /// A to-float operation.
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt;
     ///
     /// let aa:f64 = 1000000000.0;
     /// let a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(aa);
@@ -229,7 +230,7 @@ impl ops::Neg for ExtendedExponentFpt<f64> {
     type Output = Self;
 
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt;
     ///
     /// let a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
     ///
@@ -253,7 +254,7 @@ impl ops::Add for ExtendedExponentFpt<f64> {
     type Output = Self;
 
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt;
     ///
     /// let a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
     /// let b = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(2_f64);
@@ -293,7 +294,7 @@ impl ops::Add for ExtendedExponentFpt<f64> {
 impl ops::Sub for ExtendedExponentFpt<f64> {
     type Output = Self;
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt;
     ///
     /// let a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
     /// let b = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(-2_f64);
@@ -333,7 +334,7 @@ impl ops::Sub for ExtendedExponentFpt<f64> {
 impl ops::Mul for ExtendedExponentFpt<f64> {
     type Output = Self;
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt;
     ///
     /// let a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
     /// let b = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(2_f64);
@@ -359,7 +360,7 @@ impl ops::Mul for ExtendedExponentFpt<f64> {
 impl ops::Mul<f64> for ExtendedExponentFpt<f64> {
     type Output = Self;
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt;
     ///
     /// let a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(7_f64);
     /// let b = 2_f64;
@@ -384,7 +385,7 @@ impl ops::Mul<f64> for ExtendedExponentFpt<f64> {
 impl ops::Div for ExtendedExponentFpt<f64> {
     type Output = Self;
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt;
     ///
     /// let a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
     /// let b = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(2_f64);
@@ -410,7 +411,7 @@ impl ops::Div for ExtendedExponentFpt<f64> {
 impl ops::Div<f64> for ExtendedExponentFpt<f64> {
     type Output = Self;
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt;
     ///
     /// let a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
     /// let b = 2_f64;
@@ -434,7 +435,7 @@ impl ops::Div<f64> for ExtendedExponentFpt<f64> {
 
 impl ops::AddAssign for ExtendedExponentFpt<f64> {
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt;
     ///
     /// let mut a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
     /// let b = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(2_f64);
@@ -477,7 +478,7 @@ impl ops::AddAssign for ExtendedExponentFpt<f64> {
 
 impl ops::SubAssign for ExtendedExponentFpt<f64> {
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt;
     ///
     /// let mut a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
     /// let b = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(-2_f64);
@@ -519,7 +520,7 @@ impl ops::SubAssign for ExtendedExponentFpt<f64> {
 
 impl ops::MulAssign for ExtendedExponentFpt<f64> {
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt;
     ///
     /// let mut a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
     /// let b = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(2_f64);
@@ -543,7 +544,7 @@ impl ops::MulAssign for ExtendedExponentFpt<f64> {
 
 impl ops::DivAssign for ExtendedExponentFpt<f64> {
     /// ```
-    /// # use boostvoronoi_core::extended_exp_fpt;
+    /// # use boostvoronoi_ext::extended_exp_fpt;
     ///
     /// let mut a = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(1_f64);
     /// let b = extended_exp_fpt::ExtendedExponentFpt::<f64>::from(2_f64);

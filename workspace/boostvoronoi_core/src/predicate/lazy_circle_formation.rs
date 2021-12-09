@@ -12,7 +12,7 @@
 use crate::circle_event::CircleEvent;
 use crate::predicate::orientation_predicate::{self, Orientation};
 use crate::predicate::{exact_circle_formation, robust_cross_product, ULPSX2};
-use crate::robust_fpt as RF;
+use boostvoronoi_ext::robust_fpt as RF;
 use crate::site_event as VSE;
 use crate::{cast, geometry::Point, predicate::SiteIndex, t, tln, InputType, OutputType};
 

@@ -10,7 +10,7 @@
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
 use crate::beach_line as VB;
-use crate::extended_exp_fpt as EX;
+use boostvoronoi_ext::extended_exp_fpt as EX;
 
 #[cfg(feature = "console_debug")]
 use crate::tln;
