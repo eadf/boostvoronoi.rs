@@ -15,7 +15,6 @@ exclude = [
 
 [dependencies]
 boostvoronoi_ext = { path = "../boostvoronoi_ext", version="=0.10.2", default-features = false}
-num = "0.4"
 ordered-float = "2.8"
 ahash = "0.7"
 num-traits = "0.2"

@@ -16,5 +16,5 @@ exclude = [
 num-traits = "0.2"
 libm = "0.2"
 smallvec = "1.7"
-ordered-float = "2.8" # todo: remove
+ordered-float = "2.8"
 approx = "0.5"

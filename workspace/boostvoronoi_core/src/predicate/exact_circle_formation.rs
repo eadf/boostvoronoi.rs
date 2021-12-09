@@ -15,8 +15,7 @@ use boostvoronoi_ext::extended_int::ExtendedInt;
 use crate::robust_sqrt_expr as RF;
 use crate::site_event as VSE;
 use crate::{geometry::Point, predicate::SiteIndex, t, tln, InputType, OutputType};
-use num::Zero;
-use num_traits::One;
+use num_traits::{Zero,One};
 
 /// Recompute parameters of the point, point, point circle event using high-precision library.
 pub(crate) fn ppp<I: InputType, F: OutputType>(

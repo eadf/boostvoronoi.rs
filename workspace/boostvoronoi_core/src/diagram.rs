@@ -21,7 +21,7 @@ use crate::{sync_diagram as SD, BvError};
 pub use crate::{cast, InputType, OutputType};
 #[allow(unused_imports)]
 use crate::{t, tln};
-use num::NumCast;
+use num_traits::NumCast;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::cell;

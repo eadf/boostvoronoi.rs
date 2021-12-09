@@ -28,7 +28,7 @@
 )]
 #![cfg_attr(feature = "map_first_last", feature(map_first_last))]
 
-use num::{Float, NumCast, PrimInt, Signed, Zero};
+use num_traits::{Float, NumCast, PrimInt, Signed, Zero};
 use std::fmt;
 use std::hash::Hash;
 mod beach_line;
