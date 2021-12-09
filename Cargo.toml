@@ -16,10 +16,11 @@ exclude = [
 ]
 
 [workspace]
-members = ["workspace/boostvoronoi_core"]
+members = ["workspace/boostvoronoi_core", "workspace/boostvoronoi_ext"]
 
 [dependencies]
 boostvoronoi_core = { path = "workspace/boostvoronoi_core", version="=0.10.2", default-features = false}
+boostvoronoi_ext = { path = "workspace/boostvoronoi_ext", version="=0.10.2", default-features = false}
 
 # These features are only for debug purposes, should normally not be used
 [features]
