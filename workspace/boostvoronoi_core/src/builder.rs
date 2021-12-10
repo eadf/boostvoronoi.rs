@@ -54,6 +54,7 @@ mod tests;
 /// ```
 /// # use boostvoronoi_core::geometry::{Point,Line};
 /// # use boostvoronoi_core::builder::Builder;
+/// use boostvoronoi_core::BvError;
 ///
 /// type I = i32; // this is the integer input type
 /// type F = f64; // this is the float output type (circle event coordinates)
@@ -67,10 +68,11 @@ mod tests;
 ///     // input geometry indices in the output.
 ///     // `with_vertices()` and `with_segments()` accepts iterators of anything that implements
 ///     // `Into()` for `Point` and `Line`
-///     .with_vertices(p.iter()).unwrap()
-///     .with_segments(s.iter()).unwrap()
+///     .with_vertices(p.iter())?
+///     .with_segments(s.iter())?
 ///     // this will generate a the list of cells, edges and circle events (aka vertices)
-///     .build().unwrap();
+///     .build()?;
+/// # Ok::<(), BvError>(())
 /// ```
 pub struct Builder<I: InputType, F: OutputType> {
     pub(crate) site_events_: Vec<VSE::SiteEvent<I, F>>,
