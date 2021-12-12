@@ -15,7 +15,6 @@
     ellipsis_inclusive_range_patterns,
     elided_lifetimes_in_paths
 )]
-
 #![doc(issue_tracker_base_url = "https://github.com/eadf/boostvoronoi.rs/issues")]
 
 //! The `boostvoronoi` Rust library provides functionality to construct a Voronoi diagram of a set

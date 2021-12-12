@@ -1,23 +1,18 @@
-use boostvoronoi_ext::extended_exp_fpt as EX;
-use boostvoronoi_ext::extended_int as EI;
+//! Used to compute expressions that operate with square roots with predefined
+//! relative error. Evaluates expressions of the next type:
+//! sum(i = 1 .. n)(A\[i\] * sqrt(B\[i\])), 1 <= n <= 4.
+
 #[allow(unused_imports)]
 use crate::{t, tln};
+use boostvoronoi_ext::extended_exp_fpt as EX;
+use boostvoronoi_ext::extended_int as EI;
 use num_traits::Zero;
-
-/// Used to compute expressions that operate with sqrts with predefined
-/// relative error. Evaluates expressions of the next type:
-/// sum(i = 1 .. n)(A\[i\] * sqrt(B\[i\])), 1 <= n <= 4.
-
-#[inline(always)]
-fn i_to_f(that: &EI::ExtendedInt) -> EX::ExtendedExponentFpt<f64> {
-    EX::ExtendedExponentFpt::<f64>::from(that)
-}
 
 /// Evaluates expression (re = 4 EPS):
 /// A\[0\] * sqrt(B\[0\]).
 pub(crate) fn eval1(a: &[EI::ExtendedInt], b: &[EI::ExtendedInt]) -> EX::ExtendedExponentFpt<f64> {
-    let a = i_to_f(&a[0]);
-    let b = i_to_f(&b[0]);
+    let a = EX::ExtendedExponentFpt::<f64>::from(&a[0]);
+    let b = EX::ExtendedExponentFpt::<f64>::from(&b[0]);
     //tln!("eval1:");
     //tln!(" a:{:.0}", a.d());
     //tln!(" b:{:.0}", b.d());
@@ -39,7 +34,7 @@ pub fn eval2(a: &[EI::ExtendedInt], b: &[EI::ExtendedInt]) -> EX::ExtendedExpone
     }
 
     let p = &a[0] * &a[0] * &b[0] - &a[1] * &a[1] * &b[1];
-    let numer = i_to_f(&p);
+    let numer = EX::ExtendedExponentFpt::<f64>::from(&p);
     let divisor = ra - rb;
 
     numer / divisor
@@ -214,8 +209,8 @@ pub(crate) fn sqrt_expr_evaluator_pss4(
 #[cfg(test)]
 mod test {
     use boostvoronoi_ext::extended_int as EI;
-    use num_traits::Zero;
     use boostvoronoi_ext::robust_fpt::RobustFpt;
+    use num_traits::Zero;
 
     #[test]
     fn sqrt_1() {
@@ -383,5 +378,4 @@ mod test {
         let a = super::eval4(&ca[..], &cb[..]);
         approx::assert_ulps_eq!(a.d().floor(), 3537324513.0);
     }
-
 }

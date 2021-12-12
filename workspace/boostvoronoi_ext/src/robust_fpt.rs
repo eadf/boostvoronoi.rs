@@ -712,4 +712,3 @@ impl ops::DivAssign<RobustFpt> for RobustDif {
         self.negative_sum_ /= rhs;
     }
 }
-

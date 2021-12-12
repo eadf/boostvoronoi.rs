@@ -9,13 +9,15 @@
 
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
+//! Evaluation of circle events using high-precision library.
+
 use crate::circle_event::CircleEvent;
-use boostvoronoi_ext::extended_exp_fpt as EX;
-use boostvoronoi_ext::extended_int::ExtendedInt;
 use crate::robust_sqrt_expr as RF;
 use crate::site_event as VSE;
 use crate::{geometry::Point, predicate::SiteIndex, t, tln, InputType, OutputType};
-use num_traits::{Zero,One};
+use boostvoronoi_ext::extended_exp_fpt as EX;
+use boostvoronoi_ext::extended_int::ExtendedInt;
+use num_traits::{One, Zero};
 
 /// Recompute parameters of the point, point, point circle event using high-precision library.
 pub(crate) fn ppp<I: InputType, F: OutputType>(
@@ -220,8 +222,7 @@ pub(crate) fn pps<I: InputType, F: OutputType>(
         };
         cb[3] = det.clone();
         if recompute_c_y {
-            c_event
-                .set_y_xf(RF::eval2(&ca[2..], &cb[2..]) * inv_denom_sqr * 0.5f64);
+            c_event.set_y_xf(RF::eval2(&ca[2..], &cb[2..]) * inv_denom_sqr * 0.5f64);
         }
     }
 

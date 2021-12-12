@@ -163,4 +163,3 @@ fn div_2() {
     a /= b;
     approx::assert_ulps_eq!(a.fpv(), 3.0)
 }
-

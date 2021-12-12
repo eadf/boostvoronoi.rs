@@ -9,12 +9,14 @@
 
 // Ported from C++ boost 1.76.0 to Rust in 2020/2021 by Eadf (github.com/eadf)
 
+//! Lazy evaluation of circle event
+
 use crate::circle_event::CircleEvent;
 use crate::predicate::orientation_predicate::{self, Orientation};
 use crate::predicate::{exact_circle_formation, robust_cross_product, ULPSX2};
-use boostvoronoi_ext::robust_fpt as RF;
 use crate::site_event as VSE;
 use crate::{cast, geometry::Point, predicate::SiteIndex, t, tln, InputType, OutputType};
+use boostvoronoi_ext::robust_fpt as RF;
 
 /// Lazy evaluation of point, point, point circle events
 pub(crate) fn ppp<I: InputType, F: OutputType>(

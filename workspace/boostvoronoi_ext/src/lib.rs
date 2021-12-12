@@ -13,4 +13,3 @@ use num_traits::NumCast;
 pub fn cast<T: NumCast, U: NumCast>(n: T) -> U {
     NumCast::from(n).unwrap()
 }
-

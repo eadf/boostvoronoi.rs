@@ -19,9 +19,9 @@ mod tests1;
 
 use crate::circle_event as VC;
 use crate::diagram as VD;
-use crate::site_event as VSE;
 #[cfg(feature = "console_debug")]
 use crate::predicate as VP;
+use crate::site_event as VSE;
 
 #[allow(unused_imports)]
 use crate::predicate::node_comparison_predicate;
