@@ -3,7 +3,7 @@
 [![crates.io](https://img.shields.io/crates/v/boostvoronoi.svg)](https://crates.io/crates/boostvoronoi)
 [![Documentation](https://docs.rs/boostvoronoi/badge.svg)](https://docs.rs/boostvoronoi)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)
-[![dependency status](https://deps.rs/crate/boostvoronoi/0.10.1/status.svg)](https://deps.rs/crate/boostvoronoi/0.10.1)
+[![dependency status](https://deps.rs/crate/boostvoronoi/0.10.2/status.svg)](https://deps.rs/crate/boostvoronoi/0.10.2)
 ![license](https://img.shields.io/crates/l/boostvoronoi)
 
 # Segmented Voronoi for Rust
