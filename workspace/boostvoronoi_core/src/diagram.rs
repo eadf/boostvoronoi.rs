@@ -826,16 +826,19 @@ impl<F: OutputType> Diagram<F> {
     }
 
     /// Returns an iterator over all cells
+    #[deprecated(since="0.10.3", note="please use `.cells().iter()` instead")]
     pub fn cell_iter(&self) -> core::slice::Iter<'_, CellType> {
         self.cells_.iter()
     }
 
     /// Returns an iterator over all vertices
+    #[deprecated(since="0.10.3", note="please use `.vertices().iter()` instead")]
     pub fn vertex_iter(&self) -> core::slice::Iter<'_, VertexType<F>> {
         self.vertices_.iter()
     }
 
     /// Returns an iterator over all edges
+    #[deprecated(since="0.10.3", note="please use `.edges().iter()` instead")]
     pub fn edge_iter(&self) -> std::slice::Iter<'_, EdgeType> {
         self.edges_.iter()
     }
@@ -1660,7 +1663,7 @@ impl<F: OutputType> Diagram<F> {
         tln!();
 
         // Set up incident edge pointers for cells and vertices.
-        for edge_it in self.edge_iter().enumerate().map(|x| EdgeIndex(x.0)) {
+        for edge_it in self.edges().iter().enumerate().map(|x| EdgeIndex(x.0)) {
             let cell = self.edge_get_cell_(Some(edge_it));
             if self.cell_get_incident_edge_(cell).is_none() {
                 self.cell_set_incident_edge_(cell, Some(edge_it));

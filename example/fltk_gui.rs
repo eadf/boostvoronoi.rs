@@ -680,7 +680,7 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
         let draw_external = config.draw_flag.contains(DrawFilterFlag::EXTERNAL);
         let draw_site_vertex = config.draw_flag.contains(DrawFilterFlag::SITE_VERTEX);
 
-        for it in self.diagram.vertex_iter().enumerate() {
+        for it in self.diagram.vertices().iter().enumerate() {
             let vertex = it.1.get();
 
             if (!draw_site_vertex) && vertex.is_site_point() {

@@ -56,7 +56,7 @@ fn main() -> Result<(), BvError> {
         diagram.vertices().len()
     );
     // The values inside the diagram are wrapped in `Rc<Cell<T>>`
-    for cell in diagram.cell_iter().map(|c| c.get()) {
+    for cell in diagram.cells().iter().map(|c| c.get()) {
         println!("Cell : {}", cell.id().0);
         for edge_id in diagram.cell_edge_iterator(cell.id()) {
             let edge = diagram.get_edge(edge_id)?.get();
