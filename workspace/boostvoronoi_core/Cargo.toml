@@ -15,28 +15,28 @@ exclude = [
 
 [dependencies]
 boostvoronoi_ext = { path = "../boostvoronoi_ext", version="=0.10.2", default-features = false}
-ordered-float = "2.8"
-ahash = "0.7"
-num-traits = "0.2"
-vob="3.0"
-thiserror = "1.0"
-bitflags = "1.3"
-itertools = "0.10"
-cpp_map = "0.1"
-approx = "0.5"
+ordered-float = "~2.8"
+ahash = "~0.7"
+num-traits = "~0.2"
+vob="~3.0"
+thiserror = "~1.0"
+bitflags = "~1.3"
+itertools = "~0.10"
+cpp_map = "~0.1"
+approx = "~0.5"
 # using "mint" feature will enable From traits
-mint = {version="0.5.8", optional=true}
+mint = {version="~0.5.8", optional=true}
 # using "geo" feature will enable From traits
-geo = {version="0.18", optional=true}
+geo = {version="~0.18", optional=true}
 # using "cgmath" feature will enable From traits
-cgmath = {version="0.18", optional=true}
+cgmath = {version="~0.18", optional=true}
 # using "glam" feature will enable From traits
-glam = {version="0.20", optional=true}
-serde = { version = "1.0", features = ["derive"], optional = true }
+glam = {version="~0.20", optional=true}
+serde = { version = "~1.0", features = ["derive"], optional = true }
 
 [dev-dependencies]
-regex = "1.5"
-lazy_static = "1.4"
+regex = "~1.5"
+lazy_static = "~1.4"
 
 # These features are only for debug purposes, should normally not be used
 [features]
@@ -44,7 +44,7 @@ console_debug = []
 ce_corruption_check = []
 
 [build-dependencies]
-version_check = "0.9"
+version_check = "~0.9"
 
 [badges]
 maintenance = { status = "actively-developed" }
