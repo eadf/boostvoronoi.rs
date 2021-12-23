@@ -25,9 +25,9 @@ enum SeedRequest {
 
 /// Check if all the vertices really are at the midpoint between (at least) two segments.
 ///
-/// I've repeated this 10_000_000_000 times with NUMBER_OF_SEGMENTS_PER_TEST=2 w/o any problems found
+/// I've repeated this 10_000_000_000 times with NUMBER_OF_SEGMENTS_PER_TEST=2 w/o any problems.
 ///
-/// With NUMBER_OF_SEGMENTS_PER_TEST=3 it finds an error per million.
+/// With NUMBER_OF_SEGMENTS_PER_TEST=3 it finds an error per million iterations.
 fn fault_check(
     diagram: &Result<Diagram<F>, BvError>,
     segments: Vec<GLine<I>>,

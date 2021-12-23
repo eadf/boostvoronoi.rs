@@ -1,3 +1,4 @@
+// this file is imported by the fltk_gui
 [
 [402, 1580, 395, 1580],
 [408, 1577, 402, 1580],
