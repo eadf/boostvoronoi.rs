@@ -819,7 +819,7 @@ impl<F: OutputType> Diagram<F> {
         }
         self.vertex_set_color_(v1, external_color);
         let incident_edge = self.vertex_get_incident_edge(v1);
-        for e in self.edge_rot_next_iterator_(incident_edge) {
+        for e in self.edge_rot_next_iterator(incident_edge) {
             // mark all surrounding edges as EXTERNAL, but only recurse on primary edges
             self.recurse_color_exterior(Some(e), external_color);
         }
@@ -1181,7 +1181,7 @@ impl<F: OutputType> Diagram<F> {
     /// Returns an edge iterator, the edges will all originate at the same vertex as 'edge_id'.
     ///  'edge_id' will be the first edge returned by the iterator.
     /// Do *NOT* use this when altering next, prev or twin edges.
-    pub(crate) fn edge_rot_next_iterator_(
+    pub fn edge_rot_next_iterator(
         &self,
         edge_id: Option<EdgeIndex>,
     ) -> EdgeRotNextIterator<'_, F> {
@@ -1192,27 +1192,11 @@ impl<F: OutputType> Diagram<F> {
     /// Returns an edge iterator, the edges will all originate at the same vertex as 'edge_id'.
     ///  'edge_id' will be the first edge returned by the iterator.
     /// Do *NOT* use this when altering next, prev or twin edges.
-    pub fn edge_rot_next_iterator(&self, edge_id: EdgeIndex) -> EdgeRotNextIterator<'_, F> {
-        self.edge_rot_next_iterator_(Some(edge_id))
-    }
-
-    #[inline]
-    /// Returns an edge iterator, the edges will all originate at the same vertex as 'edge_id'.
-    ///  'edge_id' will be the first edge returned by the iterator.
-    /// Do *NOT* use this when altering next, prev or twin edges.
-    pub(crate) fn edge_rot_prev_iterator_(
+    pub fn edge_rot_prev_iterator(
         &self,
         edge_id: Option<EdgeIndex>,
     ) -> EdgeRotPrevIterator<'_, F> {
         EdgeRotPrevIterator::new(self, edge_id)
-    }
-
-    #[inline]
-    /// Returns an edge iterator, the edges will all originate at the same vertex as 'edge_id'.
-    ///  'edge_id' will be the first edge returned by the iterator.
-    /// Do *NOT* use this when altering next, prev or twin edges.
-    pub fn edge_rot_prev_iterator(&self, edge_id: EdgeIndex) -> EdgeRotPrevIterator<'_, F> {
-        self.edge_rot_prev_iterator_(Some(edge_id))
     }
 
     #[inline]
@@ -1805,12 +1789,12 @@ impl<F: OutputType> Diagram<F> {
             assert_eq!(i, v.get().id_.0);
 
             let edges1: Vec<usize> = self
-                .edge_rot_next_iterator_(v.get().get_incident_edge_())
+                .edge_rot_next_iterator(v.get().get_incident_edge_())
                 .map(|x| x.0)
                 .filter(|x| edge_filter(*x))
                 .collect();
             let edges2: Vec<usize> = self
-                .edge_rot_next_iterator_(v.get().get_incident_edge_())
+                .edge_rot_next_iterator(v.get().get_incident_edge_())
                 .map(|x| self.edge_get_twin_(Some(x)))
                 .flatten()
                 .map(|x| x.0)
