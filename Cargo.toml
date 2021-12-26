@@ -32,6 +32,7 @@ glam = ["boostvoronoi_core/glam"]
 mint = ["boostvoronoi_core/mint"]
 geo = ["boostvoronoi_core/geo"]
 cgmath = ["boostvoronoi_core/cgmath"]
+nalgebra = ["boostvoronoi_core/nalgebra"]
 
 serde = ["boostvoronoi_core/serde"]
 

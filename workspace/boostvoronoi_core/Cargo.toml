@@ -32,6 +32,8 @@ geo = {version="~0.18", optional=true}
 cgmath = {version="~0.18", optional=true}
 # using "glam" feature will enable From traits
 glam = {version="~0.20", optional=true}
+# using "nalgebra" feature will enable From traits
+nalgebra = {version="~0.29", optional=true}
 serde = { version = "~1.0", features = ["derive"], optional = true }
 
 [dev-dependencies]
