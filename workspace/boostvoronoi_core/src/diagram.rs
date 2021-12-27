@@ -826,19 +826,19 @@ impl<F: OutputType> Diagram<F> {
     }
 
     /// Returns an iterator over all cells
-    #[deprecated(since="0.10.3", note="please use `.cells().iter()` instead")]
+    #[deprecated(since = "0.10.3", note = "please use `.cells().iter()` instead")]
     pub fn cell_iter(&self) -> core::slice::Iter<'_, CellType> {
         self.cells_.iter()
     }
 
     /// Returns an iterator over all vertices
-    #[deprecated(since="0.10.3", note="please use `.vertices().iter()` instead")]
+    #[deprecated(since = "0.10.3", note = "please use `.vertices().iter()` instead")]
     pub fn vertex_iter(&self) -> core::slice::Iter<'_, VertexType<F>> {
         self.vertices_.iter()
     }
 
     /// Returns an iterator over all edges
-    #[deprecated(since="0.10.3", note="please use `.edges().iter()` instead")]
+    #[deprecated(since = "0.10.3", note = "please use `.edges().iter()` instead")]
     pub fn edge_iter(&self) -> std::slice::Iter<'_, EdgeType> {
         self.edges_.iter()
     }
@@ -1181,10 +1181,7 @@ impl<F: OutputType> Diagram<F> {
     /// Returns an edge iterator, the edges will all originate at the same vertex as 'edge_id'.
     ///  'edge_id' will be the first edge returned by the iterator.
     /// Do *NOT* use this when altering next, prev or twin edges.
-    pub fn edge_rot_next_iterator(
-        &self,
-        edge_id: Option<EdgeIndex>,
-    ) -> EdgeRotNextIterator<'_, F> {
+    pub fn edge_rot_next_iterator(&self, edge_id: Option<EdgeIndex>) -> EdgeRotNextIterator<'_, F> {
         EdgeRotNextIterator::new(self, edge_id)
     }
 
@@ -1192,10 +1189,7 @@ impl<F: OutputType> Diagram<F> {
     /// Returns an edge iterator, the edges will all originate at the same vertex as 'edge_id'.
     ///  'edge_id' will be the first edge returned by the iterator.
     /// Do *NOT* use this when altering next, prev or twin edges.
-    pub fn edge_rot_prev_iterator(
-        &self,
-        edge_id: Option<EdgeIndex>,
-    ) -> EdgeRotPrevIterator<'_, F> {
+    pub fn edge_rot_prev_iterator(&self, edge_id: Option<EdgeIndex>) -> EdgeRotPrevIterator<'_, F> {
         EdgeRotPrevIterator::new(self, edge_id)
     }
 
