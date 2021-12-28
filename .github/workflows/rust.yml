@@ -21,7 +21,7 @@ jobs:
       - name: install stable
         run: rustup toolchain install stable --component rustfmt,clippy --allow-downgrade
       - name: Build
-        run: cargo +stable build --all --features cgmath,geo,mint,glam,serde --verbose
+        run: cargo +stable build --all --features cgmath,geo,mint,glam,serde,nalgebra --verbose
       - name: Run tests
-        run: cargo +stable test --all --features cgmath,geo,mint,glam,serde --verbose
+        run: cargo +stable test --all --features cgmath,geo,mint,glam,serde,nalgebra --verbose
 

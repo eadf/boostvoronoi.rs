@@ -13,6 +13,9 @@ use serde::{Deserialize, Serialize};
 use std::cmp;
 use std::fmt;
 
+#[cfg(test)]
+mod tests;
+
 /// A really simple 2d coordinate container type - integer only
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone, cmp::PartialEq, cmp::PartialOrd, cmp::Eq, Hash)]
