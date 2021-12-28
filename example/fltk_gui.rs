@@ -1016,7 +1016,7 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
             Example::File => {
                 let mut chooser = dialog::NativeFileChooser::new(dialog::FileDialogType::BrowseDir);
 
-                let _ = chooser.set_directory(std::path::Path::new("examples"));
+                let _ = chooser.set_directory(&std::path::PathBuf::from("examples"));
                 let _ = chooser.set_title("select your input data");
                 chooser.set_filter("*.txt");
                 chooser.show();
