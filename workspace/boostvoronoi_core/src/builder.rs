@@ -270,7 +270,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
             let mut skip = 0;
 
             while *site_event_iterator_ < self.site_events_.len()
-                && VP::is_vertical::<I, F>(
+                && VP::is_vertical::<I>(
                     self.site_events_[*site_event_iterator_].point0(),
                     self.site_events_[0].point0(),
                 )
@@ -366,7 +366,7 @@ impl<I: InputType, F: OutputType> Builder<I, F> {
                 .deactivate(node_cell.get_circle_event_id());
 
             // make sure there are no dangling references to deactivated circle events..
-            let _ = node_cell.set_circle_event_id(None);
+            node_cell.set_circle_event_id(None);
             beachline_ptr.get_v()?.set(Some(node_cell));
         }
         Ok(())

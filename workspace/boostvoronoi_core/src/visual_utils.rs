@@ -84,18 +84,18 @@ impl VoronoiVisualUtils {
         // Use stack to avoid recursion.
         let mut point_stack = vec![projection_end];
         let mut cur_x = projection_start;
-        let mut cur_y = Self::parabola_y::<I, F>(cur_x, rot_x, rot_y);
+        let mut cur_y = Self::parabola_y::<F>(cur_x, rot_x, rot_y);
 
         // Adjust max_dist parameter in the transformed space.
         let max_dist_transformed = max_dist * max_dist * sqr_segment_length;
         while !point_stack.is_empty() {
             let new_x = point_stack[point_stack.len() - 1]; // was .top();
-            let new_y = Self::parabola_y::<I, F>(new_x, rot_x, rot_y);
+            let new_y = Self::parabola_y::<F>(new_x, rot_x, rot_y);
 
             // Compute coordinates of the point of the parabola that is
             // furthest from the current line segment.
             let mid_x = (new_y - cur_y) / (new_x - cur_x) * rot_y + rot_x;
-            let mid_y = Self::parabola_y::<I, F>(mid_x, rot_x, rot_y);
+            let mid_y = Self::parabola_y::<F>(mid_x, rot_x, rot_y);
 
             // Compute maximum distance between the given parabolic arc
             // and line segment that discretize it.
@@ -130,7 +130,7 @@ impl VoronoiVisualUtils {
     /// Compute y(x) = ((x - a) * (x - a) + b * b) / (2 * b).
     #[inline(always)]
     #[allow(clippy::suspicious_operation_groupings)]
-    fn parabola_y<I: InputType, F: OutputType>(x: F, a: F, b: F) -> F {
+    fn parabola_y<F: OutputType>(x: F, a: F, b: F) -> F {
         ((x - a) * (x - a) + b * b) / (b + b)
     }
 

@@ -20,7 +20,7 @@ use boostvoronoi_ext::extended_int::ExtendedInt;
 use num_traits::{One, Zero};
 
 /// Recompute parameters of the point, point, point circle event using high-precision library.
-pub(crate) fn ppp<I: InputType, F: OutputType>(
+pub(crate) fn ppp<I: InputType>(
     point1: Point<I>,
     point2: Point<I>,
     point3: Point<I>,

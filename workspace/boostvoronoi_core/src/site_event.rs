@@ -102,6 +102,7 @@ impl<I: InputType, F: OutputType> fmt::Debug for SiteEvent<I, F> {
     }
 }
 
+#[allow(clippy::incorrect_partial_ord_impl_on_ord_type)]
 impl<I: InputType, F: OutputType> PartialOrd for SiteEvent<I, F> {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -382,14 +383,14 @@ impl<I: InputType, F: OutputType> SiteEvent<I, F> {
     #[inline(always)]
     pub fn distance_to_point(&self, x: f64, y: f64) -> f64 {
         use geo::algorithm::euclidean_distance::*;
-        let c = geo::Coordinate { x, y };
+        let c = geo::Coord { x, y };
 
         if self.is_point() {
-            c.euclidean_distance(&geo::Coordinate::from(self.point0().as_f64()))
+            c.euclidean_distance(&geo::Coord::from(self.point0().as_f64()))
         } else {
             c.euclidean_distance(&geo::Line::new(
-                geo::Coordinate::from(self.point0().as_f64()),
-                geo::Coordinate::from(self.point1().as_f64()),
+                geo::Coord::from(self.point0().as_f64()),
+                geo::Coord::from(self.point1().as_f64()),
             ))
         }
     }

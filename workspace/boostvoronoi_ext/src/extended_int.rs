@@ -529,7 +529,7 @@ impl<'b> ops::Mul<&'b ExtendedInt> for ExtendedInt {
     }
 }
 
-impl<'b> ops::Mul<i32> for ExtendedInt {
+impl ops::Mul<i32> for ExtendedInt {
     type Output = ExtendedInt;
     /// Multiplies `self` with `that` returning a new object containing the result
     /// ```

@@ -47,7 +47,7 @@ impl Debug for SiteIndex {
 }
 
 #[inline(always)]
-pub(crate) fn is_vertical<I: InputType, F: OutputType>(point1: Point<I>, point2: Point<I>) -> bool {
+pub(crate) fn is_vertical<I: InputType>(point1: Point<I>, point2: Point<I>) -> bool {
     point1.x == point2.x
 }
 
@@ -90,7 +90,7 @@ fn robust_cross_product<I: InputType, F: OutputType>(s_a1: I, s_b1: I, s_a2: I, 
 pub(crate) mod orientation_predicate {
     use crate::geometry::Point;
     use crate::predicate::robust_cross_product;
-    use crate::{cast, InputType, OutputType};
+    use crate::{cast, InputType};
     use num_traits::Zero;
 
     #[derive(Debug, PartialEq, Eq)]
@@ -103,7 +103,7 @@ pub(crate) mod orientation_predicate {
     /// Value is a determinant of two vectors (e.g. x1 * y2 - x2 * y1).
     /// Return orientation based on the sign of the determinant.
     #[inline(always)]
-    pub(crate) fn eval_f<I: InputType, F: OutputType>(value: f64) -> Orientation {
+    pub(crate) fn eval_f(value: f64) -> Orientation {
         if value.is_zero() {
             return Orientation::Collinear;
         }
@@ -114,7 +114,7 @@ pub(crate) mod orientation_predicate {
     }
 
     #[inline(always)]
-    pub(crate) fn eval_p<I: InputType, F: OutputType>(
+    pub(crate) fn eval_p<I: InputType>(
         point1: Point<I>,
         point2: Point<I>,
         point3: Point<I>,
@@ -124,17 +124,12 @@ pub(crate) mod orientation_predicate {
         let dy1: i64 = cast::<I, i64>(point1.y) - cast::<I, i64>(point2.y);
         let dy2: i64 = cast::<I, i64>(point2.y) - cast::<I, i64>(point3.y);
         let cp: f64 = robust_cross_product::<i64, f64>(dx1, dy1, dx2, dy2);
-        eval_f::<I, F>(cp)
+        eval_f(cp)
     }
 
     #[inline(always)]
-    pub(crate) fn eval_i<I: InputType, F: OutputType>(
-        dif_x1: i64,
-        dif_y1: i64,
-        dif_x2: i64,
-        dif_y2: i64,
-    ) -> Orientation {
-        eval_f::<i64, f64>(robust_cross_product::<i64, f64>(
+    pub(crate) fn eval_i(dif_x1: i64, dif_y1: i64, dif_x2: i64, dif_y2: i64) -> Orientation {
+        eval_f(robust_cross_product::<i64, f64>(
             dif_x1, dif_y1, dif_x2, dif_y2,
         ))
     }
@@ -180,19 +175,19 @@ pub(crate) mod event_comparison_predicate {
             }
             true
         } else {
-            if is_vertical::<I, F>(rhs.point0(), rhs.point1()) {
-                if is_vertical::<I, F>(lhs.point0(), lhs.point1()) {
+            if is_vertical::<I>(rhs.point0(), rhs.point1()) {
+                if is_vertical::<I>(lhs.point0(), lhs.point1()) {
                     return lhs.y0() < rhs.y0();
                 }
                 return false;
             }
-            if is_vertical::<I, F>(lhs.point0(), lhs.point1()) {
+            if is_vertical::<I>(lhs.point0(), lhs.point1()) {
                 return true;
             }
             if lhs.y0() != rhs.y0() {
                 return lhs.y0() < rhs.y0();
             }
-            orientation_predicate::eval_p::<I, F>(lhs.point1(), lhs.point0(), rhs.point1())
+            orientation_predicate::eval_p::<I>(lhs.point1(), lhs.point0(), rhs.point1())
                 == orientation_predicate::Orientation::Left
         }
     }
@@ -284,11 +279,8 @@ pub(crate) mod event_comparison_predicate {
                         println!("ii_6");
                         return lhs.y0().cmp(&rhs.y0());
                     }
-                    if orientation_predicate::eval_p::<I, F>(
-                        lhs.point1(),
-                        lhs.point0(),
-                        rhs.point1(),
-                    ) == orientation_predicate::Orientation::Left
+                    if orientation_predicate::eval_p::<I>(lhs.point1(), lhs.point0(), rhs.point1())
+                        == orientation_predicate::Orientation::Left
                     {
                         println!("ii_7");
                         return cmp::Ordering::Less;
@@ -419,7 +411,7 @@ pub(crate) mod distance_predicate {
     ) -> bool {
         // Handle temporary segment sites.
         if left_site.sorted_index() == right_site.sorted_index() {
-            return orientation_predicate::eval_p::<I, F>(
+            return orientation_predicate::eval_p::<I>(
                 left_site.point0(),
                 left_site.point1(),
                 new_point,
@@ -482,7 +474,7 @@ pub(crate) mod distance_predicate {
         let site_point: Point<I> = left_site.point0();
         let segment_start: Point<I> = right_site.point0();
         let segment_end: Point<I> = right_site.point1();
-        let eval = orientation_predicate::eval_p::<I, F>(segment_start, segment_end, new_point);
+        let eval = orientation_predicate::eval_p::<I>(segment_start, segment_end, new_point);
         if eval != orientation_predicate::Orientation::Right {
             return if !right_site.is_inverse() {
                 KPredicateResult::LESS
@@ -504,7 +496,7 @@ pub(crate) mod distance_predicate {
             }
             return KPredicateResult::UNDEFINED;
         } else {
-            let orientation = orientation_predicate::eval_i::<I, F>(
+            let orientation = orientation_predicate::eval_i(
                 cast::<I, i64>(segment_end.x) - cast::<I, i64>(segment_start.x),
                 cast::<I, i64>(segment_end.y) - cast::<I, i64>(segment_start.y),
                 cast::<I, i64>(new_point.x) - cast::<I, i64>(site_point.x),
@@ -714,14 +706,10 @@ pub(crate) mod circle_formation_predicate {
             if !site2.is_segment() {
                 if !site3.is_segment() {
                     // (point, point, point) sites.
-                    if !circle_existence::ppp::<I, F>(
-                        site1.point0(),
-                        site2.point0(),
-                        site3.point0(),
-                    ) {
+                    if !circle_existence::ppp::<I>(site1.point0(), site2.point0(), site3.point0()) {
                         return None;
                     }
-                    lazy_circle_formation::ppp::<I, F>(
+                    lazy_circle_formation::ppp::<I>(
                         site1.point0(),
                         site2.point0(),
                         site3.point0(),

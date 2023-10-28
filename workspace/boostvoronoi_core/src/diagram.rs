@@ -1077,7 +1077,7 @@ impl<F: OutputType> Diagram<F> {
     ) -> EdgeIndex {
         let new_edge_id = EdgeIndex(self.edges_.len());
         let new_edge = Edge::new_(new_edge_id, cell_id, is_linear, is_primary);
-        let _ = self.edges_.push(new_edge);
+        self.edges_.push(new_edge);
         tln!("Created and inserted new edge : e={}", new_edge_id.0);
         new_edge_id
     }
@@ -1322,7 +1322,7 @@ impl<F: OutputType> Diagram<F> {
     fn vertex_new_2_(&mut self, x: F, y: F, is_site_vertex: bool) -> VertexIndex {
         let new_vertex_id = VertexIndex(self.vertices_.len());
         let new_edge = Vertex::new_3(new_vertex_id, x, y, is_site_vertex);
-        let _ = self.vertices_.push(new_edge);
+        self.vertices_.push(new_edge);
         #[cfg(feature = "console_debug")]
         assert_eq!(self.vertices_.len() - 1, new_vertex_id.0);
         new_vertex_id
@@ -1669,10 +1669,10 @@ impl<F: OutputType> Diagram<F> {
             let mut last_vertex_iterator = (0..self.vertices_.len()).map(VertexIndex);
             let mut last_vertex = last_vertex_iterator.next();
             for it in (0..self.vertices_.len()).map(VertexIndex) {
-                let it = Some(it);
-                if self.vertex_get_incident_edge(it).is_some() {
-                    if it != last_vertex {
-                        self.vertex_copy_(last_vertex.unwrap().0, it.unwrap().0);
+                let sit = Some(it);
+                if self.vertex_get_incident_edge(sit).is_some() {
+                    if sit != last_vertex {
+                        self.vertex_copy_(last_vertex.unwrap().0, it.0);
                         let v = last_vertex;
                         let mut e = self.vertex_get_incident_edge(last_vertex);
                         loop {
@@ -1789,8 +1789,7 @@ impl<F: OutputType> Diagram<F> {
                 .collect();
             let edges2: Vec<usize> = self
                 .edge_rot_next_iterator(v.get().get_incident_edge_())
-                .map(|x| self.edge_get_twin_(Some(x)))
-                .flatten()
+                .filter_map(|x| self.edge_get_twin_(Some(x)))
                 .map(|x| x.0)
                 .filter(|x| edge_filter(*x))
                 .collect();

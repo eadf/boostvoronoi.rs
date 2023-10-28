@@ -14,12 +14,8 @@ use crate::site_event as VSE;
 use crate::{geometry::Point, predicate::SiteIndex, InputType, OutputType};
 
 #[inline(always)]
-pub(crate) fn ppp<I: InputType, F: OutputType>(
-    point1: Point<I>,
-    point2: Point<I>,
-    point3: Point<I>,
-) -> bool {
-    orientation_predicate::eval_p::<I, F>(point1, point2, point3) == Orientation::Right
+pub(crate) fn ppp<I: InputType>(point1: Point<I>, point2: Point<I>, point3: Point<I>) -> bool {
+    orientation_predicate::eval_p::<I>(point1, point2, point3) == Orientation::Right
 }
 
 #[cfg(all(feature = "geo", feature = "ce_corruption_check"))]
@@ -32,9 +28,9 @@ pub(crate) fn validate_circle_formation<I: InputType, F: OutputType>(
 ) {
     use approx::AbsDiffEq;
 
-    let c = geo::Coordinate {
-        x: c_event.x() as f64,
-        y: c_event.y() as f64,
+    let c = geo::Coord {
+        x: c_event.x(),
+        y: c_event.y(),
     };
     let d1 = site1.distance_to_point(c.x, c.y);
     let d2 = site2.distance_to_point(c.x, c.y);
@@ -86,8 +82,8 @@ pub(crate) fn pps<I: InputType, F: OutputType>(
 ) -> bool {
     #[allow(clippy::suspicious_operation_groupings)]
     if segment_index != SiteIndex::Two {
-        let orient1 = orientation_predicate::eval_p::<I, F>(point1, point2, site3.point0());
-        let orient2 = orientation_predicate::eval_p::<I, F>(point1, point2, site3.point1());
+        let orient1 = orientation_predicate::eval_p::<I>(point1, point2, site3.point0());
+        let orient2 = orientation_predicate::eval_p::<I>(point1, point2, site3.point1());
         if segment_index == SiteIndex::One && point1.x >= point2.x {
             if orient1 != Orientation::Right {
                 return false;
@@ -120,7 +116,7 @@ pub(crate) fn pss<I: InputType, F: OutputType>(
             return false;
         }
         if site2.is_inverse() == site3.is_inverse()
-            && orientation_predicate::eval_p::<I, F>(site2.point0(), point1, site3.point1())
+            && orientation_predicate::eval_p::<I>(site2.point0(), point1, site3.point1())
                 != Orientation::Right
         {
             return false;

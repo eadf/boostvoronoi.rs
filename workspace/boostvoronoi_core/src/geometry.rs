@@ -48,7 +48,7 @@ impl<T: InputType> Point<T> {
     #[inline(always)]
     pub fn distance_to_point(&self, x: f64, y: f64) -> f64 {
         use geo::algorithm::euclidean_distance::*;
-        geo::Coordinate { x, y }.euclidean_distance(&geo::Coordinate::from(self.as_f64()))
+        geo::Coord { x, y }.euclidean_distance(&geo::Coord::from(self.as_f64()))
     }
 
     /// Cast a `Point<T>` to ´Point<T2>¨
@@ -152,45 +152,45 @@ impl<T: InputType> From<&[T; 2]> for Point<T> {
 }
 
 #[cfg(feature = "geo")]
-impl<T: InputType + geo::CoordNum> From<geo::Coordinate<T>> for Point<T> {
+impl<T: InputType + geo::CoordNum> From<geo::Coord<T>> for Point<T> {
     #[inline]
-    /// Converts to `boostvoronoi::geometry::Point` from `geo::Coordinate`
+    /// Converts to `boostvoronoi::geometry::Point` from `geo::Coord`
     /// ```
     /// # use boostvoronoi_core::geometry::*;
-    /// let c = geo::Coordinate{x:1,y:2};
+    /// let c = geo::Coord{x:1,y:2};
     /// let p:Point<i32> = Point::from(c);
     /// assert_eq!(p.x, c.x);
     /// assert_eq!(p.y, c.y);
     /// ```
-    fn from(c: geo::Coordinate<T>) -> Self {
+    fn from(c: geo::Coord<T>) -> Self {
         Self { x: c.x, y: c.y }
     }
 }
 
 #[cfg(feature = "geo")]
-impl<T: InputType + geo::CoordNum> From<&geo::Coordinate<T>> for Point<T> {
+impl<T: InputType + geo::CoordNum> From<&geo::Coord<T>> for Point<T> {
     #[inline]
-    /// Converts to `boostvoronoi::geometry::Point` from `&geo::Coordinate`
+    /// Converts to `boostvoronoi::geometry::Point` from `&geo::Coord`
     /// ```
     /// # use boostvoronoi_core::geometry::*;
-    /// let c = geo::Coordinate{x:1,y:2};
+    /// let c = geo::Coord{x:1,y:2};
     /// let p:Point<i32> = Point::from(&c);
     /// assert_eq!(p.x, c.x);
     /// assert_eq!(p.y, c.y);
     /// ```
-    fn from(c: &geo::Coordinate<T>) -> Self {
+    fn from(c: &geo::Coord<T>) -> Self {
         Self { x: c.x, y: c.y }
     }
 }
 
 #[cfg(feature = "geo")]
-impl<T: InputType + geo::CoordNum> From<Point<T>> for geo::Coordinate<T> {
+impl<T: InputType + geo::CoordNum> From<Point<T>> for geo::Coord<T> {
     #[inline]
-    /// Converts to `geo::Coordinate` from `boostvoronoi::geometry::Point`
+    /// Converts to `geo::Coord` from `boostvoronoi::geometry::Point`
     /// ```
     /// # use boostvoronoi_core::geometry::*;
     /// let p = Point{x:1,y:2};
-    /// let c = geo::Coordinate::<i32>::from(p);
+    /// let c = geo::Coord::<i32>::from(p);
     /// assert_eq!(p.x, c.x);
     /// assert_eq!(p.y, c.y);
     /// ```
@@ -248,13 +248,13 @@ impl<T: InputType + geo::CoordNum> From<Point<T>> for geo::Point<T> {
 }
 
 #[cfg(feature = "geo")]
-impl<T: InputType + geo::CoordNum> From<&Point<T>> for geo::Coordinate<T> {
+impl<T: InputType + geo::CoordNum> From<&Point<T>> for geo::Coord<T> {
     #[inline]
-    /// Converts to `geo::Coordinate` from `&boostvoronoi::geometry::Point`
+    /// Converts to `geo::Coord` from `&boostvoronoi::geometry::Point`
     /// ```
     /// # use boostvoronoi_core::geometry::*;
     /// let p = Point{x:1,y:2};
-    /// let c = geo::Coordinate::<i32>::from(&p);
+    /// let c = geo::Coord::<i32>::from(&p);
     /// assert_eq!(p.x,c.x);
     /// assert_eq!(p.y,c.y);
     /// ```
@@ -264,16 +264,16 @@ impl<T: InputType + geo::CoordNum> From<&Point<T>> for geo::Coordinate<T> {
 }
 
 #[cfg(feature = "geo")]
-impl<F: OutputType + geo::CoordFloat> From<&Vertex<F>> for geo::Coordinate<F> {
+impl<F: OutputType + geo::CoordFloat> From<&Vertex<F>> for geo::Coord<F> {
     #[inline]
-    /// Converts to `geo::Coordinate` from `&boostvoronoi::diagram::Vertex`
+    /// Converts to `geo::Coord` from `&boostvoronoi::diagram::Vertex`
     /// ```
     /// # use boostvoronoi_core::geometry::*;
     /// # use boostvoronoi_core::diagram::Vertex;
     /// # use boostvoronoi_core::diagram::VertexIndex;
     ///
     /// let v = Vertex::<f32>::new_3(VertexIndex(0),1.0,2.0,false).get();
-    /// let c = geo::Coordinate::<f32>::from(&v);
+    /// let c = geo::Coord::<f32>::from(&v);
     /// assert_eq!(v.x(),c.x);
     /// assert_eq!(v.y(),c.y);
     /// ```
@@ -283,16 +283,16 @@ impl<F: OutputType + geo::CoordFloat> From<&Vertex<F>> for geo::Coordinate<F> {
 }
 
 #[cfg(feature = "geo")]
-impl<F: OutputType + geo::CoordFloat> From<Vertex<F>> for geo::Coordinate<F> {
+impl<F: OutputType + geo::CoordFloat> From<Vertex<F>> for geo::Coord<F> {
     #[inline]
-    /// Converts to `geo::Coordinate` from `boostvoronoi::diagram::Vertex`
+    /// Converts to `geo::Coord` from `boostvoronoi::diagram::Vertex`
     /// ```
     /// # use boostvoronoi_core::geometry::*;
     /// # use boostvoronoi_core::diagram::Vertex;
     /// # use boostvoronoi_core::diagram::VertexIndex;
     ///
     /// let v = Vertex::<f32>::new_3(VertexIndex(0),1.0,2.0,false).get();
-    /// let c = geo::Coordinate::<f32>::from(v.clone());
+    /// let c = geo::Coord::<f32>::from(v.clone());
     /// assert_eq!(v.x(),c.x);
     /// assert_eq!(v.y(),c.y);
     /// ```
@@ -354,8 +354,8 @@ impl<T: InputType + geo::CoordNum> From<Line<T>> for geo::Line<T> {
     /// ```
     fn from(line: Line<T>) -> Self {
         Self {
-            start: geo::Coordinate::from(line.start),
-            end: geo::Coordinate::from(line.end),
+            start: geo::Coord::from(line.start),
+            end: geo::Coord::from(line.end),
         }
     }
 }
@@ -437,7 +437,7 @@ impl<T: InputType + cgmath::BaseNum> From<&cgmath::Point2<T>> for Point<T> {
 #[cfg(feature = "cgmath")]
 impl<T: InputType + cgmath::BaseNum> From<Point<T>> for cgmath::Point2<T> {
     #[inline]
-    /// Converts to `geo::Coordinate` from `boostvoronoi::geometry::Point`
+    /// Converts to `geo::Coord` from `boostvoronoi::geometry::Point`
     /// ```
     /// # use boostvoronoi_core::geometry::*;
     /// let p = Point{x:1,y:2};
@@ -937,7 +937,7 @@ impl<T: InputType + nalgebra::Scalar> From<&nalgebra::Point2<T>> for Point<T> {
 #[cfg(feature = "nalgebra")]
 impl<T: InputType + nalgebra::Scalar> From<Point<T>> for nalgebra::Point2<T> {
     #[inline]
-    /// Converts to `geo::Coordinate` from `boostvoronoi::geometry::Point`
+    /// Converts to `geo::Coord` from `boostvoronoi::geometry::Point`
     /// ```
     /// # use boostvoronoi_core::geometry::*;
     /// let p = Point{x:1,y:2};

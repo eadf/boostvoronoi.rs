@@ -4,7 +4,7 @@ use BV::prelude::*;
 use fltk::{app, button, dialog, draw, enums, frame, group, menu, prelude::*, window};
 use geo::prelude::Intersects;
 use geo_cr as geo;
-use ordered_float::OrderedFloat;
+use ordered_float::{FloatCore, OrderedFloat};
 use std::cell::{RefCell, RefMut};
 use std::rc::Rc;
 
@@ -38,6 +38,7 @@ bitflags! {
 }
 
 bitflags! {
+    #[derive(Debug,Clone, Copy)]
     pub struct DrawFilterFlag: u32 {
         /// Edges considered to be outside all closed input geometry
         const EXTERNAL =      0b000000000000001;
@@ -498,7 +499,7 @@ pub struct VoronoiVisualizer<I: InputType, F: OutputType> {
     affine: BV::SimpleAffine<F>,
 }
 
-impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
+impl<I: InputType, F: OutputType + ordered_float::FloatCore> VoronoiVisualizer<I, F> {
     pub fn default() -> Self {
         Self {
             screen_aabb: BV::Aabb2::<F>::new_from_i32::<I>(0, 0, FW, FH),
@@ -570,14 +571,14 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
         };
 
         // Color exterior edges.
-        self.diagram.color_exterior_edges(ColorFlag::EXTERNAL.bits);
+        self.diagram.color_exterior_edges(ColorFlag::EXTERNAL.bits());
 
         // Color infinite edges
         for it in self.diagram.edges().iter() {
             let edge_id = it.get().id();
             if !self.diagram.edge_is_finite(edge_id)? {
                 self.diagram
-                    .edge_or_color(edge_id, ColorFlag::INFINITE.bits)?;
+                    .edge_or_color(edge_id, ColorFlag::INFINITE.bits())?;
             }
         }
 
@@ -879,8 +880,8 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
             cast::<I, F>(affine.reverse_transform_x(self.screen_aabb.get_high().unwrap()[0])?)
                 - cast::<I, F>(affine.reverse_transform_x(self.screen_aabb.get_low().unwrap()[0])?);
         // absolute value is taken in case the affine transform flips one coordinate
-        let side = side.abs();
-        let coefficient = side / Self::max_f(direction[0].abs(), direction[1].abs());
+        let side = FloatCore::abs(side);
+        let coefficient = side / Self::max_f(FloatCore::abs(direction[0]), FloatCore::abs(direction[1]));
 
         if let Some(vertex0) = edge.get().vertex0() {
             let vertex0 = self.diagram.vertex_get(vertex0)?.get();
@@ -1051,11 +1052,11 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
     /// converts from BV::Line to geo::Line.
     /// I wonder why my nice geo::Line::from(BV::Line) does not work here, feature gated?.
     fn line_i_to_f64(value: &BV::Line<I>) -> geo::Line<f64> {
-        let ps = geo::Coordinate {
+        let ps = geo::Coord {
             x: cast::<I, f64>(value.start.x),
             y: cast::<I, f64>(value.start.y),
         };
-        let pe = geo::Coordinate {
+        let pe = geo::Coord {
             x: cast::<I, f64>(value.end.x),
             y: cast::<I, f64>(value.end.y),
         };
@@ -1064,6 +1065,6 @@ impl<I: InputType, F: OutputType> VoronoiVisualizer<I, F> {
 
     #[inline(always)]
     fn max_f(a: F, b: F) -> F {
-        OrderedFloat(a).max(OrderedFloat(b)).into_inner()
+        FloatCore::max(OrderedFloat(a), OrderedFloat(b)).into_inner()
     }
 }

@@ -3,7 +3,7 @@
 [![crates.io](https://img.shields.io/crates/v/boostvoronoi.svg)](https://crates.io/crates/boostvoronoi)
 [![Documentation](https://docs.rs/boostvoronoi/badge.svg)](https://docs.rs/boostvoronoi)
 [![Workflow](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)](https://github.com/eadf/boostvoronoi.rs/workflows/Rust/badge.svg)
-[![dependency status](https://deps.rs/crate/boostvoronoi/0.10.3/status.svg)](https://deps.rs/crate/boostvoronoi/0.10.3)
+[![dependency status](https://deps.rs/crate/boostvoronoi/0.11.0/status.svg)](https://deps.rs/crate/boostvoronoi/0.11.0)
 ![license](https://img.shields.io/crates/l/boostvoronoi)
 
 # Segmented Voronoi for Rust
@@ -75,13 +75,13 @@ fn main() -> Result<(), BvError> {
 ```
 Edges will become curves when line segments are used as input, see the example code for discretization and interpolation. 
 
-## Minimum Supported Rust Version (MSRV)
-The crate is only tested on 1.56 and above.
-The code uses ```#![feature(map_first_last)]``` if run on +nightly, this is only emulated on +stable.
-So +nightly should be somewhat faster.
+### Minimum Supported Rust Version (MSRV)
+
+The minimum supported version of Rust for `boostvoronoi` is `1.66`.
+
 
 ## Todo
-- [ ] Try to fix the known problems in C++ Boost voronoi and port over.  
+- [ ] Try to fix the known problems in C++ Boost voronoi and port over.
 - [ ] Add many more test cases for `voronoi_robust_ftp.rs`.
 - [ ] Benchmark and optimize.
 - [ ] Replace C++ style boolean ordering functors.

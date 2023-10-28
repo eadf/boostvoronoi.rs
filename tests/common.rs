@@ -28,7 +28,7 @@ pub fn diagram_sanity_check<I: InputType + geo_cr::CoordNum, F: OutputType + geo
 
     let coordinates: Vec<_> = points
         .iter()
-        .map(|p| geo::Coordinate::<F>::from([cast::<I, F>(p.x), cast::<I, F>(p.y)]))
+        .map(|p| geo::Coord::<F>::from([cast::<I, F>(p.x), cast::<I, F>(p.y)]))
         .collect();
     let lines: Vec<_> = segments
         .iter()
@@ -45,7 +45,7 @@ pub fn diagram_sanity_check<I: InputType + geo_cr::CoordNum, F: OutputType + geo
     let mut heap: Vec<F> = Vec::new();
 
     for v in diagram.vertices().iter() {
-        let v = geo::Coordinate::from(&v.get());
+        let v = geo::Coord::from(&v.get());
         for l in lines.iter() {
             let distance = v.euclidean_distance(l);
             //print!("s{:?} -> v {:?} = {:?}", s, v, distance);

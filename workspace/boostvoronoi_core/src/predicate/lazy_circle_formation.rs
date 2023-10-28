@@ -19,7 +19,7 @@ use crate::{cast, geometry::Point, predicate::SiteIndex, t, tln, InputType, Outp
 use boostvoronoi_ext::robust_fpt as RF;
 
 /// Lazy evaluation of point, point, point circle events
-pub(crate) fn ppp<I: InputType, F: OutputType>(
+pub(crate) fn ppp<I: InputType>(
     point1: Point<I>,
     point2: Point<I>,
     point3: Point<I>,
@@ -82,7 +82,7 @@ pub(crate) fn ppp<I: InputType, F: OutputType>(
     }
 
     if recompute_c_x || recompute_c_y || recompute_lower_x {
-        exact_circle_formation::ppp::<I, F>(
+        exact_circle_formation::ppp::<I>(
             point1,
             point2,
             point3,
@@ -159,7 +159,7 @@ pub(crate) fn pps<I: InputType, F: OutputType>(
         RF::RobustFpt::new(1_f64 / (line_a * line_a + line_b * line_b).sqrt(), 3_f64);
     let mut t = RF::RobustDif::default();
     //tln!("0t:{:?}", t);
-    if orientation_predicate::eval_f::<I, F>(denom.fpv()) == Orientation::Collinear {
+    if orientation_predicate::eval_f(denom.fpv()) == Orientation::Collinear {
         t += teta / (RF::RobustFpt::from(8_f64) * a);
         //tln!("1t:{:?}", t);
         t -= a / (RF::RobustFpt::from(2_f64) * teta);
@@ -306,7 +306,7 @@ pub(crate) fn pps<I: InputType, F: OutputType>(
             println!("dot:{:?}", dot);
             println!("ignoring this CE\n");
         }
-        return rv.then(|| c_event);
+        return rv.then_some(c_event);
     };
     Some(c_event)
 }
@@ -366,8 +366,7 @@ pub(crate) fn pss<I: InputType, F: OutputType>(
         ),
         1_f64,
     );
-    let is_collinear =
-        orientation_predicate::eval_f::<I, F>(orientation.fpv()) == Orientation::Collinear;
+    let is_collinear = orientation_predicate::eval_f(orientation.fpv()) == Orientation::Collinear;
     if is_collinear {
         tln!("  LazyCircleFormationFunctor::pss collinear");
         let a = RF::RobustFpt::new(a1 * a1 + b1 * b1, 2_f64);

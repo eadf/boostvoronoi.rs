@@ -4,7 +4,6 @@ use crate::extended_exp_fpt as EX;
 use crate::extended_int as EI;
 use crate::robust_fpt as RF;
 use num_traits::{Float, Num, NumCast, Zero};
-
 #[test]
 /// Add and sub
 // Todo: add tests of re

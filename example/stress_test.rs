@@ -1,13 +1,13 @@
 #![cfg_attr(feature = "map_first_last", feature(map_first_last))]
 use boostvoronoi::geo::{
-    algorithm::euclidean_distance::*, prelude::Intersects, Coordinate, Line as GLine,
+    algorithm::euclidean_distance::*, prelude::Intersects, Coord, Line as GLine,
 };
 use boostvoronoi::prelude::*;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
-extern crate rand_chacha;
 use rand::{Rng, SeedableRng};
+use rand::prelude::StdRng;
 
 type I = i64;
 type F = f64;
@@ -46,7 +46,7 @@ fn fault_check(
         .collect();
     for v in diagram.vertices().iter() {
         let v = v.get();
-        let v = Coordinate { x: v.x(), y: v.y() };
+        let v = Coord { x: v.x(), y: v.y() };
         //println!("v {:?}", v);
         for s in segments.iter() {
             let distance = v.euclidean_distance(s);
@@ -85,10 +85,9 @@ fn fault_check(
 }
 
 /// Looking for failing examples by generating random voronoi test data.
-fn boostvoronoi_test(rnd_seed: u64, printout_lock: Arc<Mutex<()>>) -> Result<(), BvError> {
+fn boostvoronoi_test(rnd_seed: [u8;32], printout_lock: Arc<Mutex<()>>) -> Result<(), BvError> {
     let to_r = 1000_i64;
-
-    let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(rnd_seed);
+    let mut rng: StdRng = SeedableRng::from_seed(rnd_seed);
 
     for _ in 0..TESTS_PER_SEED {
         let mut geo_segments = Vec::<GLine<I>>::with_capacity(4);
@@ -159,19 +158,27 @@ fn boostvoronoi_test(rnd_seed: u64, printout_lock: Arc<Mutex<()>>) -> Result<(),
 fn worker_thread_loop(
     id: usize,
     request_tx: Sender<SeedRequest>,
-    seed_rx: Receiver<u64>,
+    seed_rx: Receiver<[u8;32]>,
     printout_lock: Arc<Mutex<()>>,
 ) {
     loop {
         //println!("thread id {} starting", id);
         // assume that there is already a seed waiting for the first loop
         let new_seed = seed_rx.recv().unwrap();
-        if boostvoronoi_test(new_seed as u64, Arc::clone(&printout_lock)).is_err() {
+        if boostvoronoi_test(new_seed, Arc::clone(&printout_lock)).is_err() {
             request_tx.send(SeedRequest::ErrorFrom(id)).unwrap();
             //break;
         };
         request_tx.send(SeedRequest::RequestNewSeed(id)).unwrap();
     }
+}
+
+fn u64_to_u8_array(value: u64) -> [u8; 32] {
+    let u64_bytes: [u8; 8] = value.to_le_bytes(); // Convert u64 to little-endian bytes
+    let mut result: [u8; 32] = [0; 32]; // Initialize a 32-byte array with zeros
+    result[..8].copy_from_slice(&u64_bytes); // Copy the u64 bytes to the first 8 bytes of the result
+    result[..32].copy_from_slice(&u64_bytes); // Copy the u64 bytes to the entire result
+    result
 }
 
 /// spawn off a number of threads and let those test for faulty voronoi builds.
@@ -186,9 +193,9 @@ fn main() {
 
     let handles: Vec<_> = (0..NUMBER_OF_THREADS)
         .map(|n| {
-            let (thread_tx, thread_rx) = mpsc::channel::<u64>();
+            let (thread_tx, thread_rx) = mpsc::channel::<[u8;32]>();
             // prime the seed channel
-            let _ = thread_tx.send(next_seed).unwrap();
+            let _ = thread_tx.send(u64_to_u8_array(next_seed)).unwrap();
             next_seed += 1;
 
             let thread_handle = thread::spawn({
@@ -210,7 +217,7 @@ fn main() {
         {
             Some(SeedRequest::RequestNewSeed(requesting_id)) => {
                 //println!("Got request from : {}", requesting_thread);
-                handles[requesting_id as usize].1.send(next_seed).unwrap();
+                handles[requesting_id as usize].1.send(u64_to_u8_array(next_seed)).unwrap();
                 next_seed += 1;
                 iterations += TESTS_PER_SEED;
                 if iterations % REPORT_FREQUENCY == 0 {
