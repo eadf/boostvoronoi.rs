@@ -1,1 +1,1 @@
-# Repository moved to https://codeberg.org/eadf/boostvoronoi_rs
+# Repository is moved to [codeberg.org](https://codeberg.org/eadf/boostvoronoi_rs)
